@@ -1,0 +1,32 @@
+{
+  "name": "codigo-propio-core",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "factory": "node --experimental-strip-types src/scripts/testRunner.ts",
+    "bot": "node --experimental-strip-types src/scripts/telegramBot.ts",
+    "studio": "node --experimental-strip-types src/scripts/testRunner.ts & node --experimental-strip-types src/scripts/telegramBot.ts",
+    "compile": "node_modules/.bin/tsc --outDir dist --module commonjs --target es2020 --esModuleInterop true --resolveJsonModule true --skipLibCheck true src/scripts/testRunner.ts",
+    "factory:compiled": "npm run compile && node dist/testRunner.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.11.1",
+    "dotenv": "^17.4.2",
+    "googleapis": "^137.1.0",
+    "next": "14.2.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  }
+}

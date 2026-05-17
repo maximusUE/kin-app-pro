@@ -1,0 +1,250 @@
+{
+  "name": "WhatsApp Business — Respuesta Automática y CRM Básico",
+  "nodes": [
+    {
+      "id": "wh_trigger_01",
+      "name": "WhatsApp_Mensaje_Entrante",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-800, 0],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-negocios",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "notes": "Conecta este webhook a tu cuenta de WhatsApp Business API (Meta) o usa un proveedor como 360dialog o WATI."
+    },
+    {
+      "id": "wh_extract_02",
+      "name": "Extraer_Datos_Mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-560, 0],
+      "parameters": {
+        "jsCode": "// Extraer datos del mensaje de WhatsApp\n// Compatible con la API de Meta WhatsApp Business\nconst body = $input.first().json;\n\nlet telefono = '';\nlet nombre = 'Cliente';\nlet mensaje = '';\nlet tipo = 'texto';\n\ntry {\n  // Meta WhatsApp Cloud API format\n  const entry = body.entry?.[0];\n  const change = entry?.changes?.[0];\n  const value = change?.value;\n  \n  if (value?.messages?.[0]) {\n    const msg = value.messages[0];\n    telefono = msg.from || '';\n    mensaje  = msg.text?.body || msg.interactive?.button_reply?.title || '[mensaje no texto]';\n    tipo     = msg.type || 'text';\n    \n    // Get name from contacts\n    const contact = value.contacts?.[0];\n    nombre = contact?.profile?.name || 'Cliente';\n  }\n} catch(e) {\n  // Fallback for different webhook formats\n  telefono = body.from || body.phone || body.telefono || '';\n  mensaje  = body.body || body.text || body.message || '';\n  nombre   = body.name || body.nombre || 'Cliente';\n}\n\n// Classify message intent\nconst msg_lower = mensaje.toLowerCase();\nlet intencion = 'general';\n\nif (msg_lower.match(/precio|costo|cuanto|cuánto|tarifa|vale/)) intencion = 'precio';\nelse if (msg_lower.match(/hola|buenas|buenos|hi|hello|saludo/)) intencion = 'saludo';\nelse if (msg_lower.match(/horario|hora|abierto|cuando|cuándo|atienden/)) intencion = 'horario';\nelse if (msg_lower.match(/ubicacion|dirección|donde|dónde|mapa|llegar/)) intencion = 'ubicacion';\nelse if (msg_lower.match(/ayuda|ayudar|información|info|quiero|necesito/)) intencion = 'informacion';\nelse if (msg_lower.match(/gracias|thanks|perfecto|listo|ok|entendido/)) intencion = 'despedida';\n\nreturn [{ json: {\n  telefono,\n  nombre,\n  mensaje,\n  tipo,\n  intencion,\n  fecha: new Date().toISOString(),\n  timestamp: Date.now()\n} }];"
+      }
+    },
+    {
+      "id": "wh_router_03",
+      "name": "Router_Por_Intencion",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [-320, 0],
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.intencion }}",
+        "rules": {
+          "values": [
+            { "outputKey": "saludo", "value": "saludo" },
+            { "outputKey": "precio", "value": "precio" },
+            { "outputKey": "horario", "value": "horario" },
+            { "outputKey": "ubicacion", "value": "ubicacion" },
+            { "outputKey": "despedida", "value": "despedida" }
+          ]
+        },
+        "fallbackOutput": "informacion"
+      }
+    },
+    {
+      "id": "wh_resp_saludo",
+      "name": "Respuesta_Saludo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-80, -300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "respuesta",
+              "value": "=¡Hola {{ $('Extraer_Datos_Mensaje').item.json.nombre }}! 👋 Bienvenido.\n\nEstás hablando con el equipo de *[TU NEGOCIO]*. ¿En qué te puedo ayudar?\n\n📌 Responde con el número de tu consulta:\n1️⃣ Precios y servicios\n2️⃣ Horarios de atención\n3️⃣ Cómo llegar / Ubicación\n4️⃣ Hablar con un asesor",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_resp_precio",
+      "name": "Respuesta_Precio",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-80, -150],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "respuesta",
+              "value": "=¡Gracias por tu interés, {{ $('Extraer_Datos_Mensaje').item.json.nombre }}! 💼\n\n📋 Nuestros precios:\n\n• *[Servicio/Producto 1]:* $[precio]\n• *[Servicio/Producto 2]:* $[precio]\n• *[Servicio/Producto 3]:* $[precio]\n\n_Todos los precios incluyen [IVA/garantía/etc]_\n\n¿Te gustaría agendar una consulta sin costo? Responde *SÍ* y te contacto.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_resp_horario",
+      "name": "Respuesta_Horario",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-80, 0],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "respuesta",
+              "value": "⏰ Nuestros horarios de atención:\n\n📅 *Lunes a Viernes:* 9:00 AM – 7:00 PM\n📅 *Sábado:* 10:00 AM – 4:00 PM\n📅 *Domingo:* Cerrado\n\nSi escribes fuera de horario, te respondemos en cuanto abramos. 🙌\n\n¿Hay algo más en que pueda ayudarte?",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_resp_ubicacion",
+      "name": "Respuesta_Ubicacion",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-80, 150],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "respuesta",
+              "value": "📍 Nos encuentras en:\n\n*[Tu dirección completa aquí]*\n\nReferencias: [punto de referencia cercano]\n\n🗺️ Link en Google Maps: [tu-link-de-google-maps]\n\n¿Alguna otra duda? Con gusto te ayudo.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_resp_general",
+      "name": "Respuesta_General",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-80, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "respuesta",
+              "value": "=Hola {{ $('Extraer_Datos_Mensaje').item.json.nombre }} 👋\n\nRecibimos tu mensaje y en breve te atendemos.\n\nMientras tanto, cuéntame: ¿te puedo ayudar con algo de esto?\n\n1️⃣ Precios\n2️⃣ Horarios\n3️⃣ Ubicación\n4️⃣ Hablar con alguien del equipo\n\n¡Estamos para servirte! 🙌",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_resp_despedida",
+      "name": "Respuesta_Despedida",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-80, 450],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "respuesta",
+              "value": "=¡Gracias a ti, {{ $('Extraer_Datos_Mensaje').item.json.nombre }}! 😊\n\nFue un placer atenderte. Si en algún momento necesitas algo más, aquí estamos. \n\n¡Que tengas excelente día! ☀️",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_sheets_04",
+      "name": "Guardar_en_Google_Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [200, 0],
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REEMPLAZA_CON_ID_DE_TU_HOJA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Contactos",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Telefono": "={{ $('Extraer_Datos_Mensaje').item.json.telefono }}",
+            "Nombre": "={{ $('Extraer_Datos_Mensaje').item.json.nombre }}",
+            "Ultimo_Mensaje": "={{ $('Extraer_Datos_Mensaje').item.json.mensaje }}",
+            "Intencion": "={{ $('Extraer_Datos_Mensaje').item.json.intencion }}",
+            "Fecha": "={{ $('Extraer_Datos_Mensaje').item.json.fecha }}",
+            "Estado": "Nuevo"
+          },
+          "matchingColumns": ["Telefono"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "notes": "Crea una Google Sheet con columnas: Telefono, Nombre, Ultimo_Mensaje, Intencion, Fecha, Estado. Reemplaza el ID del documento."
+    },
+    {
+      "id": "wh_respond_05",
+      "name": "Responder_al_Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [440, 0],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', mensaje_enviado: true }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "connections": {
+    "WhatsApp_Mensaje_Entrante": { "main": [[{ "node": "Extraer_Datos_Mensaje", "type": "main", "index": 0 }]] },
+    "Extraer_Datos_Mensaje":     { "main": [[{ "node": "Router_Por_Intencion", "type": "main", "index": 0 }]] },
+    "Router_Por_Intencion": {
+      "main": [
+        [{ "node": "Respuesta_Saludo",    "type": "main", "index": 0 }],
+        [{ "node": "Respuesta_Precio",    "type": "main", "index": 0 }],
+        [{ "node": "Respuesta_Horario",   "type": "main", "index": 0 }],
+        [{ "node": "Respuesta_Ubicacion", "type": "main", "index": 0 }],
+        [{ "node": "Respuesta_Despedida", "type": "main", "index": 0 }],
+        [{ "node": "Respuesta_General",   "type": "main", "index": 0 }]
+      ]
+    },
+    "Respuesta_Saludo":    { "main": [[{ "node": "Guardar_en_Google_Sheets", "type": "main", "index": 0 }]] },
+    "Respuesta_Precio":    { "main": [[{ "node": "Guardar_en_Google_Sheets", "type": "main", "index": 0 }]] },
+    "Respuesta_Horario":   { "main": [[{ "node": "Guardar_en_Google_Sheets", "type": "main", "index": 0 }]] },
+    "Respuesta_Ubicacion": { "main": [[{ "node": "Guardar_en_Google_Sheets", "type": "main", "index": 0 }]] },
+    "Respuesta_Despedida": { "main": [[{ "node": "Guardar_en_Google_Sheets", "type": "main", "index": 0 }]] },
+    "Respuesta_General":   { "main": [[{ "node": "Guardar_en_Google_Sheets", "type": "main", "index": 0 }]] },
+    "Guardar_en_Google_Sheets": { "main": [[{ "node": "Responder_al_Webhook", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "_meta": {
+    "canal": "Código Propio — codigopropio.com",
+    "version": "1.0",
+    "descripcion": "Sistema automático de respuestas y CRM básico para WhatsApp Business. Importa este archivo en n8n (Workflows → Import from file). Reemplaza los textos entre corchetes con la info de tu negocio y conecta tu cuenta de Google Sheets.",
+    "instrucciones": [
+      "1. Importa este archivo en n8n (Workflows → Import from file o JSON)",
+      "2. Ve al nodo 'Guardar_en_Google_Sheets' y conecta tu cuenta de Google",
+      "3. Crea una Google Sheet con columnas: Telefono, Nombre, Ultimo_Mensaje, Intencion, Fecha, Estado",
+      "4. Copia el ID de la hoja (está en la URL de Google Sheets) y pégalo en el nodo",
+      "5. Personaliza los textos de respuesta con la info de tu negocio (busca los corchetes [])",
+      "6. Activa el workflow y copia la URL del webhook",
+      "7. Pega esa URL en la configuración de webhooks de tu proveedor de WhatsApp Business",
+      "8. ¡Listo! Tus clientes recibirán respuestas automáticas y quedarán registrados"
+    ]
+  }
+}

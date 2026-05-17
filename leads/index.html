@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Descarga Gratis Tu Automatización — Código Propio</title>
+  <meta name="description" content="Descarga gratis el sistema de automatización para tu negocio. Solo nombre y email. Valor real, sin humo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #0b0b14;
+      --surface: rgba(26, 26, 46, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+      --indigo: #6c63ff;
+      --indigo-d: #5a52e0;
+      --gold: #f5a623;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* GLOW ORBS ANIMADOS */
+    .orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(60px); }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+      top: -150px; left: 50%;
+      animation: float1 15s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, transparent 70%);
+      bottom: -100px; right: -150px;
+      animation: float2 18s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
+      50% { transform: translateX(-50%) translateY(40px) scale(1.05); }
+    }
+    @keyframes float2 {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-40px) scale(1.1); }
+    }
+
+    /* ENTRADA ANIMADA */
+    .animate-up {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUpIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeUpIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .d-1 { animation-delay: 0.1s; }
+    .d-2 { animation-delay: 0.2s; }
+    .d-3 { animation-delay: 0.3s; }
+    .d-4 { animation-delay: 0.4s; }
+    .d-5 { animation-delay: 0.5s; }
+
+    /* CONTENT WRAPPER */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 560px;
+      padding: 70px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108,99,255,0.1);
+      border: 1px solid rgba(108,99,255,0.25);
+      color: #b5b1ff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      backdrop-filter: blur(8px);
+    }
+    .badge-dot { width: 6px; height: 6px; background: var(--indigo); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 .hl {
+      background: linear-gradient(135deg, var(--indigo) 0%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sub { font-size: 1.05rem; color: var(--text-muted); text-align: center; line-height: 1.6; margin-bottom: 12px; }
+    .sub-gold { font-size: 0.95rem; color: var(--gold); font-weight: 600; text-align: center; margin-bottom: 36px; }
+
+    /* BENEFITS */
+    .benefits { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; }
+    .benefit { display: flex; align-items: flex-start; gap: 14px; font-size: 0.95rem; color: #e2e8f0; line-height: 1.5; }
+    .benefit-icon { font-size: 1.1rem; margin-top: 1px; flex-shrink: 0; }
+
+    /* GLASSMORPHISM CARD */
+    .card {
+      background: rgba(30, 30, 45, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--indigo), var(--gold), transparent);
+      opacity: 0.8;
+    }
+
+    .card h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.01em; }
+    .card .card-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 28px; }
+
+    /* FORM FIELDS */
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      background: rgba(15, 15, 25, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .field input::placeholder { color: rgba(148, 163, 184, 0.5); }
+    .field input:focus {
+      background: rgba(20, 20, 35, 0.8);
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.15), inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .field input.error { border-color: #ef4444; animation: shake 0.4s ease; }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    /* BUTTON MAGNETIC GLOW */
+    .btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-d) 100%);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::after {
+      content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: all 0.5s ease;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(108, 99, 255, 0.3), 0 0 15px rgba(108, 99, 255, 0.4);
+    }
+    .btn:hover:not(:disabled)::after { left: 150%; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .privacy { margin-top: 16px; text-align: center; font-size: 0.75rem; color: rgba(148, 163, 184, 0.7); }
+
+    /* SUCCESS STATE */
+    .success { display: none; text-align: center; padding: 20px 0; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .success-icon { font-size: 3.5rem; margin-bottom: 16px; text-shadow: 0 0 30px rgba(74, 222, 128, 0.3); }
+    .success h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+    .success p { color: var(--text-muted); font-size: 1rem; line-height: 1.7; }
+    .success .gold-text { color: var(--gold); font-weight: 600; }
+
+    /* SOCIAL PROOF */
+    .proof { width: 100%; margin-top: 50px; text-align: center; }
+    .proof-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 20px; font-weight: 600;}
+    .proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .proof-card {
+      background: rgba(30, 30, 45, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 10px;
+      transition: transform 0.3s ease;
+    }
+    .proof-card:hover { transform: translateY(-4px); background: rgba(30, 30, 45, 0.5); }
+    .proof-num {
+      font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--indigo), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .proof-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 500;}
+
+    /* FOOTER */
+    footer {
+      width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 24px; text-align: center; font-size: 0.8rem; color: rgba(148, 163, 184, 0.5);
+    }
+    footer strong { color: rgba(255, 255, 255, 0.8); }
+    footer a { color: var(--indigo); text-decoration: none; transition: color 0.2s; }
+    footer a:hover { color: var(--indigo-d); }
+
+    @media(max-width: 480px) {
+      .card { padding: 30px 20px; }
+      .proof-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .proof-num { font-size: 1.4rem; }
+      .proof-card { padding: 16px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondos Animados -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="wrapper">
+    <div class="badge animate-up d-1">
+      <span class="badge-dot"></span>Recurso Gratuito · Código Propio
+    </div>
+
+    <h1 class="animate-up d-2">La automatización que hace<br /><span class="hl">crecer negocios reales</span></h1>
+
+    <p class="sub animate-up d-3">Un workflow listo para usar que responde clientes, registra contactos y organiza tu negocio — sin saber programar.</p>
+    <p class="sub-gold animate-up d-3">⬇ Solo 2 datos y te lo envío al instante</p>
+
+    <div class="benefits animate-up d-4">
+      <div class="benefit"><span class="benefit-icon">🤖</span><span><strong>Respuesta automática en WhatsApp Business</strong> — nunca más un cliente sin atender</span></div>
+      <div class="benefit"><span class="benefit-icon">📊</span><span><strong>Base de datos automática</strong> — cada contacto queda guardado en Google Sheets</span></div>
+      <div class="benefit"><span class="benefit-icon">⚡</span><span><strong>Instala en 15 minutos</strong> con la guía paso a paso incluida</span></div>
+      <div class="benefit"><span class="benefit-icon">💰</span><span><strong>Valor: $150–$300</strong> si lo contrataras. Tuyo gratis hoy.</span></div>
+    </div>
+
+    <!-- Glassmorphism Card -->
+    <div class="card animate-up d-5">
+      <div id="form-state">
+        <h2>Recibe la automatización ahora</h2>
+        <p class="card-sub">Sin spam. Solo recursos útiles para tu negocio.</p>
+        <form id="lead-form" novalidate>
+          <div class="field">
+            <label for="nombre">Tu nombre</label>
+            <input type="text" id="nombre" name="nombre" placeholder="¿Cómo te llaman?" autocomplete="given-name" required />
+          </div>
+          <div class="field">
+            <label for="email">Tu email</label>
+            <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" autocomplete="email" required />
+          </div>
+          <button type="submit" class="btn" id="submit-btn">
+            <span id="btn-text">Quiero mi automatización gratis →</span>
+            <div class="spinner" id="spinner"></div>
+          </button>
+        </form>
+        <p class="privacy">🔒 Tus datos están seguros. Sin spam. Baja cuando quieras.</p>
+      </div>
+
+      <!-- Estado de Éxito -->
+      <div class="success" id="success-state">
+        <div class="success-icon">✅</div>
+        <h3>¡Listo, <span id="success-name"></span>!</h3>
+        <p>Revisa tu bandeja de entrada — el workflow ya está en camino.<br /><br />
+        <span class="gold-text">¿No lo ves? Revisa la carpeta de spam o promociones.</span><br /><br />
+        Bienvenido a Código Propio. Esto es solo el comienzo.</p>
+      </div>
+    </div>
+
+    <!-- Prueba Social -->
+    <div class="proof animate-up d-5">
+      <p class="proof-label">¿Por qué usarlo hoy?</p>
+      <div class="proof-grid">
+        <div class="proof-card"><div class="proof-num">15 min</div><div class="proof-lbl">de instalación</div></div>
+        <div class="proof-card"><div class="proof-num">24/7</div><div class="proof-lbl">trabajando por ti</div></div>
+        <div class="proof-card"><div class="proof-num">$0</div><div class="proof-lbl">costo para siempre</div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer><strong>CÓDIGO PROPIO</strong> · Mente · Negocio · Dinero · <a href="https://youtube.com/@codigopropio" target="_blank">youtube.com/@codigopropio</a></footer>
+
+  <script>
+    // Webhook vinculado al n8n de logisk11
+    const WEBHOOK = 'https://logisk11-n8n.rymb9g.easypanel.host/webhook/codigo-propio-leads';
+    const params = new URLSearchParams(window.location.search);
+
+    document.getElementById('lead-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value.trim();
+      const email  = document.getElementById('email').value.trim();
+      
+      // Animaciones de error sutiles
+      if (!nombre) { shake('nombre'); return; }
+      if (!email || !email.includes('@')) { shake('email'); return; }
+
+      setLoading(true);
+      try {
+        await fetch(WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre, email,
+            fuente: params.get('utm_source') || 'directo',
+            video:  params.get('utm_content') || '',
+            fecha:  new Date().toISOString(),
+            canal:  'Código Propio'
+          })
+        });
+        
+        // Mostrar vista de éxito con el nombre
+        document.getElementById('success-name').textContent = nombre.split(' ')[0];
+        document.getElementById('form-state').style.display   = 'none';
+        document.getElementById('success-state').style.display = 'block';
+      } catch (error) {
+        setLoading(false);
+        alert('Hubo un pequeño error de conexión. Por favor, intenta de nuevo.');
+      }
+    });
+
+    function setLoading(isLoading) {
+      document.getElementById('submit-btn').disabled = isLoading;
+      document.getElementById('btn-text').style.display = isLoading ? 'none' : 'inline';
+      document.getElementById('spinner').style.display  = isLoading ? 'block' : 'none';
+    }
+
+    function shake(id) {
+      const el = document.getElementById(id);
+      el.classList.add('error');
+      el.focus();
+      setTimeout(() => el.classList.remove('error'), 400);
+    }
+  </script>
+</body>
+</html>
