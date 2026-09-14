@@ -15,7 +15,12 @@ yarn-error.log*
 output/
 dist/
 build/
+.next/
+.vercel/
+tsconfig.tsbuildinfo
+scratch/
 .DS_Store
 
 # Logs
 *.log
+

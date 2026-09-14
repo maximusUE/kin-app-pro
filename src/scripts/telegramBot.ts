@@ -50,7 +50,7 @@ bot.action(/APPROVE_(.+)/, async (ctx) => {
       `✅ *Guion aprobado.* ¿Cómo quieres producirlo?\n\n` +
       `🔊 *Audio completo* — genera la locución entera (gasta créditos)\n` +
       `👂 *Preview 30 seg* — escucha solo el hook (poco crédito)\n` +
-      `🎥 *Solo videos* — clips de Pexels sin tocar ElevenLabs ($0)`,
+      `🎥 *Solo videos* — clips de B-Roll (Pexels/Pixabay) sin tocar ElevenLabs ($0)`,
       {
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
@@ -73,6 +73,7 @@ async function startProduction(ctx: any, rowIndex: number, mode: ProductionMode)
     full:        '🔊 Audio completo + videos',
     preview:     '🔊 Preview de 30 seg + videos',
     videos_only: '🎥 Solo videos',
+    user_voice:  '🎙️ Voz de César + videos',
   };
 
   await ctx.answerCbQuery(`Iniciando: ${labels[mode]}`);

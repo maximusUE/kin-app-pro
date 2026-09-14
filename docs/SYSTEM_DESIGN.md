@@ -106,3 +106,16 @@ Ver `docs/DEPLOY.md` para instrucciones completas.
 | Backend / n8n   | EasyPanel + Docker          |
 | Base de datos   | Supabase                    |
 | CI/CD           | GitHub Actions (lint + test)|
+
+---
+
+## 8. Interfaz de Usuario (Dashboard)
+
+El dashboard web (`src/app/page.tsx`) sirve como la consola central de control y edición para el creador.
+
+### Características del Layout
+- **Barra Lateral Colapsable:** La barra lateral se puede colapsar/expandir usando el botón de toggle `[|]` en el navbar superior. Esto permite maximizar el espacio de lectura y edición de guiones a pantalla completa.
+- **Grabador de Voz Integrado en Barra Lateral:** El grabador por secciones se ubica de forma compacta en la barra lateral para evitar la necesidad de desplazarse verticalmente mientras se lee el guion en el editor principal.
+  - Se muestra únicamente cuando hay un guion seleccionado en edición.
+  - Permite grabación por slots individuales (`Sección 01`, `Sección 02`, etc.) con guardado directo en la Mac.
+

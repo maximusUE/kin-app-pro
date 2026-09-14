@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estoicismo, Negocios y Finanzas — Guion de Producción</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent: #38bdf8;
+    --accent-dark: #0284c7;
+    --badge-bg: #1e293b;
+    --direction-bg: #2d2616;
+    --direction-border: #d97706;
+    --direction-text: #fbbf24;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --accent: #0284c7;
+      --accent-dark: #0369a1;
+      --badge-bg: #0f172a;
+      --direction-bg: #fef3c7;
+      --direction-border: #f59e0b;
+      --direction-text: #92400e;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.65;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 100px 24px;
+  }
+
+  /* Top Bar Actions */
+  .action-bar {
+    position: sticky;
+    top: 16px;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+
+  .action-bar .brand {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    background: var(--accent-dark);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+  }
+
+  .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Header Section */
+  .script-header {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .badge-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0 0 24px 0;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 20px;
+  }
+
+  .meta-item .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .meta-item .val {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* Content Elements */
+  .block-header {
+    background: var(--badge-bg);
+    color: #ffffff;
+    border-left: 4px solid var(--accent);
+    padding: 10px 16px;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+
+  .stage-direction {
+    background: var(--direction-bg);
+    border-left: 3px solid var(--direction-border);
+    color: var(--direction-text);
+    padding: 8px 14px;
+    margin: 12px 0 16px 0;
+    border-radius: 6px;
+    font-style: italic;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .script-paragraph {
+    font-size: 1.06rem;
+    line-height: 1.7;
+    margin: 0 0 16px 0;
+    color: var(--text-primary);
+  }
+
+  /* Print Styles */
+  @media print {
+    body {
+      background: #ffffff !important;
+      color: #111827 !important;
+      font-size: 10pt;
+      line-height: 1.45;
+    }
+    .action-bar {
+      display: none !important;
+    }
+    .container {
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .script-header {
+      border: 1px solid #e5e7eb;
+      background: #f9fafb !important;
+      padding: 16px !important;
+      margin-bottom: 20px !important;
+      page-break-after: avoid;
+    }
+    h1 {
+      font-size: 18pt !important;
+      color: #111827 !important;
+    }
+    .subtitle {
+      font-size: 10pt !important;
+      color: #4b5563 !important;
+    }
+    .block-header {
+      background: #1e293b !important;
+      color: #ffffff !important;
+      border-left: 4px solid #0284c7 !important;
+      padding: 6px 12px !important;
+      margin-top: 20px !important;
+      margin-bottom: 10px !important;
+      page-break-after: avoid;
+      break-after: avoid;
+      font-size: 10pt !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .stage-direction {
+      background: #fef3c7 !important;
+      border-left: 3px solid #d97706 !important;
+      color: #92400e !important;
+      padding: 5px 10px !important;
+      font-size: 8.5pt !important;
+      page-break-after: avoid;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .script-paragraph {
+      color: #1f2937 !important;
+      font-size: 9.5pt !important;
+      line-height: 1.45 !important;
+      margin-bottom: 8pt !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="action-bar">
+    <div class="brand">Código Propio • YouTube Studio</div>
+    <div class="action-buttons">
+      <button class="btn btn-outline" onclick="copyFullScript()">📋 Copiar Guion</button>
+      <button class="btn" onclick="window.print()">📄 Guardar en PDF / Imprimir</button>
+    </div>
+  </div>
+
+  <div class="script-header">
+    <div class="badge-tag">Guion Oficial de Producción</div>
+    <h1>Estoicismo, Negocios y Finanzas</h1>
+    <div class="subtitle">Filosofía aplicada para tomar mejores decisiones, mantener la calma bajo presión y liderar con claridad</div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">Formato</div>
+        <div class="val">Documental / Video Largo</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Locución Sugerida</div>
+        <div class="val">Locutor de Anuncios (CapCut)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Estructura</div>
+        <div class="val">31 Bloques (22 Secciones)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Duración Estimada</div>
+        <div class="val">~14 min (2,434 palabras)</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="script-body">
+    <div class="block-header"><span>BLOQUE 1 — APERTURA / HOOK</span></div><div class="stage-direction"><span class="icon">🎬</span> [ Pausa breve. Mirar directo a cámara ]</div><p class="script-paragraph">¿Sabes por qué tantos empresarios y dueños de negocios viven atrapados en un estado constante de ansiedad?</p><p class="script-paragraph">Siempre preocupados por la próxima facturación. Por la próxima venta. Por el próximo pago de nómina. Y aunque trabajen más horas... la presión parece no desaparecer.</p><p class="script-paragraph">¿Y qué pasaría si te dijera que existe una filosofía capaz de ayudarte a tomar mejores decisiones... mantener la calma bajo presión... y liderar con mayor claridad?</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa. Cambio de tono ]</div><p class="script-paragraph">Esa filosofía existe. Y se llama estoicismo.</p><div class="block-header"><span>BLOQUE 2 — ORIGEN DEL ESTOICISMO</span></div><p class="script-paragraph">El estoicismo nació hace más de dos mil años en la antigua Grecia... pero sus enseñanzas siguen siendo tan útiles hoy como entonces.</p><p class="script-paragraph">Su principio fundamental es simple: aprender a enfocarte en lo que puedes controlar. Y dejar de desperdiciar energía en aquello que está fuera de tus manos.</p><p class="script-paragraph">Pero esto nos lleva a una pregunta fascinante. ¿Cómo nació esta filosofía? Para descubrirlo, tenemos que conocer la historia de un hombre que lo perdió absolutamente todo. Y aun así... encontró algo mucho más valioso.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa dramática ]</div><p class="script-paragraph">Su nombre era Zenón de Citio.</p><div class="block-header"><span>BLOQUE 3 — HISTORIA DE ZENÓN</span></div><p class="script-paragraph">Zenón era un comerciante exitoso. Tenía riqueza, mercancías y un futuro prometedor. Sin embargo, todo cambió de la noche a la mañana cuando su barco naufragó.</p><p class="script-paragraph">En cuestión de horas perdió prácticamente todo lo que había construido. Cualquiera habría caído en la desesperación, la rabia o la frustración.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa ]</div><p class="script-paragraph">Pero Zenón tomó un camino diferente.</p><div class="block-header"><span>BLOQUE 4 — EL NACIMIENTO DEL ESTOICISMO</span></div><p class="script-paragraph">En lugar de lamentarse por lo que ya no podía recuperar, decidió concentrarse en lo único que aún estaba bajo su control.</p><p class="script-paragraph">Sus pensamientos. Sus emociones.</p><p class="script-paragraph">Fue precisamente de esa crisis financiera devastadora donde nació el estoicismo. Una filosofía que nos recuerda que nuestros peores fracasos pueden convertirse en el punto de partida de nuestras mayores transformaciones.</p><div class="block-header"><span>BLOQUE 5 — ¿QUÉ ES EL ESTOICISMO?</span></div><p class="script-paragraph">Hasta aquí la historia de Zenón es inspiradora. Pero seguramente te estés preguntando algo importante: ¿qué descubrió este hombre después de perderlo absolutamente todo?</p><p class="script-paragraph">La respuesta dio origen a una filosofía que ha ayudado durante siglos a líderes, empresarios y personas comunes a enfrentar la incertidumbre con mayor claridad.</p><p class="script-paragraph">En esencia, el estoicismo es una guía práctica para vivir con virtud, razón y autodominio. No busca eliminar los problemas de la vida. Sino enseñarte a responder mejor ante ellos.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa. Tono de anticipación ]</div><p class="script-paragraph">Y todo comienza con dos conceptos fundamentales: la Apatheia y la Ataraxia. Los nombres suenan extraños. Pero si entiendes estos dos principios... entenderás gran parte del poder del estoicismo.</p><div class="block-header"><span>BLOQUE 6 — APATHEIA</span></div><p class="script-paragraph">Comencemos con la Apatheia.</p><p class="script-paragraph">Y no, no significa volverte frío, indiferente o incapaz de sentir emociones. De hecho... significa todo lo contrario.</p><p class="script-paragraph">La Apatheia consiste en evitar que tus emociones tomen el control de tus decisiones. Porque cuando el miedo, la ansiedad, la ira o la frustración dominan tu mente... es mucho más fácil cometer errores de los que luego te arrepientes.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">¿Y qué tiene que ver esto con los negocios? Mucho más de lo que imaginas.</p><div class="block-header"><span>BLOQUE 7 — APATHEIA EN LOS NEGOCIOS</span></div><p class="script-paragraph">Cuando aprendes a gestionar tus emociones, comienzas a tomar decisiones basadas en la razón y no en impulsos momentáneos.</p><p class="script-paragraph">Recuerdo que hace años vi a un jefe despedir a uno de los mejores empleados de la empresa. No fue porque trabajara mal. No fue porque hubiera cometido un error grave.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa ]</div><p class="script-paragraph">Simplemente había tenido una mañana difícil... y permitió que sus emociones decidieran por él.</p><div class="block-header"><span>BLOQUE 8 — LA LECCIÓN</span></div><p class="script-paragraph">Lo peor vino después.</p><p class="script-paragraph">Días más tarde se arrepintió profundamente de aquella decisión. El empleado era valioso, comprometido y muy competente. Pero el daño ya estaba hecho.</p><p class="script-paragraph">Y eso me dejó una enseñanza que nunca olvidé: las decisiones importantes jamás deberían tomarse en medio de una tormenta emocional.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">Controlar las emociones es solo una parte de la ecuación. La siguiente pieza es igual de importante.</p><div class="block-header"><span>BLOQUE 9 — ATARAXIA</span></div><p class="script-paragraph">Aquí es donde entra la Ataraxia.</p><p class="script-paragraph">Un concepto que los estoicos consideraban indispensable para mantener la claridad mental en tiempos difíciles.</p><p class="script-paragraph">La Ataraxia es la capacidad de conservar la tranquilidad interior cuando las circunstancias externas parecen desmoronarse. Y atención... porque este principio puede marcar la diferencia entre reaccionar impulsivamente o actuar con inteligencia cuando enfrentas una crisis.</p><div class="block-header"><span>BLOQUE 10 — EL PODER DE LA CALMA</span></div><p class="script-paragraph">Piensa por un momento en alguien que atraviesa una crisis financiera. Es normal sentirse preocupado, abrumado o incluso paralizado por la incertidumbre.</p><p class="script-paragraph">Sin embargo, cuando existe tranquilidad interior, la mente puede analizar los problemas con mayor claridad. Y cuando la mente está clara... las soluciones empiezan a aparecer.</p><p class="script-paragraph">La calma no elimina los problemas. Pero sí te permite enfrentarlos con una ventaja que muy pocas personas tienen: la capacidad de pensar con claridad cuando los demás están dominados por el miedo.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook — transición a historia personal ]</div><p class="script-paragraph">Y en unos momentos descubrirás por qué este principio marcó profundamente la forma en que mi padre enfrentó una de las etapas más difíciles de su vida.</p><div class="block-header"><span>BLOQUE 11 — HISTORIA DEL PADRE</span></div><p class="script-paragraph">Hay un principio estoico que puede literalmente salvarte en los negocios. Y lo aprendí de la peor forma posible: viendo a mi padre perderlo todo.</p><p class="script-paragraph">Su empresa estaba a punto de quebrar. Las deudas se acumulaban. Los empleados se iban. Y yo, con 14 años, no entendía cómo él podía estar tan... tranquilo.</p><p class="script-paragraph">Me acercé y le pregunté, casi enojado: “Papá, ¿cómo puedes estar así cuando todo se está cayendo?”</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">Lo que me respondió cambió mi forma de ver la vida para siempre. Escucha esto.</p><div class="block-header"><span>BLOQUE 12 — LA RESPUESTA DEL PADRE</span></div><p class="script-paragraph">Me miró a los ojos, sin nervios, sin desesperación, y me dijo: “Hijo, en esta vida solo tienes control sobre dos cosas: lo que piensas y lo que sientes. Nada más.”</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa ]</div><p class="script-paragraph">Hizo una pausa. Y añadió: “Cómo enfrentas lo que te golpea... eso sí es tuyo. Solo tuyo.”</p><p class="script-paragraph">En ese momento no lo entendí. Tardé años en entenderlo. Pero hoy sé que esa frase, dicha en el peor momento de su vida, es la base de todo lo que los estoicos llamaban Ataraxia: la calma que no te da el mundo... sino que construyes tú.</p><div class="block-header"><span>BLOQUE 13-14 — VIRTUD</span></div><p class="script-paragraph">Los estoicos tenían un concepto que hoy casi nadie aplica en los negocios. Lo llamaban virtud. Y no hablaban de ser buena persona en el sentido religioso.</p><p class="script-paragraph">Hablaban de algo más difícil: actuar bien cuando nadie te está mirando. Cuando el dinero fácil está sobre la mesa. Cuando el atajo existe y nadie se va a enterar.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">En los negocios aparecen esos momentos constantemente. Y aquí está la clave que pocos entienden...</p><p class="script-paragraph">No todo lo que genera dinero genera paz. La virtud es una brújula interna. Te dice cuándo una decisión está alineada con quien eres... y cuándo simplemente estás vendiendo tu integridad por una recompensa rápida. Los que construyen riqueza real, lo saben.</p><div class="block-header"><span>BLOQUE 15-16 — RAZÓN</span></div><p class="script-paragraph">Otro pilar del estoicismo es la razón. Y cuando hablamos de dinero, este principio es brutal. Porque la mayoría de nosotros no compra con lógica. Compra con ego. Compra con emoción. Compra para llenar vacíos.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">Házte esta pregunta honesta...</p><p class="script-paragraph">¿Cuántas cosas tienes en casa que casi no usas? Ropa, tecnología, gadgets que compraste impulsado por una sensación del momento. Eso no es un problema de dinero. Es un problema de atención.</p><p class="script-paragraph">Y se acumula. Silenciosamente. Hasta que un día miras tu cuenta bancaria y no entiendes a dónde se fue todo. A eso los estoicos lo llamarían vivir sin razón. Y es la trampa perfecta del círculo de la rata.</p><div class="block-header"><span>BLOQUE 17-19 — ATENCIÓN PLENA</span></div><p class="script-paragraph">El último principio que quiero que conozcas es el más poderoso de todos. Y también el más ignorado. Los estoicos lo llamaban atención plena. Pero no en el sentido de meditar en una montaña.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">Lo que ellos proponían era algo concreto, casi urgente...</p><p class="script-paragraph">Deja de gastar energía mental en lo que no puedes controlar. Las noticias, la inflación, las crisis, los conflictos internacionales. Todo eso existe. Y todo eso va a seguir existiendo. Pero si le entregas tu atención, llegas agotado, distraído y sin avanzar.</p><p class="script-paragraph">El estoicismo dice: enfócate en tu terreno. Y tu terreno es pequeño. Pero es poderoso.</p><p class="script-paragraph">Tus pensamientos. Tus emociones. Tus hábitos. Lo que haces hoy. Ahí vive el cambio real. No en el caos del mundo, sino en las decisiones que tomas cada día, aunque nadie las vea. Eso es lo que los estoicos entendieron hace dos mil años. Y lo que los mejores líderes, inversores y emprendedores aplican hoy.</p><div class="block-header"><span>BLOQUE 20-22 — DISCIPLINA</span></div><p class="script-paragraph">Voy a hablarte del principio que más duele escuchar. Y el que más cambia vidas cuando se aplica. Los estoicos lo llamaban disciplina. Pero no la disciplina de los libros de autoayuda. No.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa. Tono directo ]</div><p class="script-paragraph">Hablo de algo más oscuro, más honesto.</p><p class="script-paragraph">Hacer lo que tienes que hacer cuando menos ganas tienes de hacerlo. Cuando estás agotado. Cuando nadie te aplaude. Cuando la motivación desapareció hace semanas y solo queda el vacío. Ahí es donde se decide todo.</p><p class="script-paragraph">Piénsalo. Tú ya sabes qué hacer. Sabes que debes ahorrar, moverte, crear, mejorar. Tienes el plan. Tienes los videos vistos, los libros leídos, los objetivos escritos. Y aun así... nada cambia.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">¿Por qué? No es falta de información. No es falta de inteligencia. Es que la motivación es una mentira que nos contamos para sentirnos bien sin actuar. La motivación llega, te emociona tres días, y desaparece. Y tú vuelves al sofá. Al scroll. A los mismos hábitos de siempre.</p><p class="script-paragraph">Las metas no cambian tu vida. Los hábitos sí. Y los hábitos no los construye la motivación. Los construye la disciplina. Esa es la diferencia entre quien lo sueña y quien lo logra.</p><div class="block-header"><span>BLOQUE 23 — EL VERDADERO CAMBIO</span></div><p class="script-paragraph">Entonces, ¿cómo se construye la disciplina? No con fuerza de voluntad. No con frases motivacionales.</p><p class="script-paragraph">Se construye con un acto pequeño, repetido, sin condiciones. Haz lo que sabes que debes hacer hoy. Mañana vuélvelo a hacer. Sin esperar sentirte listo. Sin esperar el momento perfecto.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa ]</div><p class="script-paragraph">Hasta que deje de ser un esfuerzo y se convierta en quien eres. Ese día... todo cambia.</p><div class="block-header"><span>BLOQUE 24-25 — ACEPTACIÓN</span></div><p class="script-paragraph">Y llegamos al principio que más me costó entender. El que más rechazo. El que más me resistí a creer.</p><p class="script-paragraph">La aceptación.</p><p class="script-paragraph">Porque cuando alguien te dice “acepta lo que es”... suena a rendirse. Suena a conformismo. Suena a dejar de luchar. Pero no. Es exactamente lo contrario.</p><div class="stage-direction"><span class="icon">🎬</span> [ Mini-hook ]</div><p class="script-paragraph">Escucha bien esto...</p><p class="script-paragraph">Aceptar no es rendirse. Es dejar de gastar energía peleando contra lo que ya pasó, para poder usarla en lo que todavía puedes cambiar. Cada segundo que pasas resistiendo la realidad es un segundo que no estás construyendo tu salida.</p><p class="script-paragraph">El sufrimiento no viene de los golpes de la vida. Viene de negarse a verlos como son. Cuando aceptas con claridad, dejas de reaccionar y empiezas a responder. Y esa diferencia... esa pequeña diferencia... lo cambia absolutamente todo.</p><div class="block-header"><span>BLOQUE 26 — IDENTIDAD</span></div><p class="script-paragraph">Y hay algo más profundo que todo esto. Porque cuando integras estos principios, algo empieza a suceder por dentro.</p><p class="script-paragraph">Ya no necesitas que el mundo valide lo que sientes. Ya no te derrumba una crítica, una pérdida, un fracaso. Porque sabes quién eres. Conoces tus valores. Sabes lo que te guía.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa ]</div><p class="script-paragraph">Y cuando tienes eso... nadie te lo puede quitar.</p><p class="script-paragraph">Tu estabilidad deja de vivir afuera, en los aplausos, en los resultados, en la aprobación de los demás. Y empieza a vivir aquí. Adentro. Donde nadie puede tocarte.</p><div class="block-header"><span>BLOQUE 27-28 — LA IDEA QUE SE QUEDA</span></div><p class="script-paragraph">Hace dos mil años, un esclavo llamado Epicteto no tenía libertad, no tenía dinero, no tenía poder. Tenía una sola cosa.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa ]</div><p class="script-paragraph">Su mente.</p><p class="script-paragraph">Y con eso fue suficiente para convertirse en uno de los filósofos más influyentes de la historia. Eso es el estoicismo. No una teoría. No un libro antiguo. Es la prueba de que las circunstancias nunca han sido el verdadero obstáculo.</p><p class="script-paragraph">Tú eres el obstáculo. Y tú eres también la solución.</p><p class="script-paragraph">Apatheia. Ataraxia. Virtud. Razón. Disciplina. Aceptación. No son palabras complicadas. Son decisiones. Decisiones que puedes tomar hoy, en tu negocio, en tus finanzas, en cómo reaccionas cuando todo sale mal. Cada principio que vimos hoy es un músculo. Y los músculos solo se fortalecen con uso. Con repetición. Con incomodidad.</p><div class="block-header"><span>BLOQUE 29-30 — EL MENSAJE PROFUNDO</span></div><p class="script-paragraph">Quiero que te lleves una sola idea de este video. Una sola.</p><p class="script-paragraph">Si el mundo te quitara todo mañana, el dinero, los clientes, los seguidores, las posesiones... ¿qué te quedaría?</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa ]</div><p class="script-paragraph">Lo que has construido adentro. Tu carácter. Tu claridad. Tu capacidad de levantarte. Eso nunca se pierde. Eso es lo que nadie puede quitarte. Y eso es exactamente lo que el estoicismo viene a construir.</p><p class="script-paragraph">Entonces hoy, no mañana, hoy, elige una cosa. Solo una. ¿Hay una emoción que te está costando gestionar? Trabájala. ¿Hay una decisión que sabes que debes tomar pero el miedo te frena? Tómala. ¿Hay un hábito que llevas meses postergando? Empíezalo hoy.</p><p class="script-paragraph">No necesitas tenerlo todo resuelto. Solo necesitas dar un paso. El estoicismo no te pide perfección. Te pide presencia.</p><div class="block-header"><span>BLOQUE 31 — CIERRE Y CTA</span></div><p class="script-paragraph">Este canal existe por una razón. Porque creemos que una mente entrenada construye mejores negocios. Que unas finanzas sanas empiezan con decisiones conscientes. Y que la filosofía más poderosa del mundo no debería estar encerrada en libros que nadie lee... sino viva, aplicada, funcionando en tu vida real.</p><p class="script-paragraph">Así que antes de cerrar este video, quiero pedirte algo. No que le des like. No que te suscribas por obligación.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa. Tono íntimo ]</div><p class="script-paragraph">Quiero pedirte que vayas a los comentarios y escribas una sola palabra. La palabra que mejor describe lo que sientes que necesitas trabajar hoy. Disciplina. Aceptación. Calma. Claridad. Una palabra. Porque escribirla es el primer acto de conciencia. Y la conciencia es donde todo empieza.</p><p class="script-paragraph">Si este video movió algo en ti, compártelo con alguien que lo necesite. No con todos. Con esa persona específica que tienes en mente ahora mismo. Porque el conocimiento que no se comparte se desperdicia. Y nosotros aquí no desperdiciamos nada.</p><p class="script-paragraph">Nos vemos en el próximo video.</p><div class="stage-direction"><span class="icon">🎬</span> [ Pausa final ]</div><p class="script-paragraph">Y recuerda: el estoico no espera las condiciones perfectas. Las crea.</p>
+  </div>
+</div>
+
+<script>
+function copyFullScript() {
+  const paragraphs = Array.from(document.querySelectorAll('.script-paragraph')).map(p => p.innerText).join('\n\n');
+  navigator.clipboard.writeText(paragraphs).then(() => {
+    alert('¡Guion copiado al portapapeles con éxito!');
+  }).catch(err => {
+    alert('No se pudo copiar automáticamente: ' + err);
+  });
+}
+</script>
+</body>
+</html>
