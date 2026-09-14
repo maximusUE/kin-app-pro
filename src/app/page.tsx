@@ -835,28 +835,47 @@ export default function MobileApp() {
                   </div>
                 </div>
 
+                {/* Destination Dropdown Pill (Arquitectura Western Union) */}
+                <div className="flex items-center justify-between bg-[#181928] border border-white/10 rounded-2xl px-4 py-3 shadow-md">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl leading-none">🇲🇽</span>
+                    <div>
+                      <span className="text-[10px] text-[#8E91A5] uppercase font-bold tracking-wider block leading-none">
+                        Send to
+                      </span>
+                      <span className="text-sm font-bold text-white tracking-wide mt-0.5 block">
+                        Mexico
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-[#8E91A5]">
+                    <span className="text-xs font-semibold">MXN</span>
+                    <span className="text-[10px]">▼</span>
+                  </div>
+                </div>
+
                 {/* FX Remittance Currency Converter Card (You Send USD <-> Transfer <-> Receiver Gets MXN) */}
-                <div className="bg-[#181928] border border-white/10 rounded-3xl p-3.5 space-y-3 shadow-lg">
+                <div className="bg-[#181928] border border-white/10 rounded-3xl p-4 space-y-3 shadow-lg">
                   {/* Row: You Send (USD) <-> Transfer Icon <-> Receiver Gets (MXN) */}
                   <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                     {/* Client Field: You send (USD) */}
-                    <div className="bg-[#121320] border border-white/5 rounded-2xl p-2.5 flex flex-col justify-between min-h-[72px]">
+                    <div className="bg-[#121320] border border-white/5 rounded-2xl p-3 flex flex-col justify-between min-h-[76px]">
                       <span className="text-[10px] font-bold text-[#8E91A5] uppercase tracking-wider block">
                         You send
                       </span>
                       <div className="flex items-baseline justify-between gap-1 mt-1">
                         <div className="flex items-baseline gap-0.5 min-w-0 flex-1">
-                          <span className="text-sm font-black text-white/70">$</span>
+                          <span className="text-base font-black text-white/70">$</span>
                           <input
                             type="number"
                             min="1"
                             value={amountValue}
                             onChange={(e) => setAmountValue(e.target.value)}
                             placeholder="50"
-                            className="w-full text-xl font-black bg-transparent text-white focus:outline-none tracking-tight placeholder-white/20 p-0 m-0"
+                            className="w-full text-2xl font-black bg-transparent text-white focus:outline-none tracking-tight placeholder-white/20 p-0 m-0"
                           />
                         </div>
-                        <span className="text-[10px] font-bold text-[#8E91A5] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 flex-shrink-0">
+                        <span className="text-xs font-black text-[#8E91A5] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 flex-shrink-0">
                           USD
                         </span>
                       </div>
@@ -870,23 +889,24 @@ export default function MobileApp() {
                     </div>
 
                     {/* Receiver Field: Receiver gets (MXN) */}
-                    <div className="bg-[#121320] border border-white/5 rounded-2xl p-2.5 flex flex-col justify-between min-h-[72px]">
+                    <div className="bg-[#121320] border border-white/5 rounded-2xl p-3 flex flex-col justify-between min-h-[76px]">
                       <span className="text-[10px] font-bold text-[#8E91A5] uppercase tracking-wider block">
                         Receiver gets
                       </span>
                       <div className="flex items-baseline justify-between gap-1 mt-1">
                         <div className="flex items-baseline gap-0.5 min-w-0 flex-1 overflow-hidden">
-                          <span className="text-sm font-black text-[#2ED5A4]/70">$</span>
-                          <span className="text-xl font-black text-[#2ED5A4] tracking-tight truncate">
+                          <span className="text-base font-black text-[#2ED5A4]/70">$</span>
+                          <span className="text-2xl font-black text-[#2ED5A4] tracking-tight truncate">
                             {((parseFloat(amountValue) || 0) * USD_TO_MXN_RATE).toLocaleString('es-MX', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold text-[#8E91A5] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 flex-shrink-0">
-                          MXN
-                        </span>
+                        <div className="flex items-center gap-0.5 text-xs font-black text-[#2ED5A4] px-1.5 py-0.5 rounded bg-[#2ED5A4]/10 border border-[#2ED5A4]/30 flex-shrink-0">
+                          <span>MXN</span>
+                          <span className="text-[8px]">▼</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -897,133 +917,185 @@ export default function MobileApp() {
                       <span className="text-[#8E91A5]">1 USD =</span>
                       <span className="font-bold text-white">${USD_TO_MXN_RATE.toFixed(2)} MXN</span>
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse ml-0.5" />
-                      <span className="text-[#2ED5A4] font-medium hidden sm:inline">Tasa real Banxico/FX</span>
+                      <span className="text-[#2ED5A4] font-medium hidden sm:inline">Tasa garantizada Banxico</span>
                     </div>
-                    <span className="text-[#8E91A5] font-medium">0% comisión KIN</span>
+                    <span className="text-[#8E91A5] font-medium">0% comisión de cambio</span>
                   </div>
                 </div>
 
                 {/* ========================================================= */}
-                {/* HOW WILL YOUR RECEIVER GET IT?                            */}
+                {/* HOW WILL YOUR RECEIVER GET IT? (3 CARDS SIDE-BY-SIDE)     */}
                 {/* ========================================================= */}
                 <div className="space-y-2.5">
                   <span className="text-xs font-semibold text-[#8E91A5] uppercase tracking-wide block px-1">
                     How will your receiver get it?
                   </span>
 
-                  {/* Dual Option Tabs: Cash Pickup vs Bank account (Uno al lado del otro) */}
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-[#121320] border border-white/5 rounded-2xl">
+                  {/* 3 Horizontal Delivery Options (Western Union Layout) */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* 1. Cash Pickup */}
                     <button
                       type="button"
                       onClick={() => setDeliveryMethod('cash')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      className={`p-2.5 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between min-h-[96px] ${
                         deliveryMethod === 'cash'
-                          ? 'bg-[#2ED5A4] text-[#0E0F1A] shadow-md'
-                          : 'text-[#8E91A5] hover:text-white'
+                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
+                          : 'bg-[#181928] border-white/10 hover:border-white/20'
                       }`}
                     >
-                      <ShoppingCartIcon className="w-4 h-4" />
-                      <span>Cash Pickup</span>
+                      {/* Cluster of store logos (Western Union style) */}
+                      <div className="flex items-center -space-x-1.5 pt-0.5">
+                        <div className="w-5 h-5 rounded-full overflow-hidden border border-[#181928] bg-white/10 flex items-center justify-center">
+                          <OxxoLogo className="w-5 h-5" />
+                        </div>
+                        <div className="w-5 h-5 rounded-full overflow-hidden border border-[#181928] bg-white/10 flex items-center justify-center">
+                          <BodegaAurreraLogo className="w-5 h-5" />
+                        </div>
+                        <div className="w-5 h-5 rounded-full overflow-hidden border border-[#181928] bg-white/10 flex items-center justify-center">
+                          <ElektraLogo className="w-5 h-5" />
+                        </div>
+                        <div className="w-5 h-5 rounded-full border border-[#181928] bg-white/20 flex items-center justify-center text-[7px] font-black text-white">
+                          +3
+                        </div>
+                      </div>
+                      <div className="mt-1.5">
+                        <p className="text-[11px] font-bold text-white leading-tight">
+                          Cash pickup <sup className="text-[9px] text-[#2ED5A4]">6</sup>
+                        </p>
+                        <p className="text-[9px] text-[#8E91A5] mt-0.5">En efectivo</p>
+                      </div>
                     </button>
 
+                    {/* 2. Bank Account */}
                     <button
                       type="button"
                       onClick={() => setDeliveryMethod('bank')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      className={`p-2.5 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between min-h-[96px] relative ${
                         deliveryMethod === 'bank'
-                          ? 'bg-[#2ED5A4] text-[#0E0F1A] shadow-md'
-                          : 'text-[#8E91A5] hover:text-white'
+                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
+                          : 'bg-[#181928] border-white/10 hover:border-white/20'
                       }`}
                     >
-                      <BankBuildingIcon className="w-4 h-4" />
-                      <span>Bank account</span>
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4]/40 text-[#2ED5A4] text-[8px] font-bold uppercase tracking-wider">
+                        Popular
+                      </div>
+                      <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white mt-1">
+                        <BankBuildingIcon className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="mt-1.5">
+                        <p className="text-[11px] font-bold text-white leading-tight">
+                          Bank account <sup className="text-[9px] text-[#2ED5A4]">10</sup>
+                        </p>
+                        <p className="text-[9px] text-[#8E91A5] mt-0.5">SPEI 24/7</p>
+                      </div>
+                    </button>
+
+                    {/* 3. Mobile Wallet / KIN Cash */}
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryMethod('wallet')}
+                      className={`p-2.5 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between min-h-[96px] ${
+                        deliveryMethod === 'wallet'
+                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
+                          : 'bg-[#181928] border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#2ED5A4] mt-1">
+                        <WalletIcon className="w-4 h-4 text-[#2ED5A4]" />
+                      </div>
+                      <div className="mt-1.5">
+                        <p className="text-[11px] font-bold text-white leading-tight">
+                          Mobile wallet <sup className="text-[9px] text-[#2ED5A4]">9</sup>
+                        </p>
+                        <p className="text-[9px] text-[#8E91A5] mt-0.5">KIN / Wallet</p>
+                      </div>
                     </button>
                   </div>
 
-                  {/* Cash Pickup Stores List (Uno arriba del otro con pequeña separación) */}
+                  {/* Secondary Details Panel for Selected Delivery Channel */}
                   {deliveryMethod === 'cash' ? (
-                    <div className="space-y-2 pt-0.5">
-                      {CASH_PICKUP_STORES.map((store) => {
-                        const isSelected = selectedStore === store.id;
-                        const StoreLogo = store.Logo;
-                        return (
-                          <button
-                            key={store.id}
-                            type="button"
-                            onClick={() => setSelectedStore(store.id)}
-                            className={`w-full p-3 rounded-2xl border transition-all flex items-center justify-between text-left cursor-pointer ${
-                              isSelected
-                                ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                                : 'bg-[#181928] border-white/10 hover:border-white/20'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden p-0.5 border border-white/5">
-                                <StoreLogo className="w-9 h-9" />
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-xs font-bold text-white tracking-wide">
-                                    {store.name}
-                                  </p>
-                                  {isSelected && (
-                                    <span className="text-[9px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/15 px-1.5 py-0.2 rounded-full border border-[#2ED5A4]/30">
-                                      ✓ Elegido
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-[#8E91A5] mt-0.5">
-                                  {store.subtitle}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <span className="text-[10px] font-semibold text-[#8E91A5] hidden sm:inline">
-                                {store.badge}
-                              </span>
-                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                                isSelected ? 'border-[#2ED5A4] bg-[#2ED5A4]' : 'border-white/30'
-                              }`}>
-                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#0E0F1A]" />}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    /* Bank Account Option Card */
-                    <div className="p-4 rounded-2xl bg-[#181928] border border-[#2ED5A4]/40 shadow-glow-mint space-y-3">
+                    <div className="p-3 rounded-2xl bg-[#121320] border border-white/5 space-y-2">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4]">
-                            <BankBuildingIcon className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-white">Transferencia SPEI México</p>
-                            <p className="text-[10px] text-[#8E91A5]">Depósito directo a 18 dígitos CLABE o Tarjeta de Débito</p>
-                          </div>
-                        </div>
-                        <span className="text-[9px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/15 px-2 py-0.5 rounded-full border border-[#2ED5A4]/30">
-                          24/7 En Segundos
+                        <span className="text-[10px] uppercase tracking-wider text-[#8E91A5] font-bold">
+                          Sucursal de cobro elegida:
+                        </span>
+                        <span className="text-[10px] text-[#2ED5A4] font-bold">
+                          {CASH_PICKUP_STORES.find((s) => s.id === selectedStore)?.name} ✓
                         </span>
                       </div>
-                      <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-[#8E91A5]">
-                        <span>Válido para BBVA, Banorte, Santander, Azteca, Inbursa y más</span>
-                        <span className="text-[#2ED5A4] font-bold">Sin comisión</span>
+                      <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                        {CASH_PICKUP_STORES.map((store) => {
+                          const isSelected = selectedStore === store.id;
+                          const StoreLogo = store.Logo;
+                          return (
+                            <button
+                              key={store.id}
+                              type="button"
+                              onClick={() => setSelectedStore(store.id)}
+                              className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#181928] border-[#2ED5A4] shadow-sm'
+                                  : 'bg-[#181928]/50 border-white/5 hover:border-white/15'
+                              }`}
+                            >
+                              <div className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center">
+                                <StoreLogo className="w-6 h-6" />
+                              </div>
+                              <span className={`text-[9px] truncate w-full font-bold ${
+                                isSelected ? 'text-[#2ED5A4]' : 'text-white/80'
+                              }`}>
+                                {store.name}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
+                    </div>
+                  ) : deliveryMethod === 'bank' ? (
+                    <div className="p-3.5 rounded-2xl bg-[#121320] border border-white/5 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4]">
+                          <BankBuildingIcon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">Cuenta Bancaria (SPEI)</p>
+                          <p className="text-[10px] text-[#8E91A5]">Depósito directo a 18 dígitos CLABE o Tarjeta en México</p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/15 px-2 py-0.5 rounded-full">
+                        Sin comisión
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="p-3.5 rounded-2xl bg-[#121320] border border-white/5 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4]">
+                          <WalletIcon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">Billetera KIN Cash</p>
+                          <p className="text-[10px] text-[#8E91A5]">Transferencia directa P2P en segundos</p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/15 px-2 py-0.5 rounded-full">
+                        Instantáneo
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {/* ========================================================= */}
-                {/* HOW WILL YOU PAY? (CUADRÍCULA 2X2 CON MONTOS/FEES)         */}
+                {/* HOW WILL YOU PAY? (WESTERN UNION 2X2 GRID WITH FEES)      */}
                 {/* ========================================================= */}
-                <div className="space-y-2">
-                  <span className="text-xs font-semibold text-[#8E91A5] uppercase tracking-wide block px-1">
-                    How will you pay?
-                  </span>
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-semibold text-[#8E91A5] uppercase tracking-wide block">
+                      How will you pay? <sup className="text-[9px] text-[#2ED5A4]">31</sup>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] text-[9px] font-bold">
+                      Pay online ✓
+                    </span>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-2.5">
                     {/* 1. Debit Card */}
@@ -1037,7 +1109,7 @@ export default function MobileApp() {
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-7 h-7 rounded-xl bg-white/5 flex items-center justify-center text-white">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
                           <CardOutlineIcon className="w-4 h-4 text-white" />
                         </div>
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -1047,8 +1119,9 @@ export default function MobileApp() {
                         </span>
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">Debit Card</p>
-                        <p className="text-[10px] text-[#2ED5A4] font-semibold mt-0.5">Fee: $0.00 (Gratis)</p>
+                        <p className="text-xs font-bold text-white">Debit card <sup className="text-[9px] text-[#2ED5A4]">3</sup></p>
+                        <p className="text-[10px] text-[#2ED5A4] font-semibold mt-0.5">Fees² $0.00 USD</p>
+                        <p className="text-[9px] text-[#8E91A5]">0-1 Business days</p>
                       </div>
                     </button>
 
@@ -1063,7 +1136,7 @@ export default function MobileApp() {
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-7 h-7 rounded-xl bg-white/5 flex items-center justify-center text-white">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
                           <ApplePayIcon className="w-4 h-4 text-white" />
                         </div>
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -1074,7 +1147,8 @@ export default function MobileApp() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-white">Apple Pay</p>
-                        <p className="text-[10px] text-[#2ED5A4] font-semibold mt-0.5">Fee: $0.00 (Sin costo)</p>
+                        <p className="text-[10px] text-[#2ED5A4] font-semibold mt-0.5">Fees² $0.00 USD</p>
+                        <p className="text-[9px] text-[#8E91A5]">Instantáneo</p>
                       </div>
                     </button>
 
@@ -1089,7 +1163,7 @@ export default function MobileApp() {
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-7 h-7 rounded-xl bg-white/5 flex items-center justify-center text-white">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
                           <BankBuildingIcon className="w-4 h-4 text-white" />
                         </div>
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -1100,7 +1174,8 @@ export default function MobileApp() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-white">Bank account</p>
-                        <p className="text-[10px] text-[#2ED5A4] font-semibold mt-0.5">Fee: $0.00 (Sin costo)</p>
+                        <p className="text-[10px] text-[#2ED5A4] font-semibold mt-0.5">Fees² $0.00 USD</p>
+                        <p className="text-[9px] text-[#8E91A5]">0-1 Business days</p>
                       </div>
                     </button>
 
@@ -1115,7 +1190,7 @@ export default function MobileApp() {
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-7 h-7 rounded-xl bg-white/5 flex items-center justify-center text-white">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
                           <CreditCardGradientIcon className="w-4 h-4 text-white" />
                         </div>
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -1125,8 +1200,9 @@ export default function MobileApp() {
                         </span>
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">Credit Card</p>
-                        <p className="text-[10px] text-amber-400 font-semibold mt-0.5">Fee: $1.99 (2.9%)</p>
+                        <p className="text-xs font-bold text-white">Credit card</p>
+                        <p className="text-[10px] text-amber-400 font-semibold mt-0.5">Fees² $1.99 USD</p>
+                        <p className="text-[9px] text-[#8E91A5]">0-1 Business days</p>
                       </div>
                     </button>
                   </div>
