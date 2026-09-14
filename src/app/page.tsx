@@ -1208,8 +1208,11 @@ export default function MobileApp() {
                   </div>
                 </div>
 
-                {/* Sticky Bottom Action Bar: Continuar + Monto Total Sumado (Siempre visible en scroll) */}
-                <div className="sticky bottom-18 z-20 -mx-3 px-3 pt-3 pb-2 bg-gradient-to-t from-[#06070B] via-[#06070B]/95 to-[#06070B]/80 backdrop-blur-xl border-t border-white/10 rounded-t-3xl shadow-2xl mt-4">
+                {/* Bottom Spacer so content is never hidden behind the fixed CTA */}
+                <div className="h-28 w-full pointer-events-none" aria-hidden="true" />
+
+                {/* Fixed Bottom Action Bar: Continuar + Monto Total Sumado (SIEMPRE FIJO EN PANTALLA) */}
+                <div className="send-floating-cta">
                   <button
                     type="button"
                     onClick={handleSendNow}
@@ -1483,59 +1486,61 @@ export default function MobileApp() {
       {/* ========================================================================= */}
       {/* FLOATING BOTTOM DOCK (5 ICONS FROM REFERENCE 2)                           */}
       {/* ========================================================================= */}
-      <div className="dock-container">
-        <nav className="dock-bar">
-          {/* 1. Home */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('home')}
-            className={`dock-btn ${activeTab === 'home' ? 'active' : ''}`}
-            title="Home"
-          >
-            <DockHomeIcon className="w-5 h-5" />
-          </button>
+      {activeTab !== 'send' && (
+        <div className="dock-container">
+          <nav className="dock-bar">
+            {/* 1. Home */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('home')}
+              className={`dock-btn ${activeTab === 'home' ? 'active' : ''}`}
+              title="Home"
+            >
+              <DockHomeIcon className="w-5 h-5" />
+            </button>
 
-          {/* 2. Card / Bills */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('bills')}
-            className={`dock-btn ${activeTab === 'bills' ? 'active' : ''}`}
-            title="Bills & Cards"
-          >
-            <DockCardIcon className="w-5 h-5" />
-          </button>
+            {/* 2. Card / Bills */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('bills')}
+              className={`dock-btn ${activeTab === 'bills' ? 'active' : ''}`}
+              title="Bills & Cards"
+            >
+              <DockCardIcon className="w-5 h-5" />
+            </button>
 
-          {/* 3. Send Money */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('send')}
-            className={`dock-btn ${activeTab === 'send' ? 'active' : ''}`}
-            title="Send Money"
-          >
-            <DockSendSparkleIcon className="w-5 h-5" />
-          </button>
+            {/* 3. Send Money */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('send')}
+              className={`dock-btn ${activeTab === 'send' ? 'active' : ''}`}
+              title="Send Money"
+            >
+              <DockSendSparkleIcon className="w-5 h-5" />
+            </button>
 
-          {/* 4. Transactions */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('transactions')}
-            className={`dock-btn ${activeTab === 'transactions' ? 'active' : ''}`}
-            title="Transactions"
-          >
-            <DockAnalyticsIcon className="w-5 h-5" />
-          </button>
+            {/* 4. Transactions */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('transactions')}
+              className={`dock-btn ${activeTab === 'transactions' ? 'active' : ''}`}
+              title="Transactions"
+            >
+              <DockAnalyticsIcon className="w-5 h-5" />
+            </button>
 
-          {/* 5. Profile / Vault */}
-          <button
-            type="button"
-            onClick={() => setShowVaultModal(true)}
-            className="dock-btn"
-            title="ClientVault"
-          >
-            <DockUserIcon className="w-5 h-5" />
-          </button>
-        </nav>
-      </div>
+            {/* 5. Profile / Vault */}
+            <button
+              type="button"
+              onClick={() => setShowVaultModal(true)}
+              className="dock-btn"
+              title="ClientVault"
+            >
+              <DockUserIcon className="w-5 h-5" />
+            </button>
+          </nav>
+        </div>
+      )}
 
       {/* Modals con aislamiento total de capas */}
       <MexicanBillPayModal
