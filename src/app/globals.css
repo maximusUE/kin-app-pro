@@ -215,21 +215,43 @@ html, body {
   color: #FFFFFF;
 }
 
-/* Fixed Bottom Continue CTA for Send Money (Always visible during scroll) */
-.send-floating-cta {
+/* Floating Bottom Continue CTA for Send Money (Truly fixed to viewport, floating over everything) */
+.send-floating-cta-container {
   position: fixed;
-  bottom: 0;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 400px;
+  width: calc(100% - 40px);
+  max-width: 360px;
   z-index: 50;
-  padding: 14px 20px 24px;
-  background: linear-gradient(to top, #06070B 80%, rgba(6, 7, 11, 0.92) 90%, transparent 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.85);
+  pointer-events: auto;
+}
+
+.send-floating-btn {
+  width: 100%;
+  height: 54px;
+  border-radius: 9999px;
+  background-color: #FFFFFF;
+  color: #0E0F1A;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8), 0 0 24px rgba(46, 213, 164, 0.28);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.send-floating-btn:hover {
+  background-color: #F3F4F6;
+  transform: translateY(-1px);
+}
+
+.send-floating-btn:active {
+  transform: scale(0.98);
 }
 
 /* Modal Overlay & Card (Aislamiento Total de Capas y Centrado Absoluto) */

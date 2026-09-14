@@ -46,6 +46,10 @@ import {
   AnyAgentLogo,
   ApplePayIcon,
   CreditCardGradientIcon,
+  DownloadIcon,
+  ShareReceiptIcon,
+  CloseIcon,
+  CheckCircleIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
 import { KinCashP2PModal } from '@/components/KinCashP2PModal';
@@ -200,7 +204,7 @@ export default function MobileApp() {
   const [sendSearch, setSendSearch] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(RECENT_CONTACTS[0]);
   const [amountValue, setAmountValue] = useState('50');
-  const [deliveryMethod, setDeliveryMethod] = useState<'cash' | 'bank'>('cash');
+  const [deliveryMethod, setDeliveryMethod] = useState<'cash' | 'bank' | 'wallet'>('cash');
   const [selectedStore, setSelectedStore] = useState('oxxo');
   const [paymentMethod, setPaymentMethod] = useState<'debit' | 'apple' | 'bank' | 'credit'>('debit');
 
@@ -1208,25 +1212,8 @@ export default function MobileApp() {
                   </div>
                 </div>
 
-                {/* Bottom Spacer so content is never hidden behind the fixed CTA */}
-                <div className="h-28 w-full pointer-events-none" aria-hidden="true" />
-
-                {/* Fixed Bottom Action Bar: Continuar + Monto Total Sumado (SIEMPRE FIJO EN PANTALLA) */}
-                <div className="send-floating-cta">
-                  <button
-                    type="button"
-                    onClick={handleSendNow}
-                    className="w-full h-13 rounded-full bg-white text-[#0E0F1A] font-bold text-sm hover:bg-gray-100 active:scale-95 shadow-xl transition-all flex items-center justify-between px-5 cursor-pointer"
-                  >
-                    <span className="text-sm font-black tracking-wide">Continuar</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black bg-[#0E0F1A]/10 px-2.5 py-1 rounded-full text-[#0E0F1A]">
-                        ${totalToPayUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
-                      </span>
-                      <ArrowRightIcon className="w-4 h-4 text-[#0E0F1A]" />
-                    </div>
-                  </button>
-                </div>
+                {/* Bottom Spacer so content is never hidden behind the floating CTA */}
+                <div className="h-32 w-full pointer-events-none" aria-hidden="true" />
               </>
             )}
           </div>
@@ -1539,6 +1526,27 @@ export default function MobileApp() {
               <DockUserIcon className="w-5 h-5" />
             </button>
           </nav>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* FLOATING ACTION CTA: SEND MONEY CONTINUAR (100% FIJO POR ENCIMA)         */}
+      {/* ========================================================================= */}
+      {activeTab === 'send' && !sendSuccessData && (
+        <div className="send-floating-cta-container">
+          <button
+            type="button"
+            onClick={handleSendNow}
+            className="send-floating-btn"
+          >
+            <span className="text-sm font-black tracking-wide">Continuar</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black bg-[#0E0F1A]/10 px-2.5 py-1 rounded-full text-[#0E0F1A]">
+                ${totalToPayUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+              </span>
+              <ArrowRightIcon className="w-4 h-4 text-[#0E0F1A]" />
+            </div>
+          </button>
         </div>
       )}
 
