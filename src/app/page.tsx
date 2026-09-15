@@ -11,6 +11,7 @@ import {
   SearchIcon,
   SlidersFilterIcon,
   AddMoneyIcon,
+  KinCashCircleIcon,
   BankBuildingIcon,
   PaperPlaneIcon,
   CardOutlineIcon,
@@ -561,17 +562,17 @@ export default function MobileApp() {
             {/* 4 Circular Action Buttons (Orden exacto y arquitectura de Imagen 2) */}
             <div className="pt-2 pb-1">
               <div className="grid grid-cols-4 gap-2">
-                {/* 1. Add Money */}
+                {/* 1. KIN Cash (Anteriormente Add Money) */}
                 <button
                   type="button"
                   onClick={() => setShowKinCashModal(true)}
                   className="flex flex-col items-center gap-1.5 cursor-pointer"
                 >
                   <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-[#2ED5A4] hover:border-[#2ED5A4] hover:bg-[#202236] transition-all shadow-md">
-                    <AddMoneyIcon className="w-6 h-6" />
+                    <KinCashCircleIcon className="w-6 h-6 text-[#2ED5A4]" />
                   </div>
                   <span className="text-[11px] font-semibold text-[#8E91A5] text-center leading-tight">
-                    Add Money
+                    KIN Cash
                   </span>
                 </button>
 
