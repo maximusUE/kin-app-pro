@@ -59,6 +59,10 @@ import {
   PhoneIcon,
   TelevisionIcon,
   WaterDropIcon,
+  QuickLinkIcon,
+  BillPaymentDocIcon,
+  DockWalletIcon,
+  SendQuickIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
 import { KinCashP2PModal } from '@/components/KinCashP2PModal';
@@ -177,7 +181,7 @@ function renderTransactionIcon(tx: TransactionItem) {
 }
 
 export default function MobileApp() {
-  const [activeTab, setActiveTab] = useState<'home' | 'send' | 'bills' | 'transactions'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'send' | 'bills' | 'transactions' | 'wallet'>('home');
 
   // Client profile state
   const [userName, setUserName] = useState('César U.');
@@ -365,6 +369,11 @@ export default function MobileApp() {
   const [selectedBillServiceId, setSelectedBillServiceId] = useState<string>('electricidad');
   const [showKinCashModal, setShowKinCashModal] = useState(false);
   const [showVaultModal, setShowVaultModal] = useState(false);
+  const [showSendQuickModal, setShowSendQuickModal] = useState(false);
+  const [sendQuickAmount, setSendQuickAmount] = useState('50');
+  const [sendQuickSelectedRecipient, setSendQuickSelectedRecipient] = useState<number>(0);
+  const [cardFrozen, setCardFrozen] = useState(false);
+  const [showCardDetails, setShowCardDetails] = useState(false);
 
   // Helper para registrar un envío de dinero y abrir ventanilla de Success
   const handleSendNow = () => {
@@ -409,6 +418,42 @@ export default function MobileApp() {
       deliveryTitle,
       paymentTitle,
     });
+  };
+
+  // Helper para Envío Rápido (Send Quick en 1 solo toque)
+  const handleSendQuick = () => {
+    const amt = parseFloat(sendQuickAmount) || 50;
+    const recipient = RECENT_CONTACTS[sendQuickSelectedRecipient] || RECENT_CONTACTS[0];
+    const txId = 'KIN-QK-' + Math.floor(100000 + Math.random() * 900000);
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    const newTx: TransactionItem = {
+      id: Date.now().toString(),
+      title: `Envío Rápido a ${recipient.name}`,
+      category: 'SPEI Exprés (0 comisiones)',
+      time: `Hoy, ${timeStr}`,
+      amount: -amt,
+      type: 'expense',
+      iconType: 'send',
+    };
+
+    setTransactions((prev) => [newTx, ...prev]);
+    setShowSendQuickModal(false);
+
+    setSendSuccessData({
+      id: txId,
+      amount: amt,
+      fee: 0,
+      totalPaid: amt,
+      recipientName: recipient.name,
+      recipientAvatar: recipient.avatar,
+      time: `${dateStr} a las ${timeStr}`,
+      deliveryTitle: 'SPEI Exprés Inmediato (Banxico)',
+      paymentTitle: 'KIN Balance ($0.00 fee)',
+    });
+    setActiveTab('send');
   };
 
   // Callback de pago de facturas
@@ -573,62 +618,62 @@ export default function MobileApp() {
               </div>
             </header>
 
-            {/* 4 Circular Action Buttons (Orden exacto y arquitectura de Imagen 2) */}
+            {/* 4 Circular Action Buttons (Orden: 1. Send Money, 2. Kin Cash, 3. Send Quick Link, 4. Bill Payments) */}
             <div className="pt-2 pb-1">
               <div className="grid grid-cols-4 gap-2">
-                {/* 1. KIN Cash (Anteriormente Add Money) */}
-                <button
-                  type="button"
-                  onClick={() => setShowKinCashModal(true)}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer"
-                >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-[#2ED5A4] hover:border-[#2ED5A4] hover:bg-[#202236] transition-all shadow-md">
-                    <KinCashCircleIcon className="w-6 h-6 text-[#2ED5A4]" />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] text-center leading-tight">
-                    KIN Cash
-                  </span>
-                </button>
-
-                {/* 2. Send Money */}
+                {/* 1. Send Money */}
                 <button
                   type="button"
                   onClick={() => setActiveTab('send')}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer"
+                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
                 >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white hover:border-[#7047EB] hover:bg-[#202236] transition-all shadow-md">
-                    <PaperPlaneIcon className="w-6 h-6" />
+                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white group-hover:border-[#7047EB] group-hover:bg-[#202236] transition-all shadow-md">
+                    <PaperPlaneIcon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] text-center leading-tight">
+                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
                     Send Money
                   </span>
                 </button>
 
-                {/* 3. To Bank */}
+                {/* 2. Kin Cash */}
                 <button
                   type="button"
-                  onClick={() => alert('Transferencia bancaria SPEI a México')}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer"
+                  onClick={() => setShowKinCashModal(true)}
+                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
                 >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white hover:border-[#2ED5A4] hover:bg-[#202236] transition-all shadow-md">
-                    <BankBuildingIcon className="w-6 h-6" />
+                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-[#2ED5A4] group-hover:border-[#2ED5A4] group-hover:bg-[#202236] transition-all shadow-md">
+                    <KinCashCircleIcon className="w-6 h-6 text-[#2ED5A4]" />
                   </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] text-center leading-tight">
-                    To Bank
+                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
+                    Kin Cash
                   </span>
                 </button>
 
-                {/* 4. Card Limit */}
+                {/* 3. Send Quick */}
                 <button
                   type="button"
-                  onClick={() => setShowVaultModal(true)}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer"
+                  onClick={() => setShowSendQuickModal(true)}
+                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
                 >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white hover:border-[#7047EB] hover:bg-[#202236] transition-all shadow-md">
-                    <CardOutlineIcon className="w-6 h-6" />
+                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white group-hover:border-[#2ED5A4] group-hover:bg-[#202236] transition-all shadow-md">
+                    <SendQuickIcon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] text-center leading-tight">
-                    Card Limit
+                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
+                    Send Quick
+                  </span>
+                </button>
+
+                {/* 4. Bill Payments */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('bills')}
+                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
+                >
+                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white group-hover:border-[#2ED5A4] group-hover:bg-[#202236] transition-all shadow-md">
+                    <BillPaymentDocIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
+                    Bill Payments
                   </span>
                 </button>
               </div>
@@ -1590,10 +1635,220 @@ export default function MobileApp() {
           </div>
         )}
 
+        {/* ========================================================================= */}
+        {/* SCREEN 5: "MY WALLET" (KIN VISA DEBIT CARD & BÓVEDA DE DIVISAS)          */}
+        {/* ========================================================================= */}
+        {activeTab === 'wallet' && (
+          <div className="animate-fade-in space-y-4">
+            {/* Header: < | My Wallet | Shield */}
+            <header className="flex items-center justify-between py-1">
+              <button
+                type="button"
+                onClick={() => setActiveTab('home')}
+                className="btn-circle"
+                title="Volver a Home"
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
+              </button>
+              <div className="text-center">
+                <h1 className="text-base font-bold text-white tracking-wide">My Wallet</h1>
+                <span className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
+                  KIN Digital Vault
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowVaultModal(true)}
+                className="btn-circle"
+                title="Bóveda de Seguridad"
+              >
+                <SettingsGearIcon className="w-5 h-5 text-white" />
+              </button>
+            </header>
+
+            {/* KIN Platinum Debit Card */}
+            <div className={`relative p-5 rounded-3xl bg-gradient-to-br from-[#1C1D2F] via-[#141524] to-[#0A0B12] border transition-all duration-300 shadow-2xl overflow-hidden ${
+              cardFrozen ? 'border-[#FF5555]/40 opacity-75 grayscale-[50%]' : 'border-[#2ED5A4]/30'
+            }`}>
+              {/* Card Ambient Glow */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#2ED5A4]/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#7047EB]/10 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Card Top: KIN Logo & Chip */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#2ED5A4] text-[#06070B] font-black flex items-center justify-center text-sm shadow-md">
+                    K
+                  </div>
+                  <div>
+                    <span className="text-xs font-extrabold text-white tracking-wider block">KIN CARD</span>
+                    <span className="text-[9px] text-[#8E91A5] font-semibold">VISA PLATINUM</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {cardFrozen && (
+                    <span className="px-2 py-0.5 rounded-full bg-[#FF5555]/20 border border-[#FF5555]/40 text-[#FF5555] text-[10px] font-bold">
+                      ❄️ Congelada
+                    </span>
+                  )}
+                  {/* Contactless Waves */}
+                  <svg className="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" d="M8.5 16.5a6 6 0 010-9M12 19a10 10 0 010-14M15.5 21.5a14 14 0 010-19" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Card Chip & Balance */}
+              <div className="my-5 relative z-10 flex items-center justify-between">
+                {/* EMV Chip */}
+                <div className="w-10 h-7 rounded-md bg-gradient-to-tr from-[#D4AF37] via-[#F3E5AB] to-[#AA771C] border border-[#8C6D1F] relative overflow-hidden flex items-center justify-center shadow-inner">
+                  <div className="w-full h-0.5 bg-[#8C6D1F]/50 absolute" />
+                  <div className="h-full w-0.5 bg-[#8C6D1F]/50 absolute" />
+                </div>
+
+                {/* Card Balance */}
+                <div className="text-right">
+                  <span className="text-[10px] text-[#8E91A5] block">Saldo en Tarjeta</span>
+                  <span className="text-lg font-black text-white tracking-tight">
+                    ${netBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-[10px] font-bold text-[#2ED5A4]">USD</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Number & Details */}
+              <div className="relative z-10 pt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-mono font-bold text-white tracking-widest">
+                    {showCardDetails ? '4892  3100  8824  4892' : '••••  ••••  ••••  4892'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowCardDetails(!showCardDetails)}
+                    className="text-[10px] text-[#2ED5A4] hover:underline font-semibold cursor-pointer"
+                  >
+                    {showCardDetails ? 'Ocultar' : 'Revelar'}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between mt-3 text-[10px]">
+                  <div>
+                    <span className="text-[#8E91A5] block uppercase text-[8px] font-bold">Titular</span>
+                    <span className="text-white font-bold tracking-wide">{userName.toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#8E91A5] block uppercase text-[8px] font-bold">Expira</span>
+                    <span className="text-white font-mono font-bold">08/29</span>
+                  </div>
+                  <div>
+                    <span className="text-[#8E91A5] block uppercase text-[8px] font-bold">CVV</span>
+                    <span className="text-white font-mono font-bold">{showCardDetails ? '481' : '•••'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Card Controls (3 Botones Ergonómicos) */}
+            <div className="grid grid-cols-3 gap-2">
+              {/* Congelar */}
+              <button
+                type="button"
+                onClick={() => setCardFrozen(!cardFrozen)}
+                className={`p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer ${
+                  cardFrozen
+                    ? 'bg-[#FF5555]/15 border-[#FF5555]/40 text-[#FF5555]'
+                    : 'bg-[#181928] border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15'
+                }`}
+              >
+                <div className="w-8 h-8 rounded-full bg-[#202236] flex items-center justify-center text-current text-sm">
+                  {cardFrozen ? '❄️' : '🔒'}
+                </div>
+                <span className="text-[11px] font-bold leading-tight">
+                  {cardFrozen ? 'Descongelar' : 'Congelar'}
+                </span>
+              </button>
+
+              {/* Ver PIN */}
+              <button
+                type="button"
+                onClick={() => alert('Tu PIN de cajero es: 4892 (Encriptado con FaceID)')}
+                className="p-3 rounded-2xl bg-[#181928] border border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#202236] flex items-center justify-center text-white text-sm">
+                  🔑
+                </div>
+                <span className="text-[11px] font-bold text-white leading-tight">
+                  Ver PIN
+                </span>
+              </button>
+
+              {/* Límite */}
+              <button
+                type="button"
+                onClick={() => alert('Límite diario actual: $5,000.00 USD')}
+                className="p-3 rounded-2xl bg-[#181928] border border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#202236] flex items-center justify-center text-white text-sm">
+                  ⚙️
+                </div>
+                <span className="text-[11px] font-bold text-white leading-tight">
+                  Límites
+                </span>
+              </button>
+            </div>
+
+            {/* Desglose de Balances (USD & MXN) */}
+            <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3">
+              <span className="text-xs font-bold text-[#8E91A5] uppercase tracking-wider block">
+                Bóvedas de Divisas
+              </span>
+
+              <div className="space-y-2">
+                <div className="p-3 rounded-2xl bg-[#0E0F1A] border border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white font-bold text-xs">
+                      🇺🇸
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Billetera USD</p>
+                      <p className="text-[10px] text-[#8E91A5]">Cuenta principal KIN</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-white">
+                      ${netBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[10px] text-[#2ED5A4] font-semibold">USD Activo</p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-[#0E0F1A] border border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white font-bold text-xs">
+                      🇲🇽
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Bóveda SPEI MXN</p>
+                      <p className="text-[10px] text-[#8E91A5]">Tipo de cambio $20.45 MXN/USD</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-white">
+                      ${(netBalance * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[10px] text-[#8E91A5] font-semibold">MXN Equivalente</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* ========================================================================= */}
-      {/* FLOATING BOTTOM DOCK (5 ICONS FROM REFERENCE 2)                           */}
+      {/* FLOATING BOTTOM DOCK: HOME, WALLET, SEND, TRANSACTIONS, MY PROFILE        */}
       {/* ========================================================================= */}
       {activeTab !== 'send' && (
         <div className="dock-container">
@@ -1608,14 +1863,14 @@ export default function MobileApp() {
               <DockHomeIcon className="w-5 h-5" />
             </button>
 
-            {/* 2. Card / Bills */}
+            {/* 2. My Wallet */}
             <button
               type="button"
-              onClick={() => setActiveTab('bills')}
-              className={`dock-btn ${activeTab === 'bills' ? 'active' : ''}`}
-              title="Bills & Cards"
+              onClick={() => setActiveTab('wallet')}
+              className={`dock-btn ${activeTab === 'wallet' ? 'active' : ''}`}
+              title="My Wallet"
             >
-              <DockCardIcon className="w-5 h-5" />
+              <DockWalletIcon className="w-5 h-5" />
             </button>
 
             {/* 3. Send Money */}
@@ -1638,12 +1893,12 @@ export default function MobileApp() {
               <DockAnalyticsIcon className="w-5 h-5" />
             </button>
 
-            {/* 5. Profile / Vault */}
+            {/* 5. My Profile */}
             <button
               type="button"
               onClick={() => setShowVaultModal(true)}
               className="dock-btn"
-              title="ClientVault"
+              title="My Profile"
             >
               <DockUserIcon className="w-5 h-5" />
             </button>
@@ -2023,6 +2278,130 @@ export default function MobileApp() {
               className="auth-btn-cta active mt-3"
             >
               Guardar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: SEND QUICK (ENVÍO RÁPIDO EN 1 TOQUE)                               */}
+      {/* ========================================================================= */}
+      {showSendQuickModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-[#0E0F1A] border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white">
+                  <SendQuickIcon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Send Quick (Envío Rápido)</h3>
+                  <p className="text-[10px] text-[#8E91A5]">Envío exprés SPEI a México en 1 solo toque</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSendQuickModal(false)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Selector de Contacto Rápido */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-bold text-[#8E91A5] uppercase tracking-wider block">
+                Selecciona Destinatario
+              </span>
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-1 no-scrollbar">
+                {RECENT_CONTACTS.map((c, idx) => {
+                  const isSelected = sendQuickSelectedRecipient === idx;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSendQuickSelectedRecipient(idx)}
+                      className={`flex flex-col items-center gap-1 p-2 rounded-2xl border transition-all flex-shrink-0 cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#2ED5A4]/15 border-[#2ED5A4] text-white'
+                          : 'bg-[#181928] border-white/5 text-[#8E91A5] hover:text-white'
+                      }`}
+                      style={{ minWidth: '72px' }}
+                    >
+                      <div className="relative">
+                        <img
+                          src={c.photoUrl}
+                          alt={c.name}
+                          className="w-9 h-9 rounded-full object-cover border border-white/10"
+                        />
+                        {isSelected && (
+                          <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center text-[#06070B] text-[8px] font-black">
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-bold truncate max-w-[64px]">
+                        {c.name.split(' ')[0]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Selector de Monto Rápido */}
+            <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/5 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-[#8E91A5] uppercase tracking-wider block">
+                  Monto a Enviar (USD)
+                </span>
+                <span className="text-[10px] text-[#2ED5A4] font-semibold">
+                  Tasa: $20.45 MXN/USD
+                </span>
+              </div>
+
+              {/* Botones de montos rápidos */}
+              <div className="grid grid-cols-4 gap-1.5">
+                {['25', '50', '100', '200'].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setSendQuickAmount(val)}
+                    className={`py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      sendQuickAmount === val
+                        ? 'bg-[#2ED5A4] text-[#06070B] shadow-sm'
+                        : 'bg-[#202236] text-white hover:bg-[#2B2C42]'
+                    }`}
+                  >
+                    ${val}
+                  </button>
+                ))}
+              </div>
+
+              {/* Input personalizado */}
+              <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                <span className="text-base font-black text-white">$</span>
+                <input
+                  type="number"
+                  placeholder="Otro monto..."
+                  value={sendQuickAmount}
+                  onChange={(e) => setSendQuickAmount(e.target.value)}
+                  className="w-full bg-transparent text-white font-bold text-base focus:outline-none placeholder-[#8E91A5]/40"
+                />
+                <span className="text-xs font-bold text-[#8E91A5] flex-shrink-0">
+                  ≈ ${((parseFloat(sendQuickAmount) || 0) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+                </span>
+              </div>
+            </div>
+
+            {/* Botón de Enviar Rápido */}
+            <button
+              type="button"
+              onClick={handleSendQuick}
+              className="w-full py-3.5 rounded-2xl bg-[#2ED5A4] text-[#06070B] font-black text-sm flex items-center justify-center gap-2 shadow-lg hover:brightness-110 cursor-pointer transition-all active:scale-[0.98]"
+            >
+              <span>⚡ Enviar ${parseFloat(sendQuickAmount) || 50} USD al Instante</span>
+              <ArrowRightIcon className="w-4 h-4 text-[#06070B]" />
             </button>
           </div>
         </div>
