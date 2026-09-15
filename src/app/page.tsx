@@ -56,6 +56,9 @@ import {
   ChevronDownIcon,
   UserPlusIcon,
   TrashIcon,
+  PhoneIcon,
+  TelevisionIcon,
+  WaterDropIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
 import { KinCashP2PModal } from '@/components/KinCashP2PModal';
@@ -108,6 +111,16 @@ const CASH_PICKUP_STORES = [
     badge: 'Recomendado',
     Logo: AnyAgentLogo,
   },
+];
+
+// 6 Opciones para pagar bills en el orden exacto requerido: Electricidad, Telefono, Internet, Television, Agua, Gas
+const BILL_SERVICES = [
+  { id: 'electricidad', name: 'Electricidad', Icon: LightningIcon },
+  { id: 'telefono', name: 'Telefono', Icon: PhoneIcon },
+  { id: 'internet', name: 'Internet', Icon: WifiIcon },
+  { id: 'television', name: 'Television', Icon: TelevisionIcon },
+  { id: 'agua', name: 'Agua', Icon: WaterDropIcon },
+  { id: 'gas', name: 'Gas', Icon: FlameIcon },
 ];
 
 // Avatares de la referencia (Sophia, David, Liam, Maria, Mike)
@@ -349,6 +362,7 @@ export default function MobileApp() {
 
   // Modals
   const [showBillPayModal, setShowBillPayModal] = useState(false);
+  const [selectedBillServiceId, setSelectedBillServiceId] = useState<string>('electricidad');
   const [showKinCashModal, setShowKinCashModal] = useState(false);
   const [showVaultModal, setShowVaultModal] = useState(false);
 
@@ -1370,77 +1384,52 @@ export default function MobileApp() {
               <div className="w-10" />
             </header>
 
-            {/* 4 Quick Category Circles (Gas, Electricity, Internet, More) */}
-            <div className="grid grid-cols-4 gap-2 pt-1">
-              <button
-                onClick={() => setShowBillPayModal(true)}
-                className="flex flex-col items-center gap-1.5"
-              >
-                <div className="w-12 h-12 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white hover:border-[#7047EB]">
-                  <FlameIcon className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] text-[#8E91A5]">Gas</span>
-              </button>
+            {/* Opciones para pagar bills: Desplazables de izquierda a derecha (Estilo Recent) */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-bold text-[#8E91A5] uppercase tracking-wider">
+                  Pagar Servicios
+                </span>
+                <span className="text-[10px] text-[#2ED5A4] font-semibold flex items-center gap-1">
+                  <span>Desliza</span>
+                  <span>← →</span>
+                </span>
+              </div>
 
-              <button
-                onClick={() => setShowBillPayModal(true)}
-                className="flex flex-col items-center gap-1.5"
-              >
-                <div className="w-12 h-12 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white hover:border-[#7047EB]">
-                  <LightningIcon className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] text-[#8E91A5]">Electricity</span>
-              </button>
-
-              <button
-                onClick={() => setShowBillPayModal(true)}
-                className="flex flex-col items-center gap-1.5"
-              >
-                <div className="w-12 h-12 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white hover:border-[#7047EB]">
-                  <WifiIcon className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] text-[#8E91A5]">Internet</span>
-              </button>
-
-              <button
-                onClick={() => setShowBillPayModal(true)}
-                className="flex flex-col items-center gap-1.5"
-              >
-                <div className="w-12 h-12 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white hover:border-[#7047EB]">
-                  <FourSquaresIcon className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] text-[#8E91A5]">More</span>
-              </button>
-            </div>
-
-            {/* All Categories (2x3 Grid from Image 2) */}
-            <div>
-              <h3 className="text-xs font-bold text-white mb-2.5 px-1">
-                All Categories
-              </h3>
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { name: 'Landline', icon: <PhoneLandlineIcon className="w-5 h-5 text-white/90" /> },
-                  { name: 'Education', icon: <GraduationCapIcon className="w-5 h-5 text-white/90" /> },
-                  { name: 'Credit card', icon: <CardOutlineIcon className="w-5 h-5 text-white/90" /> },
-                  { name: 'Municipal Tax', icon: <BankBuildingIcon className="w-5 h-5 text-white/90" /> },
-                  { name: 'Rent', icon: <HouseRentIcon className="w-5 h-5 text-white/90" /> },
-                  { name: 'Hospital', icon: <HospitalCrossIcon className="w-5 h-5 text-white/90" /> },
-                ].map((cat, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setShowBillPayModal(true)}
-                    className="p-3.5 rounded-2xl bg-[#181928] border border-white/5 flex flex-col items-center justify-center gap-2 hover:border-white/20 active:scale-95 transition-all"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-[#222338] flex items-center justify-center">
-                      {cat.icon}
-                    </div>
-                    <span className="text-[10px] font-semibold text-[#8E91A5] text-center leading-tight">
-                      {cat.name}
-                    </span>
-                  </button>
-                ))}
+              {/* Fila desplazable con toque y arrastre (Touch & Hold horizontal scroll) */}
+              <div className="flex items-center gap-3.5 overflow-x-auto pb-2 pt-1 scrollbar-hide select-none cursor-grab active:cursor-grabbing">
+                {BILL_SERVICES.map((serv) => {
+                  const isSelected = selectedBillServiceId === serv.id;
+                  const Icon = serv.Icon;
+                  return (
+                    <button
+                      key={serv.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedBillServiceId(serv.id);
+                        setShowBillPayModal(true);
+                      }}
+                      className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group"
+                    >
+                      <div
+                        className={`w-13 h-13 rounded-full flex items-center justify-center transition-all shadow-md ${
+                          isSelected
+                            ? 'border-2 border-[#2ED5A4] bg-[#2ED5A4]/15 shadow-glow-mint scale-105 text-[#2ED5A4]'
+                            : 'border border-white/10 bg-[#181928] text-white hover:border-[#2ED5A4] hover:bg-[#202236]'
+                        }`}
+                      >
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <span
+                        className={`text-[11px] font-semibold transition-colors text-center ${
+                          isSelected ? 'text-[#2ED5A4]' : 'text-[#8E91A5] group-hover:text-white'
+                        }`}
+                      >
+                        {serv.name}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -1688,6 +1677,7 @@ export default function MobileApp() {
         isOpen={showBillPayModal}
         onClose={() => setShowBillPayModal(false)}
         onPaymentSuccess={handleBillPaymentSuccess}
+        selectedServiceId={selectedBillServiceId}
       />
       <KinCashP2PModal
         isOpen={showKinCashModal}

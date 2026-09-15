@@ -1,25 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CloseIcon, ZapIcon, CheckCircleIcon } from './Icons';
 
 interface MexicanBillPayModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPaymentSuccess?: (service: string, amountMXN: number) => void;
+  selectedServiceId?: string;
 }
 
 const SERVICIOS_MEXICO = [
-  { id: 'cfe', nombre: 'CFE (Luz)', icono: '⚡', placeholder: 'Número de servicio (30 dígitos)' },
-  { id: 'telmex', nombre: 'Telmex', icono: '☎️', placeholder: 'Teléfono a 10 dígitos o Referencia' },
-  { id: 'totalplay', nombre: 'Totalplay', icono: '🌐', placeholder: 'Número de cuenta Totalplay' },
-  { id: 'izzi', nombre: 'Izzi Telecom', icono: '📺', placeholder: 'Número de referencia Izzi' },
-  { id: 'telcel', nombre: 'Telcel Paquetes', icono: '📱', placeholder: 'Número celular a 10 dígitos' },
+  { id: 'electricidad', nombre: 'CFE (Electricidad)', icono: '⚡', placeholder: 'Número de servicio (30 dígitos)' },
+  { id: 'telefono', nombre: 'Telmex (Teléfono)', icono: '☎️', placeholder: 'Teléfono a 10 dígitos o Referencia' },
+  { id: 'internet', nombre: 'Totalplay (Internet)', icono: '🌐', placeholder: 'Número de cuenta Totalplay' },
+  { id: 'television', nombre: 'Izzi (Televisión)', icono: '📺', placeholder: 'Número de referencia Izzi' },
   { id: 'agua', nombre: 'Agua SACMEX', icono: '💧', placeholder: 'Número de cuenta o medidor' },
+  { id: 'gas', nombre: 'Naturgy (Gas)', icono: '🔥', placeholder: 'Número de cliente o cuenta' },
 ];
 
-export function MexicanBillPayModal({ isOpen, onClose, onPaymentSuccess }: MexicanBillPayModalProps) {
+export function MexicanBillPayModal({ isOpen, onClose, onPaymentSuccess, selectedServiceId }: MexicanBillPayModalProps) {
   const [servicioSeleccionado, setServicioSeleccionado] = useState(SERVICIOS_MEXICO[0]);
+
+  useEffect(() => {
+    if (selectedServiceId) {
+      const found = SERVICIOS_MEXICO.find((s) => s.id === selectedServiceId);
+      if (found) {
+        setServicioSeleccionado(found);
+      }
+    }
+  }, [selectedServiceId, isOpen]);
   const [referencia, setReferencia] = useState('');
   const [montoMXN, setMontoMXN] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);

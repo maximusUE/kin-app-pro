@@ -594,6 +594,27 @@ export function TrashIcon({ className = 'w-5 h-5' }: { className?: string }) {
   );
 }
 
+export function TelevisionIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+      <rect x="2.5" y="4.5" width="19" height="13" rx="2" stroke="currentColor" strokeWidth="1.75" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.5 20.5h7m-3.5-3v3" />
+    </svg>
+  );
+}
+
+export function WaterDropIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 2.75c-3.75 4.75-7 8.5-7 12a7 7 0 1014 0c0-3.5-3.25-7.25-7-12z"
+      />
+    </svg>
+  );
+}
+
 
 
 
