@@ -3,8 +3,8 @@ import 'dotenv/config';
 
 import { Telegraf, Markup } from 'telegraf';
 import { google } from 'googleapis';
-import { processApprovedRow } from './contentFactoryWorker.ts';
-import type { ProductionMode } from './contentFactoryWorker.ts';
+import { processApprovedRow } from './contentFactoryWorker';
+import type { ProductionMode } from './contentFactoryWorker';
 
 console.log("🤖 Iniciando Oyente de Telegram...");
 

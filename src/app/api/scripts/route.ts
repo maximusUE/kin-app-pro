@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getScriptsInReview } from '../../../scripts/contentFactoryWorker.ts';
+import { getScriptsInReview } from '../../../scripts/contentFactoryWorker';
 
 export const dynamic = 'force-dynamic';
 

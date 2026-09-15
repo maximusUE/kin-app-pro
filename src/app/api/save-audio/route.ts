@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { sheets, SPREADSHEET_ID } from '../../../scripts/contentFactoryWorker.ts';
+import { sheets, SPREADSHEET_ID } from '../../../scripts/contentFactoryWorker';
 
 const execPromise = promisify(exec);
 

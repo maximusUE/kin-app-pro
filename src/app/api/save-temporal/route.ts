@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateScriptInSheet, updateScriptStateInSheet } from '../../../scripts/contentFactoryWorker.ts';
+import { updateScriptInSheet, updateScriptStateInSheet } from '../../../scripts/contentFactoryWorker';
 
 export async function POST(request: Request) {
   try {

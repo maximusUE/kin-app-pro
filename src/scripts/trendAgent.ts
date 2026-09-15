@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { sheets, SPREADSHEET_ID, geminiGenerate } from './contentFactoryWorker.ts';
+import { sheets, SPREADSHEET_ID, geminiGenerate } from './contentFactoryWorker';
 
 interface RedditPost {
   title: string;

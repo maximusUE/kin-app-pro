@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import * as cheerio from 'cheerio';
-import { sheets, SPREADSHEET_ID, geminiGenerate, processApprovedRow } from './contentFactoryWorker.ts';
+import { sheets, SPREADSHEET_ID, geminiGenerate, processApprovedRow } from './contentFactoryWorker';
 
 async function fetchArticle(url: string): Promise<string> {
   console.log(`🌐 Extrayendo mega-artículo desde: ${url}`);

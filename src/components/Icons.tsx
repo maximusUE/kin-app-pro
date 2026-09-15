@@ -615,6 +615,14 @@ export function WaterDropIcon({ className = 'w-5 h-5' }: { className?: string })
   );
 }
 
+export function DocumentScanIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 7.5V4.5a.75.75 0 01.75-.75h3M16.5 3.75h3a.75.75 0 01.75.75v3M20.25 16.5v3a.75.75 0 01-.75.75h-3M7.5 20.25h-3a.75.75 0 01-.75-.75v-3M3 12h18" />
+    </svg>
+  );
+}
+
 
 
 

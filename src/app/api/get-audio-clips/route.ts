@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { sheets, SPREADSHEET_ID } from '../../../scripts/contentFactoryWorker.ts';
+import { sheets, SPREADSHEET_ID } from '../../../scripts/contentFactoryWorker';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {

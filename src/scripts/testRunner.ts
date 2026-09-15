@@ -1,4 +1,4 @@
-import { runContentFactory } from './contentFactoryWorker.ts';
+import { runContentFactory } from './contentFactoryWorker';
 import * as dotenv from 'dotenv';
 
 dotenv.config();

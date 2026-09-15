@@ -1622,7 +1622,7 @@ export default function MobileApp() {
             <button
               type="button"
               onClick={() => setActiveTab('send')}
-              className={`dock-btn ${activeTab === 'send' ? 'active' : ''}`}
+              className={`dock-btn ${(activeTab as string) === 'send' ? 'active' : ''}`}
               title="Send Money"
             >
               <DockSendSparkleIcon className="w-5 h-5" />
