@@ -60,20 +60,32 @@ El usuario final va a realizar **pruebas integrales de punta a punta (End-to-End
 | `/api/spei/transfer` | `POST` | Ejecuta envío SPEI: valida CLABE 18 dígitos, verifica límites AML Tier 1/2, descuenta saldo, genera Clave de Rastreo de 24 caracteres y comprobante CEP. |
 | `/api/bills/pay` | `POST` | Paga recibos (CFE, Telmex, etc.): valida referencia, descuenta balance en USD, emite folio fiscal SAT CFDI 4.0 UUID y comprobante instantáneo. |
 | `/api/kin-cash/send` | `POST` | Envío P2P en tiempo real a teléfono o @tag KIN con confirmación inmediata. |
+| `/api/contacts` | `GET` / `POST` / `DELETE` | Gestión de contactos y beneficiarios reales del usuario (creación, edición y eliminación de contactos desde cero). |
 | `/api/kyc/verify` | `POST` | Procesa imagen de documento (INE/Pasaporte) mediante la SDK `@google/generative-ai` y valida identidad. |
 
 ---
 
-## 4. 💾 MOTOR DE PERSISTENCIA Y ESTADO
-Para garantizar que las pruebas del usuario no se reinicien al recargar la página:
-* Implementar un almacén local transaccional seguro y thread-safe (`src/lib/server/db.ts`).
-* Persistencia automática en archivo local (`data/kin_db.json`) para mantener usuarios registrados, saldos actualizados y el historial de transacciones.
-* Pre-inicialización con datos semilla (cuentas demo y contactos clave como Mamá Rosa, Carlos M., etc.) sin sobreescribir los nuevos clientes registrados.
+## 4. ☁️ BASE DE DATOS OFICIAL: GOOGLE FIREBASE (FIRESTORE & AUTH)
+**La base de datos oficial del proyecto está establecida en Google Firebase (Cloud Firestore)**:
+* **Colecciones Principales en Firestore:**
+  1. `users/{userId}`: Documento principal del perfil de cliente (nombre, email, teléfono, balanceUSD, kycTier, limits, clientId, memberSince).
+  2. `users/{userId}/contacts/{contactId}`: Beneficiarios reales registrados por el cliente (comenzando en blanco, sin contactos ficticios de demo).
+  3. `users/{userId}/transactions/{txId}`: Ledger contable inmutable con `claveRastreoBanxico`, folios fiscales `satFolioFiscalUuid`, montos y marcas de tiempo.
+  4. `users/{userId}/vault/{docId}`: Metadatos y blobs cifrados Zero-Knowledge AES-GCM-256 de ClientVault.
+* **Capa de Conexión & Resiliencia:**
+  - Integración mediante Google Cloud / Firebase Service Account (`bot-hojas@robot-codigo-propio.iam.gserviceaccount.com`).
+  - Cache local resiliente de alta disponibilidad (`data/kin_db.json`) sincronizado con Firebase para garantizar cero latencia y tolerancia a fallos offline en testing.
 
 ---
 
-## 5. 🚀 CRITERIOS DE ACEPTACIÓN INMEDIATA
+## 5. 🧹 POLÍTICA DE DATOS LIMPIOS (CLEAN SLATE)
+* **Cero Contactos Ficticios:** La lista de contactos debe iniciar en `0` (vacía). Cada registro que aparezca en el dashboard debe ser creado voluntariamente por el usuario durante sus pruebas.
+* **Cero Transacciones Basura:** El historial inicia limpio para el nuevo usuario registrado, mostrando únicamente su saldo de bienvenida y los registros que él mismo vaya ejecutando.
+
+---
+
+## 6. 🚀 CRITERIOS DE ACEPTACIÓN INMEDIATA
 1. **Compilación Limpia:** Ejecutar `npx tsc --noEmit` y asegurar **0 errores**.
-2. **Registro Real:** Un nuevo usuario debe poder ingresar sus datos en la pantalla de registro, recibir confirmación y entrar directamente al dashboard con su nombre, correo y saldo real disponible.
-3. **Descuento de Saldos:** Al realizar un SPEI o pagar un recibo de luz/teléfono, el saldo en el dashboard debe descontarse inmediatamente y la transacción debe aparecer en el historial superior.
-4. **Respuestas HTTP Estándar:** Todas las APIs deben retornar JSON con `{ success: boolean, data?: any, error?: string }` y códigos HTTP 200, 400, o 401 según corresponda.
+2. **Registro Real y Limpio:** Un nuevo usuario debe poder ingresar sus datos en la pantalla de registro, entrar al dashboard limpio con su saldo real y 0 contactos ficticios.
+3. **Agregar Contactos Reales:** El usuario debe poder dar clic en "+ Agregar Contacto", guardar sus datos reales, y ver cómo se registran inmediatamente en el backend y aparecen en la lista.
+4. **Descuento de Saldos:** Al realizar un SPEI o pagar un recibo, el saldo en el dashboard debe descontarse inmediatamente y la transacción debe aparecer en el historial superior.

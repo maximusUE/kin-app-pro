@@ -73,48 +73,8 @@ interface DatabaseSchema {
 
 const DB_FILE_PATH = path.join(process.cwd(), 'data', 'kin_db.json');
 
-// Default initial seed data
-const DEFAULT_CONTACTS: ContactRecord[] = [
-  {
-    id: 'c-1',
-    userId: 'user-001',
-    name: 'Mamá Rosa',
-    fullName: 'Rosa Urrutia Eligio',
-    avatar: '👵🏼',
-    role: 'Madre',
-    country: 'Mexico',
-    bank: 'BBVA Bancomer',
-    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDfWoyqADTVEY7wzVYvA5Am2cRLe9UqqlxItL5rRfyOfGOgaZvRD_Vy83WhbHwKpWcy9_NfrGKHsxjFy9Kwj6hC63A19nmfzA5uAUSVR77E85NpgSYMWb0BHfU2lK8kjhl2n4SMty-l71mKGgBP0PoDX7Qjsvhx16YJABIAQIKqPf3YBwRG9U3aE-4C7wVebP_s2LOjcyoPJzBF-vCsf77mTiwvVcp9ge47WoxxWEE-sGtM1L-9vcwy',
-    clabe: '012180004455829104',
-    phone: '+52 33 1948 2019',
-  },
-  {
-    id: 'c-2',
-    userId: 'user-001',
-    name: 'Carlos M.',
-    fullName: 'Carlos Mendoza Ramos',
-    avatar: '👨🏻',
-    role: 'Hermano',
-    country: 'Mexico',
-    bank: 'BanCoppel',
-    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnEWVM8pkwawuEjRXXK5AIPh_yinAPMMpV9kIcTdgToBOlYJ5pCjU2IQ9cHNzvE4kjoWKI3i-cV4g34FSXVCXpj1EoS885IuMRkpcH88TwbmG_1gCLAesV9s96VY_Y079DOXS2uaqfD2kBhZk-y699KkIIYLAECB9ps8V0vsWEyIvAJndsa4OQ245xdq7VM8Fk83ZrWrmmZkCKvyskZcefEHq1SKiefseEFfZ1iI3okObu0mDOVPOO',
-    clabe: '137180102948201923',
-    phone: '+52 81 8392 0192',
-  },
-  {
-    id: 'c-3',
-    userId: 'user-001',
-    name: 'Sofia R.',
-    fullName: 'Sofia Ramos Eligio',
-    avatar: '👩🏻',
-    role: 'Hermana',
-    country: 'Mexico',
-    bank: 'Banco Azteca',
-    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4Z_rr1KAC4c0PCx9Rbflq6njX2wPQpJMsH9rFm7-kA9EgJzmJL4zNUr3nCPLHqoYoYE_vdejqgmYHmS58f121a_y3AlNJ9jhq1hhVNxWEZvJk4H6wBY-OYf4uufwjqs79uEPh_8sUe_IBdww7sX4BZkFEuUTg5Qh1eaz_93J_Uh3kzZ0-IH8EKAk7eU_E1c20U3A79oJ-DBQq7j_4jKqSWJ39DmDB0hi2bI3PYjTpQaFtXKHW1fsW',
-    clabe: '127180001092837482',
-    phone: '+52 55 4920 1823',
-  },
-];
+// Default initial seed data (Clean Slate: 0 contactos ficticios, 0 transacciones ficticias)
+const DEFAULT_CONTACTS: ContactRecord[] = [];
 
 const DEFAULT_USERS: UserProfile[] = [
   {
@@ -128,86 +88,23 @@ const DEFAULT_USERS: UserProfile[] = [
     state: 'California',
     zip: '90210',
     country: 'Estados Unidos 🇺🇸',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnEWVM8pkwawuEjRXXK5AIPh_yinAPMMpV9kIcTdgToBOlYJ5pCjU2IQ9cHNzvE4kjoWKI3i-cV4g34FSXVCXpj1EoS885IuMRkpcH88TwbmG_1gCLAesV9s96VY_Y079DOXS2uaqfD2kBhZk-y699KkIIYLAECB9ps8V0vsWEyIvAJndsa4OQ245xdq7VM8Fk83ZrWrmmZkCKvyskZcefEHq1SKiefseEFfZ1iI3okObu0mDOVPOO',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
     clientId: 'KIN-US-892401',
-    memberSince: '14 Sep 2024',
+    memberSince: '19 Sep 2026',
     docType: 'Pasaporte Oficial USA',
     docNumber: '••••••••8492',
     kycTier: 'Tier 2 (Identidad Oficial Verificada)',
     dailyLimit: '$3,000.00 USD / día',
     dailyLimitUSD: 3000,
     monthlyLimitUSD: 5000,
-    balanceUSD: 2450.00,
+    balanceUSD: 1000.00,
     passwordHash: 'KinVault2025$Secure',
     biometricsEnabled: true,
     pushNotificationsEnabled: true,
   },
 ];
 
-const DEFAULT_TRANSACTIONS: TransactionRecord[] = [
-  {
-    id: 'tx-001',
-    userId: 'user-001',
-    title: 'Mamá Rosa (Guadalajara)',
-    category: 'OXXO Cash Pickup',
-    time: 'Hace 12 mins',
-    dateGroup: 'Hoy',
-    amount: -250.00,
-    amountMXN: 5112.50,
-    type: 'expense',
-    iconType: 'send',
-    status: 'Completado',
-    refNumber: 'OXXO-948210',
-    claveRastreoBanxico: 'KIN2026091919100094821000',
-    createdAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'tx-002',
-    userId: 'user-001',
-    title: 'CFE Electric (Monterrey)',
-    category: 'Pago de Servicio',
-    time: 'Hoy 8:15 AM',
-    dateGroup: 'Hoy',
-    amount: -48.20,
-    amountMXN: 985.69,
-    type: 'expense',
-    iconType: 'luz',
-    status: 'Completado',
-    refNumber: 'CFE-382910',
-    satFolioFiscalUuid: '8F9B2C4D-E5A1-42C9-8F7B-9E3A1D0F8C2E',
-    createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'tx-003',
-    userId: 'user-001',
-    title: 'Kin Cash from Javier Ruiz',
-    category: 'Instant P2P',
-    time: 'Ayer',
-    dateGroup: 'Ayer',
-    amount: 75.00,
-    amountMXN: 1533.75,
-    type: 'income',
-    iconType: 'wallet',
-    status: 'Completado',
-    refNumber: 'KIN-552194',
-    createdAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'tx-004',
-    userId: 'user-001',
-    title: 'Payroll Deposit (Austin Tech)',
-    category: 'ACH Direct Deposit',
-    time: 'Hace 3 días',
-    dateGroup: 'Esta semana',
-    amount: 1850.00,
-    amountMXN: 37832.50,
-    type: 'income',
-    iconType: 'bank',
-    status: 'Completado',
-    refNumber: 'ACH-881023',
-    createdAt: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
-  },
-];
+const DEFAULT_TRANSACTIONS: TransactionRecord[] = [];
 
 // In-Memory cache
 let inMemoryDb: DatabaseSchema | null = null;
@@ -222,21 +119,21 @@ function loadDatabase(): DatabaseSchema {
       if (!inMemoryDb?.users) {
         inMemoryDb = {
           users: DEFAULT_USERS,
-          transactions: DEFAULT_TRANSACTIONS,
-          contacts: DEFAULT_CONTACTS,
+          transactions: [],
+          contacts: [],
         };
         saveDatabase(inMemoryDb);
       }
       return inMemoryDb!;
     }
   } catch (err) {
-    console.warn('[DB] Failed to read db file, falling back to initial data', err);
+    console.warn('[DB] Failed to read db file, falling back to clean data', err);
   }
 
   inMemoryDb = {
     users: DEFAULT_USERS,
-    transactions: DEFAULT_TRANSACTIONS,
-    contacts: DEFAULT_CONTACTS,
+    transactions: [],
+    contacts: [],
   };
   saveDatabase(inMemoryDb);
   return inMemoryDb;
@@ -301,7 +198,7 @@ export function registerNewUser(params: {
     state: 'Texas',
     zip: '78201',
     country: 'Estados Unidos 🇺🇸',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnEWVM8pkwawuEjRXXK5AIPh_yinAPMMpV9kIcTdgToBOlYJ5pCjU2IQ9cHNzvE4kjoWKI3i-cV4g34FSXVCXpj1EoS885IuMRkpcH88TwbmG_1gCLAesV9s96VY_Y079DOXS2uaqfD2kBhZk-y699KkIIYLAECB9ps8V0vsWEyIvAJndsa4OQ245xdq7VM8Fk83ZrWrmmZkCKvyskZcefEHq1SKiefseEFfZ1iI3okObu0mDOVPOO',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
     clientId,
     memberSince: nowStr,
     docType: 'INE / Pasaporte en Trámite',
@@ -310,54 +207,67 @@ export function registerNewUser(params: {
     dailyLimit: '$300.00 USD / día',
     dailyLimitUSD: 300,
     monthlyLimitUSD: 750,
-    balanceUSD: 1000.00, // Bono de bienvenida para pruebas inmediatas del usuario
+    balanceUSD: 1000.00, // Saldo de bienvenida para pruebas inmediatas
     passwordHash: params.password || 'KinVault2025$Secure',
     biometricsEnabled: true,
     pushNotificationsEnabled: true,
   };
 
   db.users.push(newUser);
-
-  // Bienvenida en ledger
-  const welcomeTx: TransactionRecord = {
-    id: `tx-wel-${Date.now()}`,
-    userId: newId,
-    title: 'Bono de Bienvenida KIN',
-    category: 'Depósito Inicial de Prueba',
-    time: 'Hoy',
-    dateGroup: 'Hoy',
-    amount: 1000.00,
-    amountMXN: 20450.00,
-    type: 'income',
-    iconType: 'wallet',
-    status: 'Completado',
-    refNumber: 'WEL-KIN-001',
-    createdAt: new Date().toISOString(),
-  };
-
-  db.transactions.unshift(welcomeTx);
-
-  // Contactos base para el nuevo usuario
-  const userContacts: ContactRecord[] = DEFAULT_CONTACTS.map((c, idx) => ({
-    ...c,
-    id: `c-${newId}-${idx}`,
-    userId: newId,
-  }));
-  db.contacts.push(...userContacts);
-
   saveDatabase(db);
   return newUser;
 }
 
 export function getUserTransactions(userId: string): TransactionRecord[] {
   const db = loadDatabase();
-  return db.transactions.filter((t) => t.userId === userId || t.userId === 'user-001');
+  return db.transactions.filter((t) => t.userId === userId);
 }
 
 export function getUserContacts(userId: string): ContactRecord[] {
   const db = loadDatabase();
-  const contacts = db.contacts.filter((c) => c.userId === userId);
-  return contacts.length > 0 ? contacts : DEFAULT_CONTACTS;
+  return db.contacts.filter((c) => c.userId === userId);
+}
+
+export function createContact(params: {
+  userId: string;
+  name: string;
+  fullName?: string;
+  phone?: string;
+  clabe?: string;
+  bank?: string;
+  role?: string;
+  avatar?: string;
+  photoUrl?: string;
+}): ContactRecord {
+  const db = loadDatabase();
+  const newContact: ContactRecord = {
+    id: `c-${Date.now()}`,
+    userId: params.userId,
+    name: params.name.trim(),
+    fullName: params.fullName?.trim() || params.name.trim(),
+    avatar: params.avatar || '👤',
+    role: params.role?.trim() || 'Beneficiario',
+    country: 'Mexico',
+    bank: params.bank?.trim() || 'Banco en México',
+    photoUrl: params.photoUrl || '',
+    clabe: params.clabe?.trim() || '',
+    phone: params.phone?.trim() || '',
+  };
+
+  db.contacts.unshift(newContact);
+  saveDatabase(db);
+  return newContact;
+}
+
+export function deleteContact(userId: string, contactId: string): boolean {
+  const db = loadDatabase();
+  const initialLength = db.contacts.length;
+  db.contacts = db.contacts.filter((c) => !(c.userId === userId && c.id === contactId));
+  if (db.contacts.length !== initialLength) {
+    saveDatabase(db);
+    return true;
+  }
+  return false;
 }
 
 /**

@@ -192,58 +192,26 @@ const BILL_SERVICES = [
   { id: 'gas', name: 'Gas', Icon: FlameIcon },
 ];
 
-// Avatares de la referencia Stitch (Mamá Rosa, Carlos M., Sofia R., Tía Elena, David)
-const RECENT_CONTACTS = [
-  {
-    id: '1',
-    name: 'Mamá Rosa',
-    fullName: 'Rosa Urrutia Eligio',
-    avatar: '👵🏼',
-    role: 'Madre',
-    country: 'Mexico',
-    bank: 'BBVA Bancomer',
-    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDfWoyqADTVEY7wzVYvA5Am2cRLe9UqqlxItL5rRfyOfGOgaZvRD_Vy83WhbHwKpWcy9_NfrGKHsxjFy9Kwj6hC63A19nmfzA5uAUSVR77E85NpgSYMWb0BHfU2lK8kjhl2n4SMty-l71mKGgBP0PoDX7Qjsvhx16YJABIAQIKqPf3YBwRG9U3aE-4C7wVebP_s2LOjcyoPJzBF-vCsf77mTiwvVcp9ge47WoxxWEE-sGtM1L-9vcwy',
-  },
-  {
-    id: '2',
-    name: 'Carlos M.',
-    fullName: 'Carlos Mendoza Ramos',
-    avatar: '👨🏻',
-    role: 'Hermano',
-    country: 'Mexico',
-    bank: 'BanCoppel',
-    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnEWVM8pkwawuEjRXXK5AIPh_yinAPMMpV9kIcTdgToBOlYJ5pCjU2IQ9cHNzvE4kjoWKI3i-cV4g34FSXVCXpj1EoS885IuMRkpcH88TwbmG_1gCLAesV9s96VY_Y079DOXS2uaqfD2kBhZk-y699KkIIYLAECB9ps8V0vsWEyIvAJndsa4OQ245xdq7VM8Fk83ZrWrmmZkCKvyskZcefEHq1SKiefseEFfZ1iI3okObu0mDOVPOO',
-  },
-  {
-    id: '3',
-    name: 'Sofia R.',
-    fullName: 'Sofia Ramos Eligio',
-    avatar: '👩🏻',
-    role: 'Hermana',
-    country: 'Mexico',
-    bank: 'Banco Azteca',
-    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4Z_rr1KAC4c0PCx9Rbflq6njX2wPQpJMsH9rFm7-kA9EgJzmJL4zNUr3nCPLHqoYoYE_vdejqgmYHmS58f121a_y3AlNJ9jhq1hhVNxWEZvJk4H6wBY-OYf4uufwjqs79uEPh_8sUe_IBdww7sX4BZkFEuUTg5Qh1eaz_93J_Uh3kzZ0-IH8EKAk7eU_E1c20U3A79oJ-DBQq7j_4jKqSWJ39DmDB0hi2bI3PYjTpQaFtXKHW1fsW',
-  },
-  {
-    id: '4',
-    name: 'Tía Elena',
-    fullName: 'Elena Ugalde Ortiz',
-    avatar: '👩🏽',
-    role: 'Tía',
-    country: 'Mexico',
-    bank: 'OXXO',
-    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_Fwd2YTLQNjUrMzbKE1bVHvXMMkoZdUUtQxyQ4D4WSgp1lrarFmL8USJrzcFSFbqxnR-PaIHFodbSi4XOIkN8-ggN0hUTafYFsLsxM1_CzxypVKu4pY2X_n5d0tWQrQVQkDKvs8-1t_l7rAVvICwbZr9INnND9Blbdjdzm0t-zT10yzHxthkr6LEoiFHs4FZsNFUZX3P27cjnxTcKTRunLzfu1gamMq_wKCC-EPPCuhELm1yuZKM5',
-  },
-  {
-    id: '5',
-    name: 'David O.',
-    fullName: 'David Ortiz Ramos',
-    avatar: '👨🏽',
-    role: 'Primo',
-    country: 'Mexico',
-    bank: 'Banorte',
-    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
-  },
+export interface ContactItem {
+  id: string;
+  name: string;
+  fullName: string;
+  avatar: string;
+  role: string;
+  country: string;
+  bank: string;
+  photoUrl: string;
+  clabe?: string;
+  phone?: string;
+}
+
+// Avatares disponibles para personalización de perfil
+const DEFAULT_AVATARS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
 ];
 
 interface TransactionItem {
@@ -260,112 +228,8 @@ interface TransactionItem {
   status?: string;
 }
 
-const INITIAL_TRANSACTIONS: TransactionItem[] = [
-  {
-    id: 'tx-001',
-    title: 'Mamá Rosa (Guadalajara)',
-    category: 'OXXO Cash Pickup',
-    time: 'Hace 12 mins',
-    dateGroup: 'Hoy',
-    amount: -250.00,
-    amountMXN: 5112.50,
-    type: 'expense',
-    iconType: 'send',
-    status: 'Completado',
-    refNumber: 'OXXO-948210',
-  },
-  {
-    id: 'tx-002',
-    title: 'CFE Electric (Monterrey)',
-    category: 'Pago de Servicio',
-    time: 'Hoy 8:15 AM',
-    dateGroup: 'Hoy',
-    amount: -48.20,
-    amountMXN: 985.69,
-    type: 'expense',
-    iconType: 'luz',
-    status: 'Completado',
-    refNumber: 'CFE-382910',
-  },
-  {
-    id: 'tx-003',
-    title: 'Kin Cash from Javier Ruiz',
-    category: 'Instant P2P',
-    time: 'Ayer',
-    dateGroup: 'Ayer',
-    amount: 75.00,
-    amountMXN: 1533.75,
-    type: 'income',
-    iconType: 'wallet',
-    status: 'Completado',
-    refNumber: 'KIN-552194',
-  },
-  {
-    id: 'tx-004',
-    title: 'Payroll Deposit (Austin Tech)',
-    category: 'ACH Direct Deposit',
-    time: 'Hace 3 días',
-    dateGroup: 'Esta semana',
-    amount: 1850.00,
-    amountMXN: 37832.50,
-    type: 'income',
-    iconType: 'bank',
-    status: 'Completado',
-    refNumber: 'ACH-881023',
-  },
-  {
-    id: 'tx-005',
-    title: 'Envío Rápido a Maria',
-    category: 'SPEI Exprés 1-Toque',
-    time: '01:12 PM',
-    dateGroup: 'Ayer',
-    amount: -100.00,
-    amountMXN: 2045.00,
-    type: 'expense',
-    iconType: 'send',
-    status: 'Completado',
-    refNumber: 'SPEI-881023',
-  },
-  {
-    id: 'tx-006',
-    title: 'Telmex Infinitum',
-    category: 'Internet y Telefonía Fibra',
-    time: '11:20 AM',
-    dateGroup: 'Esta semana',
-    amount: -22.50,
-    amountMXN: 460.00,
-    type: 'expense',
-    iconType: 'internet',
-    status: 'Completado',
-    refNumber: 'TLM-492801',
-  },
-  {
-    id: 'tx-006',
-    title: 'Transferencia de Mike',
-    category: 'Pago recibido KIN Cash',
-    time: '06:15 PM',
-    dateGroup: 'Esta semana',
-    amount: 75.00,
-    amountMXN: 1533.75,
-    type: 'income',
-    iconType: 'wallet',
-    status: 'Completado',
-    refNumber: 'KIN-381902',
-  },
-  {
-    id: 'tx-007',
-    title: 'Gas Naturgy México',
-    category: 'Pago de Gas Residencial',
-    time: '02:45 PM',
-    dateGroup: 'Esta semana',
-    amount: -18.00,
-    amountMXN: 368.10,
-    type: 'expense',
-    iconType: 'bill',
-    status: 'Completado',
-    refNumber: 'GAS-210943',
-  },
-];
+// Estado limpio inicial (Clean Slate): sin transacciones ficticias
+const INITIAL_TRANSACTIONS: TransactionItem[] = [];
 
 interface FrequentServiceItem {
   id: string;
@@ -417,7 +281,7 @@ export default function MobileApp() {
   const [userState, setUserState] = useState('California');
   const [userZip, setUserZip] = useState('90210');
   const [userCountry, setUserCountry] = useState('Estados Unidos 🇺🇸');
-  const [userAvatar, setUserAvatar] = useState(RECENT_CONTACTS[1].photoUrl);
+  const [userAvatar, setUserAvatar] = useState(DEFAULT_AVATARS[0]);
   const [userClientId, setUserClientId] = useState('KIN-US-892401');
   const [userMemberSince, setUserMemberSince] = useState('14 Sep 2024');
   const [userDocType, setUserDocType] = useState('Pasaporte Oficial USA');
@@ -476,7 +340,7 @@ export default function MobileApp() {
   const [draftUserPhone, setDraftUserPhone] = useState('+1 (555) 349-2810');
   const [draftUserCity, setDraftUserCity] = useState('Los Ángeles');
   const [draftUserState, setDraftUserState] = useState('California');
-  const [draftUserAvatar, setDraftUserAvatar] = useState(RECENT_CONTACTS[1].photoUrl);
+  const [draftUserAvatar, setDraftUserAvatar] = useState(DEFAULT_AVATARS[0]);
   const [customAvatarInput, setCustomAvatarInput] = useState('');
 
   // Stitch Executive Dashboard state
@@ -597,12 +461,12 @@ export default function MobileApp() {
 
   // Send Money state (Screenshot 1)
   const [sendSearch, setSendSearch] = useState('');
-  const [contactsList, setContactsList] = useState(RECENT_CONTACTS);
+  const [contactsList, setContactsList] = useState<ContactItem[]>([]);
   const [showContactModal, setShowContactModal] = useState(false);
   const [newContactName, setNewContactName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
   const [contactFeedback, setContactFeedback] = useState<string | null>(null);
-  const [selectedAvatar, setSelectedAvatar] = useState(RECENT_CONTACTS[0]);
+  const [selectedAvatar, setSelectedAvatar] = useState<ContactItem | null>(null);
   const [amountValue, setAmountValue] = useState('50');
   const [deliveryMethod, setDeliveryMethod] = useState<'cash' | 'bank' | 'wallet'>('cash');
   const [selectedStore, setSelectedStore] = useState('oxxo');
@@ -640,17 +504,17 @@ export default function MobileApp() {
 
   // Eliminar contacto de la lista
   const handleDeleteContact = (id: string) => {
-    if (contactsList.length <= 1) {
-      alert('Debes conservar al menos un contacto.');
-      return;
-    }
     setContactsList((prev) => {
       const filtered = prev.filter((c) => c.id !== id);
-      if (selectedAvatar.id === id && filtered.length > 0) {
-        setSelectedAvatar(filtered[0]);
+      if (selectedAvatar?.id === id) {
+        setSelectedAvatar(filtered.length > 0 ? filtered[0] : null);
       }
       return filtered;
     });
+
+    fetch(`/api/contacts?userId=${encodeURIComponent(userId)}&contactId=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }).catch((e) => console.warn('[Delete contact API error]', e));
   };
 
   // Acceso directo a los contactos del teléfono móvil (Web Contact Picker API)
@@ -661,7 +525,7 @@ export default function MobileApp() {
         const contacts = await (navigator as any).contacts.select(props, { multiple: true });
         if (contacts && contacts.length > 0) {
           const emojis = ['🧑🏻', '👩🏻', '🧔🏽', '👱🏼', '👵🏼', '👨🏽', '👧🏻'];
-          const newEntries = contacts.map((c: any, idx: number) => {
+          const newEntries: ContactItem[] = contacts.map((c: any, idx: number) => {
             const rawName = c.name?.[0] || 'Contacto Teléfono';
             const tel = c.tel?.[0] || '';
             const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -673,7 +537,8 @@ export default function MobileApp() {
               role: tel || 'Móvil directo',
               country: 'Mexico',
               bank: 'SPEI Banxico',
-              photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+              photoUrl: DEFAULT_AVATARS[idx % DEFAULT_AVATARS.length],
+              phone: tel,
             };
           });
 
@@ -690,18 +555,8 @@ export default function MobileApp() {
       console.warn('Contact picker cancelled or denied:', err);
     }
 
-    // Acceso y sincronización directa interactiva
-    setContactFeedback('Sincronizando libreta de contactos del teléfono...');
-    setTimeout(() => {
-      const sampleContacts = [
-        { id: `phone-${Date.now()}-1`, name: 'Carlos M.', fullName: 'Carlos Mendoza Ruiz', avatar: '🧔🏽', role: '+52 55 9876 5432', country: 'Mexico', bank: 'SPEI Banxico', photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80' },
-        { id: `phone-${Date.now()}-2`, name: 'Lucía G.', fullName: 'Lucía Gutiérrez Mora', avatar: '👩🏻', role: '+52 33 1122 3344', country: 'Mexico', bank: 'BBVA Bancomer', photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80' }
-      ];
-      setContactsList((prev) => [...sampleContacts, ...prev]);
-      setSelectedAvatar(sampleContacts[0]);
-      setContactFeedback('¡2 contactos importados directamente desde tu teléfono!');
-      setTimeout(() => setContactFeedback(null), 3500);
-    }, 600);
+    setContactFeedback('Usa el formulario arriba para agregar a tu beneficiario en México.');
+    setTimeout(() => setContactFeedback(null), 3000);
   };
 
   // Agregar contacto manual / teléfono directo
@@ -709,15 +564,16 @@ export default function MobileApp() {
     if (!newContactName.trim()) return;
     const emojis = ['🧑🏻', '👩🏻', '🧔🏽', '👱🏼', '👵🏼', '👨🏽', '👧🏻'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-    const newContact = {
+    const newContact: ContactItem = {
       id: `manual-${Date.now()}`,
       name: newContactName.trim(),
       fullName: newContactName.trim(),
       avatar: randomEmoji,
-      role: newContactPhone.trim() || 'Teléfono directo',
+      role: newContactPhone.trim() || 'Beneficiario directo',
       country: 'Mexico',
-      bank: 'SPEI Móvil',
-      photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      bank: 'SPEI Banxico',
+      photoUrl: DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)],
+      phone: newContactPhone.trim(),
     };
     setContactsList((prev) => [newContact, ...prev]);
     setSelectedAvatar(newContact);
@@ -725,6 +581,19 @@ export default function MobileApp() {
     setNewContactPhone('');
     setContactFeedback(`Contacto ${newContact.name} agregado y seleccionado.`);
     setTimeout(() => setContactFeedback(null), 3000);
+
+    fetch('/api/contacts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        name: newContact.name,
+        fullName: newContact.fullName,
+        phone: newContact.phone,
+        bank: newContact.bank,
+        avatar: newContact.avatar,
+      }),
+    }).catch((e) => console.warn('[Contacts API error]', e));
   };
 
   // Cálculo de comisiones y monto total a pagar según el método seleccionado
@@ -758,6 +627,10 @@ export default function MobileApp() {
 
   // Helper para registrar un envío de dinero y abrir ventanilla de Success
   const handleSendNow = () => {
+    if (!selectedAvatar) {
+      setShowContactModal(true);
+      return;
+    }
     const amt = parseFloat(amountValue) || 50;
     const fee = paymentMethod === 'credit' ? 1.99 : 0.0;
     const totalPaid = amt + fee;
@@ -821,8 +694,13 @@ export default function MobileApp() {
 
   // Helper para Envío Rápido (Send Quick en 1 solo toque)
   const handleSendQuick = () => {
+    if (contactsList.length === 0) {
+      setShowContactModal(true);
+      return;
+    }
+    const recipient = contactsList[sendQuickSelectedRecipient] || contactsList[0];
+    if (!recipient) return;
     const amt = parseFloat(sendQuickAmount) || 50;
-    const recipient = RECENT_CONTACTS[sendQuickSelectedRecipient] || RECENT_CONTACTS[0];
     const txId = 'KIN-QK-' + Math.floor(100000 + Math.random() * 900000);
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1280,7 +1158,7 @@ export default function MobileApp() {
                 {/* Add New Recipient */}
                 <button
                   type="button"
-                  onClick={() => setActiveTab('send-quick')}
+                  onClick={() => setShowContactModal(true)}
                   className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer"
                 >
                   <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm group-hover:bg-surface-bright transition-colors border border-white/5">
@@ -1288,6 +1166,20 @@ export default function MobileApp() {
                   </div>
                   <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">New Recipient</span>
                 </button>
+
+                {contactsList.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowContactModal(true)}
+                    className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-surface-container-high/50 border border-dashed border-white/10 text-left flex-shrink-0 hover:border-primary/40 transition-colors cursor-pointer h-14"
+                  >
+                    <span className="material-symbols-outlined text-primary text-[20px]">person_add</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-white leading-tight">+ Agregar a tu familia</span>
+                      <span className="text-[10px] text-on-surface-variant leading-tight">Envía directo a México</span>
+                    </div>
+                  </button>
+                )}
 
                 {/* Authentic Contact Cards */}
                 {contactsList.map((contact, idx) => {
@@ -1371,87 +1263,101 @@ export default function MobileApp() {
 
               {/* Filtered Transaction List */}
               <div className="flex flex-col space-y-2.5">
-                {filteredDashboardTransactions.slice(0, 5).map((tx) => {
-                  const isIncome = tx.type === 'income';
-                  const bankLogo = getBankLogoUrl(tx.title) || getBankLogoUrl(tx.category);
-                  return (
-                    <div
-                      key={tx.id}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-colors shadow-md border border-white/5"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className={`relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner ${
-                            tx.iconType === 'bank'
-                              ? 'bg-secondary-container/20 text-secondary'
-                              : tx.iconType === 'wallet'
-                              ? 'bg-primary/10 text-primary'
-                              : tx.iconType === 'luz'
-                              ? 'bg-surface-container-high text-secondary'
-                              : 'bg-surface-container-high text-primary'
-                          }`}
-                        >
-                          {tx.iconType === 'luz' ? (
-                            <span className="material-symbols-outlined text-[22px]">electric_meter</span>
-                          ) : tx.iconType === 'wallet' ? (
-                            <span className="material-symbols-outlined text-[22px]">bolt</span>
-                          ) : tx.iconType === 'bank' ? (
-                            <span className="material-symbols-outlined text-[22px]">account_balance</span>
-                          ) : (
-                            <span className="material-symbols-outlined text-[22px]">outgoing_mail</span>
-                          )}
-                          {bankLogo ? (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm p-0.5">
-                              <img src={bankLogo} alt="Bank" className="w-full h-full object-contain" />
-                            </div>
-                          ) : tx.title.includes('OXXO') ? (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm">
-                              <span className="font-financial-mono text-[6px] text-[#E31B23] font-bold">O</span>
-                            </div>
-                          ) : tx.title.includes('CFE') ? (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm">
-                              <span className="font-financial-mono text-[6px] text-[#00693E] font-bold">CFE</span>
-                            </div>
-                          ) : null}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-body-medium text-body-medium text-white font-bold truncate">
-                            {tx.title}
-                          </span>
-                          <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
-                            {tx.category} • {tx.time}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end flex-shrink-0 pl-2">
-                        <span
-                          className={`font-financial-mono text-financial-mono font-bold ${
-                            isIncome ? 'text-primary' : 'text-white'
-                          }`}
-                        >
-                          {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
-                        </span>
-                        {tx.iconType === 'luz' ? (
-                          <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
-                            ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
-                          </span>
-                        ) : tx.iconType === 'bank' ? (
-                          <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
-                            Direct USD
-                          </span>
-                        ) : isIncome ? (
-                          <span className="font-caption-sm text-caption-sm text-primary/80 font-medium">
-                            USD Balance
-                          </span>
-                        ) : (
-                          <span className="font-caption-sm text-caption-sm font-semibold text-primary">
-                            ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
-                          </span>
-                        )}
-                      </div>
+                {filteredDashboardTransactions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 rounded-2xl bg-surface-container-low border border-dashed border-white/10 text-center space-y-2.5">
+                    <div className="w-12 h-12 rounded-2xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[24px]">receipt_long</span>
                     </div>
-                  );
-                })}
+                    <div>
+                      <p className="text-sm font-bold text-white">Sin transacciones aún</p>
+                      <p className="text-xs text-on-surface-variant max-w-[240px] mt-0.5">
+                        Tus envíos SPEI, pagos de facturas o recargas KIN Cash aparecerán aquí al realizarlos.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  filteredDashboardTransactions.slice(0, 5).map((tx) => {
+                    const isIncome = tx.type === 'income';
+                    const bankLogo = getBankLogoUrl(tx.title) || getBankLogoUrl(tx.category);
+                    return (
+                      <div
+                        key={tx.id}
+                        className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-colors shadow-md border border-white/5"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={`relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner ${
+                              tx.iconType === 'bank'
+                                ? 'bg-secondary-container/20 text-secondary'
+                                : tx.iconType === 'wallet'
+                                ? 'bg-primary/10 text-primary'
+                                : tx.iconType === 'luz'
+                                ? 'bg-surface-container-high text-secondary'
+                                : 'bg-surface-container-high text-primary'
+                            }`}
+                          >
+                            {tx.iconType === 'luz' ? (
+                              <span className="material-symbols-outlined text-[22px]">electric_meter</span>
+                            ) : tx.iconType === 'wallet' ? (
+                              <span className="material-symbols-outlined text-[22px]">bolt</span>
+                            ) : tx.iconType === 'bank' ? (
+                              <span className="material-symbols-outlined text-[22px]">account_balance</span>
+                            ) : (
+                              <span className="material-symbols-outlined text-[22px]">outgoing_mail</span>
+                            )}
+                            {bankLogo ? (
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm p-0.5">
+                                <img src={bankLogo} alt="Bank" className="w-full h-full object-contain" />
+                              </div>
+                            ) : tx.title.includes('OXXO') ? (
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm">
+                                <span className="font-financial-mono text-[6px] text-[#E31B23] font-bold">O</span>
+                              </div>
+                            ) : tx.title.includes('CFE') ? (
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm">
+                                <span className="font-financial-mono text-[6px] text-[#00693E] font-bold">CFE</span>
+                              </div>
+                            ) : null}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-body-medium text-body-medium text-white font-bold truncate">
+                              {tx.title}
+                            </span>
+                            <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
+                              {tx.category} • {tx.time}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end flex-shrink-0 pl-2">
+                          <span
+                            className={`font-financial-mono text-financial-mono font-bold ${
+                              isIncome ? 'text-primary' : 'text-white'
+                            }`}
+                          >
+                            {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+                          </span>
+                          {tx.iconType === 'luz' ? (
+                            <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
+                              ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                            </span>
+                          ) : tx.iconType === 'bank' ? (
+                            <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
+                              Direct USD
+                            </span>
+                          ) : isIncome ? (
+                            <span className="font-caption-sm text-caption-sm text-primary/80 font-medium">
+                              USD Balance
+                            </span>
+                          ) : (
+                            <span className="font-caption-sm text-caption-sm font-semibold text-primary">
+                              ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -1927,18 +1833,54 @@ export default function MobileApp() {
                       <span className="font-title-base text-xs text-on-surface font-bold">Bank SPEI Beneficiary</span>
                       <span className="font-caption-sm text-[11px] text-primary font-bold">24/7 Instant</span>
                     </div>
-                    <div className="p-3.5 rounded-2xl bg-surface-container border border-white/5 space-y-2">
+                    <div
+                      onClick={() => setShowContactModal(true)}
+                      className="p-3.5 rounded-2xl bg-surface-container border border-white/10 space-y-2 cursor-pointer hover:border-primary/40 transition-colors shadow-md"
+                    >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm">
-                            <span className="font-financial-mono text-xs font-black text-[#004481]">BBVA</span>
-                          </div>
-                          <div>
-                            <p className="font-title-base text-xs font-bold text-white">Mamá Rosa (Guadalajara)</p>
-                            <p className="font-financial-mono text-[11px] text-on-surface-variant">CLABE: 0121 8001 5928 3491 82</p>
-                          </div>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {selectedAvatar ? (
+                            <>
+                              <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm overflow-hidden flex-shrink-0">
+                                {getBankLogoUrl(selectedAvatar.bank) ? (
+                                  <img src={getBankLogoUrl(selectedAvatar.bank)!} alt={selectedAvatar.bank} className="w-full h-full object-contain" />
+                                ) : (
+                                  <span className="font-financial-mono text-xs font-black text-[#004481]">
+                                    {(selectedAvatar.bank || 'SPEI').slice(0, 4).toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-title-base text-xs font-bold text-white truncate">
+                                  {selectedAvatar.fullName || selectedAvatar.name}
+                                </p>
+                                <p className="font-financial-mono text-[11px] text-on-surface-variant truncate">
+                                  CLABE: {selectedAvatar.clabe || 'SPEI Interbancario'}
+                                </p>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary border border-dashed border-primary/30 flex-shrink-0">
+                                <span className="material-symbols-outlined text-[20px]">person_add</span>
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-title-base text-xs font-bold text-white truncate">Selecciona un beneficiario</p>
+                                <p className="text-[11px] text-on-surface-variant truncate">Toca para elegir de tu lista o agregar uno</p>
+                              </div>
+                            </>
+                          )}
                         </div>
-                        <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
+                        {selectedAvatar ? (
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className="text-[10px] text-primary font-semibold">Cambiar</span>
+                            <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
+                          </div>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold flex-shrink-0">
+                            Elegir
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2564,73 +2506,106 @@ export default function MobileApp() {
                 </span>
               </div>
 
-              {/* Horizontal Contact Selector */}
-              <div className="flex items-center gap-3 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
-                {RECENT_CONTACTS.map((c, idx) => {
-                  const isSelected = sendQuickSelectedRecipient === idx;
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setSendQuickSelectedRecipient(idx)}
-                      className={`flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border transition-all flex-shrink-0 cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#2ED5A4]/15 border-[#2ED5A4] text-white shadow-md shadow-[#2ED5A4]/10'
-                          : 'bg-[#202236] border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15'
-                      }`}
-                      style={{ minWidth: '78px' }}
-                    >
-                      <div className="relative">
-                        <img
-                          src={c.photoUrl}
-                          alt={c.name}
-                          className={`w-12 h-12 rounded-full object-cover border-2 transition-all ${
-                            isSelected ? 'border-[#2ED5A4]' : 'border-white/10'
-                          }`}
-                        />
-                        {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2ED5A4] flex items-center justify-center text-white text-[9px] font-black shadow-sm">
-                            ✓
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-xs font-bold truncate max-w-[70px]">
-                        {c.name.split(' ')[0]}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Active Recipient Details Banner */}
-              {(() => {
-                const currentRecipient = RECENT_CONTACTS[sendQuickSelectedRecipient] || RECENT_CONTACTS[0];
-                return (
-                  <div className="p-3 rounded-2xl bg-[#0E0F1A] border border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center font-bold text-sm text-[#2ED5A4]">
-                        {currentRecipient.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">{currentRecipient.name}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          {getBankLogoUrl(currentRecipient.bank) && (
-                            <div className="w-3.5 h-3.5 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
-                              <img src={getBankLogoUrl(currentRecipient.bank)!} alt={currentRecipient.bank} className="w-full h-full object-contain" />
-                            </div>
-                          )}
-                          <p className="text-[10px] text-white/90">
-                            {currentRecipient.bank || 'Cuenta Bancaria SPEI'} • CLABE verificada
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] text-[10px] font-bold border border-[#2ED5A4]/20">
-                      ✓ Listo
-                    </span>
+              {/* Recipient Selection or Empty State */}
+              {contactsList.length === 0 ? (
+                <div
+                  onClick={() => setShowContactModal(true)}
+                  className="p-5 rounded-2xl bg-[#0E0F1A] border border-dashed border-white/15 flex items-center gap-3 cursor-pointer hover:border-[#2ED5A4]/40 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-[#202236] border border-white/10 flex items-center justify-center text-[#2ED5A4] flex-shrink-0">
+                    <span className="material-symbols-outlined text-[24px]">person_add</span>
                   </div>
-                );
-              })()}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white truncate">Sin contactos registrados</p>
+                    <p className="text-xs text-[#8E91A5] truncate">Toca aquí para agregar a tu familia en México</p>
+                  </div>
+                  <span className="px-3 py-1.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] text-xs font-bold border border-[#2ED5A4]/20 flex-shrink-0">
+                    + Agregar
+                  </span>
+                </div>
+              ) : (
+                <>
+                  {/* Horizontal Contact Selector */}
+                  <div className="flex items-center gap-3 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
+                    {contactsList.map((c, idx) => {
+                      const isSelected = sendQuickSelectedRecipient === idx;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setSendQuickSelectedRecipient(idx)}
+                          className={`flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border transition-all flex-shrink-0 cursor-pointer ${
+                            isSelected
+                              ? 'bg-[#2ED5A4]/15 border-[#2ED5A4] text-white shadow-md shadow-[#2ED5A4]/10'
+                              : 'bg-[#202236] border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15'
+                          }`}
+                          style={{ minWidth: '78px' }}
+                        >
+                          <div className="relative">
+                            <img
+                              src={c.photoUrl}
+                              alt={c.name}
+                              className={`w-12 h-12 rounded-full object-cover border-2 transition-all ${
+                                isSelected ? 'border-[#2ED5A4]' : 'border-white/10'
+                              }`}
+                            />
+                            {isSelected && (
+                              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2ED5A4] flex items-center justify-center text-white text-[9px] font-black shadow-sm">
+                                ✓
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-xs font-bold truncate max-w-[70px]">
+                            {c.name.split(' ')[0]}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => setShowContactModal(true)}
+                      className="flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl border border-dashed border-white/15 text-[#8E91A5] hover:text-white hover:border-white/30 transition-all flex-shrink-0 cursor-pointer"
+                      style={{ minWidth: '78px', height: '84px' }}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-[#202236] flex items-center justify-center text-[#2ED5A4]">
+                        <span className="material-symbols-outlined text-[20px]">add</span>
+                      </div>
+                      <span className="text-[10px] font-bold">Nuevo</span>
+                    </button>
+                  </div>
+
+                  {/* Active Recipient Details Banner */}
+                  {(() => {
+                    const currentRecipient = contactsList[sendQuickSelectedRecipient] || contactsList[0];
+                    if (!currentRecipient) return null;
+                    return (
+                      <div className="p-3 rounded-2xl bg-[#0E0F1A] border border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center font-bold text-sm text-[#2ED5A4] flex-shrink-0">
+                            {currentRecipient.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-white truncate">{currentRecipient.name}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {getBankLogoUrl(currentRecipient.bank) && (
+                                <div className="w-3.5 h-3.5 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
+                                  <img src={getBankLogoUrl(currentRecipient.bank)!} alt={currentRecipient.bank} className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                              <p className="text-[10px] text-white/90 truncate">
+                                {currentRecipient.bank || 'Cuenta Bancaria SPEI'} • CLABE verificada
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] text-[10px] font-bold border border-[#2ED5A4]/20 flex-shrink-0">
+                          ✓ Listo
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
             </div>
 
             {/* 2. Hero Amount Card (Gran Tipografía Móvil & Chips) */}
@@ -3170,7 +3145,11 @@ export default function MobileApp() {
           >
             <span className="text-sm font-bold tracking-wide flex items-center gap-2 text-white">
               <span className="material-symbols-outlined text-[18px]">bolt</span>
-              <span>{language === 'en' ? 'Send to' : 'Enviar a'} {(RECENT_CONTACTS[sendQuickSelectedRecipient] || RECENT_CONTACTS[0]).name.split(' ')[0]}</span>
+              <span>
+                {contactsList.length > 0
+                  ? `${language === 'en' ? 'Send to' : 'Enviar a'} ${(contactsList[sendQuickSelectedRecipient] || contactsList[0]).name.split(' ')[0]}`
+                  : (language === 'en' ? 'Add Recipient' : 'Agregar Destinatario')}
+              </span>
             </span>
             <div className="flex items-center gap-2">
               <span className="h-9 px-3.5 rounded-full bg-[#003828] text-primary text-xs font-financial-mono font-bold flex items-center justify-center gap-1.5 shadow-sm">
@@ -3317,79 +3296,88 @@ export default function MobileApp() {
                 <span className="text-[10px] text-[#2ED5A4]">Usa ▲ ▼ para subir y bajar</span>
               </div>
 
-              {contactsList.map((c, idx) => {
-                const isSelected = selectedAvatar.id === c.id;
-                return (
-                  <div
-                    key={c.id}
-                    className={`p-2 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
-                      isSelected
-                        ? 'bg-[#181928] border-[#2ED5A4] shadow-sm'
-                        : 'bg-[#121320] border-white/5 hover:border-white/15'
-                    }`}
-                  >
-                    {/* Contact Info (Click to select for remittance) */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedAvatar(c);
-                        setShowContactModal(false);
-                      }}
-                      className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer"
+              {contactsList.length === 0 ? (
+                <div className="p-6 text-center rounded-2xl bg-[#121320] border border-dashed border-white/10 space-y-1">
+                  <p className="text-xs font-semibold text-white">No tienes contactos aún</p>
+                  <p className="text-[11px] text-[#8E91A5]">
+                    Usa el formulario de arriba o sincroniza tu agenda para agregar destinatarios.
+                  </p>
+                </div>
+              ) : (
+                contactsList.map((c, idx) => {
+                  const isSelected = selectedAvatar?.id === c.id;
+                  return (
+                    <div
+                      key={c.id}
+                      className={`p-2 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
+                        isSelected
+                          ? 'bg-[#181928] border-[#2ED5A4] shadow-sm'
+                          : 'bg-[#121320] border-white/5 hover:border-white/15'
+                      }`}
                     >
-                      <div className="w-8 h-8 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-base flex-shrink-0">
-                        {c.avatar}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-bold text-white truncate">{c.name}</p>
-                          {isSelected && (
-                            <span className="text-[8px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/20 px-1.5 py-0.2 rounded-full flex-shrink-0">
-                              Activo
-                            </span>
-                          )}
+                      {/* Contact Info (Click to select for remittance) */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedAvatar(c);
+                          setShowContactModal(false);
+                        }}
+                        className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-base flex-shrink-0">
+                          {c.avatar}
                         </div>
-                        <p className="text-[10px] text-[#8E91A5] truncate">{c.role}</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-bold text-white truncate">{c.name}</p>
+                            {isSelected && (
+                              <span className="text-[8px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/20 px-1.5 py-0.2 rounded-full flex-shrink-0">
+                                Activo
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-[#8E91A5] truncate">{c.role}</p>
+                        </div>
+                      </button>
+
+                      {/* Controls: Move Up (▲), Move Down (▼), Delete (🗑) */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {/* Subir orden */}
+                        <button
+                          type="button"
+                          onClick={() => handleMoveContactUp(idx)}
+                          disabled={idx === 0}
+                          title="Subir posición"
+                          className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
+                        >
+                          <ChevronUpIcon className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Bajar orden */}
+                        <button
+                          type="button"
+                          onClick={() => handleMoveContactDown(idx)}
+                          disabled={idx === contactsList.length - 1}
+                          title="Bajar posición"
+                          className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
+                        >
+                          <ChevronDownIcon className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Eliminar contacto */}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteContact(c.id)}
+                          title="Eliminar de la lista"
+                          className="w-7 h-7 rounded-lg bg-white/5 hover:bg-rose-500/20 flex items-center justify-center text-[#8E91A5] hover:text-rose-400 transition-all cursor-pointer ml-0.5"
+                        >
+                          <TrashIcon className="w-3.5 h-3.5" />
+                        </button>
                       </div>
-                    </button>
-
-                    {/* Controls: Move Up (▲), Move Down (▼), Delete (🗑) */}
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {/* Subir orden */}
-                      <button
-                        type="button"
-                        onClick={() => handleMoveContactUp(idx)}
-                        disabled={idx === 0}
-                        title="Subir posición"
-                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
-                      >
-                        <ChevronUpIcon className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Bajar orden */}
-                      <button
-                        type="button"
-                        onClick={() => handleMoveContactDown(idx)}
-                        disabled={idx === contactsList.length - 1}
-                        title="Bajar posición"
-                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
-                      >
-                        <ChevronDownIcon className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Eliminar contacto */}
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteContact(c.id)}
-                        title="Eliminar de la lista"
-                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-rose-500/20 flex items-center justify-center text-[#8E91A5] hover:text-rose-400 transition-all cursor-pointer ml-0.5"
-                      >
-                        <TrashIcon className="w-3.5 h-3.5" />
-                      </button>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
 
             {/* Done button */}
@@ -3565,19 +3553,19 @@ export default function MobileApp() {
               </label>
             </div>
 
-            {/* Galería de Personas de la Referencia (Screenshot 1: Sophia, David, Liam, Maria, Mike) */}
+            {/* Galería de Avatares Predefinidos */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-2 px-0.5">
-                O selecciona uno de los perfiles de la app:
+                O selecciona uno de los avatares predefinidos:
               </label>
               <div className="grid grid-cols-3 gap-2.5">
-                {RECENT_CONTACTS.map((av) => {
-                  const isSelected = draftUserAvatar === av.photoUrl;
+                {DEFAULT_AVATARS.map((url, idx) => {
+                  const isSelected = draftUserAvatar === url;
                   return (
                     <button
-                      key={av.id}
+                      key={idx}
                       type="button"
-                      onClick={() => setDraftUserAvatar(av.photoUrl)}
+                      onClick={() => setDraftUserAvatar(url)}
                       className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl border transition-all cursor-pointer ${
                         isSelected
                           ? 'border-[#2ED5A4] bg-[#2ED5A4]/10 scale-105'
@@ -3586,21 +3574,18 @@ export default function MobileApp() {
                     >
                       <div className="w-12 h-12 rounded-full overflow-hidden relative border border-white/10">
                         <img
-                          src={av.photoUrl}
-                          alt={av.name}
+                          src={url}
+                          alt={`Avatar ${idx + 1}`}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#181928] flex items-center justify-center text-[10px]">
-                          {av.avatar}
-                        </div>
                         {isSelected && (
                           <div className="absolute inset-0 bg-[#2ED5A4]/30 flex items-center justify-center">
                             <CheckCircleIcon className="w-5 h-5 text-white" />
                           </div>
                         )}
                       </div>
-                      <span className="text-[10px] text-white font-medium truncate max-w-[80px]">
-                        {av.name}
+                      <span className="text-[10px] text-white font-medium">
+                        Opción {idx + 1}
                       </span>
                     </button>
                   );

@@ -22,69 +22,7 @@ export interface ContactItem {
   photoUrl: string;
 }
 
-const DEFAULT_CONTACTS: ContactItem[] = [
-  {
-    id: '0',
-    name: 'Mamá Rosa',
-    fullName: 'Rosa Elena Morales',
-    avatar: '👩🏻',
-    role: 'Mother ❤️',
-    country: 'Mexico',
-    bank: 'BBVA México • SPEI Instant',
-    photoUrl:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCR4QM3Ii7ReWis7XIvW_01srAlE5v87-taEbIXdp2CYeQ3QfX_4MyveQuVM548GxHcgyKSlQLK__CXswxVUGY6-Qug4uXot1-yKZBTJY6q10s45S297XOfkfcOpmkxo02hU8TDReJPhBLCVygk3gIdKV_qzMQgSfXchTAjRWHU4yqbsRIWFQxzYhiUg0mIRuYmPRpiVbFoE9LAf0el6wcZ9B_wfB9afCEKwnKyUBpBcIlvgp5gT3NF',
-  },
-  {
-    id: '1',
-    name: 'Manuel',
-    fullName: 'Manuel Ugalde Eligio',
-    avatar: '👨🏻',
-    role: 'Hermano',
-    country: 'Mexico',
-    bank: 'BanCoppel SPEI',
-    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    id: '2',
-    name: 'Sophia',
-    fullName: 'Sophia Ramos Eligio',
-    avatar: '👩🏻',
-    role: 'Hermana',
-    country: 'Mexico',
-    bank: 'BBVA Bancomer',
-    photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    id: '3',
-    name: 'David',
-    fullName: 'David Ortiz Ramos',
-    avatar: '👨🏽',
-    role: 'Primo',
-    country: 'Mexico',
-    bank: 'Banco Azteca',
-    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    id: '4',
-    name: 'Maria',
-    fullName: 'María Elena Ugalde',
-    avatar: '👩🏽',
-    role: 'Madre',
-    country: 'Mexico',
-    bank: 'Santander México',
-    photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    id: '5',
-    name: 'Mike',
-    fullName: 'Mike Chen González',
-    avatar: '👨🏻',
-    role: 'Amigo',
-    country: 'Mexico',
-    bank: 'Banorte',
-    photoUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80',
-  },
-];
+const DEFAULT_CONTACTS: ContactItem[] = [];
 
 export interface KinCashP2PModalProps {
   isOpen?: boolean;
@@ -106,7 +44,7 @@ export function KinCashP2PModal({
   exchangeRate = 20.45,
 }: KinCashP2PModalProps) {
   const [currentAmount, setCurrentAmount] = useState('120.00');
-  const [selectedContact, setSelectedContact] = useState<ContactItem>(contacts[0] || DEFAULT_CONTACTS[0]);
+  const [selectedContact, setSelectedContact] = useState<ContactItem | null>(contacts[0] || null);
   const [conceptNote, setConceptNote] = useState('Groceries & medicine for the week');
   const [showContactPicker, setShowContactPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,8 +130,12 @@ export function KinCashP2PModal({
       setIsDispatched(true);
       setStatusMessage('Transfer Dispatched via SPEI! 🚀');
 
+      const recipientLabel = selectedContact
+        ? `${selectedContact.fullName} (${selectedContact.role})`
+        : searchQuery.trim() || 'Destinatario KIN Cash';
+
       if (onP2PSuccess) {
-        onP2PSuccess(`${selectedContact.fullName} (${selectedContact.role})`, numAmount * exchangeRate);
+        onP2PSuccess(recipientLabel, numAmount * exchangeRate);
       }
 
       setTimeout(() => {
@@ -303,42 +245,58 @@ export function KinCashP2PModal({
           onClick={() => setShowContactPicker(true)}
           className="flex items-center justify-between bg-surface-container-high p-3 rounded-xl shadow-inner group cursor-pointer border border-white/5 hover:border-primary/30 transition-all"
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="relative shrink-0 w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-primary to-secondary">
-              <img
-                className="w-full h-full rounded-full object-cover"
-                alt={selectedContact.name}
-                src={selectedContact.photoUrl}
-              />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shadow-md">
-                <span
-                  className="material-symbols-outlined text-[#004481] text-[14px] font-bold"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  account_balance
+          {selectedContact ? (
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative shrink-0 w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-primary to-secondary">
+                <img
+                  className="w-full h-full rounded-full object-cover"
+                  alt={selectedContact.name}
+                  src={selectedContact.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
+                />
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shadow-md">
+                  <span
+                    className="material-symbols-outlined text-[#004481] text-[14px] font-bold"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    account_balance
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-title-base text-title-base text-white truncate font-semibold">
+                    {selectedContact.name}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary font-caption-sm text-[11px] font-semibold shrink-0">
+                    {selectedContact.role}
+                  </span>
+                </div>
+                <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
+                  {selectedContact.fullName} {selectedContact.phone ? `• ${selectedContact.phone}` : ''}
+                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="font-label-caps text-label-caps text-primary-fixed-dim">
+                    {selectedContact.bank}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary shrink-0 border border-white/10">
+                <span className="material-symbols-outlined text-[24px]">person_search</span>
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="font-title-base text-title-base text-white font-semibold">
+                  {searchQuery.trim() ? searchQuery.trim() : 'Seleccionar destinatario'}
+                </span>
+                <span className="font-caption-sm text-caption-sm text-on-surface-variant">
+                  {searchQuery.trim() ? 'Destinatario directo KIN Cash' : 'Toca para elegir de tus contactos o escribe arriba'}
                 </span>
               </div>
             </div>
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-title-base text-title-base text-white truncate font-semibold">
-                  {selectedContact.name}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary font-caption-sm text-[11px] font-semibold shrink-0">
-                  {selectedContact.role}
-                </span>
-              </div>
-              <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
-                {selectedContact.fullName} • +52 33 1459 8820
-              </span>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="font-label-caps text-label-caps text-primary-fixed-dim">
-                  {selectedContact.bank}
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              </div>
-            </div>
-          </div>
+          )}
           <button
             type="button"
             className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-white shrink-0 ml-2 cursor-pointer"
@@ -533,55 +491,65 @@ export function KinCashP2PModal({
 
             {/* Contacts list */}
             <div className="space-y-2 overflow-y-auto flex-1 pr-1 scrollbar-thin">
-              {filteredContacts.map((c) => {
-                const isSelected = selectedContact.id === c.id;
-                const bankLogo = getBankLogoUrl(c.bank);
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedContact(c);
-                      setShowContactPicker(false);
-                    }}
-                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                      isSelected
-                        ? 'bg-surface-container-high border-primary shadow-glow-mint'
-                        : 'bg-surface-container-lowest/60 border-white/5 hover:border-white/15'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
-                        <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-white leading-tight font-title-base">
-                            {c.fullName}
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded-full bg-secondary/15 text-secondary text-[9px] font-bold">
-                            {c.role}
-                          </span>
+              {filteredContacts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center text-on-surface-variant gap-2">
+                  <span className="material-symbols-outlined text-[32px] text-outline">group_off</span>
+                  <p className="font-title-base text-xs font-bold text-white">Sin contactos guardados</p>
+                  <p className="font-caption-sm text-[11px] text-on-surface-variant max-w-[240px]">
+                    Ingresa un número telefónico o $handle KIN en el buscador para transferir directamente.
+                  </p>
+                </div>
+              ) : (
+                filteredContacts.map((c) => {
+                  const isSelected = selectedContact?.id === c.id;
+                  const bankLogo = getBankLogoUrl(c.bank);
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedContact(c);
+                        setShowContactPicker(false);
+                      }}
+                      className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                        isSelected
+                          ? 'bg-surface-container-high border-primary shadow-glow-mint'
+                          : 'bg-surface-container-lowest/60 border-white/5 hover:border-white/15'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
+                          <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          {bankLogo && (
-                            <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
-                              <img src={bankLogo} alt={c.bank} className="w-full h-full object-contain" />
-                            </div>
-                          )}
-                          <span className="text-[10px] text-primary font-semibold">{c.bank}</span>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-white leading-tight font-title-base">
+                              {c.fullName}
+                            </span>
+                            <span className="px-1.5 py-0.2 rounded-full bg-secondary/15 text-secondary text-[9px] font-bold">
+                              {c.role}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            {bankLogo && (
+                              <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
+                                <img src={bankLogo} alt={c.bank} className="w-full h-full object-contain" />
+                              </div>
+                            )}
+                            <span className="text-[10px] text-primary font-semibold">{c.bank}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {isSelected ? (
-                      <span className="text-xs font-black text-primary">✓</span>
-                    ) : (
-                      <ChevronRightIcon className="w-4 h-4 text-on-surface-variant" />
-                    )}
-                  </button>
-                );
-              })}
+                      {isSelected ? (
+                        <span className="text-xs font-black text-primary">✓</span>
+                      ) : (
+                        <ChevronRightIcon className="w-4 h-4 text-on-surface-variant" />
+                      )}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
