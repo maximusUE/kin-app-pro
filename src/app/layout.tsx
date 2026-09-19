@@ -4,6 +4,11 @@ import type { Metadata, Viewport } from 'next';
 export const metadata: Metadata = {
   title: 'KIN — Envíos de Dinero USA a México y Pagos de Servicios',
   description: 'Envía dinero de USA a México al mejor tipo de cambio, paga servicios de CFE, Telmex e Internet, y transfiere P2P con KIN Cash.',
+  icons: {
+    icon: '/kin_logo.svg',
+    shortcut: '/kin_app_icon.png',
+    apple: '/apple-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

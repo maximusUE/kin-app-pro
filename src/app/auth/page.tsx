@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { KinLogo } from '@/components/KinLogo';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -148,14 +149,7 @@ export default function AuthPage() {
           {/* Brand & Hero Title */}
           <div className="flex flex-col items-center text-center mt-space-md mb-space-lg relative z-10">
             <div className="relative mb-space-sm group">
-              <div className="absolute -inset-1.5 bg-gradient-to-r from-primary-container to-secondary-container rounded-2xl blur-md opacity-40 group-hover:opacity-75 transition duration-500" />
-              <div className="relative w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center shadow-2xl overflow-hidden p-2 border border-white/10">
-                <img
-                  alt="KIN Mobile Logo"
-                  className="w-full h-full object-contain"
-                  src="https://lh3.googleusercontent.com/aida/AEtjO1V_8X2opIoIO0njK74woCl2dxtYqfl-WAABzU2MYshHEFwiQoCZe7e1eaJ6jXgemVbtgC0RRgZHLEAi_40Z3TnujI5b5WAq6qEJmRGkBPKPCrXL6145em5KAJRBIo8Or9-DvpdtQtyxIqtt5m6Lj8LlRkor9TqaYWS8lDlatmnCOD6iQeRFtCg1zgW9lHj7I1rxeSHNDVRui77pvXQCvFnwUdmXq6GkYIlwpfimyxE4vGZm2vmyjBhsgdw"
-                />
-              </div>
+              <KinLogo size={68} />
             </div>
             <h1 className="font-headline-lg text-2xl font-bold text-white tracking-tight">
               KIN <span className="text-primary">Mobile</span>

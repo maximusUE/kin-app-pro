@@ -81,6 +81,7 @@ import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
 import { KinCashP2PModal } from '@/components/KinCashP2PModal';
 import { ClientVaultModal } from '@/components/ClientVaultModal';
 import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
+import { KinLogo } from '@/components/KinLogo';
 
 // Tasa de cambio real de mercado USD/MXN
 const USD_TO_MXN_RATE = 20.45;
@@ -906,10 +907,7 @@ export default function MobileApp() {
         {activeTab === 'home' && (
           <header className="flex items-center justify-between gap-2 mb-3 px-0.5">
             <div className="flex items-center gap-2">
-              <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-[#2ED5A4]/25 to-[#7047EB]/25 border border-white/10 p-1">
-                <KinCashCircleIcon className="w-5 h-5 text-[#2ED5A4]" />
-                <div className="absolute -inset-1 rounded-full bg-[#2ED5A4]/10 blur-sm pointer-events-none" />
-              </div>
+              <KinLogo size={34} />
               <div className="flex flex-col leading-none">
                 <span className="font-headline-md text-[17px] font-bold tracking-tight text-white">KIN</span>
                 <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>

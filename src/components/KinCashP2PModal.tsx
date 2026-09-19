@@ -19,6 +19,7 @@ import {
   SwapHorizIcon,
   BackspaceIcon,
 } from './Icons';
+import { KinLogo } from './KinLogo';
 
 export interface ContactItem {
   id: string;
@@ -264,9 +265,7 @@ export function KinCashP2PModal({
 
             {/* KIN Global Branding */}
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2ED5A4] to-[#1EA77F] flex items-center justify-center font-black text-white text-sm shadow-glow-mint">
-                K
-              </div>
+              <KinLogo size={28} />
               <div className="flex flex-col leading-none">
                 <span className="font-extrabold text-sm tracking-tight text-white">KIN</span>
                 <span className="text-[8px] uppercase tracking-widest text-[#2ED5A4] font-bold">Global</span>
