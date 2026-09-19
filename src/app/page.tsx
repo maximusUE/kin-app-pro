@@ -1069,7 +1069,7 @@ export default function MobileApp() {
                 onClick={() => setActiveTab('send')}
                 className="group flex flex-col items-center gap-1.5 cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#57f2bf] to-[#2ed5a4] flex items-center justify-center text-[#003828] shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
                   <span className="material-symbols-outlined text-[26px]">send</span>
                 </div>
                 <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Send MX</span>
@@ -1081,7 +1081,7 @@ export default function MobileApp() {
                 onClick={() => setShowKinCashModal(true)}
                 className="group flex flex-col items-center gap-1.5 cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#5018cb] to-[#7047eb] flex items-center justify-center text-white shadow-[0_8px_20px_-4px_rgba(112,71,235,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary-container to-secondary flex items-center justify-center text-white shadow-[0_8px_20px_-4px_rgba(112,71,235,0.45)] transition-transform group-hover:scale-105 active:scale-95">
                   <span className="material-symbols-outlined text-[26px]">bolt</span>
                 </div>
                 <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Kin Cash</span>
@@ -1093,7 +1093,7 @@ export default function MobileApp() {
                 onClick={() => setActiveTab('send-quick')}
                 className="group flex flex-col items-center gap-1.5 cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4] transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
                   <span className="material-symbols-outlined text-[26px]">touch_app</span>
                 </div>
                 <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">1-Tap Send</span>
@@ -1105,7 +1105,7 @@ export default function MobileApp() {
                 onClick={() => setShowBillPayModal(true)}
                 className="group flex flex-col items-center gap-1.5 cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-[#ccbdff] transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
                   <span className="material-symbols-outlined text-[26px]">receipt_long</span>
                 </div>
                 <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">Bill Pay</span>
@@ -1116,13 +1116,13 @@ export default function MobileApp() {
             <div className="flex flex-col space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#2ED5A4] text-[20px]">group</span>
+                  <span className="material-symbols-outlined text-primary text-[18px]">family_restroom</span>
                   <h2 className="font-title-base text-title-base text-white font-bold">Quick Send to Family</h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveTab('send-quick')}
-                  className="font-caption-sm text-caption-sm text-[#2ED5A4] font-bold hover:underline cursor-pointer"
+                  className="font-caption-sm text-caption-sm text-primary font-bold hover:underline cursor-pointer"
                 >
                   View All ({contactsList.length})
                 </button>
@@ -1135,7 +1135,7 @@ export default function MobileApp() {
                   onClick={() => setActiveTab('send-quick')}
                   className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4] shadow-sm group-hover:bg-surface-bright transition-colors border border-white/5">
+                  <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm group-hover:bg-surface-bright transition-colors border border-white/5">
                     <span className="material-symbols-outlined text-[26px]">add</span>
                   </div>
                   <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">New Recipient</span>
@@ -1233,18 +1233,24 @@ export default function MobileApp() {
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className={`relative w-11 h-11 rounded-2xl ${
-                            isIncome ? 'bg-[#2ED5A4]/10 text-[#2ED5A4]' : 'bg-surface-container-high text-[#2ED5A4]'
-                          } flex items-center justify-center flex-shrink-0 shadow-inner`}
+                          className={`relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner ${
+                            tx.iconType === 'bank'
+                              ? 'bg-secondary-container/20 text-secondary'
+                              : tx.iconType === 'wallet'
+                              ? 'bg-primary/10 text-primary'
+                              : tx.iconType === 'luz'
+                              ? 'bg-surface-container-high text-secondary'
+                              : 'bg-surface-container-high text-primary'
+                          }`}
                         >
                           {tx.iconType === 'luz' ? (
-                            <span className="material-symbols-outlined text-[22px] text-[#ccbdff]">electric_meter</span>
+                            <span className="material-symbols-outlined text-[22px]">electric_meter</span>
                           ) : tx.iconType === 'wallet' ? (
-                            <span className="material-symbols-outlined text-[22px] text-[#2ED5A4]">bolt</span>
+                            <span className="material-symbols-outlined text-[22px]">bolt</span>
                           ) : tx.iconType === 'bank' ? (
-                            <span className="material-symbols-outlined text-[22px] text-[#ccbdff]">account_balance</span>
+                            <span className="material-symbols-outlined text-[22px]">account_balance</span>
                           ) : (
-                            <span className="material-symbols-outlined text-[22px] text-[#2ED5A4]">outgoing_mail</span>
+                            <span className="material-symbols-outlined text-[22px]">outgoing_mail</span>
                           )}
                           {bankLogo ? (
                             <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm p-0.5">
@@ -1272,7 +1278,7 @@ export default function MobileApp() {
                       <div className="flex flex-col items-end flex-shrink-0 pl-2">
                         <span
                           className={`font-financial-mono text-financial-mono font-bold ${
-                            isIncome ? 'text-[#2ED5A4]' : 'text-white'
+                            isIncome ? 'text-primary' : 'text-white'
                           }`}
                         >
                           {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
@@ -1286,11 +1292,11 @@ export default function MobileApp() {
                             Direct USD
                           </span>
                         ) : isIncome ? (
-                          <span className="font-caption-sm text-caption-sm text-[#2ED5A4]/80 font-medium">
+                          <span className="font-caption-sm text-caption-sm text-primary/80 font-medium">
                             USD Balance
                           </span>
                         ) : (
-                          <span className="font-caption-sm text-caption-sm font-semibold text-[#2ED5A4]">
+                          <span className="font-caption-sm text-caption-sm font-semibold text-primary">
                             ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
                           </span>
                         )}
@@ -2869,7 +2875,8 @@ export default function MobileApp() {
       {/* ========================================================================= */}
       {!sendSuccessData && activeTab !== 'send-quick' && (
         <nav
-          className="fixed bottom-0 max-w-[400px] w-full z-50 bg-[#000000] border-t border-white/10 pb-safe pt-1 pointer-events-auto shadow-[0_-10px_35px_rgba(0,0,0,0.95)]"
+          className="stitch-bottom-dock"
+          style={{ backgroundColor: '#000000', opacity: 1 }}
           data-active-classes="text-primary font-bold scale-105"
         >
           <div className="h-16 w-full flex items-center justify-around px-2">
@@ -2884,7 +2891,7 @@ export default function MobileApp() {
               }}
               className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'home' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                  ? 'text-primary font-bold'
+                  ? 'text-primary font-bold scale-105'
                   : 'text-on-surface-variant hover:text-white'
               }`}
               title="Home"
@@ -2904,7 +2911,7 @@ export default function MobileApp() {
               }}
               className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'send' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                  ? 'text-primary font-bold'
+                  ? 'text-primary font-bold scale-105'
                   : 'text-on-surface-variant hover:text-white'
               }`}
               title="Send"
@@ -2923,7 +2930,7 @@ export default function MobileApp() {
               }}
               className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 showKinCashModal || activeTab === 'kin-cash'
-                  ? 'text-primary font-bold'
+                  ? 'text-primary font-bold scale-105'
                   : 'text-on-surface-variant hover:text-white'
               }`}
               title="Kin Cash"
@@ -2942,7 +2949,7 @@ export default function MobileApp() {
               }}
               className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 showBillPayModal || activeTab === 'bill-pay'
-                  ? 'text-primary font-bold'
+                  ? 'text-primary font-bold scale-105'
                   : 'text-on-surface-variant hover:text-white'
               }`}
               title="Bill Pay"
@@ -2961,12 +2968,12 @@ export default function MobileApp() {
               }}
               className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 showVaultModal || activeTab === 'vault'
-                  ? 'text-primary font-bold'
+                  ? 'text-primary font-bold scale-105'
                   : 'text-on-surface-variant hover:text-white'
               }`}
               title="Vault"
             >
-              <span className="material-symbols-outlined text-[24px]">shield</span>
+              <span className="material-symbols-outlined text-[24px]">shield_lock</span>
               <span className="font-label-caps text-[10px] tracking-tight">Vault</span>
             </button>
           </div>
