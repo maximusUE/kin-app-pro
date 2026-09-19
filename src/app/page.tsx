@@ -904,7 +904,7 @@ export default function MobileApp() {
           </div>
         </div>
 
-        {(activeTab === 'home' || activeTab === 'kin-cash') && (
+        {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay') && (
           <header className="flex items-center justify-between gap-2 mb-3 px-0.5">
             <div className="flex items-center gap-2">
               <KinLogo size={34} />
@@ -1102,7 +1102,7 @@ export default function MobileApp() {
               {/* Bill Pay */}
               <button
                 type="button"
-                onClick={() => setShowBillPayModal(true)}
+                onClick={() => setActiveTab('bill-pay')}
                 className="group flex flex-col items-center gap-1.5 cursor-pointer"
               >
                 <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
@@ -1319,6 +1319,21 @@ export default function MobileApp() {
               onP2PSuccess={handleP2PSuccess}
               contacts={contactsList}
               onViewHistory={() => setActiveTab('transactions')}
+              exchangeRate={USD_TO_MXN_RATE}
+            />
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SCREEN: "BILL PAY" (STITCH DASHBOARD TAB)                                 */}
+        {/* ========================================================================= */}
+        {activeTab === 'bill-pay' && (
+          <div className="animate-fade-in space-y-4">
+            <MexicanBillPayModal
+              isScreen={true}
+              isOpen={true}
+              onPaymentSuccess={handleBillPaymentSuccess}
+              selectedServiceId={selectedBillServiceId}
               exchangeRate={USD_TO_MXN_RATE}
             />
           </div>
@@ -2959,12 +2974,13 @@ export default function MobileApp() {
             <button
               type="button"
               onClick={() => {
-                setShowBillPayModal(true);
+                setActiveTab('bill-pay');
+                setShowBillPayModal(false);
                 setShowKinCashModal(false);
                 setShowVaultModal(false);
               }}
               className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                showBillPayModal || activeTab === 'bill-pay'
+                activeTab === 'bill-pay'
                   ? 'text-primary font-bold scale-105'
                   : 'text-on-surface-variant hover:text-white'
               }`}
