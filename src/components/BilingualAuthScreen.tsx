@@ -480,6 +480,20 @@ export function BilingualAuthScreen({
                   ? 'Al continuar confirmas estar de acuerdo con los Términos de Servicio y el Aviso de Privacidad Biométrico KIN.'
                   : 'By continuing you agree to KIN Terms of Service and Biometric Privacy Policy.'}
               </p>
+
+              {/* Direct Dashboard Access Link */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onLoginSuccess) onLoginSuccess();
+                  }}
+                  className="px-4 py-2 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-bold hover:bg-primary/20 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[16px]">dashboard</span>
+                  <span>{language === 'es' ? 'Entrar directo al Dashboard KIN →' : 'Direct to KIN Dashboard →'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </main>

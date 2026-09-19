@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   StatusBatteryIcon,
@@ -453,17 +453,29 @@ export default function MobileApp() {
     setTimeout(() => setCopiedClientId(false), 2000);
   };
 
-  // Authentication Gate State (Default false so the user can review and test the login screen)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  // Authentication Gate State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+
+  // Sincronizar parámetros de URL (?view=login para Login, ?view=dashboard para Dashboard)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const view = params.get('view');
+      const auth = params.get('auth');
+      if (view === 'login' || auth === 'login') {
+        setIsAuthenticated(false);
+      } else if (view === 'dashboard' || auth === 'skip' || auth === 'dashboard') {
+        setIsAuthenticated(true);
+      }
+    }
+  }, []);
 
   // Helper para Cerrar Sesión Segura
   const handleLogout = () => {
     if (confirm('¿Deseas cerrar tu sesión segura en KIN?')) {
       setIsAuthenticated(false);
       setActiveTab('home');
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('kin_auth');
-      }
+      router.push('/auth');
     }
   };
 
