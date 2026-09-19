@@ -82,6 +82,7 @@ import { KinCashP2PModal } from '@/components/KinCashP2PModal';
 import { ClientVaultModal } from '@/components/ClientVaultModal';
 import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
 import { KinLogo } from '@/components/KinLogo';
+import { BilingualAuthScreen } from '@/components/BilingualAuthScreen';
 
 // Tasa de cambio real de mercado USD/MXN
 const USD_TO_MXN_RATE = 20.45;
@@ -452,10 +453,17 @@ export default function MobileApp() {
     setTimeout(() => setCopiedClientId(false), 2000);
   };
 
+  // Authentication Gate State (Default false so the user can review and test the login screen)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
   // Helper para Cerrar Sesión Segura
   const handleLogout = () => {
     if (confirm('¿Deseas cerrar tu sesión segura en KIN?')) {
-      router.push('/auth');
+      setIsAuthenticated(false);
+      setActiveTab('home');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('kin_auth');
+      }
     }
   };
 
@@ -882,6 +890,21 @@ export default function MobileApp() {
     acc[group].push(tx);
     return acc;
   }, {});
+
+  // Si el usuario aún no ha iniciado sesión, desplegar pantalla de autenticación y login Stitch
+  if (!isAuthenticated) {
+    return (
+      <BilingualAuthScreen
+        initialMode="login"
+        onLoginSuccess={() => {
+          setIsAuthenticated(true);
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('kin_auth', 'true');
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] bg-[#06070B] text-white flex justify-center selection:bg-[#7047EB]/30 selection:text-[#2ED5A4]">
