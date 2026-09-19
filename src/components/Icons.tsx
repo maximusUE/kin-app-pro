@@ -536,7 +536,7 @@ export function AnyAgentLogo({ className = 'w-7 h-7' }: { className?: string }) 
     <svg className={className} viewBox="0 0 40 40" fill="none">
       <rect width="40" height="40" rx="10" fill="#181928" stroke="#2ED5A4" strokeWidth="1.5" />
       <path d="M20 9C16.134 9 13 12.134 13 16C13 21.25 20 28 20 28C20 28 27 21.25 27 16C27 12.134 23.866 9 20 9Z" fill="#2ED5A4" />
-      <circle cx="20" cy="16" r="3" fill="#0E0F1A" />
+      <circle cx="20" cy="16" r="3" fill="#FFFFFF" />
       <text x="20" y="35" textAnchor="middle" fill="#2ED5A4" fontSize="5.5" fontWeight="900" fontFamily="sans-serif">ANY AGENT</text>
     </svg>
   );

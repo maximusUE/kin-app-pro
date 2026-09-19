@@ -218,12 +218,12 @@ html, body {
 /* Floating Bottom Continue CTA for Send Money (Truly fixed to viewport, floating over everything) */
 .send-floating-cta-container {
   position: fixed;
-  bottom: 20px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 40px);
-  max-width: 360px;
-  z-index: 50;
+  width: calc(100% - 36px);
+  max-width: 364px;
+  z-index: 60;
   pointer-events: auto;
 }
 
