@@ -472,74 +472,136 @@ export function TransferSwapIcon({ className = 'w-4 h-4' }: { className?: string
 }
 
 // ============================================================================
-// LOGOS DE SUCURSALES DE COBRO EN EFECTIVO (CASH PICKUP MÉXICO)
+// ============================================================================
+// LOGOS OFICIALES DE SUCURSALES DE RETIRO Y BANCOS EN MÉXICO
 // ============================================================================
 
 export function BodegaAurreraLogo({ className = 'w-7 h-7' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="10" fill="#007934" />
-      <circle cx="20" cy="15" r="8" fill="#FFF200" />
-      <path d="M14 27C14 23 17 21 20 21C23 21 26 23 26 27H14Z" fill="#FFF200" />
-      <path d="M17 14C17 12.3431 18.3431 11 20 11C21.6569 11 23 12.3431 23 14C23 15.6569 21.6569 17 20 17C18.3431 17 17 15.6569 17 14Z" fill="#007934" />
-      <text x="20" y="35" textAnchor="middle" fill="#FFF" fontSize="6.5" fontWeight="900" fontFamily="sans-serif">AURRERA</text>
-    </svg>
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/bodega_aurrera.png" alt="Bodega Aurrera" className="w-full h-full object-contain" />
+    </div>
   );
 }
 
 export function OxxoLogo({ className = 'w-7 h-7' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="10" fill="#E21836" />
-      <rect x="4" y="9" width="32" height="22" rx="4" fill="#FFC800" />
-      <text x="20" y="25" textAnchor="middle" fill="#E21836" fontSize="11" fontWeight="900" fontFamily="Impact, Arial Black, sans-serif" letterSpacing="0.5">OXXO</text>
-    </svg>
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/oxxo.png" alt="OXXO" className="w-full h-full object-contain" />
+    </div>
   );
 }
 
 export function BancoppelLogo({ className = 'w-7 h-7' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="10" fill="#004B87" />
-      <circle cx="14" cy="15" r="4" fill="#FFC72C" />
-      <circle cx="26" cy="15" r="4" fill="#FFC72C" />
-      <path d="M12 25C12 22 16 20 20 20C24 20 28 22 28 25" stroke="#FFC72C" strokeWidth="2.5" strokeLinecap="round" />
-      <text x="20" y="34" textAnchor="middle" fill="#FFF" fontSize="6.5" fontWeight="800" fontFamily="sans-serif">BanCoppel</text>
-    </svg>
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/bancoppel.png" alt="BanCoppel" className="w-full h-full object-contain" />
+    </div>
   );
 }
 
 export function ElektraLogo({ className = 'w-7 h-7' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="10" fill="#E31B23" />
-      <circle cx="20" cy="16" r="8" fill="#FFD200" />
-      <path d="M16 16H24M16 13H24M16 19H22" stroke="#E31B23" strokeWidth="2" strokeLinecap="round" />
-      <text x="20" y="34" textAnchor="middle" fill="#FFF" fontSize="7" fontWeight="900" fontFamily="sans-serif">elektra</text>
-    </svg>
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/elektra.png" alt="Elektra" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function BancoAztecaLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/banco_azteca.png" alt="Banco Azteca" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function BbvaBancomerLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/bbva_bancomer.png" alt="BBVA Bancomer" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function SorianaLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/soriana.png" alt="Soriana" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function BanorteLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/banorte.png" alt="Banorte" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function WalmartLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/walmart.png" alt="Walmart" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function BanamexLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/banamex.png" alt="Citibanamex" className="w-full h-full object-contain" />
+    </div>
   );
 }
 
 export function FarmaciasGuadalajaraLogo({ className = 'w-7 h-7' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="10" fill="#003B70" />
-      <circle cx="20" cy="16" r="9" fill="#00A3E0" />
-      <path d="M20 11V21M15 16H25" stroke="#FFF" strokeWidth="3" strokeLinecap="round" />
-      <text x="20" y="34" textAnchor="middle" fill="#FFF" fontSize="5.5" fontWeight="800" fontFamily="sans-serif">F. GUADALAJARA</text>
-    </svg>
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/farmacias_guadalajara.png" alt="Farmacias Guadalajara" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function BansefiLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/bansefi.png" alt="Bansefi" className="w-full h-full object-contain" />
+    </div>
   );
 }
 
 export function AnyAgentLogo({ className = 'w-7 h-7' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="10" fill="#181928" stroke="#2ED5A4" strokeWidth="1.5" />
-      <path d="M20 9C16.134 9 13 12.134 13 16C13 21.25 20 28 20 28C20 28 27 21.25 27 16C27 12.134 23.866 9 20 9Z" fill="#2ED5A4" />
-      <circle cx="20" cy="16" r="3" fill="#FFFFFF" />
-      <text x="20" y="35" textAnchor="middle" fill="#2ED5A4" fontSize="5.5" fontWeight="900" fontFamily="sans-serif">ANY AGENT</text>
-    </svg>
+    <div className={`${className} bg-[#181928] border border-[#2ED5A4]/40 rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <svg className="w-full h-full" viewBox="0 0 40 40" fill="none">
+        <path d="M20 9C16.134 9 13 12.134 13 16C13 21.25 20 28 20 28C20 28 27 21.25 27 16C27 12.134 23.866 9 20 9Z" fill="#2ED5A4" />
+        <circle cx="20" cy="16" r="3" fill="#FFFFFF" />
+      </svg>
+    </div>
   );
+}
+
+/**
+ * Helper para obtener la URL del logo oficial según el nombre del banco o sucursal
+ */
+export function getBankLogoUrl(bankName?: string): string | null {
+  if (!bankName) return null;
+  const b = bankName.toLowerCase();
+  if (b.includes('coppel')) return '/logos/bancoppel.png';
+  if (b.includes('bbva') || b.includes('bancomer')) return '/logos/bbva_bancomer.png';
+  if (b.includes('azteca')) return '/logos/banco_azteca.png';
+  if (b.includes('banorte')) return '/logos/banorte.png';
+  if (b.includes('banamex') || b.includes('citibanamex')) return '/logos/banamex.png';
+  if (b.includes('oxxo')) return '/logos/oxxo.png';
+  if (b.includes('aurrera')) return '/logos/bodega_aurrera.png';
+  if (b.includes('walmart')) return '/logos/walmart.png';
+  if (b.includes('elektra')) return '/logos/elektra.png';
+  if (b.includes('soriana')) return '/logos/soriana.png';
+  if (b.includes('guadalajara')) return '/logos/farmacias_guadalajara.png';
+  if (b.includes('bansefi') || b.includes('bienestar')) return '/logos/bansefi.png';
+  return null;
 }
 
 export function ApplePayIcon({ className = 'w-6 h-6' }: { className?: string }) {

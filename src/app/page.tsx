@@ -44,8 +44,16 @@ import {
   OxxoLogo,
   BancoppelLogo,
   ElektraLogo,
+  BancoAztecaLogo,
+  BbvaBancomerLogo,
+  SorianaLogo,
+  BanorteLogo,
+  WalmartLogo,
+  BanamexLogo,
   FarmaciasGuadalajaraLogo,
+  BansefiLogo,
   AnyAgentLogo,
+  getBankLogoUrl,
   ApplePayIcon,
   CreditCardGradientIcon,
   DownloadIcon,
@@ -77,8 +85,15 @@ import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
 // Tasa de cambio real de mercado USD/MXN
 const USD_TO_MXN_RATE = 20.45;
 
-// Sucursales de Cash Pickup en México
+// Red Oficial de Sucursales de Retiro en Efectivo (Cash Pickup México - 12 Redes Oficiales)
 const CASH_PICKUP_STORES = [
+  {
+    id: 'oxxo',
+    name: 'OXXO',
+    subtitle: 'Más de 21,000 tiendas 24/7 en todo México',
+    badge: 'Popular 24/7',
+    Logo: OxxoLogo,
+  },
   {
     id: 'aurrera',
     name: 'Bodega Aurrera',
@@ -87,11 +102,25 @@ const CASH_PICKUP_STORES = [
     Logo: BodegaAurreraLogo,
   },
   {
-    id: 'oxxo',
-    name: 'OXXO',
-    subtitle: 'Más de 21,000 tiendas 24/7',
-    badge: 'Popular',
-    Logo: OxxoLogo,
+    id: 'walmart',
+    name: 'Walmart',
+    subtitle: 'Supercenter y Walmart Express en México',
+    badge: 'Nacional',
+    Logo: WalmartLogo,
+  },
+  {
+    id: 'elektra',
+    name: 'Elektra',
+    subtitle: 'Tiendas Elektra en todo el país',
+    badge: 'Inmediato',
+    Logo: ElektraLogo,
+  },
+  {
+    id: 'azteca',
+    name: 'Banco Azteca',
+    subtitle: 'Abierto 9am a 9pm los 365 días del año',
+    badge: 'Sin tarjeta',
+    Logo: BancoAztecaLogo,
   },
   {
     id: 'bancoppel',
@@ -101,23 +130,51 @@ const CASH_PICKUP_STORES = [
     Logo: BancoppelLogo,
   },
   {
-    id: 'elektra',
-    name: 'Elektra',
-    subtitle: 'Banco Azteca y tiendas Elektra',
-    badge: 'Inmediato',
-    Logo: ElektraLogo,
+    id: 'bbva',
+    name: 'BBVA Bancomer',
+    subtitle: 'Cajeros automáticos y ventanilla BBVA',
+    badge: 'Líder',
+    Logo: BbvaBancomerLogo,
+  },
+  {
+    id: 'banorte',
+    name: 'Banorte',
+    subtitle: 'Red nacional de sucursales y corresponsales',
+    badge: 'Disponible',
+    Logo: BanorteLogo,
+  },
+  {
+    id: 'banamex',
+    name: 'Citibanamex',
+    subtitle: 'Sucursales y centros de servicio Banamex',
+    badge: 'Disponible',
+    Logo: BanamexLogo,
+  },
+  {
+    id: 'soriana',
+    name: 'Soriana',
+    subtitle: 'Soriana Híper, Súper y City Club',
+    badge: 'Nacional',
+    Logo: SorianaLogo,
   },
   {
     id: 'guadalajara',
     name: 'Farmacias Guadalajara',
-    subtitle: 'Más de 2,600 sucursales',
-    badge: 'Disponible',
+    subtitle: 'Super Farmacia con servicio 24 horas',
+    badge: '24 Horas',
     Logo: FarmaciasGuadalajaraLogo,
   },
   {
+    id: 'bansefi',
+    name: 'Bansefi / Bienestar',
+    subtitle: 'El banco que te incluye en todo México',
+    badge: 'Cobertura rural',
+    Logo: BansefiLogo,
+  },
+  {
     id: 'any',
-    name: 'Any agent location',
-    subtitle: 'Más de 40,000 ubicaciones en México',
+    name: 'Cualquier agente (Any agent)',
+    subtitle: 'Red de más de 40,000 puntos en México',
     badge: 'Recomendado',
     Logo: AnyAgentLogo,
   },
@@ -1476,17 +1533,20 @@ export default function MobileApp() {
                     >
                       {/* Cluster of store logos */}
                       <div className="flex items-center -space-x-1.5 pt-1">
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white/10 flex items-center justify-center shadow-sm">
-                          <OxxoLogo className="w-5 h-5" />
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
+                          <img src="/logos/oxxo.png" alt="OXXO" className="w-full h-full object-contain" />
                         </div>
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white/10 flex items-center justify-center shadow-sm">
-                          <BodegaAurreraLogo className="w-5 h-5" />
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
+                          <img src="/logos/bodega_aurrera.png" alt="Aurrera" className="w-full h-full object-contain" />
                         </div>
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white/10 flex items-center justify-center shadow-sm">
-                          <ElektraLogo className="w-5 h-5" />
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
+                          <img src="/logos/elektra.png" alt="Elektra" className="w-full h-full object-contain" />
                         </div>
-                        <div className="w-6 h-6 rounded-full border border-[#181928] bg-white/20 flex items-center justify-center text-[8px] font-black text-white shadow-sm">
-                          More
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
+                          <img src="/logos/bbva_bancomer.png" alt="BBVA" className="w-full h-full object-contain" />
+                        </div>
+                        <div className="w-6 h-6 rounded-full border border-[#181928] bg-[#202236] flex items-center justify-center text-[8px] font-black text-[#2ED5A4] shadow-sm">
+                          +8
                         </div>
                       </div>
                       <div className="mt-2">
@@ -1494,8 +1554,8 @@ export default function MobileApp() {
                           Cash pickup <sup className="text-[9px] text-[#2ED5A4]">6</sup>
                         </p>
                         <span className="text-[10px] text-white font-bold flex items-center justify-center gap-1 mt-1">
-                          <span>{selectedStore ? CASH_PICKUP_STORES.find(s => s.id === selectedStore)?.name : 'Any agent location'}</span>
-                          <span className="text-white">▼</span>
+                          <span className="truncate max-w-[120px]">{selectedStore ? CASH_PICKUP_STORES.find(s => s.id === selectedStore)?.name : 'Cualquier agente'}</span>
+                          <span className="text-white text-[8px]">▼</span>
                         </span>
                       </div>
                     </button>
@@ -1553,16 +1613,18 @@ export default function MobileApp() {
 
                   {/* Cash Pickup Stores Expanded Grid */}
                   {deliveryMethod === 'cash' && (
-                    <div className="p-3 rounded-2xl bg-[#121320] border border-white/10 space-y-2 animate-fade-in">
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="uppercase tracking-wider text-white font-bold">
-                          Seleccionar tienda de cobro:
+                    <div className="p-3.5 rounded-2xl bg-[#121320] border border-white/10 space-y-2.5 animate-fade-in">
+                      <div className="flex items-center justify-between text-[11px] px-0.5">
+                        <span className="uppercase tracking-wider text-white font-extrabold flex items-center gap-1.5">
+                          <span className="text-[#2ED5A4]">📍</span>
+                          <span>Red de Retiro Oficial en México:</span>
                         </span>
-                        <span className="text-[#2ED5A4] font-bold">
-                          {CASH_PICKUP_STORES.find((s) => s.id === selectedStore)?.name} ✓
+                        <span className="text-[#2ED5A4] font-bold text-[10px] bg-[#2ED5A4]/15 px-2 py-0.5 rounded-full border border-[#2ED5A4]/30">
+                          {CASH_PICKUP_STORES.find((s) => s.id === selectedStore)?.name || 'OXXO'} ✓
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+
+                      <div className="grid grid-cols-3 gap-2 pt-1 max-h-[360px] overflow-y-auto pr-0.5 scrollbar-thin">
                         {CASH_PICKUP_STORES.map((store) => {
                           const isSelected = selectedStore === store.id;
                           const StoreLogo = store.Logo;
@@ -1571,20 +1633,34 @@ export default function MobileApp() {
                               key={store.id}
                               type="button"
                               onClick={() => setSelectedStore(store.id)}
-                              className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                              className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-between min-h-[76px] gap-1.5 cursor-pointer relative ${
                                 isSelected
-                                  ? 'bg-[#181928] border-[#2ED5A4] shadow-sm'
-                                  : 'bg-[#181928]/50 border-white/5 hover:border-white/15'
+                                  ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint ring-1 ring-[#2ED5A4]'
+                                  : 'bg-[#181928]/60 border-white/10 hover:border-white/25 hover:bg-[#181928]'
                               }`}
                             >
-                              <div className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center">
-                                <StoreLogo className="w-6 h-6" />
+                              {/* Logo Badge */}
+                              <div className="w-full h-8 flex items-center justify-center">
+                                <StoreLogo className="w-full h-full" />
                               </div>
-                              <span className={`text-[9px] truncate w-full font-bold ${
-                                isSelected ? 'text-[#2ED5A4]' : 'text-white'
-                              }`}>
-                                {store.name}
-                              </span>
+
+                              {/* Store Name & Badge */}
+                              <div className="w-full text-center">
+                                <span className={`text-[10px] truncate w-full font-bold block leading-tight ${
+                                  isSelected ? 'text-[#2ED5A4]' : 'text-white'
+                                }`}>
+                                  {store.name}
+                                </span>
+                                <span className="text-[8px] text-[#8E91A5] truncate w-full block mt-0.5 font-medium">
+                                  {store.badge}
+                                </span>
+                              </div>
+
+                              {isSelected && (
+                                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#2ED5A4] text-[#06070B] font-black text-[9px] flex items-center justify-center shadow-md">
+                                  ✓
+                                </div>
+                              )}
                             </button>
                           );
                         })}
@@ -2320,9 +2396,16 @@ export default function MobileApp() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-white">{currentRecipient.name}</p>
-                        <p className="text-[10px] text-white/80">
-                          {currentRecipient.bank || 'Cuenta Bancaria SPEI'} • CLABE verificada
-                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {getBankLogoUrl(currentRecipient.bank) && (
+                            <div className="w-3.5 h-3.5 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
+                              <img src={getBankLogoUrl(currentRecipient.bank)!} alt={currentRecipient.bank} className="w-full h-full object-contain" />
+                            </div>
+                          )}
+                          <p className="text-[10px] text-white/90">
+                            {currentRecipient.bank || 'Cuenta Bancaria SPEI'} • CLABE verificada
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] text-[10px] font-bold border border-[#2ED5A4]/20">

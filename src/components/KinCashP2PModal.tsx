@@ -13,6 +13,7 @@ import {
   SearchIcon,
   CloseIcon,
   ChevronRightIcon,
+  getBankLogoUrl,
 } from './Icons';
 
 export interface ContactItem {
@@ -395,9 +396,15 @@ export function KinCashP2PModal({
                           </div>
                           <div>
                             <p className="text-xs font-bold text-white leading-tight">{c.fullName}</p>
-                            <p className="text-[10px] text-[#8E91A5] mt-0.5">
-                              {c.role} • <span className="text-[#2ED5A4]">{c.bank}</span>
-                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] text-[#8E91A5]">{c.role} •</span>
+                              {getBankLogoUrl(c.bank) && (
+                                <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
+                                  <img src={getBankLogoUrl(c.bank)!} alt={c.bank} className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                              <span className="text-[10px] text-[#2ED5A4] font-semibold">{c.bank}</span>
+                            </div>
                           </div>
                         </div>
 
@@ -511,9 +518,16 @@ export function KinCashP2PModal({
                       <p className="text-xs font-black text-white group-hover:text-[#2ED5A4] transition-colors leading-tight">
                         {recipient || 'Toca para seleccionar destinatario'}
                       </p>
-                      <p className="text-[10px] text-[#8E91A5] mt-0.5">
-                        {selectedContact ? `${selectedContact.bank} • Red KIN` : 'Toca para abrir agenda y buscar'}
-                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {selectedContact && getBankLogoUrl(selectedContact.bank) && (
+                          <div className="w-3.5 h-3.5 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
+                            <img src={getBankLogoUrl(selectedContact.bank)!} alt={selectedContact.bank} className="w-full h-full object-contain" />
+                          </div>
+                        )}
+                        <p className="text-[10px] text-[#8E91A5]">
+                          {selectedContact ? `${selectedContact.bank} • Red KIN` : 'Toca para abrir agenda y buscar'}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
