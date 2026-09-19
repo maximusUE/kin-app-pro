@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 export interface BilingualAuthScreenProps {
-  onLoginSuccess?: () => void;
+  onLoginSuccess?: (userData?: any) => void;
   initialMode?: 'login' | 'register';
 }
 
@@ -15,18 +15,18 @@ export function BilingualAuthScreen({
   const [language, setLanguage] = useState<'es' | 'en'>('es');
 
   // Register state
-  const [firstName, setFirstName] = useState('Mateo');
-  const [lastName, setLastName] = useState('Morales');
-  const [phone, setPhone] = useState('(555) 349-2910');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [phonePrefix, setPhonePrefix] = useState('+1');
-  const [email, setEmail] = useState('mateo.morales@gmail.com');
-  const [password, setPassword] = useState('KinVault2025$Secure');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(true);
 
   // Login state
-  const [loginEmail, setLoginEmail] = useState('mateo.morales@gmail.com');
-  const [loginPassword, setLoginPassword] = useState('KinVault2025$Secure');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Status
@@ -36,42 +36,130 @@ export function BilingualAuthScreen({
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!firstName.trim() || !email.trim()) {
+      showToast(language === 'es' ? 'Por favor completa tu nombre y correo' : 'Please enter your name and email');
+      return;
+    }
+
     setIsLoading(true);
     showToast(language === 'es' ? 'Creando bóveda cifrada en ClientVault...' : 'Creating encrypted ClientVault...');
-    setTimeout(() => {
-      setIsLoading(false);
-      if (onLoginSuccess) {
-        onLoginSuccess();
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          phone: `${phonePrefix} ${phone}`.trim(),
+          email: email.trim(),
+          password: password.trim() || 'KinVault2025$Secure',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Error al registrar');
       }
-    }, 1200);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kin_active_user', JSON.stringify(data.user));
+        sessionStorage.setItem('kin_auth', 'true');
+      }
+
+      showToast(language === 'es' ? '¡Bienvenido a KIN! Bono asignado ⚡' : 'Welcome to KIN! Welcome bonus credited ⚡');
+      setTimeout(() => {
+        setIsLoading(false);
+        if (onLoginSuccess) {
+          onLoginSuccess(data.user);
+        }
+      }, 700);
+    } catch (err: any) {
+      setIsLoading(false);
+      showToast(err.message || 'Error en el registro');
+    }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!loginEmail.trim()) {
+      showToast(language === 'es' ? 'Por favor ingresa tu correo' : 'Please enter your email');
+      return;
+    }
+
     setIsLoading(true);
     showToast(language === 'es' ? 'Autenticando credenciales KIN...' : 'Authenticating KIN credentials...');
-    setTimeout(() => {
-      setIsLoading(false);
-      if (onLoginSuccess) {
-        onLoginSuccess();
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailOrPhone: loginEmail.trim(),
+          password: loginPassword.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Credenciales inválidas');
       }
-    }, 1000);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kin_active_user', JSON.stringify(data.user));
+        sessionStorage.setItem('kin_auth', 'true');
+      }
+
+      setTimeout(() => {
+        setIsLoading(false);
+        if (onLoginSuccess) {
+          onLoginSuccess(data.user);
+        }
+      }, 600);
+    } catch (err: any) {
+      setIsLoading(false);
+      showToast(err.message || 'Error al iniciar sesión');
+    }
   };
 
-  const handleFaceId = () => {
+  const handleFaceId = async () => {
     setIsFaceIdLoading(true);
     showToast(language === 'es' ? 'Verificando datos biométricos Face ID ⚡' : 'Verifying biometric Face ID ⚡');
-    setTimeout(() => {
-      setIsFaceIdLoading(false);
-      if (onLoginSuccess) {
-        onLoginSuccess();
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          isBiometric: true,
+          emailOrPhone: loginEmail.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.user) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('kin_active_user', JSON.stringify(data.user));
+          sessionStorage.setItem('kin_auth', 'true');
+        }
+        setTimeout(() => {
+          setIsFaceIdLoading(false);
+          if (onLoginSuccess) {
+            onLoginSuccess(data.user);
+          }
+        }, 700);
+      } else {
+        throw new Error('Biometría no reconocida');
       }
-    }, 1100);
+    } catch (err: any) {
+      setIsFaceIdLoading(false);
+      showToast(err.message || 'Error con Face ID');
+    }
   };
 
   return (

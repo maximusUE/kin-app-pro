@@ -14,7 +14,7 @@ export default function AuthPage() {
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('kin_auth', 'true');
         }
-        router.push('/');
+        router.push('/?view=dashboard');
       }}
     />
   );

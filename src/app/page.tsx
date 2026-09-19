@@ -406,6 +406,8 @@ export default function MobileApp() {
   const [activeTab, setActiveTab] = useState<'home' | 'send' | 'bills' | 'transactions' | 'wallet' | 'send-quick' | 'profile' | 'kin-cash' | 'bill-pay' | 'vault'>('home');
 
   // Client registration & KYC profile state
+  const [userId, setUserId] = useState<string>('user-001');
+  const [baseBalanceUSD, setBaseBalanceUSD] = useState<number>(2450.00);
   const [userName, setUserName] = useState('César U.');
   const [userFirstName, setUserFirstName] = useState('César');
   const [userLastName, setUserLastName] = useState('Urrutia');
@@ -428,6 +430,43 @@ export default function MobileApp() {
   const [language, setLanguage] = useState<'es' | 'en'>('es');
   const [copiedClientId, setCopiedClientId] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+
+  const loadUserData = (user: any) => {
+    if (!user) return;
+    if (user.id) setUserId(user.id);
+    if (user.firstName) setUserFirstName(user.firstName);
+    if (user.lastName) setUserLastName(user.lastName);
+    if (user.name) setUserName(user.name);
+    if (user.email) setUserEmail(user.email);
+    if (user.phone) setUserPhone(user.phone);
+    if (user.city) setUserCity(user.city);
+    if (user.state) setUserState(user.state);
+    if (user.zip) setUserZip(user.zip);
+    if (user.country) setUserCountry(user.country);
+    if (user.avatar) setUserAvatar(user.avatar);
+    if (user.clientId) setUserClientId(user.clientId);
+    if (user.memberSince) setUserMemberSince(user.memberSince);
+    if (user.docType) setUserDocType(user.docType);
+    if (user.docNumber) setUserDocNumber(user.docNumber);
+    if (user.kycTier) setUserKycTier(user.kycTier);
+    if (user.dailyLimit) setUserDailyLimit(user.dailyLimit);
+    if (typeof user.balanceUSD === 'number') setBaseBalanceUSD(user.balanceUSD);
+  };
+
+  // Cargar usuario guardado en localStorage al inicio
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('kin_active_user');
+      if (savedUser) {
+        try {
+          const parsed = JSON.parse(savedUser);
+          loadUserData(parsed);
+        } catch (e) {
+          console.warn('[LocalStorage] parse error', e);
+        }
+      }
+    }
+  }, []);
   
   // Draft buffer state for profile editing (Solo se aplica al dar clic en 'Guardar')
   const [draftUserName, setDraftUserName] = useState('César U.');
@@ -470,9 +509,33 @@ export default function MobileApp() {
     }
   }, []);
 
+  // Sincronizar datos reactivos de cuenta desde el backend
+  useEffect(() => {
+    if (userId) {
+      fetch(`/api/account/data?userId=${encodeURIComponent(userId)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.user) {
+            loadUserData(data.user);
+            if (Array.isArray(data.transactions) && data.transactions.length > 0) {
+              setTransactions(data.transactions);
+            }
+            if (Array.isArray(data.contacts) && data.contacts.length > 0) {
+              setContactsList(data.contacts);
+            }
+          }
+        })
+        .catch((err) => console.warn('[Backend Sync]', err));
+    }
+  }, [userId]);
+
   // Helper para Cerrar Sesión Segura
   const handleLogout = () => {
     if (confirm('¿Deseas cerrar tu sesión segura en KIN?')) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('kin_active_user');
+        sessionStorage.removeItem('kin_auth');
+      }
       setIsAuthenticated(false);
       setActiveTab('home');
       router.push('/auth');
@@ -728,6 +791,20 @@ export default function MobileApp() {
     };
 
     setTransactions((prev) => [newTx, ...prev]);
+    setBaseBalanceUSD((prev) => +(prev - totalPaid).toFixed(2));
+
+    // Despacho asíncrono hacia el backend SPEI
+    fetch('/api/spei/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        recipientName: selectedAvatar.name,
+        amountUSD: amt,
+        deliveryMethod,
+        pickupStore: selectedStore,
+      }),
+    }).catch((e) => console.warn('[SPEI API error]', e));
 
     setSendSuccessData({
       id: txId,
@@ -766,6 +843,18 @@ export default function MobileApp() {
     };
 
     setTransactions((prev) => [newTx, ...prev]);
+    setBaseBalanceUSD((prev) => +(prev - amt).toFixed(2));
+
+    fetch('/api/spei/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        recipientName: recipient.name,
+        amountUSD: amt,
+        deliveryMethod: 'bank',
+      }),
+    }).catch((e) => console.warn('[SPEI Quick API error]', e));
 
     setSendSuccessData({
       id: txId,
@@ -804,6 +893,17 @@ export default function MobileApp() {
       status: 'Completado',
     };
     setTransactions((prev) => [newTx, ...prev]);
+    setBaseBalanceUSD((prev) => +(prev - amountUSD).toFixed(2));
+
+    fetch('/api/bills/pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        serviceName: service,
+        amountMXN,
+      }),
+    }).catch((e) => console.warn('[BillPay API error]', e));
 
     // Actualizar lista de servicios frecuentes (ordenados de menor a mayor frecuencia)
     setFrequentServices((prev) => {
@@ -849,6 +949,17 @@ export default function MobileApp() {
       status: 'Completado',
     };
     setTransactions((prev) => [newTx, ...prev]);
+    setBaseBalanceUSD((prev) => +(prev - amountUSD).toFixed(2));
+
+    fetch('/api/kin-cash/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        recipientName: recipient,
+        amountUSD,
+      }),
+    }).catch((e) => console.warn('[KIN Cash API error]', e));
   };
 
   // Totales calculados dinámicamente
@@ -860,11 +971,10 @@ export default function MobileApp() {
     .filter((t) => t.type === 'expense')
     .reduce((acc, t) => acc + Math.abs(t.amount), 0);
 
-  const netBalance = 12458.90 + totalIncome - totalExpense;
+  const netBalance = baseBalanceUSD;
 
-  // Stitch Executive Dashboard: balance base $2,450.00 USD
-  const initialNet = 1925.00 - 298.20;
-  const executiveBalance = 2450.00 + (totalIncome - totalExpense - initialNet);
+  // Stitch Executive Dashboard: balance dinámico reactivo
+  const executiveBalance = baseBalanceUSD;
 
   // Filtered transactions for Stitch Executive Activity feed
   const filteredDashboardTransactions = transactions.filter((tx) => {
@@ -908,8 +1018,11 @@ export default function MobileApp() {
     return (
       <BilingualAuthScreen
         initialMode="login"
-        onLoginSuccess={() => {
+        onLoginSuccess={(userData) => {
           setIsAuthenticated(true);
+          if (userData) {
+            loadUserData(userData);
+          }
           if (typeof window !== 'undefined') {
             sessionStorage.setItem('kin_auth', 'true');
           }
