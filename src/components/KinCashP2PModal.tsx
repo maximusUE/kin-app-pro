@@ -2,22 +2,12 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  ChevronLeftIcon,
-  PhoneIcon,
-  CheckCircleIcon,
-  ArrowRightIcon,
-  StatusCellularIcon,
-  StatusWifiIcon,
-  StatusBatteryIcon,
-  SearchIcon,
   CloseIcon,
+  SearchIcon,
   ChevronRightIcon,
-  ChevronDownIcon,
   getBankLogoUrl,
-  FingerprintIcon,
-  QrCodeScannerIcon,
-  SwapHorizIcon,
-  BackspaceIcon,
+  StatusCellularIcon,
+  StatusBatteryIcon,
 } from './Icons';
 import { KinLogo } from './KinLogo';
 
@@ -41,7 +31,8 @@ const DEFAULT_CONTACTS: ContactItem[] = [
     role: 'Mother ❤️',
     country: 'Mexico',
     bank: 'BBVA México • SPEI Instant',
-    photoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    photoUrl:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCR4QM3Ii7ReWis7XIvW_01srAlE5v87-taEbIXdp2CYeQ3QfX_4MyveQuVM548GxHcgyKSlQLK__CXswxVUGY6-Qug4uXot1-yKZBTJY6q10s45S297XOfkfcOpmkxo02hU8TDReJPhBLCVygk3gIdKV_qzMQgSfXchTAjRWHU4yqbsRIWFQxzYhiUg0mIRuYmPRpiVbFoE9LAf0el6wcZ9B_wfB9afCEKwnKyUBpBcIlvgp5gT3NF',
   },
   {
     id: '1',
@@ -95,26 +86,28 @@ const DEFAULT_CONTACTS: ContactItem[] = [
   },
 ];
 
-interface KinCashP2PModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+export interface KinCashP2PModalProps {
+  isOpen?: boolean;
+  isScreen?: boolean;
+  onClose?: () => void;
   onP2PSuccess?: (recipient: string, amountMXN: number) => void;
   contacts?: ContactItem[];
   onViewHistory?: () => void;
+  exchangeRate?: number;
 }
 
 export function KinCashP2PModal({
-  isOpen,
+  isOpen = true,
+  isScreen = false,
   onClose,
   onP2PSuccess,
   contacts = DEFAULT_CONTACTS,
   onViewHistory,
+  exchangeRate = 20.45,
 }: KinCashP2PModalProps) {
-  const exchangeRate = 20.45;
   const [currentAmount, setCurrentAmount] = useState('120.00');
   const [selectedContact, setSelectedContact] = useState<ContactItem>(contacts[0] || DEFAULT_CONTACTS[0]);
   const [conceptNote, setConceptNote] = useState('Groceries & medicine for the week');
-  const [isEditingNote, setIsEditingNote] = useState(false);
   const [showContactPicker, setShowContactPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -129,6 +122,13 @@ export function KinCashP2PModal({
   // Recalcular montos en MXN
   const numAmount = parseFloat(currentAmount) || 0;
   const mxnEquivalent = (numAmount * exchangeRate).toFixed(2);
+
+  // Sincronizar contacto inicial si cambian los contactos
+  useEffect(() => {
+    if (contacts.length > 0 && (!selectedContact || !contacts.some((c) => c.id === selectedContact.id))) {
+      setSelectedContact(contacts[0]);
+    }
+  }, [contacts, selectedContact]);
 
   // Filtrado reactivo de contactos
   const filteredContacts = useMemo(() => {
@@ -200,10 +200,12 @@ export function KinCashP2PModal({
         setIsDispatched(false);
         setSlideX(0);
         setStatusMessage(null);
-        onClose();
-      }, 2000);
+        if (!isScreen && onClose) {
+          onClose();
+        }
+      }, 2200);
     } else {
-      // Regreso con resorte
+      // Regreso suave elástico
       setSlideX(0);
     }
   };
@@ -227,20 +229,380 @@ export function KinCashP2PModal({
     };
   }, [isDragging, slideX]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isScreen) return null;
 
+  // Renderizado del contenido central KIN Cash adaptado de Stitch code.html
+  const content = (
+    <div className="flex flex-col w-full gap-5 animate-fade-in">
+      {/* 1. Sub-header & Value Prop Banner */}
+      <div className="flex items-start justify-between gap-3 bg-surface-container-high/60 backdrop-blur-md p-4 rounded-xl shadow-lg relative overflow-hidden border border-white/5">
+        <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-primary shadow-[0_0_16px_rgba(87,242,191,0.25)]">
+            <span className="material-symbols-outlined text-[22px]">swap_horiz</span>
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="font-title-base text-title-base text-white">KIN Cash Express</span>
+              <span className="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-caps text-[10px] tracking-wider uppercase font-bold">
+                Zero-Fee
+              </span>
+            </div>
+            <p className="font-caption-sm text-caption-sm text-on-surface-variant mt-0.5 leading-snug">
+              Instant Zero-Fee P2P Transits across USA &amp; Mexico via KIN Phone or Handle ($kinhandle)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Recipient Picker Module */}
+      <div className="flex flex-col gap-3 bg-surface-container p-4 rounded-xl shadow-xl relative border border-white/5">
+        <div className="flex items-center justify-between">
+          <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            Recipient
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowContactPicker(true)}
+            className="flex items-center gap-1 text-primary font-caption-sm text-caption-sm active:opacity-75 transition-opacity cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">contacts</span>
+            <span>Recent ({contacts.length})</span>
+          </button>
+        </div>
+
+        {/* Contact Search Input */}
+        <div className="relative flex items-center">
+          <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px]">
+            search
+          </span>
+          <input
+            className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-lowest text-white font-body-base text-body-medium placeholder:text-outline focus:outline-none focus:bg-surface-container-high transition-all border border-white/5"
+            id="recipientSearch"
+            placeholder="Search name, $handle, phone, CLABE..."
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (!showContactPicker && e.target.value.trim().length > 0) {
+                setShowContactPicker(true);
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => alert('Escáner QR listo para escanear Handle o CLABE')}
+            className="material-symbols-outlined absolute right-3 text-on-surface-variant text-[18px] hover:text-white cursor-pointer"
+          >
+            qr_code_scanner
+          </button>
+        </div>
+
+        {/* Selected Recipient Hero Pill */}
+        <div
+          onClick={() => setShowContactPicker(true)}
+          className="flex items-center justify-between bg-surface-container-high p-3 rounded-xl shadow-inner group cursor-pointer border border-white/5 hover:border-primary/30 transition-all"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative shrink-0 w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-primary to-secondary">
+              <img
+                className="w-full h-full rounded-full object-cover"
+                alt={selectedContact.name}
+                src={selectedContact.photoUrl}
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shadow-md">
+                <span
+                  className="material-symbols-outlined text-[#004481] text-[14px] font-bold"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  account_balance
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-title-base text-title-base text-white truncate font-semibold">
+                  {selectedContact.name}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary font-caption-sm text-[11px] font-semibold shrink-0">
+                  {selectedContact.role}
+                </span>
+              </div>
+              <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
+                {selectedContact.fullName} • +52 33 1459 8820
+              </span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="font-label-caps text-label-caps text-primary-fixed-dim">
+                  {selectedContact.bank}
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-white shrink-0 ml-2 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">expand_more</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 3. Giant Centered Amount Display */}
+      <div className="flex flex-col items-center justify-center pt-2 pb-1 relative">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-caption-sm text-caption-sm font-medium">
+            USD Transit Balance: $1,450.80
+          </span>
+        </div>
+
+        {/* Amount Hero */}
+        <div className="flex items-baseline justify-center gap-1.5 select-none tracking-tight">
+          <span className="font-display-hero text-headline-lg text-primary font-bold leading-none">$</span>
+          <span className="font-headline-lg text-[44px] text-white font-bold leading-none tracking-tight">
+            {currentAmount}
+          </span>
+        </div>
+
+        {/* Live FX & Fee Guarantee */}
+        <div className="flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-surface-container-high/80 backdrop-blur-sm border border-white/5">
+          <span className="material-symbols-outlined text-primary text-[15px] animate-pulse">bolt</span>
+          <span className="font-financial-mono text-caption-sm text-primary font-bold">
+            ≈ ${Number(mxnEquivalent).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+          </span>
+          <span className="text-outline text-[12px]">•</span>
+          <span className="font-caption-sm text-caption-sm text-white font-medium">Zero Fees</span>
+        </div>
+
+        {/* Transfer Concept Note Chip (Editable) */}
+        <div className="mt-4 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-all cursor-pointer shadow-sm border border-white/5">
+          <span className="text-[14px]">🛒</span>
+          <input
+            className="bg-transparent border-none text-white font-caption-sm text-caption-sm focus:outline-none w-56 text-center truncate"
+            placeholder="Add payment concept note..."
+            type="text"
+            value={conceptNote}
+            onChange={(e) => setConceptNote(e.target.value)}
+          />
+          <span className="material-symbols-outlined text-on-surface-variant text-[14px]">edit</span>
+        </div>
+      </div>
+
+      {/* 4. Tactical Numeric Keypad */}
+      <div className="grid grid-cols-3 gap-2 px-1">
+        {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => pressKey(key)}
+            className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
+          >
+            {key}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => pressKey('.')}
+          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[24px] font-bold shadow-md cursor-pointer border border-white/5"
+        >
+          •
+        </button>
+        <button
+          type="button"
+          onClick={() => pressKey('0')}
+          className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
+        >
+          0
+        </button>
+        <button
+          type="button"
+          onClick={pressBackspace}
+          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-on-surface-variant hover:text-white shadow-md cursor-pointer border border-white/5"
+          aria-label="Borrar número"
+        >
+          <span className="material-symbols-outlined text-[22px]">backspace</span>
+        </button>
+      </div>
+
+      {/* 5. Biometric Slide-to-Confirm Interactive Module */}
+      <div className="flex flex-col gap-2 mt-1">
+        <div
+          ref={trackRef}
+          className="relative w-full h-[58px] rounded-full bg-surface-container-high p-1.5 flex items-center shadow-2xl overflow-hidden select-none border border-white/10"
+        >
+          {/* Glow trail behind thumb */}
+          <div
+            className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-primary/30 to-primary/60 rounded-full transition-all duration-75"
+            style={{ width: `${slideX + 46}px` }}
+          />
+
+          {/* Slide Instruction Label */}
+          <div
+            className="w-full flex items-center justify-center gap-1.5 text-on-surface-variant font-title-base text-body-medium pl-10 pr-4 pointer-events-none transition-opacity"
+            style={{
+              opacity: trackRef.current
+                ? Math.max(0, 1 - (slideX / ((trackRef.current.clientWidth - 58) || 1)) * 1.5)
+                : 1,
+            }}
+          >
+            <span className="text-white font-semibold">Slide to send</span>
+            <span className="text-primary font-financial-mono font-bold">
+              ${Number(numAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="material-symbols-outlined text-[18px] text-white">chevron_right</span>
+          </div>
+
+          {/* Transfer status overlay message */}
+          {statusMessage && (
+            <div className="absolute inset-0 flex items-center justify-center bg-primary text-on-primary font-black text-xs tracking-wide animate-fade-in z-20">
+              {statusMessage}
+            </div>
+          )}
+
+          {/* Interactive Slider Thumb Knob */}
+          <div
+            onMouseDown={(e) => handleDragStart(e.clientX)}
+            onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+            onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
+            onTouchEnd={handleDragEnd}
+            style={{ transform: `translateX(${slideX}px)` }}
+            className={`absolute left-1.5 top-1.5 w-[46px] h-[46px] rounded-full bg-gradient-to-tr from-primary-container to-primary flex items-center justify-center text-on-primary-container cursor-grab active:cursor-grabbing shadow-[0_4px_20px_rgba(46,213,164,0.45)] z-10 transition-transform ${
+              isDragging ? 'duration-0' : 'duration-200'
+            }`}
+          >
+            {isDispatched ? (
+              <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold animate-scale-in">
+                task_alt
+              </span>
+            ) : (
+              <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold">
+                {slideX > 150 ? 'check' : 'fingerprint'}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 6. Trust, Speed & Compliance Badging */}
+      <div className="flex items-center justify-center gap-2 py-1 px-3">
+        <span className="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+        <p className="font-caption-sm text-[11px] text-on-surface-variant text-center font-medium">
+          Secured by Banxico SPEI • Direct Settlement • FDIC-insured partner bank
+        </p>
+      </div>
+
+      {/* Contact Picker Bottom Sheet Modal */}
+      {showContactPicker && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end justify-center animate-fade-in"
+          onClick={() => setShowContactPicker(false)}
+        >
+          <div
+            className="w-full max-w-[400px] bg-surface-container border-t border-white/10 rounded-t-3xl p-5 max-h-[85vh] flex flex-col shadow-2xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Grab handle */}
+            <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4" />
+
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-base font-bold text-white font-title-base">Seleccionar Destinatario</h3>
+                <p className="text-xs text-on-surface-variant">Agenda de transferencias frecuentes KIN</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowContactPicker(false)}
+                className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Internal Search */}
+            <div className="relative mb-3">
+              <SearchIcon className="w-4 h-4 absolute left-3 top-3 text-on-surface-variant" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, banco o parentesco..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 pl-9 pr-3 rounded-xl bg-surface-container-lowest border border-white/10 text-white text-xs placeholder:text-outline focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            {/* Contacts list */}
+            <div className="space-y-2 overflow-y-auto flex-1 pr-1 scrollbar-thin">
+              {filteredContacts.map((c) => {
+                const isSelected = selectedContact.id === c.id;
+                const bankLogo = getBankLogoUrl(c.bank);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedContact(c);
+                      setShowContactPicker(false);
+                    }}
+                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                      isSelected
+                        ? 'bg-surface-container-high border-primary shadow-glow-mint'
+                        : 'bg-surface-container-lowest/60 border-white/5 hover:border-white/15'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
+                        <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-white leading-tight font-title-base">
+                            {c.fullName}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded-full bg-secondary/15 text-secondary text-[9px] font-bold">
+                            {c.role}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {bankLogo && (
+                            <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
+                              <img src={bankLogo} alt={c.bank} className="w-full h-full object-contain" />
+                            </div>
+                          )}
+                          <span className="text-[10px] text-primary font-semibold">{c.bank}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {isSelected ? (
+                      <span className="text-xs font-black text-primary">✓</span>
+                    ) : (
+                      <ChevronRightIcon className="w-4 h-4 text-on-surface-variant" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // Si se usa como pantalla integrada dentro del dashboard (activeTab === 'kin-cash')
+  if (isScreen) {
+    return content;
+  }
+
+  // Si se usa como modal de pantalla completa tradicional
   return (
     <div className="fixed inset-0 z-50 bg-[#06070B] text-white flex justify-center selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4] overflow-y-auto animate-fade-in">
-      {/* Smartphone Frame Container */}
-      <div className="w-full max-w-[400px] flex flex-col relative min-h-screen pb-6 px-4">
-        {/* Glow de fondo atmosférico difuso KIN */}
+      <div className="w-full max-w-[400px] flex flex-col relative min-h-screen pb-24 px-4">
+        {/* Glow de fondo atmosférico */}
         <div className="bicolor-atmosphere-glow" />
 
-        {/* ===================================================================== */}
-        {/* 1. TOP HEADER & DYNAMIC ISLAND STATUS BAR                            */}
-        {/* ===================================================================== */}
-        <header className="sticky top-0 z-40 bg-[#06070B]/90 backdrop-blur-xl pt-2 pb-2.5 -mx-4 px-4 border-b border-white/5">
-          {/* Status Bar */}
+        {/* Modal Top Header with Close */}
+        <header className="sticky top-0 z-40 bg-[#06070B]/90 backdrop-blur-xl pt-2 pb-2.5 -mx-4 px-4 border-b border-white/5 mb-4">
           <div className="flex items-center justify-between text-[11px] font-semibold text-[#8E91A5] mb-2 px-1">
             <span className="font-mono text-white">9:41</span>
             <div className="h-3 w-16 bg-[#121320] rounded-full mx-auto shadow-inner" />
@@ -251,419 +613,25 @@ export function KinCashP2PModal({
             </div>
           </div>
 
-          {/* Nav Header */}
-          <div className="flex items-center justify-between gap-2">
-            {/* Botón Atrás / Cerrar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <KinLogo size={28} />
+              <div className="flex flex-col leading-none">
+                <span className="font-headline-md text-sm font-bold tracking-tight text-white">KIN</span>
+                <span className="font-label-caps text-[8px] uppercase tracking-widest text-primary">Global</span>
+              </div>
+            </div>
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white transition-colors flex-shrink-0 cursor-pointer border border-white/5 shadow-sm"
-              title="Volver al Dashboard"
+              className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+              <CloseIcon className="w-4 h-4" />
             </button>
-
-            {/* KIN Global Branding */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <KinLogo size={28} />
-              <div className="flex flex-col leading-none">
-                <span className="font-extrabold text-sm tracking-tight text-white">KIN</span>
-                <span className="text-[8px] uppercase tracking-widest text-[#2ED5A4] font-bold">Global</span>
-              </div>
-            </div>
-
-            {/* Píldora de Cotización FX en vivo */}
-            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#181928] border border-white/10 text-xs shadow-inner">
-              <span className="font-mono text-[11px] font-bold text-white">1 USD = 20.45 MXN</span>
-              <span className="text-[#2ED5A4] text-xs animate-pulse">⚡</span>
-            </div>
-
-            {/* Avatar Verificado */}
-            <div className="relative w-8 h-8 rounded-full p-0.5 bg-[#181928] border border-white/15 flex-shrink-0">
-              <img
-                src={selectedContact.photoUrl}
-                alt="Profile"
-                className="w-full h-full rounded-full object-cover"
-              />
-              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center text-[8px] font-black text-[#0E0F1A] shadow-sm">
-                ✓
-              </div>
-            </div>
           </div>
         </header>
 
-        {/* ===================================================================== */}
-        {/* 2. VALUE PROP BANNER: KIN CASH EXPRESS                                */}
-        {/* ===================================================================== */}
-        <div className="mt-3 flex items-center justify-between gap-3 bg-[#181928]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg relative overflow-hidden">
-          <div className="absolute -right-6 -top-6 w-20 h-20 bg-[#2ED5A4]/10 rounded-full blur-xl pointer-events-none" />
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center shrink-0 text-[#2ED5A4] shadow-glow-mint">
-              <SwapHorizIcon className="w-5 h-5 text-[#2ED5A4]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-black text-white tracking-tight">KIN Cash Express</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-[#2ED5A4] text-[#06070B] font-black text-[9px] tracking-wider uppercase">
-                  Zero-Fee
-                </span>
-              </div>
-              <p className="text-[11px] text-[#8E91A5] mt-0.5 leading-snug">
-                Envíos P2P instantáneos sin comisiones USA ➔ México vía SPEI Banxico
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ===================================================================== */}
-        {/* 3. RECIPIENT PICKER MODULE (SEARCH + HERO CARD)                       */}
-        {/* ===================================================================== */}
-        <div className="mt-3 flex flex-col gap-2.5 bg-[#121320] p-3.5 rounded-2xl border border-white/10 shadow-xl">
-          <div className="flex items-center justify-between px-0.5">
-            <span className="text-[10px] font-extrabold text-[#8E91A5] uppercase tracking-wider">
-              Destinatario
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowContactPicker(true)}
-              className="flex items-center gap-1 text-[#2ED5A4] text-xs font-bold hover:underline cursor-pointer"
-            >
-              <span>Contactos ({contacts.length})</span>
-              <span className="text-[11px]">👥</span>
-            </button>
-          </div>
-
-          {/* Quick Search Bar with QR Scanner */}
-          <div className="relative flex items-center">
-            <SearchIcon className="w-4 h-4 absolute left-3 text-[#8E91A5]" />
-            <input
-              type="text"
-              placeholder="Buscar nombre, $kinhandle, teléfono, CLABE..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (!showContactPicker && e.target.value.trim().length > 0) {
-                  setShowContactPicker(true);
-                }
-              }}
-              className="w-full h-10 pl-9 pr-9 rounded-xl bg-[#06070B] border border-white/10 text-white text-xs placeholder:text-[#5F6175] focus:outline-none focus:border-[#2ED5A4] transition-all"
-            />
-            <button
-              type="button"
-              onClick={() => alert('Escáner QR listo para leer CLABE o Handle')}
-              className="absolute right-2.5 text-[#8E91A5] hover:text-white cursor-pointer"
-              title="Escanear Código QR"
-            >
-              <QrCodeScannerIcon className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Selected Recipient Hero Card */}
-          <div
-            onClick={() => setShowContactPicker(true)}
-            className="flex items-center justify-between bg-[#181928] hover:bg-[#1E2034] p-3 rounded-xl border border-white/5 cursor-pointer transition-all group"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              {/* Avatar con aro gradiente y mini-logo del banco */}
-              <div className="relative shrink-0 w-11 h-11 rounded-full p-0.5 bg-gradient-to-tr from-[#2ED5A4] to-[#7047EB]">
-                <img
-                  src={selectedContact.photoUrl}
-                  alt={selectedContact.name}
-                  className="w-full h-full rounded-full object-cover"
-                />
-                {getBankLogoUrl(selectedContact.bank) && (
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center p-0.5 shadow-md">
-                    <img
-                      src={getBankLogoUrl(selectedContact.bank)!}
-                      alt={selectedContact.bank}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Nombre, Rol y Banco */}
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-xs font-black text-white truncate group-hover:text-[#2ED5A4] transition-colors">
-                    {selectedContact.fullName}
-                  </span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-[#7047EB]/20 text-[#CCBDFF] text-[9px] font-bold shrink-0 border border-[#7047EB]/30">
-                    {selectedContact.role}
-                  </span>
-                </div>
-                <span className="text-[10px] text-[#8E91A5] truncate mt-0.5">
-                  {selectedContact.name} • {selectedContact.country}
-                </span>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[9px] font-bold text-[#2ED5A4] truncate">
-                    {selectedContact.bank}
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse shrink-0" />
-                </div>
-              </div>
-            </div>
-
-            <ChevronDownIcon className="w-4 h-4 text-[#8E91A5] group-hover:text-white shrink-0 ml-2 transition-colors" />
-          </div>
-        </div>
-
-        {/* ===================================================================== */}
-        {/* 4. GIANT CENTERED AMOUNT DISPLAY                                      */}
-        {/* ===================================================================== */}
-        <div className="mt-4 flex flex-col items-center justify-center text-center">
-          {/* Balance Chip */}
-          <div className="px-3 py-1 rounded-full bg-[#2ED5A4]/10 border border-[#2ED5A4]/25 text-[#2ED5A4] text-[11px] font-semibold shadow-sm mb-1.5">
-            USD Transit Balance: $1,450.80
-          </div>
-
-          {/* Amount Display */}
-          <div className="flex items-baseline justify-center gap-1.5 select-none tracking-tight">
-            <span className="text-2xl sm:text-3xl text-[#2ED5A4] font-black leading-none">$</span>
-            <span className="text-4xl sm:text-5xl text-white font-extrabold leading-none tracking-tight font-mono">
-              {currentAmount}
-            </span>
-          </div>
-
-          {/* Live FX Equivalent Pill */}
-          <div className="flex items-center gap-2 mt-2 px-3.5 py-1 rounded-full bg-[#181928] border border-white/10 shadow-sm">
-            <span className="text-[#2ED5A4] text-xs">⚡</span>
-            <span className="font-mono text-xs text-[#2ED5A4] font-bold">
-              ≈ ${Number(mxnEquivalent).toLocaleString('en-US', { minimumFractionDigits: 2 })} MXN
-            </span>
-            <span className="text-white/30 text-xs">•</span>
-            <span className="text-xs text-white font-medium">Zero Fees</span>
-          </div>
-
-          {/* Concept Note Chip (Editable) */}
-          <div className="mt-3 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#181928] border border-white/10 hover:border-white/20 transition-all shadow-sm">
-            <span className="text-xs">🛒</span>
-            {isEditingNote ? (
-              <input
-                type="text"
-                value={conceptNote}
-                onChange={(e) => setConceptNote(e.target.value)}
-                onBlur={() => setIsEditingNote(false)}
-                onKeyDown={(e) => e.key === 'Enter' && setIsEditingNote(false)}
-                autoFocus
-                className="bg-transparent border-none text-white text-xs focus:outline-none w-52 text-center"
-              />
-            ) : (
-              <span
-                onClick={() => setIsEditingNote(true)}
-                className="text-xs text-[#8E91A5] hover:text-white cursor-pointer truncate max-w-[200px]"
-              >
-                {conceptNote || 'Agregar concepto...'}
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={() => setIsEditingNote(!isEditingNote)}
-              className="text-[#8E91A5] hover:text-white text-[11px] cursor-pointer"
-            >
-              ✏️
-            </button>
-          </div>
-        </div>
-
-        {/* ===================================================================== */}
-        {/* 5. TACTILE NUMERIC KEYPAD (3X4 GRID)                                  */}
-        {/* ===================================================================== */}
-        <div className="mt-3 grid grid-cols-3 gap-2 px-1">
-          {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => pressKey(key)}
-              className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
-            >
-              {key}
-            </button>
-          ))}
-
-          {/* Punto decimal */}
-          <button
-            type="button"
-            onClick={() => pressKey('.')}
-            className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[24px] font-bold shadow-md cursor-pointer border border-white/5"
-          >
-            •
-          </button>
-
-          {/* Cero */}
-          <button
-            type="button"
-            onClick={() => pressKey('0')}
-            className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
-          >
-            0
-          </button>
-
-          {/* Borrar */}
-          <button
-            type="button"
-            onClick={pressBackspace}
-            className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-on-surface-variant hover:text-white shadow-md cursor-pointer border border-white/5"
-            aria-label="Borrar número"
-          >
-            <span className="material-symbols-outlined text-[22px]">backspace</span>
-          </button>
-        </div>
-
-        {/* ===================================================================== */}
-        {/* 6. BIOMETRIC SLIDE-TO-CONFIRM INTERACTIVE MODULE                      */}
-        {/* ===================================================================== */}
-        <div className="mt-3">
-          <div
-            ref={trackRef}
-            className="relative w-full h-[58px] rounded-full bg-surface-container-high border border-white/10 p-1.5 flex items-center shadow-2xl overflow-hidden select-none"
-          >
-            {/* Rastro luminoso tras la perilla */}
-            <div
-              className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-primary/30 to-primary/60 rounded-full transition-all duration-75"
-              style={{ width: `${slideX + 46}px` }}
-            />
-
-            {/* Texto de instrucción en la barra */}
-            <div
-              className="w-full flex items-center justify-center gap-1.5 text-on-surface-variant font-title-base text-body-medium pl-10 pr-4 pointer-events-none transition-opacity"
-              style={{
-                opacity: trackRef.current
-                  ? 1 - (slideX / (trackRef.current.clientWidth - 58)) * 1.5
-                  : 1,
-              }}
-            >
-              <span className="text-white font-semibold">Slide to send</span>
-              <span className="text-primary font-financial-mono font-bold">${currentAmount}</span>
-              <span className="material-symbols-outlined text-[18px] text-white">chevron_right</span>
-            </div>
-
-            {/* Mensaje de confirmación al disparar */}
-            {statusMessage && (
-              <div className="absolute inset-0 flex items-center justify-center bg-primary text-on-primary font-black text-xs tracking-wide animate-fade-in z-20">
-                {statusMessage}
-              </div>
-            )}
-
-            {/* Perilla deslizante con icono de Huella Dactilar */}
-            <div
-              onMouseDown={(e) => handleDragStart(e.clientX)}
-              onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
-              onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
-              onTouchEnd={handleDragEnd}
-              style={{ transform: `translateX(${slideX}px)` }}
-              className={`absolute left-1.5 top-1.5 w-[46px] h-[46px] rounded-full bg-gradient-to-tr from-primary-container to-primary flex items-center justify-center text-on-primary-container cursor-grab active:cursor-grabbing shadow-[0_4px_20px_rgba(46,213,164,0.45)] z-10 transition-transform ${
-                isDragging ? 'duration-0' : 'duration-200'
-              }`}
-            >
-              {isDispatched ? (
-                <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold animate-scale-in">task_alt</span>
-              ) : (
-                <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold">fingerprint</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ===================================================================== */}
-        {/* 7. TRUST, SPEED & COMPLIANCE BADGE                                    */}
-        {/* ===================================================================== */}
-        <div className="mt-3 flex items-center justify-center gap-1.5 px-3 text-center">
-          <span className="text-[#2ED5A4] text-xs">🛡️</span>
-          <p className="text-[10px] text-[#8E91A5] font-medium leading-tight">
-            Secured by Banxico SPEI • Direct Settlement • FDIC-insured partner bank
-          </p>
-        </div>
-
-        {/* ===================================================================== */}
-        {/* MODAL BOTTOM SHEET: AGENDA DE CONTACTOS KIN                           */}
-        {/* ===================================================================== */}
-        {showContactPicker && (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end justify-center animate-fade-in">
-            <div className="w-full max-w-[400px] bg-[#121320] border-t border-white/10 rounded-t-3xl p-5 max-h-[85vh] flex flex-col shadow-2xl animate-slide-up">
-              {/* Grab handle */}
-              <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4" />
-
-              {/* Header */}
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-base font-black text-white">Seleccionar Destinatario</h3>
-                  <p className="text-xs text-[#8E91A5]">Agenda de transferencias frecuentes KIN</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowContactPicker(false)}
-                  className="btn-circle"
-                >
-                  <CloseIcon className="w-5 h-5 text-white" />
-                </button>
-              </div>
-
-              {/* Buscador interno */}
-              <div className="relative mb-3">
-                <SearchIcon className="w-4 h-4 absolute left-3 top-3 text-[#8E91A5]" />
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre, banco o parentesco..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 rounded-xl bg-[#181928] border border-white/10 text-white text-xs placeholder:text-[#5F6175] focus:outline-none focus:border-[#2ED5A4]"
-                />
-              </div>
-
-              {/* Lista de Contactos con Logos Oficiales */}
-              <div className="space-y-2 overflow-y-auto flex-1 pr-1 scrollbar-thin">
-                {filteredContacts.map((c) => {
-                  const isSelected = selectedContact.id === c.id;
-                  const bankLogo = getBankLogoUrl(c.bank);
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedContact(c);
-                        setShowContactPicker(false);
-                      }}
-                      className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                          : 'bg-[#181928]/60 border-white/5 hover:border-white/15'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
-                          <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-white leading-tight">{c.fullName}</span>
-                            <span className="px-1.5 py-0.2 rounded-full bg-[#7047EB]/20 text-[#CCBDFF] text-[9px] font-bold">
-                              {c.role}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            {bankLogo && (
-                              <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
-                                <img src={bankLogo} alt={c.bank} className="w-full h-full object-contain" />
-                              </div>
-                            )}
-                            <span className="text-[10px] text-[#2ED5A4] font-semibold">{c.bank}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {isSelected ? (
-                        <span className="text-xs font-black text-[#2ED5A4]">✓</span>
-                      ) : (
-                        <ChevronRightIcon className="w-4 h-4 text-[#8E91A5]" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+        {content}
       </div>
     </div>
   );

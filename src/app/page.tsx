@@ -904,7 +904,7 @@ export default function MobileApp() {
           </div>
         </div>
 
-        {activeTab === 'home' && (
+        {(activeTab === 'home' || activeTab === 'kin-cash') && (
           <header className="flex items-center justify-between gap-2 mb-3 px-0.5">
             <div className="flex items-center gap-2">
               <KinLogo size={34} />
@@ -1078,7 +1078,7 @@ export default function MobileApp() {
               {/* Kin Cash P2P */}
               <button
                 type="button"
-                onClick={() => setShowKinCashModal(true)}
+                onClick={() => setActiveTab('kin-cash')}
                 className="group flex flex-col items-center gap-1.5 cursor-pointer"
               >
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary-container to-secondary flex items-center justify-center text-white shadow-[0_8px_20px_-4px_rgba(112,71,235,0.45)] transition-transform group-hover:scale-105 active:scale-95">
@@ -1306,6 +1306,21 @@ export default function MobileApp() {
                 })}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SCREEN: "KIN CASH" (P2P EXPRESS ZERO-FEE DASHBOARD TAB)                   */}
+        {/* ========================================================================= */}
+        {activeTab === 'kin-cash' && (
+          <div className="animate-fade-in space-y-4">
+            <KinCashP2PModal
+              isScreen={true}
+              onP2PSuccess={handleP2PSuccess}
+              contacts={contactsList}
+              onViewHistory={() => setActiveTab('transactions')}
+              exchangeRate={USD_TO_MXN_RATE}
+            />
           </div>
         )}
 
@@ -2924,12 +2939,13 @@ export default function MobileApp() {
             <button
               type="button"
               onClick={() => {
-                setShowKinCashModal(true);
+                setActiveTab('kin-cash');
+                setShowKinCashModal(false);
                 setShowBillPayModal(false);
                 setShowVaultModal(false);
               }}
               className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                showKinCashModal || activeTab === 'kin-cash'
+                activeTab === 'kin-cash'
                   ? 'text-primary font-bold scale-105'
                   : 'text-on-surface-variant hover:text-white'
               }`}
