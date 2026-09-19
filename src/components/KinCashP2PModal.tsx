@@ -256,10 +256,10 @@ export function KinCashP2PModal({
             <button
               type="button"
               onClick={onClose}
-              className="btn-circle flex-shrink-0"
+              className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white transition-colors flex-shrink-0 cursor-pointer border border-white/5 shadow-sm"
               title="Volver al Dashboard"
             >
-              <ChevronLeftIcon className="w-5 h-5 text-white" />
+              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </button>
 
             {/* KIN Global Branding */}
@@ -470,13 +470,13 @@ export function KinCashP2PModal({
         {/* ===================================================================== */}
         {/* 5. TACTILE NUMERIC KEYPAD (3X4 GRID)                                  */}
         {/* ===================================================================== */}
-        <div className="mt-4 grid grid-cols-3 gap-2 px-1">
+        <div className="mt-3 grid grid-cols-3 gap-2 px-1">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((key) => (
             <button
               key={key}
               type="button"
               onClick={() => pressKey(key)}
-              className="h-12 rounded-2xl bg-[#181928]/80 hover:bg-[#202236] active:scale-95 transition-all flex items-center justify-center text-white font-mono text-xl font-bold border border-white/5 shadow-sm cursor-pointer"
+              className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
             >
               {key}
             </button>
@@ -486,7 +486,7 @@ export function KinCashP2PModal({
           <button
             type="button"
             onClick={() => pressKey('.')}
-            className="h-12 rounded-2xl bg-[#181928]/50 hover:bg-[#202236] active:scale-95 transition-all flex items-center justify-center text-white font-mono text-2xl font-bold border border-white/5 shadow-sm cursor-pointer"
+            className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[24px] font-bold shadow-md cursor-pointer border border-white/5"
           >
             •
           </button>
@@ -495,7 +495,7 @@ export function KinCashP2PModal({
           <button
             type="button"
             onClick={() => pressKey('0')}
-            className="h-12 rounded-2xl bg-[#181928]/80 hover:bg-[#202236] active:scale-95 transition-all flex items-center justify-center text-white font-mono text-xl font-bold border border-white/5 shadow-sm cursor-pointer"
+            className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
           >
             0
           </button>
@@ -504,44 +504,44 @@ export function KinCashP2PModal({
           <button
             type="button"
             onClick={pressBackspace}
-            className="h-12 rounded-2xl bg-[#181928]/50 hover:bg-[#202236] active:scale-95 transition-all flex items-center justify-center text-[#8E91A5] hover:text-white border border-white/5 shadow-sm cursor-pointer"
+            className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-on-surface-variant hover:text-white shadow-md cursor-pointer border border-white/5"
             aria-label="Borrar número"
           >
-            <BackspaceIcon className="w-5 h-5" />
+            <span className="material-symbols-outlined text-[22px]">backspace</span>
           </button>
         </div>
 
         {/* ===================================================================== */}
         {/* 6. BIOMETRIC SLIDE-TO-CONFIRM INTERACTIVE MODULE                      */}
         {/* ===================================================================== */}
-        <div className="mt-4">
+        <div className="mt-3">
           <div
             ref={trackRef}
-            className="relative w-full h-[56px] rounded-full bg-[#181928] border border-white/10 p-1 flex items-center shadow-2xl overflow-hidden select-none"
+            className="relative w-full h-[58px] rounded-full bg-surface-container-high border border-white/10 p-1.5 flex items-center shadow-2xl overflow-hidden select-none"
           >
             {/* Rastro luminoso tras la perilla */}
             <div
-              className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[#2ED5A4]/30 to-[#2ED5A4]/60 rounded-full transition-all duration-75"
+              className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-primary/30 to-primary/60 rounded-full transition-all duration-75"
               style={{ width: `${slideX + 46}px` }}
             />
 
             {/* Texto de instrucción en la barra */}
             <div
-              className="w-full flex items-center justify-center gap-1.5 text-xs font-bold pl-12 pr-4 pointer-events-none transition-opacity"
+              className="w-full flex items-center justify-center gap-1.5 text-on-surface-variant font-title-base text-body-medium pl-10 pr-4 pointer-events-none transition-opacity"
               style={{
                 opacity: trackRef.current
                   ? 1 - (slideX / (trackRef.current.clientWidth - 58)) * 1.5
                   : 1,
               }}
             >
-              <span className="text-white">Slide to send</span>
-              <span className="text-[#2ED5A4] font-mono font-black">${currentAmount}</span>
-              <span className="text-white text-xs">›</span>
+              <span className="text-white font-semibold">Slide to send</span>
+              <span className="text-primary font-financial-mono font-bold">${currentAmount}</span>
+              <span className="material-symbols-outlined text-[18px] text-white">chevron_right</span>
             </div>
 
             {/* Mensaje de confirmación al disparar */}
             {statusMessage && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#2ED5A4] text-[#06070B] font-black text-xs tracking-wide animate-fade-in z-20">
+              <div className="absolute inset-0 flex items-center justify-center bg-primary text-on-primary font-black text-xs tracking-wide animate-fade-in z-20">
                 {statusMessage}
               </div>
             )}
@@ -553,14 +553,14 @@ export function KinCashP2PModal({
               onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
               onTouchEnd={handleDragEnd}
               style={{ transform: `translateX(${slideX}px)` }}
-              className={`absolute left-1 top-1 w-[48px] h-[48px] rounded-full bg-gradient-to-tr from-[#2ED5A4] to-[#1EA77F] flex items-center justify-center text-[#06070B] cursor-grab active:cursor-grabbing shadow-[0_4px_20px_rgba(46,213,164,0.45)] z-10 transition-transform ${
+              className={`absolute left-1.5 top-1.5 w-[46px] h-[46px] rounded-full bg-gradient-to-tr from-primary-container to-primary flex items-center justify-center text-on-primary-container cursor-grab active:cursor-grabbing shadow-[0_4px_20px_rgba(46,213,164,0.45)] z-10 transition-transform ${
                 isDragging ? 'duration-0' : 'duration-200'
               }`}
             >
               {isDispatched ? (
-                <CheckCircleIcon className="w-6 h-6 text-[#06070B] animate-scale-in" />
+                <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold animate-scale-in">task_alt</span>
               ) : (
-                <FingerprintIcon className="w-6 h-6 text-[#06070B]" />
+                <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold">fingerprint</span>
               )}
             </div>
           </div>

@@ -493,9 +493,9 @@ export function ClientVaultModal({ isOpen, onClose }: ClientVaultModalProps) {
                 onClose();
               }
             }}
-            className="w-full h-11 rounded-full bg-surface-container-high text-error hover:bg-error-container/40 flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-md cursor-pointer"
+            className="w-full h-[52px] rounded-full bg-surface-container-high text-error hover:bg-error-container/40 flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-md cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+            <span className="material-symbols-outlined text-[20px]">power_settings_new</span>
             <span className="font-title-base text-xs font-bold">Cerrar Sesión en Todos los Equipos</span>
           </button>
 

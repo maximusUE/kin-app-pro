@@ -492,14 +492,14 @@ export function MexicanBillPayModal({
                 type="button"
                 onClick={() => handlePayDirect(842.00, 'CFE Electricidad')}
                 disabled={isLoading}
-                className="w-full h-13 rounded-full bg-gradient-to-r from-[#2ED5A4] to-[#18A57E] hover:brightness-110 text-[#003828] font-title-base text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(87,242,191,0.3)] transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full h-14 rounded-full bg-primary hover:bg-primary-container text-on-primary font-title-base text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(87,242,191,0.3)] transition-all active:scale-[0.98] cursor-pointer"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-[#003828] border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <span>Pay Selected Bill ($41.17 USD)</span>
-                    <span className="material-symbols-outlined text-[18px] font-bold">arrow_forward</span>
+                    <span className="material-symbols-outlined text-[20px] font-bold">arrow_forward</span>
                   </>
                 )}
               </button>

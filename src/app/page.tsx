@@ -401,7 +401,7 @@ function renderTransactionIcon(tx: TransactionItem) {
 
 export default function MobileApp() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'home' | 'send' | 'bills' | 'transactions' | 'wallet' | 'send-quick' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'send' | 'bills' | 'transactions' | 'wallet' | 'send-quick' | 'profile' | 'kin-cash' | 'bill-pay' | 'vault'>('home');
 
   // Client registration & KYC profile state
   const [userName, setUserName] = useState('César U.');
@@ -1430,10 +1430,10 @@ export default function MobileApp() {
                       setSendSuccessData(null);
                       setActiveTab('transactions');
                     }}
-                    className="w-full h-13 rounded-full bg-white text-[#0E0F1A] font-bold text-sm hover:bg-gray-100 active:scale-95 shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] hover:shadow-[0_16px_32px_-4px_rgba(46,213,164,0.6)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Done</span>
-                    <ArrowRightIcon className="w-4 h-4 text-[#0E0F1A]" />
+                    <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                   </button>
                 </div>
               </div>
@@ -1496,595 +1496,341 @@ export default function MobileApp() {
                   </div>
                 </div>
 
-                {/* Remittance Flow Stepper Bar (Estimate | Receiver | Payment | Review) */}
-                <div className="grid grid-cols-4 border-b border-white/10 text-center pb-2.5 pt-1 text-xs">
-                  <div className="relative pb-1 cursor-pointer">
-                    <span className="font-black text-white">Estimate</span>
-                    <div className="absolute bottom-[-11px] left-1 right-1 h-0.5 bg-[#2ED5A4] rounded-full shadow-[0_0_8px_rgba(46,213,164,0.8)]" />
-                  </div>
-                  <div className="text-white/80 font-bold">Receiver</div>
-                  <div className="text-white/80 font-bold">Payment</div>
-                  <div className="text-white/80 font-bold">Review</div>
-                </div>
-
-                {/* ========================================================= */}
-                {/* CARD 1: WELCOME & RECEIVER SELECTION                     */}
-                {/* ========================================================= */}
-                <div className="bg-[#181928] border border-white/10 rounded-3xl p-4 space-y-3.5 shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-black text-white tracking-tight">
-                      Welcome {userFirstName || 'Cesar'}
-                    </h3>
-                    <span className="text-[10px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/15 px-2 py-0.5 rounded-full border border-[#2ED5A4]/30">
-                      Tier 2 Verificado
-                    </span>
-                  </div>
-
-                  {/* Segmented Receiver Mode: [ Existing receiver ] vs [ New receiver ] */}
-                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#121320] border border-white/5 rounded-2xl">
-                    <button
-                      type="button"
-                      onClick={() => setReceiverMode('existing')}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        receiverMode === 'existing'
-                          ? 'bg-[#2B6CB0] text-white shadow-md'
-                          : 'text-white/80 hover:text-white'
-                      }`}
-                    >
-                      Existing receiver
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setReceiverMode('new');
-                        setShowContactModal(true);
-                      }}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        receiverMode === 'new'
-                          ? 'bg-[#2B6CB0] text-white shadow-md'
-                          : 'text-white/80 hover:text-white'
-                      }`}
-                    >
-                      New receiver
-                    </button>
-                  </div>
-
-                  {/* Main Beneficiary Selector Card */}
-                  <button
-                    type="button"
-                    onClick={() => setShowReceiverPicker(!showReceiverPicker)}
-                    className="w-full text-left bg-[#121320] border border-white/10 hover:border-[#2ED5A4]/50 rounded-2xl p-3.5 transition-all flex items-center justify-between cursor-pointer group shadow-sm"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-2xl flex-shrink-0 shadow-inner">
-                        🇲🇽
+                {/* ========================================================================= */}
+                {/* STITCH DUAL LIVE EXCHANGE CALCULATOR                                      */}
+                {/* ========================================================================= */}
+                <div className="relative flex flex-col space-y-2">
+                  {/* You Send Card */}
+                  <div className="rounded-2xl bg-surface-container-high p-4 shadow-md flex flex-col space-y-3 border border-white/5">
+                    <div className="flex items-center justify-between">
+                      <label className="font-caption-sm text-xs uppercase text-on-surface-variant font-semibold" htmlFor="send-amount-input">
+                        You Send
+                      </label>
+                      <span className="font-caption-sm text-xs text-primary flex items-center gap-1 font-bold">
+                        <span className="material-symbols-outlined text-[13px]">check_circle</span> No markup rate
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-1 min-w-0 flex-1">
+                        <span className="font-financial-mono text-2xl text-on-surface font-bold tracking-tight">$</span>
+                        <input
+                          aria-label="Send amount in USD"
+                          className="w-full bg-transparent font-financial-mono text-2xl text-on-surface font-bold focus:outline-none placeholder:text-outline"
+                          id="send-amount-input"
+                          max="2999"
+                          min="10"
+                          step="10"
+                          type="number"
+                          value={amountValue}
+                          onChange={(e) => setAmountValue(e.target.value)}
+                        />
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-white tracking-tight truncate group-hover:text-[#2ED5A4] transition-colors">
-                          {(selectedAvatar as any).fullName || selectedAvatar.name}
-                        </h4>
-                        <p className="text-[11px] text-white/80 truncate mt-0.5 font-medium">
-                          {(selectedAvatar as any).country || 'Mexico'} • {(selectedAvatar as any).bank || 'BanCoppel SPEI'}
-                        </p>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container shrink-0 shadow-inner border border-white/5">
+                        <span className="text-base">🇺🇸</span>
+                        <span className="font-title-base text-xs text-on-surface font-bold">USD</span>
                       </div>
                     </div>
-                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white transition-colors flex-shrink-0 ml-2">
-                      <ChevronDownIcon className={`w-4 h-4 text-white transition-transform duration-200 ${showReceiverPicker ? 'rotate-180 text-[#2ED5A4]' : ''}`} />
-                    </div>
-                  </button>
-
-                  {/* Collapsible Receiver List Drawer */}
-                  {showReceiverPicker && (
-                    <div className="p-2.5 rounded-2xl bg-[#121320] border border-white/10 space-y-1.5 animate-fade-in max-h-56 overflow-y-auto">
-                      <div className="flex items-center justify-between px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
-                        <span>Seleccionar destinatario guardado</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowReceiverPicker(false);
-                            setShowContactModal(true);
-                          }}
-                          className="text-[#2ED5A4] hover:underline"
-                        >
-                          + Agregar otro
-                        </button>
-                      </div>
-                      {contactsList.map((contact) => {
-                        const isSelected = selectedAvatar.id === contact.id;
-                        return (
-                          <button
-                            key={contact.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedAvatar(contact);
-                              setShowReceiverPicker(false);
-                            }}
-                            className={`w-full p-2.5 rounded-xl text-left flex items-center justify-between transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-[#2ED5A4]/15 border border-[#2ED5A4]/40 text-white shadow-sm'
-                                : 'hover:bg-white/5 text-white border border-transparent'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span className="text-lg">{contact.avatar}</span>
-                              <div className="min-w-0">
-                                <p className="text-xs font-bold text-white truncate">
-                                  {(contact as any).fullName || contact.name}
-                                </p>
-                                <p className="text-[10px] text-white/80 truncate font-medium">
-                                  {(contact as any).bank || contact.role}
-                                </p>
-                              </div>
-                            </div>
-                            {isSelected && <span className="text-xs text-[#2ED5A4] font-black">✓</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Horizontal Quick-Pick Avatars */}
-                  <div className="pt-0.5">
-                    <span className="text-[10px] font-bold text-white uppercase tracking-wider block mb-2 px-1">
-                      Destinatarios Recientes
-                    </span>
-                    <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                      {contactsList.map((rec) => {
-                        const isSelected = selectedAvatar.id === rec.id;
-                        return (
-                          <button
-                            key={rec.id}
-                            type="button"
-                            onClick={() => setSelectedAvatar(rec)}
-                            className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group"
-                          >
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl border-2 transition-all ${
-                              isSelected
-                                ? 'border-[#2ED5A4] bg-[#2ED5A4]/15 shadow-glow-mint scale-105'
-                                : 'border-white/10 bg-[#121320] group-hover:border-white/25'
-                            }`}>
-                              <span>{rec.avatar}</span>
-                            </div>
-                            <span className={`text-[10px] transition-colors truncate max-w-[56px] font-semibold ${
-                              isSelected ? 'text-[#2ED5A4] font-bold' : 'text-white/90'
-                            }`}>
-                              {rec.name}
-                            </span>
-                          </button>
-                        );
-                      })}
+                    {/* Quick Amount Increment Pills */}
+                    <div className="flex items-center gap-1.5 pt-1 overflow-x-auto scrollbar-none">
                       <button
+                        className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 50).toFixed(2))}
                         type="button"
-                        onClick={() => setShowContactModal(true)}
-                        className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group"
-                        title="Agregar nuevo destinatario"
                       >
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center border-2 border-dashed border-[#2ED5A4]/40 group-hover:border-[#2ED5A4] bg-[#2ED5A4]/10 transition-all">
-                          <PlusIcon className="w-4 h-4 text-[#2ED5A4]" />
-                        </div>
-                        <span className="text-[10px] font-bold text-[#2ED5A4]">Nuevo</span>
+                        +$50
+                      </button>
+                      <button
+                        className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 100).toFixed(2))}
+                        type="button"
+                      >
+                        +$100
+                      </button>
+                      <button
+                        className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 200).toFixed(2))}
+                        type="button"
+                      >
+                        +$200
+                      </button>
+                      <button
+                        className="px-2.5 py-1 rounded-lg bg-surface-container text-primary font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright font-bold cursor-pointer border border-primary/20"
+                        onClick={() => setAmountValue('500.00')}
+                        type="button"
+                      >
+                        $500 Max
                       </button>
                     </div>
                   </div>
-                </div>
 
-                {/* ========================================================= */}
-                {/* CARD 2: YOU SEND USD <-> RECEIVER GETS MXN               */}
-                {/* ========================================================= */}
-                <div className="bg-[#181928] border border-white/10 rounded-3xl p-4 space-y-3.5 shadow-lg">
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                    {/* You send (USD) */}
-                    <div className="bg-[#121320] border border-white/5 rounded-2xl p-3 flex flex-col justify-between min-h-[82px]">
-                      <span className="text-[10px] font-bold text-white uppercase tracking-wider block">
-                        You send
+                  {/* Animated Swap / Ticker Node */}
+                  <div className="relative z-10 flex items-center justify-center -my-2.5">
+                    <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#1F2133] shadow-lg border border-white/10">
+                      <span className="material-symbols-outlined text-primary text-[15px]">swap_vert</span>
+                      <span className="font-financial-mono text-xs text-on-surface">
+                        1 USD = <span className="text-primary font-bold">{USD_TO_MXN_RATE.toFixed(2)} MXN</span>
                       </span>
-                      <div className="flex items-baseline justify-between gap-1 mt-1">
-                        <div className="flex items-baseline gap-0.5 min-w-0 flex-1">
-                          <span className="text-base font-black text-white/90">$</span>
-                          <input
-                            type="number"
-                            min="1"
-                            value={amountValue}
-                            onChange={(e) => setAmountValue(e.target.value)}
-                            placeholder="50"
-                            className="w-full text-2xl font-black bg-transparent text-white focus:outline-none tracking-tight placeholder-white/30 p-0 m-0"
-                          />
-                        </div>
-                        <span className="text-xs font-black text-white px-1.5 py-0.5 rounded bg-white/10 border border-white/20 flex-shrink-0">
-                          USD
+                      <span className="text-on-surface-variant font-caption-sm">•</span>
+                      <span className="font-label-caps text-[10px] text-primary font-bold uppercase tracking-wider">$0 Fee</span>
+                    </div>
+                  </div>
+
+                  {/* Receiver Gets Card */}
+                  <div className="rounded-2xl bg-surface-container p-4 shadow-md flex flex-col space-y-2 border border-white/5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-caption-sm text-xs uppercase text-on-surface-variant font-semibold">
+                        Receiver Gets (Guaranteed)
+                      </span>
+                      <span className="font-caption-sm text-xs text-on-surface-variant font-medium">Instant pickup</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-baseline min-w-0 flex-1 overflow-hidden">
+                        <span className="font-financial-mono text-2xl text-primary font-bold tracking-tight">$</span>
+                        <span className="font-financial-mono text-2xl text-primary font-bold tracking-tight truncate">
+                          {((parseFloat(amountValue) || 0) * USD_TO_MXN_RATE).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </span>
                       </div>
-                      <span className="text-[9px] text-white/80 mt-1 truncate font-medium">
-                        Send up to $3,000 USD
-                      </span>
-                    </div>
-
-                    {/* Transfer Swap Icon */}
-                    <div className="flex items-center justify-center pt-2">
-                      <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-inner">
-                        <TransferSwapIcon className="w-4 h-4 text-white" />
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high shrink-0 shadow-inner border border-white/5">
+                        <span className="text-base">🇲🇽</span>
+                        <span className="font-title-base text-xs text-on-surface font-bold">MXN</span>
                       </div>
                     </div>
-
-                    {/* Receiver gets (MXN) */}
-                    <div className="bg-[#121320] border border-white/5 rounded-2xl p-3 flex flex-col justify-between min-h-[82px]">
-                      <span className="text-[10px] font-bold text-white uppercase tracking-wider block">
-                        Receiver gets
-                      </span>
-                      <div className="flex items-baseline justify-between gap-1 mt-1">
-                        <div className="flex items-baseline gap-0.5 min-w-0 flex-1 overflow-hidden">
-                          <span className="text-base font-black text-[#2ED5A4]/90">$</span>
-                          <span className="text-2xl font-black text-[#2ED5A4] tracking-tight truncate">
-                            {((parseFloat(amountValue) || 0) * USD_TO_MXN_RATE).toLocaleString('es-MX', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                              })}
-                          </span>
-                        </div>
-                        <span className="text-xs font-black text-[#2ED5A4] px-1.5 py-0.5 rounded bg-[#2ED5A4]/10 border border-[#2ED5A4]/30 flex-shrink-0">
-                          MXN
-                        </span>
-                      </div>
-                      <span className="text-[9px] text-[#2ED5A4] font-medium mt-1 truncate">
-                        Tasa garantizada
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      <span className="material-symbols-outlined text-primary text-[14px]">verified</span>
+                      <span className="font-caption-sm text-[11px] text-on-surface-variant">
+                        Zero hidden FX spread • Complete amount delivered
                       </span>
                     </div>
                   </div>
-
-                  {/* Quick Amount Increment Pills (Stitch Specs) */}
-                  <div className="flex items-center gap-1.5 pt-0.5 overflow-x-auto scrollbar-none">
-                    <button
-                      type="button"
-                      onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 50).toFixed(2))}
-                      className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
-                    >
-                      +$50
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 100).toFixed(2))}
-                      className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
-                    >
-                      +$100
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 200).toFixed(2))}
-                      className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
-                    >
-                      +$200
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAmountValue('500.00')}
-                      className="px-2.5 py-1 rounded-lg bg-surface-container text-[#2ED5A4] font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright font-bold cursor-pointer border border-[#2ED5A4]/30"
-                    >
-                      $500 Max
-                    </button>
-                  </div>
-
-                  {/* Exchange Rate Highlight (Screenshot 1: 1.00 USD = 20.4500 MXN²) */}
-                  <div className="text-center pt-0.5">
-                    <span className="text-xs font-black text-[#38BDF8] tracking-wide">
-                      1.00 USD = {USD_TO_MXN_RATE.toFixed(4)} MXN<sup className="text-[9px]">2</sup>
-                    </span>
-                  </div>
-
-                  {/* Set an exchange rate alert button (Screenshot 1) */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowRateAlertToast(true);
-                      setTimeout(() => setShowRateAlertToast(false), 4000);
-                    }}
-                    className="w-full py-2.5 px-3 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/15 transition-all flex items-center justify-center gap-2 cursor-pointer group shadow-sm"
-                  >
-                    <BellIcon className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-bold text-white">
-                      Set an exchange rate alert
-                    </span>
-                  </button>
-                  {showRateAlertToast && (
-                    <div className="p-2.5 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[11px] font-bold text-[#2ED5A4] text-center animate-fade-in">
-                      ✓ Alerta activada: Te avisaremos cuando el tipo de cambio supere $20.50 MXN.
-                    </div>
-                  )}
                 </div>
 
-                {/* ========================================================= */}
-                {/* SECTION 1: HOW WILL YOUR RECEIVER GET IT?                 */}
-                {/* ========================================================= */}
-                <div className="space-y-2.5">
-                  <span className="text-xs font-black text-white uppercase tracking-wider block px-1">
-                    How will your receiver get it?
-                  </span>
-
-                  {/* 2 Top Cards + 1 Full Width Card (Western Union Layout) */}
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {/* 1. Cash Pickup */}
+                {/* ========================================================================= */}
+                {/* DELIVERY METHOD SELECTOR (3-TABS GRID)                                    */}
+                {/* ========================================================================= */}
+                <div className="flex flex-col space-y-2.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-title-base text-xs text-on-surface font-bold">How will your receiver get it?</span>
+                    <span className="font-caption-sm text-xs text-primary font-bold">Free</span>
+                  </div>
+                  {/* Delivery Method Tabs */}
+                  <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-surface-container-lowest border border-white/5">
                     <button
-                      type="button"
-                      onClick={() => {
-                        setDeliveryMethod('cash');
-                        setIsCashPickupExpanded(!isCashPickupExpanded);
-                      }}
-                      className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between min-h-[116px] ${
+                      className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
                         deliveryMethod === 'cash'
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                          : 'bg-[#181928] border-white/10 hover:border-white/20'
+                          ? 'bg-surface-container-high text-primary shadow-sm border border-primary/20'
+                          : 'text-on-surface-variant hover:text-on-surface'
                       }`}
-                    >
-                      {/* Cluster of store logos */}
-                      <div className="flex items-center -space-x-1.5 pt-1">
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
-                          <img src="/logos/oxxo.png" alt="OXXO" className="w-full h-full object-contain" />
-                        </div>
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
-                          <img src="/logos/bodega_aurrera.png" alt="Aurrera" className="w-full h-full object-contain" />
-                        </div>
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
-                          <img src="/logos/elektra.png" alt="Elektra" className="w-full h-full object-contain" />
-                        </div>
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-[#181928] bg-white p-0.5 flex items-center justify-center shadow-sm">
-                          <img src="/logos/bbva_bancomer.png" alt="BBVA" className="w-full h-full object-contain" />
-                        </div>
-                        <div className="w-6 h-6 rounded-full border border-[#181928] bg-[#202236] flex items-center justify-center text-[8px] font-black text-[#2ED5A4] shadow-sm">
-                          +8
-                        </div>
-                      </div>
-                      <div className="mt-2">
-                        <p className="text-xs font-bold text-white leading-tight">
-                          Cash pickup <sup className="text-[9px] text-[#2ED5A4]">6</sup>
-                        </p>
-                        <span className="text-[10px] text-white font-bold flex items-center justify-center gap-1 mt-1">
-                          <span className="truncate max-w-[120px]">{selectedStore ? CASH_PICKUP_STORES.find(s => s.id === selectedStore)?.name : 'Cualquier agente'}</span>
-                          <span className="text-white text-[8px]">▼</span>
-                        </span>
-                      </div>
-                    </button>
-
-                    {/* 2. Bank Account */}
-                    <button
+                      onClick={() => setDeliveryMethod('cash')}
                       type="button"
-                      onClick={() => setDeliveryMethod('bank')}
-                      className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between min-h-[116px] relative ${
-                        deliveryMethod === 'bank'
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                          : 'bg-[#181928] border-white/10 hover:border-white/20'
-                      }`}
                     >
-                      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-[#2B6CB0] text-white text-[8px] font-bold uppercase tracking-wider shadow-sm">
-                        Popular
-                      </div>
-                      <div className="w-9 h-9 rounded-full bg-[#1E3A8A]/40 border border-[#38BDF8]/30 flex items-center justify-center text-[#38BDF8] mt-2 shadow-inner">
-                        <BankBuildingIcon className="w-5 h-5" />
-                      </div>
-                      <div className="mt-2">
-                        <p className="text-xs font-bold text-white leading-tight">
-                          Bank account <sup className="text-[9px] text-[#2ED5A4]">10</sup>
-                        </p>
-                        <p className="text-[10px] text-white/80 mt-0.5 font-medium">SPEI 24/7 en minutos</p>
-                      </div>
+                      <span className="material-symbols-outlined text-[18px]">payments</span>
+                      <span className="truncate">Cash Pickup</span>
+                    </button>
+                    <button
+                      className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                        deliveryMethod === 'bank'
+                          ? 'bg-surface-container-high text-primary shadow-sm border border-primary/20'
+                          : 'text-on-surface-variant hover:text-on-surface'
+                      }`}
+                      onClick={() => setDeliveryMethod('bank')}
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">account_balance</span>
+                      <span className="truncate">Bank (SPEI)</span>
+                    </button>
+                    <button
+                      className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                        deliveryMethod === 'wallet'
+                          ? 'bg-surface-container-high text-primary shadow-sm border border-primary/20'
+                          : 'text-on-surface-variant hover:text-on-surface'
+                      }`}
+                      onClick={() => setDeliveryMethod('wallet')}
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">smartphone</span>
+                      <span className="truncate">Mobile Wallet</span>
                     </button>
                   </div>
+                </div>
 
-                  {/* 3. Mobile Wallet (Full width) */}
+                {/* ========================================================================= */}
+                {/* PICKUP PARTNER NETWORK (13 NETWORK CAPSULES)                              */}
+                {/* ========================================================================= */}
+                {deliveryMethod === 'cash' && (
+                  <div className="flex flex-col space-y-3 pt-1 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="font-title-base text-xs text-on-surface font-bold">Pickup Partner Network</span>
+                        <span className="font-caption-sm text-[11px] text-on-surface-variant">
+                          40,000+ branch and retail locations in Mexico
+                        </span>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5">
+                        <span className="material-symbols-outlined text-primary text-[18px]">storefront</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      {CASH_PICKUP_STORES.filter((s) => s.id !== 'any').map((store) => {
+                        const isSelected = selectedStore === store.id;
+                        const StoreLogo = store.Logo;
+                        return (
+                          <button
+                            key={store.id}
+                            type="button"
+                            onClick={() => setSelectedStore(store.id)}
+                            className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer ${
+                              isSelected ? 'ring-2 ring-primary shadow-[0_0_16px_rgba(46,213,164,0.45)]' : 'hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="w-full h-7 flex items-center justify-center">
+                              <StoreLogo className="w-full h-full object-contain" />
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-700 leading-tight truncate w-full">
+                              {store.badge}
+                            </span>
+                            {isSelected && (
+                              <span className="selected-pill absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+                                <span className="material-symbols-outlined text-[11px] font-bold">check</span>
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+
+                      {/* 13. Any Available Network Partner (Full Span) */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStore('any')}
+                        className={`network-btn col-span-3 h-12 rounded-xl bg-white text-slate-900 shadow-sm px-3 flex items-center justify-between text-left transition-all cursor-pointer ${
+                          selectedStore === 'any' ? 'ring-2 ring-primary shadow-[0_0_16px_rgba(46,213,164,0.45)]' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-primary-container text-[20px]">hub</span>
+                          <div className="flex flex-col leading-tight">
+                            <span className="font-title-base text-xs font-bold text-slate-900">
+                              Any Available Network Partner
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-medium">
+                              Receiver picks up at any of 40,000+ locations
+                            </span>
+                          </div>
+                        </div>
+                        {selectedStore === 'any' && (
+                          <span className="selected-pill w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+                            <span className="material-symbols-outlined text-[11px] font-bold">check</span>
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================================================= */}
+                {/* BANK (SPEI) SELECTION                                                     */}
+                {/* ========================================================================= */}
+                {deliveryMethod === 'bank' && (
+                  <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <span className="font-title-base text-xs text-on-surface font-bold">Bank SPEI Beneficiary</span>
+                      <span className="font-caption-sm text-[11px] text-primary font-bold">24/7 Instant</span>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-surface-container border border-white/5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm">
+                            <span className="font-financial-mono text-xs font-black text-[#004481]">BBVA</span>
+                          </div>
+                          <div>
+                            <p className="font-title-base text-xs font-bold text-white">Mamá Rosa (Guadalajara)</p>
+                            <p className="font-financial-mono text-[11px] text-on-surface-variant">CLABE: 0121 8001 5928 3491 82</p>
+                          </div>
+                        </div>
+                        <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================================================= */}
+                {/* MOBILE WALLET SELECTION                                                   */}
+                {/* ========================================================================= */}
+                {deliveryMethod === 'wallet' && (
+                  <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <span className="font-title-base text-xs text-on-surface font-bold">Mobile Wallet Destination</span>
+                      <span className="font-caption-sm text-[11px] text-primary font-bold">Zero Fee</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        className="p-3 rounded-xl bg-surface-container border border-primary text-left transition-all shadow-[0_0_16px_rgba(46,213,164,0.3)] cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-primary text-[22px]">account_balance_wallet</span>
+                        <p className="font-title-base text-xs font-bold text-white mt-1">KIN Cash</p>
+                        <p className="text-[10px] text-primary">Direct P2P Transit</p>
+                      </button>
+                      <button
+                        type="button"
+                        className="p-3 rounded-xl bg-surface-container border border-white/10 text-left transition-all hover:border-white/20 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-secondary text-[22px]">smartphone</span>
+                        <p className="font-title-base text-xs font-bold text-white mt-1">Mercado Pago</p>
+                        <p className="text-[10px] text-on-surface-variant">Instant Transfer</p>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================================================= */}
+                {/* TRANSPARENT FEE BREAKDOWN CARD                                            */}
+                {/* ========================================================================= */}
+                <div className="rounded-2xl bg-surface-container p-4 shadow-md space-y-2.5 border border-white/5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-caption-sm text-xs text-on-surface-variant">Transfer Fee</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-financial-mono text-xs text-on-surface-variant line-through">$4.99</span>
+                      <span className="font-financial-mono text-xs text-primary font-bold">$0.00 Free</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-caption-sm text-xs text-on-surface-variant">Exchange Rate Guaranteed</span>
+                    <span className="font-financial-mono text-xs text-on-surface font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-caption-sm text-xs text-on-surface-variant">Estimated Delivery Time</span>
+                    <span className="font-caption-sm text-xs text-primary font-bold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px]">bolt</span> Within 5 minutes
+                    </span>
+                  </div>
+                  <div className="pt-2 flex items-center justify-between border-t border-white/5">
+                    <span className="font-title-base text-xs text-on-surface font-bold">Total to Charge</span>
+                    <span className="font-financial-mono text-sm text-primary font-bold">
+                      ${(parseFloat(amountValue) || 300).toFixed(2)} USD
+                    </span>
+                  </div>
+                </div>
+
+                {/* ========================================================================= */}
+                {/* PERSISTENT STICKY PRIMARY CTA (EXACT STITCH SPECS)                        */}
+                {/* ========================================================================= */}
+                <div className="sticky bottom-20 z-30 pt-2 pb-1">
                   <button
                     type="button"
-                    onClick={() => setDeliveryMethod('wallet')}
-                    className={`w-full p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                      deliveryMethod === 'wallet'
-                        ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                        : 'bg-[#181928] border-white/10 hover:border-white/20'
-                    }`}
+                    onClick={handleSendNow}
+                    className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-105"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4] shadow-inner">
-                        <WalletIcon className="w-5 h-5" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs font-bold text-white leading-tight">
-                          Mobile wallet <sup className="text-[9px] text-[#2ED5A4]">9</sup>
-                        </p>
-                        <p className="text-[10px] text-white/80 mt-0.5 font-medium">Transferencia directa a KIN Cash o Mercado Pago</p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/15 px-2 py-0.5 rounded-full border border-[#2ED5A4]/30">
-                      Instantáneo
-                    </span>
+                    <span>{language === 'en' ? 'Continue to Beneficiary' : 'Continuar al Beneficiario'}</span>
+                    <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                   </button>
-
-                  {/* Cash Pickup Stores Expanded Grid */}
-                  {deliveryMethod === 'cash' && (
-                    <div className="p-3.5 rounded-2xl bg-[#121320] border border-white/10 space-y-2.5 animate-fade-in">
-                      <div className="flex items-center justify-between text-[11px] px-0.5">
-                        <span className="uppercase tracking-wider text-white font-extrabold flex items-center gap-1.5">
-                          <span className="text-[#2ED5A4]">📍</span>
-                          <span>Red de Retiro Oficial en México:</span>
-                        </span>
-                        <span className="text-[#2ED5A4] font-bold text-[10px] bg-[#2ED5A4]/15 px-2 py-0.5 rounded-full border border-[#2ED5A4]/30">
-                          {CASH_PICKUP_STORES.find((s) => s.id === selectedStore)?.name || 'OXXO'} ✓
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2 pt-1 max-h-[360px] overflow-y-auto pr-0.5 scrollbar-thin">
-                        {CASH_PICKUP_STORES.map((store) => {
-                          const isSelected = selectedStore === store.id;
-                          const StoreLogo = store.Logo;
-                          return (
-                            <button
-                              key={store.id}
-                              type="button"
-                              onClick={() => setSelectedStore(store.id)}
-                              className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-between min-h-[76px] gap-1.5 cursor-pointer relative ${
-                                isSelected
-                                  ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint ring-1 ring-[#2ED5A4]'
-                                  : 'bg-[#181928]/60 border-white/10 hover:border-white/25 hover:bg-[#181928]'
-                              }`}
-                            >
-                              {/* Logo Badge */}
-                              <div className="w-full h-8 flex items-center justify-center">
-                                <StoreLogo className="w-full h-full" />
-                              </div>
-
-                              {/* Store Name & Badge */}
-                              <div className="w-full text-center">
-                                <span className={`text-[10px] truncate w-full font-bold block leading-tight ${
-                                  isSelected ? 'text-[#2ED5A4]' : 'text-white'
-                                }`}>
-                                  {store.name}
-                                </span>
-                                <span className="text-[8px] text-[#8E91A5] truncate w-full block mt-0.5 font-medium">
-                                  {store.badge}
-                                </span>
-                              </div>
-
-                              {isSelected && (
-                                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#2ED5A4] text-[#06070B] font-black text-[9px] flex items-center justify-center shadow-md">
-                                  ✓
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                {/* ========================================================= */}
-                {/* SECTION 2: HOW WILL YOU PAY? (WESTERN UNION 2X2 GRID)     */}
-                {/* ========================================================= */}
-                <div className="space-y-2.5">
-                  <span className="text-xs font-black text-white uppercase tracking-wider block px-1">
-                    How will you pay?<sup className="text-[9px] text-[#2ED5A4]">31</sup>
-                  </span>
-
-                  {/* Segmented Rail: [ Pay online ] vs [ Pay in-store ] */}
-                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#121320] border border-white/5 rounded-2xl">
-                    <button
-                      type="button"
-                      onClick={() => setPayOnlineTab('online')}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        payOnlineTab === 'online'
-                          ? 'bg-[#2B6CB0] text-white shadow-md'
-                          : 'text-white/80 hover:text-white'
-                      }`}
-                    >
-                      Pay online
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPayOnlineTab('store')}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        payOnlineTab === 'store'
-                          ? 'bg-[#2B6CB0] text-white shadow-md'
-                          : 'text-white/80 hover:text-white'
-                      }`}
-                    >
-                      Pay in-store
-                    </button>
-                  </div>
-
-                  {/* 2x2 Grid of Payment Cards (Screenshot 2) */}
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {/* 1. Debit card */}
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('debit')}
-                      className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between min-h-[118px] relative ${
-                        paymentMethod === 'debit'
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                          : 'bg-[#181928] border-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-[#2B6CB0] text-white text-[8px] font-bold uppercase tracking-wider shadow-sm">
-                        Popular
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-[#1E3A8A]/40 border border-[#38BDF8]/30 flex items-center justify-center text-[#38BDF8] mb-1 shadow-inner">
-                        <CardOutlineIcon className="w-4 h-4 text-[#38BDF8]" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">Debit card <sup className="text-[9px] text-[#2ED5A4]">3</sup></p>
-                        <p className="text-[11px] text-[#2ED5A4] font-black mt-0.5">Fees² $0.00 USD</p>
-                        <p className="text-[10px] text-white/80 font-medium">Real time ¹, ⁸</p>
-                      </div>
-                    </button>
-
-                    {/* 2. Apple Pay */}
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('apple')}
-                      className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between min-h-[118px] relative ${
-                        paymentMethod === 'apple'
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                          : 'bg-[#181928] border-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white mb-1 shadow-inner">
-                        <ApplePayIcon className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">Apple Pay <sup className="text-[9px] text-[#2ED5A4]">3</sup></p>
-                        <p className="text-[11px] text-[#2ED5A4] font-black mt-0.5">Fees² $0.00 USD</p>
-                        <p className="text-[10px] text-white/80 font-medium">Real time ¹, ⁸</p>
-                      </div>
-                    </button>
-
-                    {/* 3. Bank account */}
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('bank')}
-                      className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between min-h-[118px] relative ${
-                        paymentMethod === 'bank'
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                          : 'bg-[#181928] border-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-full bg-[#1E3A8A]/40 border border-[#38BDF8]/30 flex items-center justify-center text-[#38BDF8] mb-1 shadow-inner">
-                        <BankBuildingIcon className="w-4 h-4 text-[#38BDF8]" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">Bank account <sup className="text-[9px] text-[#2ED5A4]">4, 33</sup></p>
-                        <p className="text-[11px] text-[#2ED5A4] font-black mt-0.5">Fees² $0.00 USD</p>
-                        <p className="text-[10px] text-white/80 font-medium">0-1 Business days ¹, ⁸</p>
-                      </div>
-                    </button>
-
-                    {/* 4. Credit card */}
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('credit')}
-                      className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between min-h-[118px] relative ${
-                        paymentMethod === 'credit'
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-glow-mint'
-                          : 'bg-[#181928] border-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white mb-1 shadow-inner">
-                        <CreditCardGradientIcon className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">Credit card <sup className="text-[9px] text-[#2ED5A4]">3</sup></p>
-                        <p className="text-[11px] text-amber-400 font-black mt-0.5">Fees² $1.99 USD</p>
-                        <p className="text-[10px] text-white/80 font-medium">Real time ¹, ⁸</p>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Regulatory & Security Disclosure Banner */}
-                <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 flex items-center gap-3 shadow-md">
-                  <div className="w-8 h-8 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4] flex-shrink-0">
-                    <ShieldCheckIcon className="w-4 h-4" />
-                  </div>
-                  <div className="text-[11px] text-white/90 leading-relaxed">
-                    <span className="font-bold text-white">Garantía KIN Remittance:</span> Fondos 100% protegidos y liquidados por SPEI Banxico (Participante #90642).
-                  </div>
-                </div>
-
-                {/* Bottom Spacer so content is never hidden behind the floating CTA */}
-                <div className="h-36 w-full pointer-events-none" aria-hidden="true" />
+                {/* Spacer */}
+                <div className="h-14 w-full pointer-events-none" aria-hidden="true" />
               </>
             )}
           </div>
@@ -3118,14 +2864,21 @@ export default function MobileApp() {
       {/* STITCH MASTER BOTTOM DOCK (5 TABS: HOME, SEND, KIN CASH, BILL PAY, VAULT) */}
       {/* ========================================================================= */}
       {!sendSuccessData && activeTab !== 'send-quick' && (
-        <nav className="fixed bottom-0 max-w-[400px] w-full z-50 pb-safe pointer-events-none">
+        <nav className="fixed bottom-0 max-w-[400px] w-full z-50 pb-safe pointer-events-none" data-active-classes="text-primary font-bold scale-105">
           <div className="mx-4 mb-2.5 h-16 rounded-full bg-[#1F2133]/92 backdrop-blur-2xl shadow-[0_20px_48px_rgba(0,0,0,0.85),0_0_24px_rgba(46,213,164,0.08)] border border-white/10 flex items-center justify-between px-3 pointer-events-auto">
             {/* 1. Home */}
             <button
               type="button"
-              onClick={() => setActiveTab('home')}
+              onClick={() => {
+                setActiveTab('home');
+                setShowKinCashModal(false);
+                setShowBillPayModal(false);
+                setShowVaultModal(false);
+              }}
               className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
-                activeTab === 'home' ? 'text-[#2ED5A4] font-bold scale-105' : 'text-[#8E91A5] hover:text-white'
+                activeTab === 'home' && !showKinCashModal && !showBillPayModal && !showVaultModal
+                  ? 'text-primary font-bold scale-105'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
               title="Home"
             >
@@ -3136,9 +2889,16 @@ export default function MobileApp() {
             {/* 2. Send */}
             <button
               type="button"
-              onClick={() => setActiveTab('send')}
+              onClick={() => {
+                setActiveTab('send');
+                setShowKinCashModal(false);
+                setShowBillPayModal(false);
+                setShowVaultModal(false);
+              }}
               className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
-                activeTab === 'send' ? 'text-[#2ED5A4] font-bold scale-105' : 'text-[#8E91A5] hover:text-white'
+                activeTab === 'send' && !showKinCashModal && !showBillPayModal && !showVaultModal
+                  ? 'text-primary font-bold scale-105'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
               title="Send"
             >
@@ -3149,8 +2909,16 @@ export default function MobileApp() {
             {/* 3. Kin Cash */}
             <button
               type="button"
-              onClick={() => setShowKinCashModal(true)}
-              className="flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all text-[#8E91A5] hover:text-white cursor-pointer"
+              onClick={() => {
+                setShowKinCashModal(true);
+                setShowBillPayModal(false);
+                setShowVaultModal(false);
+              }}
+              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+                showKinCashModal || activeTab === 'kin-cash'
+                  ? 'text-primary font-bold scale-105'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
               title="Kin Cash"
             >
               <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
@@ -3160,8 +2928,16 @@ export default function MobileApp() {
             {/* 4. Bill Pay */}
             <button
               type="button"
-              onClick={() => setShowBillPayModal(true)}
-              className="flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all text-[#8E91A5] hover:text-white cursor-pointer"
+              onClick={() => {
+                setShowBillPayModal(true);
+                setShowKinCashModal(false);
+                setShowVaultModal(false);
+              }}
+              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+                showBillPayModal || activeTab === 'bill-pay'
+                  ? 'text-primary font-bold scale-105'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
               title="Bill Pay"
             >
               <span className="material-symbols-outlined text-[22px]">receipt_long</span>
@@ -3171,8 +2947,16 @@ export default function MobileApp() {
             {/* 5. Vault */}
             <button
               type="button"
-              onClick={() => setShowVaultModal(true)}
-              className="flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all text-[#8E91A5] hover:text-white cursor-pointer"
+              onClick={() => {
+                setShowVaultModal(true);
+                setShowKinCashModal(false);
+                setShowBillPayModal(false);
+              }}
+              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+                showVaultModal || activeTab === 'vault'
+                  ? 'text-primary font-bold scale-105'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
               title="Vault"
             >
               <span className="material-symbols-outlined text-[22px]">shield_lock</span>
@@ -3182,114 +2966,26 @@ export default function MobileApp() {
         </nav>
       )}
 
-      {/* ========================================================================= */}
-      {/* FLOATING ACTION CTA: SEND MONEY (BOTÓN BLANCO, LETRAS E ICONOS BLANCOS)    */}
-      {/* ========================================================================= */}
-      {activeTab === 'send' && !sendSuccessData && (
-        <div className="send-floating-cta-container flex flex-col gap-2 pointer-events-none">
-          {/* Desglose desplegable (Fee Breakdown Drawer con texto blanco) */}
-          {showBreakdown && (
-            <div className="w-full bg-[#161826]/98 backdrop-blur-2xl border border-white/20 rounded-2xl p-4 shadow-2xl space-y-2.5 pointer-events-auto animate-in fade-in slide-in-from-bottom-2 duration-200 text-white">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-1.5">
-                  <span className="text-[#2ED5A4]">●</span> Desglose de Operación
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowBreakdown(false)}
-                  className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs cursor-pointer transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between text-white/80">
-                  <span>{language === 'en' ? 'Transfer amount' : 'Monto a transferir'}</span>
-                  <span className="font-bold text-white">${currentSendAmount.toFixed(2)} USD</span>
-                </div>
-                <div className="flex items-center justify-between text-white/80">
-                  <span>{language === 'en' ? 'Transfer fee' : 'Comisión de transferencia'}</span>
-                  <span className="font-bold text-[#2ED5A4]">
-                    {paymentMethod === 'credit' ? '+$1.99 USD' : '+$0.00 USD (Promoción)'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-white/80">
-                  <span>{language === 'en' ? 'Guaranteed exchange rate' : 'Tipo de cambio garantizado'}</span>
-                  <span className="font-bold text-[#38BDF8]">1 USD = {USD_TO_MXN_RATE.toFixed(4)} MXN</span>
-                </div>
-                <div className="flex items-center justify-between text-white/80">
-                  <span>{language === 'en' ? 'Recipient gets' : 'Destinatario recibe'}</span>
-                  <span className="font-black text-[#2ED5A4]">
-                    ${(currentSendAmount * USD_TO_MXN_RATE).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-white/80 pt-1 border-t border-white/5">
-                  <span>{language === 'en' ? 'Delivery speed' : 'Tiempo de entrega'}</span>
-                  <span className="font-bold text-white">{language === 'en' ? 'SPEI 24/7 in minutes' : 'SPEI 24/7 en minutos'}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Barra Flotante de la Cantidad (100% BLANCA, Siempre Visible, Iconos y Letras Blancos) */}
-          <div className="w-full bg-white text-[#0E0F1A] rounded-full px-4 py-2 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_24px_rgba(255,255,255,0.25)] flex items-center justify-between gap-2.5 pointer-events-auto border border-white">
-            {/* Izquierda: Botón de la Cantidad con Desglose */}
-            <button
-              type="button"
-              onClick={() => setShowBreakdown(!showBreakdown)}
-              className="text-left group cursor-pointer flex flex-col justify-center select-none pl-1 flex-shrink-0"
-              title="Toca para ver el desglose de tarifas"
-            >
-              <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#4A4D68] group-hover:text-[#0E0F1A] transition-colors">
-                <span>{language === 'en' ? 'Total to pay' : 'Total a pagar'}</span>
-                <span className="text-[9px] text-[#0E0F1A] font-black">
-                  {showBreakdown ? '▼' : '▲'}
-                </span>
-              </div>
-              <div className="text-base font-black text-[#0E0F1A] tracking-tight flex items-baseline gap-1">
-                <span>
-                  {currencyPref === 'USD'
-                    ? `$${totalToPayUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : `$${(totalToPayUSD * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                </span>
-                <span className="text-[10px] font-bold text-[#4A4D68]">{currencyPref}</span>
-              </div>
-            </button>
-
-            {/* Derecha: Botón Continuar con Letras e Icono en Blanco */}
-            <button
-              type="button"
-              onClick={handleSendNow}
-              className="h-11 px-6 rounded-full bg-[#0E0F1A] hover:bg-[#1E2036] text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer flex-shrink-0"
-            >
-              <span className="text-white font-black">{language === 'en' ? 'Continue' : 'Continuar'}</span>
-              <ArrowRightIcon className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* FLOATING ACTION CTA: SEND QUICK (ENVÍO RÁPIDO NATIVO BLANCO) */}
+      {/* FLOATING ACTION CTA: SEND QUICK (STITCH MINT GRADIENT CTA) */}
       {activeTab === 'send-quick' && (
         <div className="send-floating-cta-container">
           <button
             type="button"
             onClick={handleSendQuick}
-            className="w-full h-14 rounded-full bg-white text-[#0E0F1A] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.85)] flex items-center justify-between border border-white cursor-pointer"
+            className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white px-5 shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer font-bold border border-white/10"
           >
-            <span className="text-sm font-black tracking-wide flex items-center gap-1.5 text-[#0E0F1A]">
-              <span>⚡</span>
+            <span className="text-sm font-bold tracking-wide flex items-center gap-2 text-white">
+              <span className="material-symbols-outlined text-[18px]">bolt</span>
               <span>{language === 'en' ? 'Send to' : 'Enviar a'} {(RECENT_CONTACTS[sendQuickSelectedRecipient] || RECENT_CONTACTS[0]).name.split(' ')[0]}</span>
             </span>
             <div className="flex items-center gap-2">
-              <span className="h-9 px-3.5 rounded-full bg-[#0E0F1A] text-white text-xs font-black flex items-center justify-center gap-1.5 shadow-sm">
-                <span className="text-white">
+              <span className="h-9 px-3.5 rounded-full bg-[#003828] text-primary text-xs font-financial-mono font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                <span>
                   {currencyPref === 'USD'
                     ? `$${(parseFloat(sendQuickAmount) || 50).toFixed(2)} USD`
                     : `$${((parseFloat(sendQuickAmount) || 50) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`}
                 </span>
-                <ArrowRightIcon className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span className="material-symbols-outlined text-[16px] text-primary">arrow_forward</span>
               </span>
             </div>
           </button>
@@ -3506,9 +3202,10 @@ export default function MobileApp() {
             <button
               type="button"
               onClick={() => setShowContactModal(false)}
-              className="w-full py-2.5 rounded-full bg-white text-[#0E0F1A] text-xs font-bold hover:bg-gray-100 transition-all cursor-pointer flex-shrink-0"
+              className="w-full h-12 rounded-full bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition-all cursor-pointer flex-shrink-0 shadow-md flex items-center justify-center gap-1.5 active:scale-[0.98]"
             >
-              Listo
+              <span>Listo</span>
+              <span className="material-symbols-outlined text-[18px]">check</span>
             </button>
           </div>
         </div>

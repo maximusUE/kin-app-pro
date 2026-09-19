@@ -363,18 +363,18 @@ export default function AuthPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col gap-2.5 pt-2">
+              <div className="flex flex-col gap-space-sm pt-2">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-13 py-3.5 rounded-full bg-primary text-on-primary font-headline-md text-sm font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer"
+                  className="w-full h-14 rounded-full bg-primary text-on-primary font-headline-md text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-[#003828] border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
                       <span>{language === 'es' ? 'Crear Cuenta Segura' : 'Create Secure Account'}</span>
-                      <span className="material-symbols-outlined text-[19px]">arrow_forward</span>
+                      <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                     </>
                   )}
                 </button>
@@ -383,13 +383,13 @@ export default function AuthPage() {
                   type="button"
                   onClick={handleFaceIdAuth}
                   disabled={isFaceIdLoading}
-                  className="w-full h-11 rounded-2xl bg-secondary-container/20 text-secondary font-title-base text-xs font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(112,71,235,0.25)] hover:bg-secondary-container/30 active:scale-[0.98] transition-all cursor-pointer border border-secondary/20"
+                  className="w-full h-12 rounded-2xl bg-secondary-container/20 text-secondary font-title-base text-body-medium font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(112,71,235,0.25)] hover:bg-secondary-container/30 active:scale-[0.98] transition-all cursor-pointer border border-secondary/20"
                 >
                   {isFaceIdLoading ? (
                     <div className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <span className="material-symbols-outlined text-[20px] text-secondary">face</span>
+                      <span className="material-symbols-outlined text-[22px] text-secondary">face</span>
                       <span>{language === 'es' ? 'Ingresar con Face ID ⚡' : 'Sign in with Face ID ⚡'}</span>
                     </>
                   )}
@@ -469,18 +469,18 @@ export default function AuthPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col gap-2.5 pt-2">
+              <div className="flex flex-col gap-space-sm pt-2">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-13 py-3.5 rounded-full bg-primary text-on-primary font-headline-md text-sm font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer"
+                  className="w-full h-14 rounded-full bg-primary text-on-primary font-headline-md text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-[#003828] border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
                       <span>{language === 'es' ? 'Iniciar Sesión Segura' : 'Log In Securely'}</span>
-                      <span className="material-symbols-outlined text-[19px]">arrow_forward</span>
+                      <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                     </>
                   )}
                 </button>
@@ -489,13 +489,13 @@ export default function AuthPage() {
                   type="button"
                   onClick={handleFaceIdAuth}
                   disabled={isFaceIdLoading}
-                  className="w-full h-11 rounded-2xl bg-secondary-container/20 text-secondary font-title-base text-xs font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(112,71,235,0.25)] hover:bg-secondary-container/30 active:scale-[0.98] transition-all cursor-pointer border border-secondary/20"
+                  className="w-full h-12 rounded-2xl bg-secondary-container/20 text-secondary font-title-base text-body-medium font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(112,71,235,0.25)] hover:bg-secondary-container/30 active:scale-[0.98] transition-all cursor-pointer border border-secondary/20"
                 >
                   {isFaceIdLoading ? (
                     <div className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <span className="material-symbols-outlined text-[20px] text-secondary">face</span>
+                      <span className="material-symbols-outlined text-[22px] text-secondary">face</span>
                       <span>{language === 'es' ? 'Ingresar con Face ID ⚡' : 'Sign in with Face ID ⚡'}</span>
                     </>
                   )}
