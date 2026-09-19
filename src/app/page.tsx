@@ -1082,7 +1082,7 @@ export default function MobileApp() {
                 className="group flex flex-col items-center gap-1.5 cursor-pointer"
               >
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#5018cb] to-[#7047eb] flex items-center justify-center text-white shadow-[0_8px_20px_-4px_rgba(112,71,235,0.45)] transition-transform group-hover:scale-105 active:scale-95">
-                  <span className="material-symbols-outlined text-[26px]">electric_bolt</span>
+                  <span className="material-symbols-outlined text-[26px]">bolt</span>
                 </div>
                 <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Kin Cash</span>
               </button>
@@ -1116,7 +1116,7 @@ export default function MobileApp() {
             <div className="flex flex-col space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#2ED5A4] text-[18px]">family_restroom</span>
+                  <span className="material-symbols-outlined text-[#2ED5A4] text-[20px]">group</span>
                   <h2 className="font-title-base text-title-base text-white font-bold">Quick Send to Family</h2>
                 </div>
                 <button
@@ -1277,17 +1277,23 @@ export default function MobileApp() {
                         >
                           {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
                         </span>
-                        <span
-                          className={`font-caption-sm text-caption-sm font-semibold ${
-                            isIncome ? 'text-[#2ED5A4]/80' : 'text-[#2ED5A4]'
-                          }`}
-                        >
-                          {isIncome
-                            ? (currencyPref === 'USD'
-                                ? 'USD Balance'
-                                : `+$${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`)
-                            : `$${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓`}
-                        </span>
+                        {tx.iconType === 'luz' ? (
+                          <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
+                            ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                          </span>
+                        ) : tx.iconType === 'bank' ? (
+                          <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
+                            Direct USD
+                          </span>
+                        ) : isIncome ? (
+                          <span className="font-caption-sm text-caption-sm text-[#2ED5A4]/80 font-medium">
+                            USD Balance
+                          </span>
+                        ) : (
+                          <span className="font-caption-sm text-caption-sm font-semibold text-[#2ED5A4]">
+                            ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
@@ -2862,8 +2868,11 @@ export default function MobileApp() {
       {/* STITCH MASTER BOTTOM DOCK (5 TABS: HOME, SEND, KIN CASH, BILL PAY, VAULT) */}
       {/* ========================================================================= */}
       {!sendSuccessData && activeTab !== 'send-quick' && (
-        <nav className="fixed bottom-0 max-w-[400px] w-full z-50 pb-safe pointer-events-none" data-active-classes="text-primary font-bold scale-105">
-          <div className="mx-4 mb-2.5 h-16 rounded-full bg-[#1F2133]/92 backdrop-blur-2xl shadow-[0_20px_48px_rgba(0,0,0,0.85),0_0_24px_rgba(46,213,164,0.08)] border border-white/10 flex items-center justify-between px-3 pointer-events-auto">
+        <nav
+          className="fixed bottom-0 max-w-[400px] w-full z-50 bg-[#000000] border-t border-white/10 pb-safe pt-1 pointer-events-auto shadow-[0_-10px_35px_rgba(0,0,0,0.95)]"
+          data-active-classes="text-primary font-bold scale-105"
+        >
+          <div className="h-16 w-full flex items-center justify-around px-2">
             {/* 1. Home */}
             <button
               type="button"
@@ -2873,15 +2882,15 @@ export default function MobileApp() {
                 setShowBillPayModal(false);
                 setShowVaultModal(false);
               }}
-              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'home' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'text-primary font-bold'
+                  : 'text-on-surface-variant hover:text-white'
               }`}
               title="Home"
             >
-              <span className="material-symbols-outlined text-[22px]">home</span>
-              <span className="font-label-caps text-[10px]">Home</span>
+              <span className="material-symbols-outlined text-[24px]">home</span>
+              <span className="font-label-caps text-[10px] tracking-tight">Home</span>
             </button>
 
             {/* 2. Send */}
@@ -2893,15 +2902,15 @@ export default function MobileApp() {
                 setShowBillPayModal(false);
                 setShowVaultModal(false);
               }}
-              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'send' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'text-primary font-bold'
+                  : 'text-on-surface-variant hover:text-white'
               }`}
               title="Send"
             >
-              <span className="material-symbols-outlined text-[22px]">send</span>
-              <span className="font-label-caps text-[10px]">Send</span>
+              <span className="material-symbols-outlined text-[24px]">send</span>
+              <span className="font-label-caps text-[10px] tracking-tight">Send</span>
             </button>
 
             {/* 3. Kin Cash */}
@@ -2912,15 +2921,15 @@ export default function MobileApp() {
                 setShowBillPayModal(false);
                 setShowVaultModal(false);
               }}
-              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 showKinCashModal || activeTab === 'kin-cash'
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'text-primary font-bold'
+                  : 'text-on-surface-variant hover:text-white'
               }`}
               title="Kin Cash"
             >
-              <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
-              <span className="font-label-caps text-[10px]">Kin Cash</span>
+              <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+              <span className="font-label-caps text-[10px] tracking-tight">Kin Cash</span>
             </button>
 
             {/* 4. Bill Pay */}
@@ -2931,15 +2940,15 @@ export default function MobileApp() {
                 setShowKinCashModal(false);
                 setShowVaultModal(false);
               }}
-              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 showBillPayModal || activeTab === 'bill-pay'
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'text-primary font-bold'
+                  : 'text-on-surface-variant hover:text-white'
               }`}
               title="Bill Pay"
             >
-              <span className="material-symbols-outlined text-[22px]">receipt_long</span>
-              <span className="font-label-caps text-[10px]">Bill Pay</span>
+              <span className="material-symbols-outlined text-[24px]">receipt_long</span>
+              <span className="font-label-caps text-[10px] tracking-tight">Bill Pay</span>
             </button>
 
             {/* 5. Vault */}
@@ -2950,15 +2959,15 @@ export default function MobileApp() {
                 setShowKinCashModal(false);
                 setShowBillPayModal(false);
               }}
-              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
                 showVaultModal || activeTab === 'vault'
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'text-primary font-bold'
+                  : 'text-on-surface-variant hover:text-white'
               }`}
               title="Vault"
             >
-              <span className="material-symbols-outlined text-[22px]">shield_lock</span>
-              <span className="font-label-caps text-[10px]">Vault</span>
+              <span className="material-symbols-outlined text-[24px]">shield</span>
+              <span className="font-label-caps text-[10px] tracking-tight">Vault</span>
             </button>
           </div>
         </nav>
