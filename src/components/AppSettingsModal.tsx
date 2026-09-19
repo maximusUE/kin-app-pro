@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   CloseIcon,
   SettingsGearIcon,
@@ -595,8 +596,17 @@ export function AppSettingsModal({
           </div>
         )}
 
-        {/* Footer: Botón Cerrar Sesión Segura */}
-        <div className="pt-2 border-t border-white/10 flex-shrink-0">
+        {/* Footer: Acceso a Login y Cerrar Sesión */}
+        <div className="pt-2.5 border-t border-white/10 flex flex-col gap-2 flex-shrink-0">
+          <Link
+            href="/auth"
+            onClick={onClose}
+            className="w-full py-2.5 rounded-2xl bg-[#202236] border border-white/10 hover:border-[#2ED5A4] text-white text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <ShieldCheckIcon className="w-3.5 h-3.5 text-[#2ED5A4]" />
+            <span>{isEn ? 'Switch Account / Go to Login & Register' : 'Cambiar Cuenta / Ir a Login & Registro'}</span>
+          </Link>
+
           <button
             type="button"
             onClick={() => {

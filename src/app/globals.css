@@ -455,8 +455,9 @@ input:-webkit-autofill:focus {
 }
 
 .auth-btn-cta.active {
-  background-color: #2ED5A4;
-  color: #0E0F1A;
+  background: linear-gradient(135deg, #2ED5A4 0%, #1EA77F 100%);
+  color: #FFFFFF;
+  font-weight: 800;
   box-shadow: 0 8px 24px -4px rgba(46, 213, 164, 0.4);
 }
 
