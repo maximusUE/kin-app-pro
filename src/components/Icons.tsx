@@ -729,6 +729,38 @@ export function SendQuickIcon({ className = 'w-5 h-5' }: { className?: string })
   );
 }
 
+export function FingerprintIcon({ className = 'w-6 h-6' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 9m5.936 8.529a10.024 10.024 0 01-1.921-.76" />
+    </svg>
+  );
+}
+
+export function QrCodeScannerIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.5v3m0-3h3m-3 0l3 3m10.5-3h3m0 0v3m0-3l-3 3M3.75 19.5v-3m0 3h3m-3 0l3-3m13.5 3h-3m3 0v-3m0 3l-3-3M9 9h6v6H9V9z" />
+    </svg>
+  );
+}
+
+export function SwapHorizIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+  );
+}
+
+export function BackspaceIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
+    </svg>
+  );
+}
+
 
 
 
