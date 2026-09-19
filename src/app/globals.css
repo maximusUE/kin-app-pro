@@ -784,3 +784,79 @@ a {
 .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
 .transition-colors { transition-property: color, background-color, border-color; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
 
+/* ========================================================================= */
+/* STITCH DESIGN SYSTEM TOKENS & UTILITIES                                    */
+/* ========================================================================= */
+.bg-surface { background-color: #0f1322; }
+.bg-surface-dim { background-color: #0f1322; }
+.bg-surface-bright { background-color: #353849; }
+.bg-surface-variant { background-color: #303445; }
+.bg-surface-container-lowest { background-color: #0a0d1c; }
+.bg-surface-container-low { background-color: #171b2a; }
+.bg-surface-container { background-color: #1b1f2f; }
+.bg-surface-container-high { background-color: #262939; }
+.bg-surface-container-highest { background-color: #303445; }
+.bg-primary { background-color: #57f2bf; }
+.bg-primary-container { background-color: #2ed5a4; }
+.bg-secondary { background-color: #ccbdff; }
+.bg-secondary-container { background-color: #5018cb; }
+.bg-primary\/10 { background-color: rgba(87, 242, 191, 0.10); }
+.bg-primary\/15 { background-color: rgba(87, 242, 191, 0.15); }
+.bg-primary\/20 { background-color: rgba(87, 242, 191, 0.20); }
+.bg-secondary-container\/20 { background-color: rgba(80, 24, 203, 0.20); }
+.bg-secondary-container\/30 { background-color: rgba(80, 24, 203, 0.30); }
+
+.text-primary { color: #57f2bf; }
+.text-primary-container { color: #2ed5a4; }
+.text-on-primary { color: #003828; }
+.text-on-primary-container { color: #005740; }
+.text-secondary { color: #ccbdff; }
+.text-on-surface { color: #dfe1f7; }
+.text-on-surface-variant { color: #bbcac1; }
+
+.font-financial-mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: 'tnum'; }
+.font-headline-md { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 24px; line-height: 30px; letter-spacing: -0.02em; font-weight: 700; }
+.font-headline-lg { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 30px; line-height: 36px; letter-spacing: -0.025em; font-weight: 700; }
+.font-display-hero { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 36px; line-height: 40px; letter-spacing: -0.025em; font-weight: 700; }
+.font-title-base { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 16px; line-height: 22px; letter-spacing: -0.01em; font-weight: 700; }
+.font-body-medium { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 14px; line-height: 20px; letter-spacing: 0; font-weight: 500; }
+.font-body-base { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 15px; line-height: 22px; letter-spacing: 0; font-weight: 400; }
+.font-caption-sm { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 12px; line-height: 16px; letter-spacing: 0.025em; font-weight: 600; }
+.font-label-caps { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 11px; line-height: 14px; letter-spacing: 0.05em; font-weight: 700; }
+
+.pt-safe { padding-top: max(env(safe-area-inset-top, 0px), 0px); }
+.pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px); }
+.px-margin-mobile { padding-left: 1.25rem; padding-right: 1.25rem; }
+.text-error { color: #ffb4ab; }
+.bg-error-container { background-color: #93000a; }
+.bg-error-container\/40 { background-color: rgba(147, 0, 10, 0.40); }
+.text-outline { color: #85948c; }
+.text-primary-fixed { color: #62fcc8; }
+.text-secondary-fixed { color: #e7deff; }
+
+.gap-space-xs { gap: 0.25rem; }
+.gap-space-sm { gap: 0.5rem; }
+.gap-space-md { gap: 1rem; }
+.gap-space-lg { gap: 1.25rem; }
+.gap-space-2xl { gap: 2rem; }
+
+.p-space-xs { padding: 0.25rem; }
+.p-space-sm { padding: 0.5rem; }
+.p-space-md { padding: 1rem; }
+.p-space-lg { padding: 1.25rem; }
+.p-space-2xl { padding: 2rem; }
+
+.mt-space-sm { margin-top: 0.5rem; }
+.mt-space-md { margin-top: 1rem; }
+.mt-space-lg { margin-top: 1.25rem; }
+.mb-space-sm { margin-bottom: 0.5rem; }
+.mb-space-md { margin-bottom: 1rem; }
+.mb-space-lg { margin-bottom: 1.25rem; }
+.py-space-sm { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-space-md { padding-top: 1rem; padding-bottom: 1rem; }
+.pt-space-xs { padding-top: 0.25rem; }
+.pt-space-md { padding-top: 1rem; }
+.-mx-margin-mobile { margin-left: -1.25rem; margin-right: -1.25rem; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+

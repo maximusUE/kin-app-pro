@@ -190,13 +190,58 @@ const BILL_SERVICES = [
   { id: 'gas', name: 'Gas', Icon: FlameIcon },
 ];
 
-// Avatares de la referencia (Manuel Ugalde, Sophia, David, Maria, Mike)
+// Avatares de la referencia Stitch (Mamá Rosa, Carlos M., Sofia R., Tía Elena, David)
 const RECENT_CONTACTS = [
-  { id: '1', name: 'Manuel', fullName: 'Manuel Ugalde Eligio', avatar: '👨🏻', role: 'Hermano', country: 'Mexico', bank: 'BanCoppel SPEI', photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80' },
-  { id: '2', name: 'Sophia', fullName: 'Sophia Ramos Eligio', avatar: '👩🏻', role: 'Hermana', country: 'Mexico', bank: 'BBVA Bancomer', photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80' },
-  { id: '3', name: 'David', fullName: 'David Ortiz Ramos', avatar: '👨🏽', role: 'Primo', country: 'Mexico', bank: 'Banco Azteca', photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80' },
-  { id: '4', name: 'Maria', fullName: 'María Elena Ugalde', avatar: '👩🏽', role: 'Madre', country: 'Mexico', bank: 'Santander México', photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80' },
-  { id: '5', name: 'Mike', fullName: 'Mike Chen González', avatar: '👨🏻', role: 'Amigo', country: 'Mexico', bank: 'Banorte', photoUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80' },
+  {
+    id: '1',
+    name: 'Mamá Rosa',
+    fullName: 'Rosa Urrutia Eligio',
+    avatar: '👵🏼',
+    role: 'Madre',
+    country: 'Mexico',
+    bank: 'BBVA Bancomer',
+    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDfWoyqADTVEY7wzVYvA5Am2cRLe9UqqlxItL5rRfyOfGOgaZvRD_Vy83WhbHwKpWcy9_NfrGKHsxjFy9Kwj6hC63A19nmfzA5uAUSVR77E85NpgSYMWb0BHfU2lK8kjhl2n4SMty-l71mKGgBP0PoDX7Qjsvhx16YJABIAQIKqPf3YBwRG9U3aE-4C7wVebP_s2LOjcyoPJzBF-vCsf77mTiwvVcp9ge47WoxxWEE-sGtM1L-9vcwy',
+  },
+  {
+    id: '2',
+    name: 'Carlos M.',
+    fullName: 'Carlos Mendoza Ramos',
+    avatar: '👨🏻',
+    role: 'Hermano',
+    country: 'Mexico',
+    bank: 'BanCoppel',
+    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnEWVM8pkwawuEjRXXK5AIPh_yinAPMMpV9kIcTdgToBOlYJ5pCjU2IQ9cHNzvE4kjoWKI3i-cV4g34FSXVCXpj1EoS885IuMRkpcH88TwbmG_1gCLAesV9s96VY_Y079DOXS2uaqfD2kBhZk-y699KkIIYLAECB9ps8V0vsWEyIvAJndsa4OQ245xdq7VM8Fk83ZrWrmmZkCKvyskZcefEHq1SKiefseEFfZ1iI3okObu0mDOVPOO',
+  },
+  {
+    id: '3',
+    name: 'Sofia R.',
+    fullName: 'Sofia Ramos Eligio',
+    avatar: '👩🏻',
+    role: 'Hermana',
+    country: 'Mexico',
+    bank: 'Banco Azteca',
+    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4Z_rr1KAC4c0PCx9Rbflq6njX2wPQpJMsH9rFm7-kA9EgJzmJL4zNUr3nCPLHqoYoYE_vdejqgmYHmS58f121a_y3AlNJ9jhq1hhVNxWEZvJk4H6wBY-OYf4uufwjqs79uEPh_8sUe_IBdww7sX4BZkFEuUTg5Qh1eaz_93J_Uh3kzZ0-IH8EKAk7eU_E1c20U3A79oJ-DBQq7j_4jKqSWJ39DmDB0hi2bI3PYjTpQaFtXKHW1fsW',
+  },
+  {
+    id: '4',
+    name: 'Tía Elena',
+    fullName: 'Elena Ugalde Ortiz',
+    avatar: '👩🏽',
+    role: 'Tía',
+    country: 'Mexico',
+    bank: 'OXXO',
+    photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_Fwd2YTLQNjUrMzbKE1bVHvXMMkoZdUUtQxyQ4D4WSgp1lrarFmL8USJrzcFSFbqxnR-PaIHFodbSi4XOIkN8-ggN0hUTafYFsLsxM1_CzxypVKu4pY2X_n5d0tWQrQVQkDKvs8-1t_l7rAVvICwbZr9INnND9Blbdjdzm0t-zT10yzHxthkr6LEoiFHs4FZsNFUZX3P27cjnxTcKTRunLzfu1gamMq_wKCC-EPPCuhELm1yuZKM5',
+  },
+  {
+    id: '5',
+    name: 'David O.',
+    fullName: 'David Ortiz Ramos',
+    avatar: '👨🏽',
+    role: 'Primo',
+    country: 'Mexico',
+    bank: 'Banorte',
+    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+  },
 ];
 
 interface TransactionItem {
@@ -216,25 +261,25 @@ interface TransactionItem {
 const INITIAL_TRANSACTIONS: TransactionItem[] = [
   {
     id: 'tx-001',
-    title: 'Envío SPEI a David',
-    category: 'Transferencia Directa SPEI',
-    time: '10:42 AM',
+    title: 'Mamá Rosa (Guadalajara)',
+    category: 'OXXO Cash Pickup',
+    time: 'Hace 12 mins',
     dateGroup: 'Hoy',
-    amount: -50.00,
-    amountMXN: 1022.50,
+    amount: -250.00,
+    amountMXN: 5112.50,
     type: 'expense',
-    iconType: 'bank',
+    iconType: 'send',
     status: 'Completado',
-    refNumber: 'SPEI-948210',
+    refNumber: 'OXXO-948210',
   },
   {
     id: 'tx-002',
-    title: 'CFE Suministrador',
-    category: 'Pago de Electricidad México',
-    time: '08:15 AM',
+    title: 'CFE Electric (Monterrey)',
+    category: 'Pago de Servicio',
+    time: 'Hoy 8:15 AM',
     dateGroup: 'Hoy',
-    amount: -34.20,
-    amountMXN: 700.00,
+    amount: -48.20,
+    amountMXN: 985.69,
     type: 'expense',
     iconType: 'luz',
     status: 'Completado',
@@ -242,12 +287,12 @@ const INITIAL_TRANSACTIONS: TransactionItem[] = [
   },
   {
     id: 'tx-003',
-    title: 'Recarga KIN Cash P2P',
-    category: 'Depósito Nómina / Remesa',
-    time: '04:30 PM',
+    title: 'Kin Cash from Javier Ruiz',
+    category: 'Instant P2P',
+    time: 'Ayer',
     dateGroup: 'Ayer',
-    amount: 350.00,
-    amountMXN: 7157.50,
+    amount: 75.00,
+    amountMXN: 1533.75,
     type: 'income',
     iconType: 'wallet',
     status: 'Completado',
@@ -255,6 +300,19 @@ const INITIAL_TRANSACTIONS: TransactionItem[] = [
   },
   {
     id: 'tx-004',
+    title: 'Payroll Deposit (Austin Tech)',
+    category: 'ACH Direct Deposit',
+    time: 'Hace 3 días',
+    dateGroup: 'Esta semana',
+    amount: 1850.00,
+    amountMXN: 37832.50,
+    type: 'income',
+    iconType: 'bank',
+    status: 'Completado',
+    refNumber: 'ACH-881023',
+  },
+  {
+    id: 'tx-005',
     title: 'Envío Rápido a Maria',
     category: 'SPEI Exprés 1-Toque',
     time: '01:12 PM',
@@ -267,7 +325,7 @@ const INITIAL_TRANSACTIONS: TransactionItem[] = [
     refNumber: 'SPEI-881023',
   },
   {
-    id: 'tx-005',
+    id: 'tx-006',
     title: 'Telmex Infinitum',
     category: 'Internet y Telefonía Fibra',
     time: '11:20 AM',
@@ -379,6 +437,10 @@ export default function MobileApp() {
   const [draftUserState, setDraftUserState] = useState('California');
   const [draftUserAvatar, setDraftUserAvatar] = useState(RECENT_CONTACTS[1].photoUrl);
   const [customAvatarInput, setCustomAvatarInput] = useState('');
+
+  // Stitch Executive Dashboard state
+  const [hideBalance, setHideBalance] = useState(false);
+  const [dashboardFilter, setDashboardFilter] = useState<'all' | 'sent' | 'bills'>('all');
 
   // Helper para copiar Folio de Cliente
   const handleCopyClientId = () => {
@@ -779,6 +841,37 @@ export default function MobileApp() {
 
   const netBalance = 12458.90 + totalIncome - totalExpense;
 
+  // Stitch Executive Dashboard: balance base $2,450.00 USD
+  const initialNet = 1925.00 - 298.20;
+  const executiveBalance = 2450.00 + (totalIncome - totalExpense - initialNet);
+
+  // Filtered transactions for Stitch Executive Activity feed
+  const filteredDashboardTransactions = transactions.filter((tx) => {
+    if (dashboardFilter === 'all') return true;
+    if (dashboardFilter === 'sent') {
+      return (
+        tx.type === 'expense' &&
+        (tx.category.toLowerCase().includes('spei') ||
+          tx.category.toLowerCase().includes('envío') ||
+          tx.category.toLowerCase().includes('pickup') ||
+          tx.category.toLowerCase().includes('remesa') ||
+          tx.iconType === 'send')
+      );
+    }
+    if (dashboardFilter === 'bills') {
+      return (
+        tx.category.toLowerCase().includes('servicio') ||
+        tx.category.toLowerCase().includes('cfe') ||
+        tx.category.toLowerCase().includes('telmex') ||
+        tx.iconType === 'luz' ||
+        tx.iconType === 'internet' ||
+        tx.iconType === 'phone' ||
+        tx.iconType === 'bill'
+      );
+    }
+    return true;
+  });
+
   // Agrupación ordenada de transacciones por temporalidad (Hoy, Ayer, Esta semana, Anteriores)
   const groupedTransactions = transactions.reduce<Record<string, TransactionItem[]>>((acc, tx) => {
     const group = tx.dateGroup || 'Hoy';
@@ -798,275 +891,410 @@ export default function MobileApp() {
         <div className="bicolor-atmosphere-glow" />
 
         {/* ========================================================================= */}
-        {/* TOP STATUS BAR (9:41, Cellular, Wifi, Battery)                            */}
+        {/* TOP STATUS BAR & APP HEADER (STITCH DYNAMIC ISLAND + KIN GLOBAL)          */}
         {/* ========================================================================= */}
-        <div className="flex items-center justify-between text-xs text-white/90 font-semibold mb-2 pt-1 px-1">
-          <span>9:41</span>
+        <div className="flex items-center justify-between text-xs text-[#8E91A5] font-semibold mb-2 pt-1 px-1">
+          <span className="font-financial-mono text-white">9:41</span>
+          <div className="h-3.5 w-20 bg-[#121320] rounded-full mx-auto shadow-inner border border-white/5" />
           <div className="flex items-center gap-1.5">
-            <StatusCellularIcon className="w-3.5 h-2.5 text-white" />
-            <StatusWifiIcon className="w-3.5 h-2.5 text-white" />
-            <StatusBatteryIcon className="w-5 h-2.5 text-white" />
+            <span className="material-symbols-outlined text-[13px] text-white">signal_cellular_alt</span>
+            <span className="font-financial-mono text-[10px] text-white">5G</span>
+            <span className="material-symbols-outlined text-[13px] text-white">battery_full</span>
           </div>
         </div>
 
+        {activeTab === 'home' && (
+          <header className="flex items-center justify-between gap-2 mb-3 px-0.5">
+            <div className="flex items-center gap-2">
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-[#2ED5A4]/25 to-[#7047EB]/25 border border-white/10 p-1">
+                <KinCashCircleIcon className="w-5 h-5 text-[#2ED5A4]" />
+                <div className="absolute -inset-1 rounded-full bg-[#2ED5A4]/10 blur-sm pointer-events-none" />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="font-headline-md text-[17px] font-bold tracking-tight text-white">KIN</span>
+                <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/80 text-[#2ED5A4] shadow-inner border border-white/5">
+              <span className="font-financial-mono text-caption-sm font-semibold tracking-tight text-white">
+                1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN
+              </span>
+              <span className="material-symbols-outlined text-[13px] text-[#2ED5A4] animate-pulse">bolt</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => alert('No tienes notificaciones pendientes')}
+                aria-label="Notifications"
+                className="relative w-9 h-9 flex items-center justify-center rounded-full text-on-surface hover:text-white transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[20px]">notifications</span>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#2ED5A4] shadow-[0_0_8px_#2ED5A4]" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenAvatarPicker}
+                className="relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border border-white/10"
+                title="Ajustes de Perfil"
+              >
+                <img alt={userName} className="w-full h-full rounded-full object-cover" src={userAvatar} />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center shadow-sm">
+                  <span className="material-symbols-outlined text-[9px] text-[#003828] font-bold">check</span>
+                </div>
+              </button>
+            </div>
+          </header>
+        )}
+
         {/* ========================================================================= */}
-        {/* SCREEN 1: "MY CARD / HOME" (DASHBOARD REDISEÑADO CON ENCABEZADO Y AVATAR)   */}
+        {/* SCREEN 1: "MY CARD / HOME" (STITCH EXECUTIVE DASHBOARD)                   */}
         {/* ========================================================================= */}
         {activeTab === 'home' && (
-          <div className="animate-fade-in space-y-4">
-            {/* Header: Foto/Avatar + Nombre del Cliente + Notificaciones & Settings */}
-            <header className="flex items-center justify-between py-1">
-              <div className="flex items-center gap-3">
-                {/* Avatar circular interactivo */}
-                <button
-                  type="button"
-                  onClick={handleOpenAvatarPicker}
-                  className="avatar-ring"
-                  title="Cambiar foto de perfil"
-                >
-                  <img
-                    src={userAvatar}
-                    alt={userName}
-                    className="avatar-img"
-                  />
-                  <div className="avatar-status-dot" />
-                </button>
+          <div className="animate-fade-in space-y-5">
+            {/* Greeting & Status Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+                  Executive Overview
+                </span>
+                <h1 className="font-headline-md text-headline-md text-white flex items-center gap-1.5 mt-0.5">
+                  Hola, {userFirstName || userName.split(' ')[0]} <span className="inline-block animate-bounce text-xl">👋</span>
+                </h1>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-md border border-white/5">
+                <span className="w-2 h-2 rounded-full bg-[#2ED5A4] animate-pulse shadow-[0_0_8px_#2ED5A4]" />
+                <span className="font-caption-sm text-caption-sm text-[#2ED5A4] font-semibold">Tier-3 Verified</span>
+              </div>
+            </div>
 
-                {/* Saludo y Nombre */}
-                <div>
-                  <span className="text-[11px] text-[#8E91A5] font-medium block">
-                    {language === 'en' ? 'Welcome back 👋' : 'Bienvenido de nuevo 👋'}
-                  </span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <h1 className="text-base font-bold text-white tracking-tight">
-                      {userName}
-                    </h1>
-                    <span className="px-1.5 py-0.2 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] text-[10px] font-bold border border-[#2ED5A4]/30">
-                      {language === 'en' ? '✓ Verified' : '✓ Verificado'}
+            {/* Dynamic Balance Hero Card */}
+            <div className="relative overflow-hidden rounded-3xl bg-surface-container-low shadow-2xl p-5 border border-white/5">
+              {/* Atmospheric Dual Glow Radiance */}
+              <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[#5018cb]/30 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-[#2ED5A4]/20 blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col space-y-4">
+                {/* Balance Header & Privacy Toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+                      Combined Liquid Capital
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-[#2ED5A4] font-financial-mono text-[11px] font-bold">
+                      USD/SPEI
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setHideBalance(!hideBalance)}
+                    aria-label="Toggle Balance Visibility"
+                    className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white transition-colors cursor-pointer border border-white/5"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {hideBalance ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Main USD Balance Display */}
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-display-hero text-display-hero text-white tracking-tight font-extrabold">
+                      {hideBalance
+                        ? '••••••••'
+                        : `$${executiveBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    </span>
+                    <span className="font-financial-mono text-financial-mono text-on-surface-variant">USD</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="font-body-medium text-body-medium text-on-surface font-semibold">
+                      {hideBalance
+                        ? '≈ •••••••• MXN'
+                        : `≈ $${(executiveBalance * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`}
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-primary/15 text-[#2ED5A4] font-caption-sm text-caption-sm font-bold">
+                      <span className="material-symbols-outlined text-[12px]">trending_up</span>+1.2%
                     </span>
                   </div>
                 </div>
-              </div>
 
-              {/* Botones de acción derecha */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => alert('No tienes notificaciones pendientes')}
-                  className="btn-circle relative"
-                  title="Notificaciones"
-                >
-                  <BellIcon className="w-5 h-5 text-white" />
-                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#2ED5A4]" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowSettingsModal(true)}
-                  className="btn-circle"
-                  title="Configuración & Ajustes"
-                >
-                  <SettingsGearIcon className="w-5 h-5 text-white" />
-                </button>
-              </div>
-            </header>
-
-            {/* 4 Circular Action Buttons (Orden: 1. Send Money, 2. Kin Cash, 3. Send Quick Link, 4. Bill Payments) */}
-            <div className="pt-2 pb-1">
-              <div className="grid grid-cols-4 gap-2">
-                {/* 1. Send Money */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('send')}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
-                >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white group-hover:border-[#7047EB] group-hover:bg-[#202236] transition-all shadow-md">
-                    <PaperPlaneIcon className="w-6 h-6 text-white" />
+                {/* Live FX Guarantee Badge */}
+                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-surface-container-high shadow-inner border border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex items-center justify-center">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#2ED5A4]" />
+                      <span className="absolute w-2.5 h-2.5 rounded-full bg-[#2ED5A4] animate-ping opacity-75" />
+                    </div>
+                    <span className="font-caption-sm text-caption-sm text-white font-medium">
+                      1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN
+                    </span>
                   </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
-                    Send Money
+                  <span className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">
+                    Banxico Guaranteed
                   </span>
-                </button>
+                </div>
 
-                {/* 2. Kin Cash */}
-                <button
-                  type="button"
-                  onClick={() => setShowKinCashModal(true)}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
-                >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-[#2ED5A4] group-hover:border-[#2ED5A4] group-hover:bg-[#202236] transition-all shadow-md">
-                    <KinCashCircleIcon className="w-6 h-6 text-[#2ED5A4]" />
+                {/* Virtual Metal Card Drawer Snippet */}
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-6 rounded-md bg-gradient-to-tr from-[#0a0d1c] via-[#303445] to-[#353849] flex items-center justify-between px-1.5 shadow-sm border border-white/10">
+                      <span className="w-2 h-2 rounded-sm bg-[#2ED5A4]/40" />
+                      <span className="font-financial-mono text-[8px] text-white font-bold">KIN</span>
+                    </div>
+                    <div className="flex flex-col leading-tight">
+                      <span className="font-caption-sm text-caption-sm text-white font-bold tracking-wide">
+                        Obsidian Metal •• 8942
+                      </span>
+                      <span className="font-label-caps text-[10px] text-on-surface-variant">Virtual Card Ready</span>
+                    </div>
                   </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
-                    Kin Cash
-                  </span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => alert('Apple Pay: Obsidian Metal KIN Card lista para pagos')}
+                    className="flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-highest hover:bg-surface-bright text-white text-caption-sm font-medium transition-colors shadow-sm cursor-pointer border border-white/5"
+                  >
+                    <span className="material-symbols-outlined text-[15px] text-[#2ED5A4]">account_balance_wallet</span>
+                    <span>Apple Pay</span>
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                {/* 3. Send Quick */}
+            {/* Quick Action Rail */}
+            <div className="grid grid-cols-4 gap-2.5">
+              {/* Send Money */}
+              <button
+                type="button"
+                onClick={() => setActiveTab('send')}
+                className="group flex flex-col items-center gap-1.5 cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#57f2bf] to-[#2ed5a4] flex items-center justify-center text-[#003828] shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+                  <span className="material-symbols-outlined text-[26px]">send</span>
+                </div>
+                <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Send MX</span>
+              </button>
+
+              {/* Kin Cash P2P */}
+              <button
+                type="button"
+                onClick={() => setShowKinCashModal(true)}
+                className="group flex flex-col items-center gap-1.5 cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#5018cb] to-[#7047eb] flex items-center justify-center text-white shadow-[0_8px_20px_-4px_rgba(112,71,235,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+                  <span className="material-symbols-outlined text-[26px]">electric_bolt</span>
+                </div>
+                <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Kin Cash</span>
+              </button>
+
+              {/* 1-Tap Send */}
+              <button
+                type="button"
+                onClick={() => setActiveTab('send-quick')}
+                className="group flex flex-col items-center gap-1.5 cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4] transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                  <span className="material-symbols-outlined text-[26px]">touch_app</span>
+                </div>
+                <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">1-Tap Send</span>
+              </button>
+
+              {/* Bill Pay */}
+              <button
+                type="button"
+                onClick={() => setShowBillPayModal(true)}
+                className="group flex flex-col items-center gap-1.5 cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-[#ccbdff] transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                  <span className="material-symbols-outlined text-[26px]">receipt_long</span>
+                </div>
+                <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">Bill Pay</span>
+              </button>
+            </div>
+
+            {/* Beneficiaries Horizontal Carousel */}
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[#2ED5A4] text-[18px]">family_restroom</span>
+                  <h2 className="font-title-base text-title-base text-white font-bold">Quick Send to Family</h2>
+                </div>
                 <button
                   type="button"
                   onClick={() => setActiveTab('send-quick')}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
+                  className="font-caption-sm text-caption-sm text-[#2ED5A4] font-bold hover:underline cursor-pointer"
                 >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white group-hover:border-[#2ED5A4] group-hover:bg-[#202236] transition-all shadow-md">
-                    <SendQuickIcon className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
-                    Send Quick
-                  </span>
-                </button>
-
-                {/* 4. Bill Payments */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('bills')}
-                  className="flex flex-col items-center gap-1.5 cursor-pointer group"
-                >
-                  <div className="w-13 h-13 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-white group-hover:border-[#2ED5A4] group-hover:bg-[#202236] transition-all shadow-md">
-                    <BillPaymentDocIcon className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#8E91A5] group-hover:text-white text-center leading-tight transition-colors">
-                    Bill Payments
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Servicios Frecuentes (Inicia vacío y se puebla dinámicamente en formato listado) */}
-            <div>
-              <div className="flex items-center justify-between mb-2 px-1">
-                <h3 className="text-xs font-bold text-[#8E91A5] uppercase tracking-wider">
-                  {language === 'en' ? 'Frequent Services' : 'Servicios Frecuentes'}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('bills')}
-                  className="text-xs text-[#2ED5A4] hover:underline cursor-pointer"
-                >
-                  {language === 'en' ? 'View all' : 'Ver todos'}
+                  View All ({contactsList.length})
                 </button>
               </div>
 
-              {frequentServices.length === 0 ? (
-                /* Estado vacío para pruebas de servicios frecuentes */
-                <div className="p-5 rounded-2xl bg-[#181928] border border-white/5 text-center space-y-1.5">
-                  <div className="w-10 h-10 mx-auto rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white">
-                    <LightningIcon className="w-5 h-5 text-white" />
+              <div className="flex items-start gap-3 overflow-x-auto pb-1 -mx-margin-mobile px-margin-mobile scrollbar-none">
+                {/* Add New Recipient */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('send-quick')}
+                  className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4] shadow-sm group-hover:bg-surface-bright transition-colors border border-white/5">
+                    <span className="material-symbols-outlined text-[26px]">add</span>
                   </div>
-                  <p className="text-xs font-bold text-white">
-                    {language === 'en' ? 'No frequent services yet' : 'Sin servicios frecuentes'}
-                  </p>
-                  <p className="text-[10px] text-[#8E91A5] max-w-[280px] mx-auto">
-                    {language === 'en'
-                      ? 'Paying utilities in "View all" will register them here in your frequent list.'
-                      : 'Al realizar pagos de servicios en "Ver todos" se registrarán aquí en tu lista frecuente.'}
-                  </p>
-                </div>
-              ) : (
-                /* Listado dinámico de servicios frecuentes ordenado de menor a mayor frecuencia */
-                <div className="space-y-2">
-                  {frequentServices.map((svc) => (
+                  <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">New Recipient</span>
+                </button>
+
+                {/* Authentic Contact Cards */}
+                {contactsList.map((contact, idx) => {
+                  const bankLogo = getBankLogoUrl(contact.bank);
+                  return (
                     <button
-                      key={svc.id}
+                      key={contact.id || idx}
                       type="button"
-                      onClick={() => setShowBillPayModal(true)}
-                      className="w-full p-3 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between hover:border-white/15 transition-all text-left cursor-pointer"
+                      onClick={() => {
+                        setSendQuickSelectedRecipient(idx);
+                        setActiveTab('send');
+                      }}
+                      className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer text-left"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white flex-shrink-0">
-                          {svc.iconType === 'luz' ? (
-                            <LightningIcon className="w-4 h-4 text-white" />
-                          ) : svc.iconType === 'internet' ? (
-                            <WifiIcon className="w-4 h-4 text-white" />
-                          ) : svc.iconType === 'phone' ? (
-                            <PhoneLandlineIcon className="w-4 h-4 text-white" />
-                          ) : (
-                            <LightningIcon className="w-4 h-4 text-white" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-white leading-tight">{svc.name}</p>
-                          <p className="text-[10px] text-[#8E91A5] mt-0.5">
-                            {svc.category} • {svc.count} {language === 'en' ? (svc.count === 1 ? 'payment' : 'frequent payments') : (svc.count === 1 ? 'pago' : 'pagos frecuentes')}
-                          </p>
-                        </div>
+                      <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-md border border-white/10">
+                        <img
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          src={contact.photoUrl}
+                          alt={contact.name}
+                        />
+                        {bankLogo ? (
+                          <div className="absolute bottom-1 right-1 w-5 h-5 rounded-md bg-white flex items-center justify-center shadow-md p-0.5">
+                            <img src={bankLogo} alt={contact.bank} className="w-full h-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="absolute bottom-1 right-1 w-5 h-5 rounded-md bg-white flex items-center justify-center shadow-md p-0.5">
+                            <span className="font-financial-mono text-[7px] text-[#004481] font-extrabold leading-none">SPEI</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[#FF5555]" style={{ color: '#FF5555' }}>
-                          {currencyPref === 'USD'
-                            ? `-$${svc.lastAmountUSD.toFixed(2)}`
-                            : `-$${(svc.lastAmountUSD * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`}
-                        </span>
-                        <ChevronRightIcon className="w-4 h-4 text-[#8E91A5]" />
-                      </div>
+                      <span className="font-caption-sm text-caption-sm text-white font-semibold text-center truncate max-w-[70px]">
+                        {contact.name}
+                      </span>
                     </button>
-                  ))}
-                </div>
-              )}
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Historial de Transacciones (Dinámico para pruebas con Iconografía Minimalista Blanca) */}
-            <div>
-              <div className="flex items-center justify-between mb-2 px-1">
-                <h3 className="text-xs font-bold text-[#8E91A5] uppercase tracking-wider">
-                  {language === 'en' ? 'Transaction History' : 'Historial de Transacciones'}
-                </h3>
-                {transactions.length > 0 && (
+            {/* Live Activity Feed */}
+            <div className="flex flex-col space-y-3">
+              {/* Header with Filter Controls */}
+              <div className="flex items-center justify-between">
+                <h2 className="font-title-base text-title-base text-white font-bold">Recent Activity</h2>
+                <div className="flex items-center gap-1 bg-surface-container-high rounded-full p-0.5 shadow-inner border border-white/5">
                   <button
-                    onClick={() => setActiveTab('transactions')}
-                    className="text-xs text-[#8E91A5] hover:text-white"
+                    type="button"
+                    onClick={() => setDashboardFilter('all')}
+                    className={`px-2.5 py-1 rounded-full font-label-caps text-[10px] font-bold transition-all cursor-pointer ${
+                      dashboardFilter === 'all'
+                        ? 'bg-surface-container-highest text-white'
+                        : 'text-on-surface-variant hover:text-white'
+                    }`}
                   >
-                    {language === 'en' ? `View all (${transactions.length})` : `Ver todas (${transactions.length})`}
+                    All
                   </button>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => setDashboardFilter('sent')}
+                    className={`px-2.5 py-1 rounded-full font-label-caps text-[10px] font-bold transition-all cursor-pointer ${
+                      dashboardFilter === 'sent'
+                        ? 'bg-surface-container-highest text-white'
+                        : 'text-on-surface-variant hover:text-white'
+                    }`}
+                  >
+                    Sent
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDashboardFilter('bills')}
+                    className={`px-2.5 py-1 rounded-full font-label-caps text-[10px] font-bold transition-all cursor-pointer ${
+                      dashboardFilter === 'bills'
+                        ? 'bg-surface-container-highest text-white'
+                        : 'text-on-surface-variant hover:text-white'
+                    }`}
+                  >
+                    Bills
+                  </button>
+                </div>
               </div>
 
-              {transactions.length === 0 ? (
-                /* Estado vacío para iniciar pruebas */
-                <div className="p-5 rounded-2xl bg-[#181928] border border-white/5 text-center space-y-1.5">
-                  <div className="w-10 h-10 mx-auto rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white">
-                    <CardOutlineIcon className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-bold text-white">
-                    {language === 'en' ? 'No transactions yet' : 'Sin transacciones registradas'}
-                  </p>
-                  <p className="text-[10px] text-[#8E91A5] max-w-[280px] mx-auto">
-                    {language === 'en'
-                      ? 'Send money or pay a bill to see your history here.'
-                      : 'Realiza una prueba de envío en "Send Money" o paga una factura para ver el registro aquí.'}
-                  </p>
-                </div>
-              ) : (
-                /* Lista minimalista en tiempo real con iconos blancos a juego */
-                <div className="space-y-2">
-                  {transactions.slice(0, 5).map((tx) => (
+              {/* Filtered Transaction List */}
+              <div className="flex flex-col space-y-2.5">
+                {filteredDashboardTransactions.slice(0, 5).map((tx) => {
+                  const isIncome = tx.type === 'income';
+                  const bankLogo = getBankLogoUrl(tx.title) || getBankLogoUrl(tx.category);
+                  return (
                     <div
                       key={tx.id}
-                      className="p-3 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between hover:border-white/15 transition-all"
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-colors shadow-md border border-white/5"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white flex-shrink-0">
-                          {renderTransactionIcon(tx)}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`relative w-11 h-11 rounded-2xl ${
+                            isIncome ? 'bg-[#2ED5A4]/10 text-[#2ED5A4]' : 'bg-surface-container-high text-[#2ED5A4]'
+                          } flex items-center justify-center flex-shrink-0 shadow-inner`}
+                        >
+                          {tx.iconType === 'luz' ? (
+                            <span className="material-symbols-outlined text-[22px] text-[#ccbdff]">electric_meter</span>
+                          ) : tx.iconType === 'wallet' ? (
+                            <span className="material-symbols-outlined text-[22px] text-[#2ED5A4]">bolt</span>
+                          ) : tx.iconType === 'bank' ? (
+                            <span className="material-symbols-outlined text-[22px] text-[#ccbdff]">account_balance</span>
+                          ) : (
+                            <span className="material-symbols-outlined text-[22px] text-[#2ED5A4]">outgoing_mail</span>
+                          )}
+                          {bankLogo ? (
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm p-0.5">
+                              <img src={bankLogo} alt="Bank" className="w-full h-full object-contain" />
+                            </div>
+                          ) : tx.title.includes('OXXO') ? (
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm">
+                              <span className="font-financial-mono text-[6px] text-[#E31B23] font-bold">O</span>
+                            </div>
+                          ) : tx.title.includes('CFE') ? (
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded bg-white flex items-center justify-center shadow-sm">
+                              <span className="font-financial-mono text-[6px] text-[#00693E] font-bold">CFE</span>
+                            </div>
+                          ) : null}
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-white leading-tight">{tx.title}</p>
-                          <p className="text-[10px] text-[#8E91A5] mt-0.5">{tx.category} • {tx.time}</p>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-body-medium text-body-medium text-white font-bold truncate">
+                            {tx.title}
+                          </span>
+                          <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
+                            {tx.category} • {tx.time}
+                          </span>
                         </div>
                       </div>
-                      <span
-                        className={`text-xs font-bold ${tx.type === 'income' ? 'text-[#2ED5A4]' : 'text-[#FF5555]'}`}
-                        style={{ color: tx.type === 'income' ? '#2ED5A4' : '#FF5555' }}
-                      >
-                        {currencyPref === 'USD'
-                          ? (tx.amount > 0 ? `+$${tx.amount.toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`)
-                          : (tx.amount > 0
-                              ? `+$${(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`
-                              : `-$${Math.abs(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`)}
-                      </span>
+                      <div className="flex flex-col items-end flex-shrink-0 pl-2">
+                        <span
+                          className={`font-financial-mono text-financial-mono font-bold ${
+                            isIncome ? 'text-[#2ED5A4]' : 'text-white'
+                          }`}
+                        >
+                          {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+                        </span>
+                        <span
+                          className={`font-caption-sm text-caption-sm font-semibold ${
+                            isIncome ? 'text-[#2ED5A4]/80' : 'text-[#2ED5A4]'
+                          }`}
+                        >
+                          {isIncome
+                            ? (currencyPref === 'USD'
+                                ? 'USD Balance'
+                                : `+$${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`)
+                            : `$${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓`}
+                        </span>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -1245,11 +1473,34 @@ export default function MobileApp() {
                   </button>
                 </header>
 
+                {/* Corridor Routing & Lock Banner (Stitch Specs) */}
+                <div className="relative overflow-hidden rounded-2xl bg-surface-container border border-white/10 p-3.5 shadow-md">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center -space-x-1.5 shrink-0">
+                        <span className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-xs shadow-sm">🇺🇸</span>
+                        <span className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-xs shadow-sm">🇲🇽</span>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-title-base text-xs text-white font-bold truncate">USA ➔ México</span>
+                          <span className="px-1.5 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] font-label-caps text-[9px] uppercase font-bold border border-[#2ED5A4]/30">SPEI</span>
+                        </div>
+                        <span className="font-caption-sm text-[10px] text-on-surface-variant">Instant Direct Remittance</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-highest border border-white/10 shrink-0">
+                      <span className="material-symbols-outlined text-[#2ED5A4] text-[13px] animate-spin" style={{ animationDuration: '6s' }}>timer</span>
+                      <span className="font-financial-mono text-xs text-[#2ED5A4] font-bold">14:59</span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Remittance Flow Stepper Bar (Estimate | Receiver | Payment | Review) */}
                 <div className="grid grid-cols-4 border-b border-white/10 text-center pb-2.5 pt-1 text-xs">
                   <div className="relative pb-1 cursor-pointer">
                     <span className="font-black text-white">Estimate</span>
-                    <div className="absolute bottom-[-11px] left-1 right-1 h-0.5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+                    <div className="absolute bottom-[-11px] left-1 right-1 h-0.5 bg-[#2ED5A4] rounded-full shadow-[0_0_8px_rgba(46,213,164,0.8)]" />
                   </div>
                   <div className="text-white/80 font-bold">Receiver</div>
                   <div className="text-white/80 font-bold">Payment</div>
@@ -1478,6 +1729,38 @@ export default function MobileApp() {
                         Tasa garantizada
                       </span>
                     </div>
+                  </div>
+
+                  {/* Quick Amount Increment Pills (Stitch Specs) */}
+                  <div className="flex items-center gap-1.5 pt-0.5 overflow-x-auto scrollbar-none">
+                    <button
+                      type="button"
+                      onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 50).toFixed(2))}
+                      className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+                    >
+                      +$50
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 100).toFixed(2))}
+                      className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+                    >
+                      +$100
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 200).toFixed(2))}
+                      className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+                    >
+                      +$200
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAmountValue('500.00')}
+                      className="px-2.5 py-1 rounded-lg bg-surface-container text-[#2ED5A4] font-financial-mono text-caption-sm active:scale-95 transition-transform hover:bg-surface-bright font-bold cursor-pointer border border-[#2ED5A4]/30"
+                    >
+                      $500 Max
+                    </button>
                   </div>
 
                   {/* Exchange Rate Highlight (Screenshot 1: 1.00 USD = 20.4500 MXN²) */}
@@ -2832,62 +3115,71 @@ export default function MobileApp() {
       </div>
 
       {/* ========================================================================= */}
-      {/* FLOATING BOTTOM DOCK: HOME, WALLET, SEND, TRANSACTIONS, MY PROFILE        */}
+      {/* STITCH MASTER BOTTOM DOCK (5 TABS: HOME, SEND, KIN CASH, BILL PAY, VAULT) */}
       {/* ========================================================================= */}
-      {activeTab !== 'send' && activeTab !== 'send-quick' && (
-        <div className="dock-container">
-          <nav className="dock-bar">
+      {!sendSuccessData && activeTab !== 'send-quick' && (
+        <nav className="fixed bottom-0 max-w-[400px] w-full z-50 pb-safe pointer-events-none">
+          <div className="mx-4 mb-2.5 h-16 rounded-full bg-[#1F2133]/92 backdrop-blur-2xl shadow-[0_20px_48px_rgba(0,0,0,0.85),0_0_24px_rgba(46,213,164,0.08)] border border-white/10 flex items-center justify-between px-3 pointer-events-auto">
             {/* 1. Home */}
             <button
               type="button"
               onClick={() => setActiveTab('home')}
-              className={`dock-btn ${activeTab === 'home' ? 'active' : ''}`}
+              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+                activeTab === 'home' ? 'text-[#2ED5A4] font-bold scale-105' : 'text-[#8E91A5] hover:text-white'
+              }`}
               title="Home"
             >
-              <DockHomeIcon className="w-5 h-5" />
+              <span className="material-symbols-outlined text-[22px]">home</span>
+              <span className="font-label-caps text-[10px]">Home</span>
             </button>
 
-            {/* 2. My Wallet */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('wallet')}
-              className={`dock-btn ${activeTab === 'wallet' ? 'active' : ''}`}
-              title="My Wallet"
-            >
-              <DockWalletIcon className="w-5 h-5" />
-            </button>
-
-            {/* 3. Send Money */}
+            {/* 2. Send */}
             <button
               type="button"
               onClick={() => setActiveTab('send')}
-              className={`dock-btn ${(activeTab as string) === 'send' ? 'active' : ''}`}
-              title="Send Money"
+              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all cursor-pointer ${
+                activeTab === 'send' ? 'text-[#2ED5A4] font-bold scale-105' : 'text-[#8E91A5] hover:text-white'
+              }`}
+              title="Send"
             >
-              <DockSendSparkleIcon className="w-5 h-5" />
+              <span className="material-symbols-outlined text-[22px]">send</span>
+              <span className="font-label-caps text-[10px]">Send</span>
             </button>
 
-            {/* 4. Transactions */}
+            {/* 3. Kin Cash */}
             <button
               type="button"
-              onClick={() => setActiveTab('transactions')}
-              className={`dock-btn ${activeTab === 'transactions' ? 'active' : ''}`}
-              title="Transactions"
+              onClick={() => setShowKinCashModal(true)}
+              className="flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all text-[#8E91A5] hover:text-white cursor-pointer"
+              title="Kin Cash"
             >
-              <DockAnalyticsIcon className="w-5 h-5" />
+              <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+              <span className="font-label-caps text-[10px]">Kin Cash</span>
             </button>
 
-            {/* 5. My Profile */}
+            {/* 4. Bill Pay */}
             <button
               type="button"
-              onClick={() => setActiveTab('profile')}
-              className={`dock-btn ${activeTab === 'profile' ? 'active' : ''}`}
-              title="My Profile"
+              onClick={() => setShowBillPayModal(true)}
+              className="flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all text-[#8E91A5] hover:text-white cursor-pointer"
+              title="Bill Pay"
             >
-              <DockUserIcon className="w-5 h-5" />
+              <span className="material-symbols-outlined text-[22px]">receipt_long</span>
+              <span className="font-label-caps text-[10px]">Bill Pay</span>
             </button>
-          </nav>
-        </div>
+
+            {/* 5. Vault */}
+            <button
+              type="button"
+              onClick={() => setShowVaultModal(true)}
+              className="flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all text-[#8E91A5] hover:text-white cursor-pointer"
+              title="Vault"
+            >
+              <span className="material-symbols-outlined text-[22px]">shield_lock</span>
+              <span className="font-label-caps text-[10px]">Vault</span>
+            </button>
+          </div>
+        </nav>
       )}
 
       {/* ========================================================================= */}
