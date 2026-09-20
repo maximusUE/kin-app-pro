@@ -95,7 +95,7 @@
       "dailyLimit": "$300.00 USD / día",
       "dailyLimitUSD": 300,
       "monthlyLimitUSD": 750,
-      "balanceUSD": 580,
+      "balanceUSD": 558,
       "passwordHash": "98765",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true
@@ -127,6 +127,22 @@
     }
   ],
   "transactions": [
+    {
+      "id": "tx-bill-1789945956603",
+      "userId": "user_jaime_gutierrez",
+      "title": "Pago de Pay TV",
+      "category": "Servicio en México (CFDI 4.0)",
+      "time": "Hoy, 07:12 PM",
+      "dateGroup": "Hoy",
+      "amount": -22,
+      "amountMXN": 450,
+      "type": "expense",
+      "iconType": "bill",
+      "status": "Completado",
+      "refNumber": "REF-123456",
+      "satFolioFiscalUuid": "SAT-IKNAA8A4-BQPS",
+      "createdAt": "2026-09-20T23:12:36.613Z"
+    },
     {
       "id": "tx-in-1789945182135-666",
       "userId": "user_jose_eligio",
