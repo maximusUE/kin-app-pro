@@ -128,6 +128,21 @@
   ],
   "transactions": [
     {
+      "id": "tx-kin-1789930981342",
+      "userId": "user_maricela_fernandez",
+      "title": "KIN Cash para Destinatario KIN Cash",
+      "category": "Recarga / SPEI P2P Inmediato",
+      "time": "Hoy, 03:03 PM",
+      "dateGroup": "Hoy",
+      "amount": -1000,
+      "amountMXN": 20450,
+      "type": "expense",
+      "iconType": "wallet",
+      "status": "Completado",
+      "refNumber": "KIN-155707",
+      "createdAt": "2026-09-20T19:03:01.344Z"
+    },
+    {
       "id": "tx-1789917735632",
       "userId": "user_jose_eligio",
       "title": "Hernana (OXXO)",

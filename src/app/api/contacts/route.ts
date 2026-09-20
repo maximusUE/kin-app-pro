@@ -1,12 +1,20 @@
 import { NextResponse } from 'next/server';
-import { getUserContacts, createContact, deleteContact } from '@/lib/server/db';
+import {
+  getUserContacts,
+  getFamilyNetwork,
+  createContact,
+  deleteContact,
+  validateRemittanceRecipient,
+  validateKinCashRecipient,
+} from '@/lib/server/db';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId') || 'user-001';
     const contacts = getUserContacts(userId);
-    return NextResponse.json({ success: true, contacts });
+    const familyNetwork = getFamilyNetwork(userId);
+    return NextResponse.json({ success: true, contacts, familyNetwork });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
@@ -15,9 +23,59 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, name, fullName, phone, clabe, bank, role, avatar } = body;
+    const {
+      userId,
+      name,
+      fullName,
+      phone,
+      clabe,
+      bank,
+      role,
+      avatar,
+      street,
+      houseNumber,
+      state,
+      country,
+      zipCode,
+      validateFor, // 'remittance' | 'kincash'
+    } = body;
 
-    if (!name) {
+    // Validación estricta según el tipo de operación
+    if (validateFor === 'remittance') {
+      const val = validateRemittanceRecipient({
+        name,
+        phone,
+        street,
+        houseNumber,
+        state,
+        country,
+        zipCode,
+      });
+      if (!val.valid) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Faltan campos obligatorios para envíos transfronterizos a México (CNBV/Banxico)',
+            missingFields: val.missingFields,
+            errors: val.errors,
+          },
+          { status: 400 }
+        );
+      }
+    } else if (validateFor === 'kincash') {
+      const val = validateKinCashRecipient({ name, phone });
+      if (!val.valid) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Nombre y teléfono son obligatorios para KIN Cash',
+            missingFields: val.missingFields,
+            errors: val.errors,
+          },
+          { status: 400 }
+        );
+      }
+    } else if (!name) {
       return NextResponse.json(
         { success: false, error: 'El nombre del contacto es requerido' },
         { status: 400 }
@@ -31,8 +89,13 @@ export async function POST(request: Request) {
       phone,
       clabe,
       bank: bank || 'Banco en México',
-      role: role || 'Familiar',
+      role: role || 'Beneficiario directo',
       avatar: avatar || '👤',
+      street,
+      houseNumber,
+      state,
+      country,
+      zipCode,
     });
 
     return NextResponse.json({

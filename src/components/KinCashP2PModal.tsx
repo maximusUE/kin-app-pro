@@ -24,6 +24,88 @@ export interface ContactItem {
   clabe?: string;
 }
 
+export const KIN_FAMILY_MEMBERS: ContactItem[] = [
+  {
+    id: 'fam-user_jose_eligio',
+    name: 'Jose Eligio',
+    fullName: 'Jose Eligio',
+    avatar: '👨🏽',
+    role: 'Familiar KIN',
+    country: 'Mexico',
+    bank: 'Banxico SPEI Directo',
+    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+    phone: '+1 3472486386',
+  },
+  {
+    id: 'fam-user_maricela_fernandez',
+    name: 'Maricela Fernandez',
+    fullName: 'Maricela Fernandez',
+    avatar: '👩🏻',
+    role: 'Familiar KIN',
+    country: 'Mexico',
+    bank: 'BBVA Bancomer',
+    photoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+    phone: '+1 0115212345678',
+  },
+  {
+    id: 'fam-user_jaime_gutierrez',
+    name: 'Jaime Gutierrez',
+    fullName: 'Jaime Gutierrez',
+    avatar: '🧔🏽',
+    role: 'Familiar KIN',
+    country: 'Mexico',
+    bank: 'Santander México',
+    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+    phone: '+1 3479876543',
+  },
+  {
+    id: 'fam-user_manuel_gomez',
+    name: 'Manuel Gomez',
+    fullName: 'Manuel Gomez',
+    avatar: '👱🏼',
+    role: 'Familiar KIN',
+    country: 'Mexico',
+    bank: 'Banorte',
+    photoUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
+    phone: '+1 2345678910',
+  },
+  {
+    id: 'fam-user-001',
+    name: 'César Urrutia',
+    fullName: 'César Urrutia',
+    avatar: '🧑🏻',
+    role: 'Familiar KIN',
+    country: 'Estados Unidos',
+    bank: 'KIN Global Network',
+    photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    phone: '+1 (555) 349-2810',
+  },
+];
+
+// Helper para exportar y agregar a los contactos reales del celular
+export function exportContactVCard(name: string, phone: string) {
+  if (typeof window === 'undefined') return;
+  const cleanPhone = phone.replace(/[^\d+]/g, '');
+  const vcard = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `FN:${name}`,
+    `N:${name};;;;`,
+    `TEL;TYPE=CELL:${cleanPhone}`,
+    'NOTE:Contacto KIN Global Ecosystem',
+    'END:VCARD',
+  ].join('\n');
+  const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name.replace(/\s+/g, '_')}_kin.vcf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 const DEFAULT_CONTACTS: ContactItem[] = [];
 
 export interface KinCashP2PModalProps {
@@ -35,6 +117,8 @@ export interface KinCashP2PModalProps {
   onViewHistory?: () => void;
   exchangeRate?: number;
   userBalanceUSD?: number;
+  userId?: string;
+  onContactCreated?: (contact: ContactItem) => void;
 }
 
 export function KinCashP2PModal({
@@ -46,12 +130,23 @@ export function KinCashP2PModal({
   onViewHistory,
   exchangeRate = 20.45,
   userBalanceUSD = 1000.00,
+  userId = 'user-001',
+  onContactCreated,
 }: KinCashP2PModalProps) {
   const [currentAmount, setCurrentAmount] = useState('0');
   const [selectedContact, setSelectedContact] = useState<ContactItem | null>(contacts[0] || null);
   const [conceptNote, setConceptNote] = useState('Groceries & medicine for the week');
   const [showContactPicker, setShowContactPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Selector de destinatarios (Pestañas ergonómicas)
+  const [pickerTab, setPickerTab] = useState<'contacts' | 'family' | 'add_new'>('contacts');
+  const [newContactName, setNewContactName] = useState('');
+  const [newContactPhone, setNewContactPhone] = useState('');
+  const [newContactErrors, setNewContactErrors] = useState<{ name?: string; phone?: string } | null>(null);
+  const [saveToDeviceContacts, setSaveToDeviceContacts] = useState(true);
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+  const [syncPhoneFeedback, setSyncPhoneFeedback] = useState<string | null>(null);
 
   // Slider Touch & Mouse drag state
   const trackRef = useRef<HTMLDivElement>(null);
@@ -84,6 +179,98 @@ export function KinCashP2PModal({
         c.bank.toLowerCase().includes(q)
     );
   }, [contacts, searchQuery]);
+
+  // Manejo de alta inmediata de contacto para KIN Cash (P2P)
+  const handleAddNewKinCashContact = async () => {
+    const trimmedName = newContactName.trim();
+    const trimmedPhone = newContactPhone.trim();
+
+    const errors: { name?: string; phone?: string } = {};
+    if (!trimmedName) {
+      errors.name = 'El nombre es obligatorio';
+    }
+    if (!trimmedPhone) {
+      errors.phone = 'El teléfono es obligatorio';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setNewContactErrors(errors);
+      return;
+    }
+
+    setNewContactErrors(null);
+    setIsSubmittingContact(true);
+
+    try {
+      const res = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          name: trimmedName,
+          fullName: trimmedName,
+          phone: trimmedPhone,
+          bank: 'Red KIN Cash P2P',
+          role: 'Familiar directo',
+          validateFor: 'kincash',
+        }),
+      });
+
+      const data = await res.json();
+      const newContact: ContactItem = {
+        id: data.contact?.id || `c-${Date.now()}`,
+        name: trimmedName,
+        fullName: trimmedName,
+        avatar: '👤',
+        role: 'Destinatario KIN',
+        country: 'Mexico',
+        bank: 'Red KIN Cash P2P',
+        photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+        phone: trimmedPhone,
+      };
+
+      onContactCreated?.(newContact);
+      setSelectedContact(newContact);
+
+      if (saveToDeviceContacts) {
+        exportContactVCard(trimmedName, trimmedPhone);
+      }
+
+      setNewContactName('');
+      setNewContactPhone('');
+      setShowContactPicker(false);
+      setPickerTab('contacts');
+    } catch (err) {
+      console.warn('Error guardando contacto KIN Cash:', err);
+    } finally {
+      setIsSubmittingContact(false);
+    }
+  };
+
+  // Acceso a contactos del teléfono celular
+  const handlePickPhoneContacts = async () => {
+    try {
+      if (typeof window !== 'undefined' && 'contacts' in navigator && 'ContactsManager' in window) {
+        const props = ['name', 'tel'];
+        const selected = await (navigator as any).contacts.select(props, { multiple: false });
+        if (selected && selected.length > 0) {
+          const rawName = selected[0].name?.[0] || '';
+          const tel = selected[0].tel?.[0] || '';
+          if (rawName) setNewContactName(rawName);
+          if (tel) setNewContactPhone(tel);
+          setPickerTab('add_new');
+          setSyncPhoneFeedback('¡Contacto importado de tu agenda!');
+          setTimeout(() => setSyncPhoneFeedback(null), 3000);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Contact picker cancelled:', e);
+    }
+    setPickerTab('add_new');
+    setSyncPhoneFeedback('Ingresa nombre y teléfono directamente en los campos.');
+    setTimeout(() => setSyncPhoneFeedback(null), 3000);
+  };
 
   // Manejo del Teclado Numérico Táctil Reactivo
   const pressKey = (key: string) => {
@@ -543,17 +730,17 @@ export function KinCashP2PModal({
           onClick={() => setShowContactPicker(false)}
         >
           <div
-            className="w-full max-w-[400px] bg-surface-container border-t border-white/10 rounded-t-3xl p-5 max-h-[85vh] flex flex-col shadow-2xl animate-slide-up"
+            className="w-full max-w-[400px] bg-surface-container border-t border-white/10 rounded-t-3xl p-5 max-h-[88vh] flex flex-col shadow-2xl animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Grab handle */}
             <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4" />
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <div>
                 <h3 className="text-base font-bold text-white font-title-base">Seleccionar Destinatario</h3>
-                <p className="text-xs text-on-surface-variant">Agenda de transferencias frecuentes KIN</p>
+                <p className="text-xs text-on-surface-variant">Transferencias inmediatas KIN Cash (P2P)</p>
               </div>
               <button
                 type="button"
@@ -564,80 +751,337 @@ export function KinCashP2PModal({
               </button>
             </div>
 
-            {/* Internal Search */}
-            <div className="relative mb-3">
-              <SearchIcon className="w-4 h-4 absolute left-3 top-3 text-on-surface-variant" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre, banco o parentesco..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-9 pr-3 rounded-xl bg-surface-container-lowest border border-white/10 text-white text-xs placeholder:text-outline focus:outline-none focus:border-primary"
-              />
+            {/* Selector de Pestañas Ergonómicas (iOS 18 HIG & Material 3) */}
+            <div className="flex items-center gap-1.5 p-1 bg-surface-container-lowest rounded-2xl mb-3 border border-white/5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setPickerTab('contacts')}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  pickerTab === 'contacts'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+              >
+                👥 Guardados ({contacts.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setPickerTab('family')}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  pickerTab === 'family'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+              >
+                👨‍👩‍👧‍👦 Familia KIN
+              </button>
+              <button
+                type="button"
+                onClick={() => setPickerTab('add_new')}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  pickerTab === 'add_new'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+              >
+                ➕ Nuevo
+              </button>
             </div>
 
-            {/* Contacts list */}
-            <div className="space-y-2 overflow-y-auto flex-1 pr-1 scrollbar-thin">
-              {filteredContacts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 text-center text-on-surface-variant gap-2">
-                  <span className="material-symbols-outlined text-[32px] text-outline">group_off</span>
-                  <p className="font-title-base text-xs font-bold text-white">Sin contactos guardados</p>
-                  <p className="font-caption-sm text-[11px] text-on-surface-variant max-w-[240px]">
-                    Ingresa un número telefónico o $handle KIN en el buscador para transferir directamente.
-                  </p>
+            {/* TAB 1: Contactos Guardados */}
+            {pickerTab === 'contacts' && (
+              <div className="flex flex-col flex-1 overflow-hidden">
+                {/* Internal Search */}
+                <div className="relative mb-3 flex-shrink-0">
+                  <SearchIcon className="w-4 h-4 absolute left-3 top-3 text-on-surface-variant" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre, banco o teléfono..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-11 pl-9 pr-3 rounded-xl bg-surface-container-lowest border border-white/10 text-white text-xs placeholder:text-outline focus:outline-none focus:border-primary"
+                  />
                 </div>
-              ) : (
-                filteredContacts.map((c) => {
-                  const isSelected = selectedContact?.id === c.id;
-                  const bankLogo = getBankLogoUrl(c.bank);
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedContact(c);
-                        setShowContactPicker(false);
-                      }}
-                      className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                        isSelected
-                          ? 'bg-surface-container-high border-primary shadow-glow-mint'
-                          : 'bg-surface-container-lowest/60 border-white/5 hover:border-white/15'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
-                          <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-white leading-tight font-title-base">
-                              {c.fullName}
-                            </span>
-                            <span className="px-1.5 py-0.2 rounded-full bg-secondary/15 text-secondary text-[9px] font-bold">
-                              {c.role}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            {bankLogo && (
-                              <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
-                                <img src={bankLogo} alt={c.bank} className="w-full h-full object-contain" />
-                              </div>
-                            )}
-                            <span className="text-[10px] text-primary font-semibold">{c.bank}</span>
-                          </div>
-                        </div>
-                      </div>
 
-                      {isSelected ? (
-                        <span className="text-xs font-black text-primary">✓</span>
-                      ) : (
-                        <ChevronRightIcon className="w-4 h-4 text-on-surface-variant" />
-                      )}
-                    </button>
-                  );
-                })
-              )}
-            </div>
+                {/* Contacts list */}
+                <div className="space-y-2 overflow-y-auto flex-1 pr-1 scrollbar-thin">
+                  {filteredContacts.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-6 text-center text-on-surface-variant gap-3 bg-surface-container-lowest/40 rounded-2xl border border-white/5">
+                      <span className="material-symbols-outlined text-[36px] text-primary">group_add</span>
+                      <div>
+                        <p className="font-title-base text-sm font-bold text-white">Sin contactos guardados</p>
+                        <p className="font-caption-sm text-xs text-on-surface-variant max-w-[260px] mt-1">
+                          Transfiere a tu red familiar KIN o agrega un destinatario directamente sin salirte de la app.
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2 w-full pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setPickerTab('family')}
+                          className="w-full py-2.5 px-3 rounded-xl bg-primary/20 border border-primary/40 text-primary text-xs font-bold hover:bg-primary/30 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <span>👨‍👩‍👧‍👦 Ver Red Familiar KIN</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPickerTab('add_new')}
+                          className="w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <span>➕ Agregar nuevo contacto</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    filteredContacts.map((c) => {
+                      const isSelected = selectedContact?.id === c.id;
+                      const bankLogo = getBankLogoUrl(c.bank);
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedContact(c);
+                            setShowContactPicker(false);
+                          }}
+                          className={`w-full p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                            isSelected
+                              ? 'bg-surface-container-high border-primary shadow-glow-mint'
+                              : 'bg-surface-container-lowest/60 border-white/5 hover:border-white/15'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-white/10 flex-shrink-0 bg-surface-container-high flex items-center justify-center">
+                              {c.photoUrl ? (
+                                <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-lg">{c.avatar || '👤'}</span>
+                              )}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-white leading-tight font-title-base">
+                                  {c.fullName || c.name}
+                                </span>
+                                <span className="px-1.5 py-0.2 rounded-full bg-secondary/15 text-secondary text-[9px] font-bold">
+                                  {c.role}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                {bankLogo && (
+                                  <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs">
+                                    <img src={bankLogo} alt={c.bank} className="w-full h-full object-contain" />
+                                  </div>
+                                )}
+                                <span className="text-[10px] text-primary font-semibold">{c.phone || c.bank}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {isSelected ? (
+                            <span className="text-xs font-black text-primary">✓</span>
+                          ) : (
+                            <ChevronRightIcon className="w-4 h-4 text-on-surface-variant" />
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: Red Familiar KIN */}
+            {pickerTab === 'family' && (
+              <div className="flex flex-col flex-1 overflow-hidden space-y-2.5">
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-primary/15 via-primary/10 to-transparent border border-primary/20 flex items-center gap-2.5 flex-shrink-0">
+                  <span className="text-xl">👨‍👩‍👧‍👦</span>
+                  <div>
+                    <p className="text-xs font-bold text-white">Familiares en el Ecosistema KIN</p>
+                    <p className="text-[10px] text-on-surface-variant">
+                      Toca a cualquier familiar registrado para transferirle al instante.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 overflow-y-auto flex-1 pr-1 scrollbar-thin">
+                  {KIN_FAMILY_MEMBERS.filter((f) => !f.id.includes(userId)).map((fam) => {
+                    const isSelected = selectedContact?.id === fam.id;
+                    return (
+                      <button
+                        key={fam.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedContact(fam);
+                          setShowContactPicker(false);
+                        }}
+                        className={`w-full p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                          isSelected
+                            ? 'bg-surface-container-high border-primary shadow-glow-mint'
+                            : 'bg-surface-container-lowest/60 border-white/5 hover:border-white/15'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-11 h-11 rounded-full overflow-hidden border border-white/10 flex-shrink-0 bg-surface-container-high flex items-center justify-center">
+                            {fam.photoUrl ? (
+                              <img src={fam.photoUrl} alt={fam.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-lg">{fam.avatar}</span>
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-bold text-white leading-tight font-title-base">
+                                {fam.fullName}
+                              </span>
+                              <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
+                                Familia
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#2ED5A4] font-mono mt-0.5">{fam.phone}</p>
+                            <p className="text-[10px] text-on-surface-variant">{fam.bank}</p>
+                          </div>
+                        </div>
+
+                        <div className="px-2.5 py-1.5 rounded-xl bg-primary/20 text-primary text-xs font-bold flex items-center gap-1">
+                          <span>Elegir</span>
+                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: Agregar Nuevo Destinatario (Manual / Celular) */}
+            {pickerTab === 'add_new' && (
+              <div className="flex flex-col flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+                <div className="flex items-center justify-between flex-shrink-0">
+                  <div>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Registrar Destinatario KIN Cash
+                    </h4>
+                    <p className="text-[10px] text-on-surface-variant">
+                      P2P Express: Se requiere únicamente Nombre y Teléfono.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handlePickPhoneContacts}
+                    className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all"
+                  >
+                    <span>📱 Agenda Celular</span>
+                  </button>
+                </div>
+
+                {/* Banner de Feedback de sincronización */}
+                {syncPhoneFeedback && (
+                  <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30 text-primary text-xs font-semibold flex items-center gap-2 animate-fade-in">
+                    <span className="material-symbols-outlined text-[18px]">info</span>
+                    <span>{syncPhoneFeedback}</span>
+                  </div>
+                )}
+
+                {/* Banner de Validación en Rojo si faltan datos */}
+                {newContactErrors && (
+                  <div className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/40 text-red-400 text-xs font-bold flex items-center gap-2 animate-fade-in">
+                    <span className="material-symbols-outlined text-[18px] text-red-400">error</span>
+                    <span>⚠️ Nombre y teléfono son obligatorios para KIN Cash.</span>
+                  </div>
+                )}
+
+                {/* Campo: Nombre */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center gap-1">
+                    <span>Nombre Completo</span>
+                    {newContactErrors?.name && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[18px] text-on-surface-variant pointer-events-none">
+                      person
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Ej. Jose Eligio"
+                      value={newContactName}
+                      onChange={(e) => {
+                        setNewContactName(e.target.value);
+                        if (newContactErrors?.name) setNewContactErrors((prev) => ({ ...prev, name: undefined }));
+                      }}
+                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        newContactErrors?.name
+                          ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                          : 'border border-white/10 focus:border-primary'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Campo: Teléfono */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center gap-1">
+                    <span>Teléfono Móvil (+52 / +1)</span>
+                    {newContactErrors?.phone && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[18px] text-on-surface-variant pointer-events-none">
+                      smartphone
+                    </span>
+                    <input
+                      type="tel"
+                      placeholder="+1 (347) 248-6386 ó +52..."
+                      value={newContactPhone}
+                      onChange={(e) => {
+                        setNewContactPhone(e.target.value);
+                        if (newContactErrors?.phone) setNewContactErrors((prev) => ({ ...prev, phone: undefined }));
+                      }}
+                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        newContactErrors?.phone
+                          ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                          : 'border border-white/10 focus:border-primary'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Guardar en la agenda del teléfono */}
+                <div
+                  onClick={() => setSaveToDeviceContacts((prev) => !prev)}
+                  className="p-3 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between cursor-pointer hover:border-white/15 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[20px]">contact_page</span>
+                    <div>
+                      <p className="text-xs font-bold text-white">Guardar en agenda del teléfono</p>
+                      <p className="text-[10px] text-on-surface-variant">Descarga archivo vCard (.vcf) de 1 toque</p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={saveToDeviceContacts}
+                    onChange={() => {}}
+                    className="w-4 h-4 accent-primary cursor-pointer"
+                  />
+                </div>
+
+                {/* Botón CTA de Guardar y Transferir */}
+                <button
+                  type="button"
+                  onClick={handleAddNewKinCashContact}
+                  disabled={isSubmittingContact}
+                  className="w-full h-[52px] rounded-2xl bg-primary hover:bg-primary-container text-on-primary text-sm font-bold transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] mt-2"
+                >
+                  {isSubmittingContact ? (
+                    <span>Guardando contacto...</span>
+                  ) : (
+                    <>
+                      <span>Guardar y Transferir KIN Cash</span>
+                      <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

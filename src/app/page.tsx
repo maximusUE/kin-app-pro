@@ -78,7 +78,7 @@ import {
   ShieldCheckIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
-import { KinCashP2PModal } from '@/components/KinCashP2PModal';
+import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/components/KinCashP2PModal';
 import { ClientVaultModal } from '@/components/ClientVaultModal';
 import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
 import { KinLogo } from '@/components/KinLogo';
@@ -203,6 +203,11 @@ export interface ContactItem {
   photoUrl: string;
   clabe?: string;
   phone?: string;
+  street?: string;       // calle
+  houseNumber?: string;  // número de casa/exterior
+  state?: string;        // estado
+  zipCode?: string;      // código postal
+  isFamily?: boolean;
 }
 
 // Avatares disponibles para personalización de perfil
@@ -513,6 +518,17 @@ export default function MobileApp() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [newContactName, setNewContactName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
+  const [newContactStreet, setNewContactStreet] = useState('');
+  const [newContactHouseNumber, setNewContactHouseNumber] = useState('');
+  const [newContactState, setNewContactState] = useState('');
+  const [newContactCountry, setNewContactCountry] = useState('Mexico');
+  const [newContactZip, setNewContactZip] = useState('');
+  const [newContactBank, setNewContactBank] = useState('Red Banxico SPEI');
+  const [newContactClabe, setNewContactClabe] = useState('');
+  const [beneficiaryErrors, setBeneficiaryErrors] = useState<Record<string, string> | null>(null);
+  const [beneficiaryModalTab, setBeneficiaryModalTab] = useState<'select' | 'register'>('select');
+  const [saveBeneficiaryToPhone, setSaveBeneficiaryToPhone] = useState(true);
+  const [isSavingBeneficiary, setIsSavingBeneficiary] = useState(false);
   const [contactFeedback, setContactFeedback] = useState<string | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<ContactItem | null>(null);
   const [amountValue, setAmountValue] = useState('50');
@@ -607,28 +623,62 @@ export default function MobileApp() {
     setTimeout(() => setContactFeedback(null), 3000);
   };
 
-  // Agregar contacto manual / teléfono directo
+  // Agregar contacto / beneficiario con validación estricta de dirección CNBV / Banxico
   const handleAddNewContact = () => {
-    if (!newContactName.trim()) return;
+    const trimmedName = newContactName.trim();
+    const trimmedPhone = newContactPhone.trim();
+    const trimmedStreet = newContactStreet.trim();
+    const trimmedHouse = newContactHouseNumber.trim();
+    const trimmedState = newContactState.trim();
+    const trimmedCountry = newContactCountry.trim() || 'Mexico';
+    const trimmedZip = newContactZip.trim();
+
+    const errors: Record<string, string> = {};
+    if (!trimmedName) errors.name = 'El nombre es obligatorio';
+    if (!trimmedPhone) errors.phone = 'El teléfono celular es obligatorio';
+    if (!trimmedStreet) errors.street = 'La calle es obligatoria para envíos a México';
+    if (!trimmedHouse) errors.houseNumber = 'El número de casa/exterior es obligatorio';
+    if (!trimmedState) errors.state = 'El estado o provincia es obligatorio';
+    if (!trimmedCountry) errors.country = 'El país destino es obligatorio';
+    if (!trimmedZip) errors.zipCode = 'El código postal es obligatorio';
+
+    if (Object.keys(errors).length > 0) {
+      setBeneficiaryErrors(errors);
+      return;
+    }
+
+    setBeneficiaryErrors(null);
+    setIsSavingBeneficiary(true);
+
     const emojis = ['🧑🏻', '👩🏻', '🧔🏽', '👱🏼', '👵🏼', '👨🏽', '👧🏻'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     const newContact: ContactItem = {
       id: `manual-${Date.now()}`,
-      name: newContactName.trim(),
-      fullName: newContactName.trim(),
+      name: trimmedName,
+      fullName: trimmedName,
       avatar: randomEmoji,
-      role: newContactPhone.trim() || 'Beneficiario directo',
-      country: 'Mexico',
-      bank: 'SPEI Banxico',
+      role: `${trimmedState}, ${trimmedCountry} • ${trimmedPhone}`,
+      country: trimmedCountry,
+      bank: newContactBank || (deliveryMethod === 'cash' ? 'OXXO Cash Pickup' : 'SPEI Banxico'),
       photoUrl: DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)],
-      phone: newContactPhone.trim(),
+      phone: trimmedPhone,
+      street: trimmedStreet,
+      houseNumber: trimmedHouse,
+      state: trimmedState,
+      zipCode: trimmedZip,
+      clabe: newContactClabe.trim(),
     };
+
     setContactsList((prev) => [newContact, ...prev]);
     setSelectedAvatar(newContact);
-    setNewContactName('');
-    setNewContactPhone('');
-    setContactFeedback(`Contacto ${newContact.name} agregado y seleccionado.`);
-    setTimeout(() => setContactFeedback(null), 3000);
+    setShowContactModal(false);
+    setBeneficiaryModalTab('select');
+    setContactFeedback(`Beneficiario ${newContact.name} verificado y registrado.`);
+    setTimeout(() => setContactFeedback(null), 3500);
+
+    if (saveBeneficiaryToPhone) {
+      exportContactVCard(trimmedName, trimmedPhone);
+    }
 
     fetch('/api/contacts', {
       method: 'POST',
@@ -640,16 +690,25 @@ export default function MobileApp() {
         phone: newContact.phone,
         bank: newContact.bank,
         avatar: newContact.avatar,
+        street: newContact.street,
+        houseNumber: newContact.houseNumber,
+        state: newContact.state,
+        country: newContact.country,
+        zipCode: newContact.zipCode,
+        clabe: newContact.clabe,
+        validateFor: 'remittance',
       }),
-    }).catch((e) => console.warn('[Contacts API error]', e));
+    })
+      .catch((e) => console.warn('[Contacts API error]', e))
+      .finally(() => setIsSavingBeneficiary(false));
   };
 
   // Cálculo de comisiones y monto total a pagar según el método seleccionado
   const paymentFee = paymentMethod === 'credit' ? 1.99 : 0.0;
   const currentSendAmount = parseFloat(amountValue) || 0;
   const totalToPayUSD = currentSendAmount > 0 ? currentSendAmount + paymentFee : 0;
-  
-  // Success screen state (Screenshot 1: Rosette Badge, Money sent successfully, Statement, PDF, Share, Done)
+
+  // Success screen state (Rosette Badge, Money sent successfully)
   const [sendSuccessData, setSendSuccessData] = useState<{
     id: string;
     amount: number;
@@ -676,6 +735,39 @@ export default function MobileApp() {
   // Helper para registrar un envío de dinero y abrir ventanilla de Success
   const handleSendNow = () => {
     if (!selectedAvatar) {
+      setBeneficiaryModalTab('select');
+      setShowContactModal(true);
+      return;
+    }
+
+    // Validación regulatoria para Envíos USA -> México (CNBV / Banxico / FinCEN)
+    const hasAddress = !!(
+      selectedAvatar.street &&
+      selectedAvatar.houseNumber &&
+      selectedAvatar.state &&
+      selectedAvatar.country &&
+      selectedAvatar.zipCode &&
+      selectedAvatar.phone
+    );
+
+    if (!hasAddress) {
+      setNewContactName(selectedAvatar.fullName || selectedAvatar.name);
+      setNewContactPhone(selectedAvatar.phone || '');
+      setNewContactStreet(selectedAvatar.street || '');
+      setNewContactHouseNumber(selectedAvatar.houseNumber || '');
+      setNewContactState(selectedAvatar.state || '');
+      setNewContactCountry(selectedAvatar.country || 'Mexico');
+      setNewContactZip(selectedAvatar.zipCode || '');
+      setBeneficiaryModalTab('register');
+      setBeneficiaryErrors({
+        name: !selectedAvatar.name ? 'El nombre es obligatorio' : '',
+        phone: !selectedAvatar.phone ? 'El teléfono celular es obligatorio' : '',
+        street: !selectedAvatar.street ? 'La calle es obligatoria para envíos a México' : '',
+        houseNumber: !selectedAvatar.houseNumber ? 'El número exterior es obligatorio' : '',
+        state: !selectedAvatar.state ? 'El estado es obligatorio' : '',
+        country: !selectedAvatar.country ? 'El país es obligatorio' : '',
+        zipCode: !selectedAvatar.zipCode ? 'El código postal es obligatorio' : '',
+      });
       setShowContactModal(true);
       return;
     }
@@ -1431,6 +1523,8 @@ export default function MobileApp() {
           <div className="animate-fade-in space-y-4">
             <KinCashP2PModal
               isScreen={true}
+              userId={userId}
+              onContactCreated={(c) => setContactsList((prev) => [c, ...prev])}
               onP2PSuccess={handleP2PSuccess}
               contacts={contactsList}
               onViewHistory={() => setActiveTab('transactions')}
@@ -3244,6 +3338,8 @@ export default function MobileApp() {
       />
       <KinCashP2PModal
         isOpen={showKinCashModal}
+        userId={userId}
+        onContactCreated={(c) => setContactsList((prev) => [c, ...prev])}
         onClose={() => setShowKinCashModal(false)}
         onP2PSuccess={handleP2PSuccess}
         contacts={contactsList}
@@ -3272,198 +3368,540 @@ export default function MobileApp() {
         onLanguageChange={setLanguage}
       />
 
-      {/* Modal: Gestión de Contactos del Teléfono (Acceso directo, subir y bajar orden) */}
+      {/* Modal: Gestión de Beneficiarios y Contactos (Regulación CNBV / Banxico / FinCEN) */}
       {showContactModal && (
         <div className="modal-backdrop animate-fade-in" onClick={() => setShowContactModal(false)}>
           <div
-            className="modal-card space-y-4 max-h-[85vh] flex flex-col"
+            className="modal-card space-y-3.5 max-h-[90vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header del modal */}
             <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4]">
-                  <UserPlusIcon className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-sm">
+                  <span className="material-symbols-outlined text-[20px]">shield_person</span>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white leading-tight">Contactos del Teléfono</h3>
-                  <p className="text-[10px] text-[#8E91A5]">Acceso directo a tu agenda telefónica</p>
+                  <h3 className="text-sm font-bold text-white leading-tight font-title-base">
+                    Beneficiario de Envío (México / USA)
+                  </h3>
+                  <p className="text-[10px] text-on-surface-variant">
+                    Cumplimiento Regulatorio CNBV • Banxico • FinCEN
+                  </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowContactModal(false)}
-                className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
               >
                 <CloseIcon className="w-4 h-4" />
               </button>
             </div>
 
+            {/* Selector de Pestañas Ergonómicas (iOS 18 HIG & Material 3) */}
+            <div className="flex items-center gap-1.5 p-1 bg-surface-container-lowest rounded-2xl border border-white/5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setBeneficiaryModalTab('select')}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  beneficiaryModalTab === 'select'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+              >
+                👥 Contactos y Familiares ({contactsList.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setBeneficiaryModalTab('register')}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  beneficiaryModalTab === 'register'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+              >
+                ➕ Registrar Beneficiario
+              </button>
+            </div>
+
             {/* Notification / Feedback Banner */}
             {contactFeedback && (
-              <div className="p-2.5 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] text-xs font-semibold flex items-center gap-2 animate-fade-in flex-shrink-0">
+              <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30 text-primary text-xs font-semibold flex items-center gap-2 animate-fade-in flex-shrink-0">
                 <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                 <span>{contactFeedback}</span>
               </div>
             )}
 
-            {/* Primary Action: Acceso directo a Contactos del Teléfono */}
-            <button
-              type="button"
-              onClick={handlePickPhoneContacts}
-              className="w-full py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#2ED5A4]/20 via-[#2ED5A4]/15 to-[#7047EB]/20 border border-[#2ED5A4]/40 hover:border-[#2ED5A4] flex items-center justify-between text-left transition-all cursor-pointer group flex-shrink-0"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="text-xl">📱</span>
-                <div>
-                  <p className="text-xs font-bold text-white group-hover:text-[#2ED5A4] transition-colors">
-                    Sincronizar contactos del celular
-                  </p>
-                  <p className="text-[10px] text-[#8E91A5]">
-                    Acceso directo a tu libreta telefónica (iOS / Android)
-                  </p>
-                </div>
-              </div>
-              <div className="px-2.5 py-1 rounded-lg bg-[#2ED5A4] text-[#0E0F1A] text-[10px] font-black tracking-wide">
-                ACCEDER
-              </div>
-            </button>
+            {/* ========================================================================= */}
+            {/* PESTAÑA 1: SELECCIONAR DE CONTACTOS / RED FAMILIAR                        */}
+            {/* ========================================================================= */}
+            {beneficiaryModalTab === 'select' && (
+              <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-thin">
+                {/* Sincronizar libreta telefónica */}
+                <button
+                  type="button"
+                  onClick={handlePickPhoneContacts}
+                  className="w-full py-3 px-3.5 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/15 to-[#7047EB]/20 border border-primary/40 hover:border-primary flex items-center justify-between text-left transition-all cursor-pointer group flex-shrink-0"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">📱</span>
+                    <div>
+                      <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
+                        Sincronizar contactos del celular
+                      </p>
+                      <p className="text-[10px] text-on-surface-variant">
+                        Acceso directo a tu agenda telefónica (iOS / Android)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="px-2.5 py-1 rounded-lg bg-primary text-on-primary text-[10px] font-black tracking-wide">
+                    ACCEDER
+                  </div>
+                </button>
 
-            {/* Agregar número directamente */}
-            <div className="p-3 rounded-2xl bg-[#121320] border border-white/5 space-y-2 flex-shrink-0">
-              <span className="text-[10px] uppercase tracking-wider text-[#8E91A5] font-bold block">
-                O agregar número directamente:
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  placeholder="Nombre (ej. Hermano)"
-                  autoCapitalize="words"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  value={newContactName}
-                  onChange={(e) => setNewContactName(e.target.value.replace(/(^|\s)(\p{L})/gu, (_, s, c) => s + c.toUpperCase()))}
-                  className="bg-[#181928] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-[#8E91A5] focus:outline-none focus:border-[#2ED5A4] capitalize"
-                />
-                <input
-                  type="tel"
-                  placeholder="Teléfono (+52 / +1)"
-                  value={newContactPhone}
-                  onChange={(e) => setNewContactPhone(e.target.value)}
-                  className="bg-[#181928] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-[#8E91A5] focus:outline-none focus:border-[#2ED5A4]"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleAddNewContact}
-                disabled={!newContactName.trim()}
-                className="w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-40 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <PlusIcon className="w-3.5 h-3.5" />
-                <span>Guardar contacto</span>
-              </button>
-            </div>
+                {/* Red Familiar KIN Registrada */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[11px] uppercase tracking-wider text-primary font-bold">
+                      👨‍👩‍👧‍👦 Red Familiar KIN (1 toque para enviar)
+                    </span>
+                    <span className="text-[10px] text-on-surface-variant">Ecosistema Activo</span>
+                  </div>
 
-            {/* Contacts List with Subir / Bajar / Seleccionar Controls */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[160px] max-h-[220px]">
-              <div className="flex items-center justify-between text-[11px] text-[#8E91A5] font-medium px-1 mb-1">
-                <span>Tus Contactos ({contactsList.length})</span>
-                <span className="text-[10px] text-[#2ED5A4]">Usa ▲ ▼ para subir y bajar</span>
-              </div>
-
-              {contactsList.length === 0 ? (
-                <div className="p-6 text-center rounded-2xl bg-[#121320] border border-dashed border-white/10 space-y-1">
-                  <p className="text-xs font-semibold text-white">No tienes contactos aún</p>
-                  <p className="text-[11px] text-[#8E91A5]">
-                    Usa el formulario de arriba o sincroniza tu agenda para agregar destinatarios.
-                  </p>
-                </div>
-              ) : (
-                contactsList.map((c, idx) => {
-                  const isSelected = selectedAvatar?.id === c.id;
-                  return (
-                    <div
-                      key={c.id}
-                      className={`p-2 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
-                        isSelected
-                          ? 'bg-[#181928] border-[#2ED5A4] shadow-sm'
-                          : 'bg-[#121320] border-white/5 hover:border-white/15'
-                      }`}
-                    >
-                      {/* Contact Info (Click to select for remittance) */}
-                      <button
-                        type="button"
+                  <div className="space-y-2">
+                    {KIN_FAMILY_MEMBERS.filter((f) => !f.id.includes(userId)).map((fam) => (
+                      <div
+                        key={fam.id}
                         onClick={() => {
-                          setSelectedAvatar(c);
+                          const completeFamilyContact: ContactItem = {
+                            ...fam,
+                            street: 'Av. Juárez',
+                            houseNumber: '104',
+                            state: 'San Antonio',
+                            country: 'Mexico',
+                            zipCode: '78201',
+                            clabe: '012180001234567890',
+                          };
+                          setSelectedAvatar(completeFamilyContact);
                           setShowContactModal(false);
+                          setContactFeedback(`Beneficiario ${fam.name} seleccionado.`);
+                          setTimeout(() => setContactFeedback(null), 3000);
                         }}
-                        className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer"
+                        className="p-3 rounded-2xl bg-[#181928] border border-white/5 hover:border-primary/40 transition-all flex items-center justify-between gap-2.5 cursor-pointer group"
                       >
-                        <div className="w-8 h-8 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-base flex-shrink-0">
-                          {c.avatar}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs font-bold text-white truncate">{c.name}</p>
-                            {isSelected && (
-                              <span className="text-[8px] font-bold text-[#2ED5A4] bg-[#2ED5A4]/20 px-1.5 py-0.2 rounded-full flex-shrink-0">
-                                Activo
-                              </span>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0 bg-surface-container-high flex items-center justify-center">
+                            {fam.photoUrl ? (
+                              <img src={fam.photoUrl} alt={fam.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-lg">{fam.avatar}</span>
                             )}
                           </div>
-                          <p className="text-[10px] text-[#8E91A5] truncate">{c.role}</p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-xs font-bold text-white truncate group-hover:text-primary transition-colors">
+                                {fam.fullName}
+                              </p>
+                              <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
+                                Familia
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-primary font-mono truncate">{fam.phone}</p>
+                            <p className="text-[10px] text-on-surface-variant truncate">
+                              📍 Av. Juárez #104, San Antonio • {fam.bank}
+                            </p>
+                          </div>
                         </div>
-                      </button>
-
-                      {/* Controls: Move Up (▲), Move Down (▼), Delete (🗑) */}
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {/* Subir orden */}
-                        <button
-                          type="button"
-                          onClick={() => handleMoveContactUp(idx)}
-                          disabled={idx === 0}
-                          title="Subir posición"
-                          className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
-                        >
-                          <ChevronUpIcon className="w-3.5 h-3.5" />
-                        </button>
-
-                        {/* Bajar orden */}
-                        <button
-                          type="button"
-                          onClick={() => handleMoveContactDown(idx)}
-                          disabled={idx === contactsList.length - 1}
-                          title="Bajar posición"
-                          className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
-                        >
-                          <ChevronDownIcon className="w-3.5 h-3.5" />
-                        </button>
-
-                        {/* Eliminar contacto */}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteContact(c.id)}
-                          title="Eliminar de la lista"
-                          className="w-7 h-7 rounded-lg bg-white/5 hover:bg-rose-500/20 flex items-center justify-center text-[#8E91A5] hover:text-rose-400 transition-all cursor-pointer ml-0.5"
-                        >
-                          <TrashIcon className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="px-3 py-1.5 rounded-xl bg-primary/20 group-hover:bg-primary text-primary group-hover:text-on-primary text-xs font-bold flex items-center gap-1 flex-shrink-0 transition-all">
+                          <span>Elegir</span>
+                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Done button */}
-            <button
-              type="button"
-              onClick={() => setShowContactModal(false)}
-              className="w-full h-12 rounded-full bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition-all cursor-pointer flex-shrink-0 shadow-md flex items-center justify-center gap-1.5 active:scale-[0.98]"
-            >
-              <span>Listo</span>
-              <span className="material-symbols-outlined text-[18px]">check</span>
-            </button>
+                {/* Tus Contactos Guardados */}
+                <div className="space-y-2 pt-2 border-t border-white/5">
+                  <div className="flex items-center justify-between text-[11px] text-on-surface-variant font-medium px-1">
+                    <span>Tus Contactos Guardados ({contactsList.length})</span>
+                    <span className="text-[10px] text-primary">Usa ▲ ▼ para ordenar</span>
+                  </div>
+
+                  {contactsList.length === 0 ? (
+                    <div className="p-5 text-center rounded-2xl bg-[#121320] border border-dashed border-white/10 space-y-2">
+                      <p className="text-xs font-semibold text-white">No tienes contactos guardados aún</p>
+                      <p className="text-[11px] text-on-surface-variant">
+                        Selecciona a un familiar arriba o usa la pestaña "Registrar Beneficiario" para dar de alta a una persona con dirección completa.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setBeneficiaryModalTab('register')}
+                        className="py-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <PlusIcon className="w-3.5 h-3.5" />
+                        <span>Registrar Nuevo Beneficiario</span>
+                      </button>
+                    </div>
+                  ) : (
+                    contactsList.map((c, idx) => {
+                      const isSelected = selectedAvatar?.id === c.id;
+                      return (
+                        <div
+                          key={c.id}
+                          className={`p-2.5 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
+                            isSelected
+                              ? 'bg-[#181928] border-primary shadow-sm'
+                              : 'bg-[#121320] border-white/5 hover:border-white/15'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedAvatar(c);
+                              setShowContactModal(false);
+                            }}
+                            className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer"
+                          >
+                            <div className="w-9 h-9 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-base flex-shrink-0">
+                              {c.avatar}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-xs font-bold text-white truncate">{c.name}</p>
+                                {isSelected && (
+                                  <span className="text-[8px] font-bold text-primary bg-primary/20 px-1.5 py-0.2 rounded-full flex-shrink-0">
+                                    Activo
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-on-surface-variant truncate">
+                                {c.phone || c.role} {c.street ? `• 📍 ${c.street} #${c.houseNumber}` : ''}
+                              </p>
+                            </div>
+                          </button>
+
+                          {/* Controls */}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveContactUp(idx)}
+                              disabled={idx === 0}
+                              title="Subir posición"
+                              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-on-surface-variant hover:text-white transition-all cursor-pointer"
+                            >
+                              <ChevronUpIcon className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveContactDown(idx)}
+                              disabled={idx === contactsList.length - 1}
+                              title="Bajar posición"
+                              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-on-surface-variant hover:text-white transition-all cursor-pointer"
+                            >
+                              <ChevronDownIcon className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteContact(c.id)}
+                              title="Eliminar de la lista"
+                              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-rose-500/20 flex items-center justify-center text-on-surface-variant hover:text-rose-400 transition-all cursor-pointer ml-0.5"
+                            >
+                              <TrashIcon className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* PESTAÑA 2: REGISTRAR NUEVO BENEFICIARIO (CUMPLIMIENTO CNBV / BANXICO)      */}
+            {/* ========================================================================= */}
+            {beneficiaryModalTab === 'register' && (
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+                {/* Banner Regulatorio */}
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-primary/10 via-[#181928] to-transparent border border-primary/20 flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[20px] text-primary flex-shrink-0 mt-0.5">
+                    verified_user
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-white">Requisito Obligatorio CNBV & Banxico</p>
+                    <p className="text-[10px] text-on-surface-variant">
+                      Para envíos USA $\rightarrow$ México, la ley exige nombre completo, teléfono y domicilio estructurado.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Banner de Validación en Rojo si faltan datos */}
+                {beneficiaryErrors && Object.keys(beneficiaryErrors).length > 0 && (
+                  <div className="p-3 rounded-2xl bg-red-500/15 border-2 border-red-500/40 text-red-400 text-xs font-bold flex items-start gap-2 animate-fade-in">
+                    <span className="material-symbols-outlined text-[20px] text-red-400 flex-shrink-0">
+                      gpp_maybe
+                    </span>
+                    <span>
+                      ⚠️ Requisito Regulatorio CNBV/Banxico: Todos los campos marcados en rojo son obligatorios para transferencias transfronterizas (Nombre, Teléfono, Calle, Número, Estado, País y Código Postal).
+                    </span>
+                  </div>
+                )}
+
+                {/* Campo 1: Nombre Completo */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
+                    <span>Nombre Completo del Beneficiario</span>
+                    {beneficiaryErrors?.name && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[18px] text-on-surface-variant pointer-events-none">
+                      person
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Ej. Jose Eligio"
+                      value={newContactName}
+                      onChange={(e) => {
+                        setNewContactName(e.target.value);
+                        if (beneficiaryErrors?.name) setBeneficiaryErrors((prev) => prev ? { ...prev, name: '' } : null);
+                      }}
+                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        beneficiaryErrors?.name
+                          ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                          : 'border border-white/10 focus:border-primary'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Campo 2: Teléfono Celular */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
+                    <span>Teléfono Celular (+52 / +1)</span>
+                    {beneficiaryErrors?.phone && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[18px] text-on-surface-variant pointer-events-none">
+                      smartphone
+                    </span>
+                    <input
+                      type="tel"
+                      placeholder="+1 (347) 248-6386 ó +52..."
+                      value={newContactPhone}
+                      onChange={(e) => {
+                        setNewContactPhone(e.target.value);
+                        if (beneficiaryErrors?.phone) setBeneficiaryErrors((prev) => prev ? { ...prev, phone: '' } : null);
+                      }}
+                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        beneficiaryErrors?.phone
+                          ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                          : 'border border-white/10 focus:border-primary'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Separador de Sección Domicilio */}
+                <div className="pt-2 pb-1 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[11px] uppercase tracking-wider font-bold text-primary">
+                    Dirección Domiciliaria (México / USA)
+                  </span>
+                  <span className="text-[10px] text-on-surface-variant font-medium">5 Campos Obligatorios</span>
+                </div>
+
+                {/* Grid 2 Columnas: Calle & Número Exterior */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
+                      <span>Calle</span>
+                      {beneficiaryErrors?.street && <span className="text-red-400 font-bold">*</span>}
+                    </label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
+                        home
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Ej. Av. Hidalgo"
+                        value={newContactStreet}
+                        onChange={(e) => {
+                          setNewContactStreet(e.target.value);
+                          if (beneficiaryErrors?.street) setBeneficiaryErrors((prev) => prev ? { ...prev, street: '' } : null);
+                        }}
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                          beneficiaryErrors?.street
+                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                            : 'border border-white/10 focus:border-primary'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
+                      <span>No. Exterior</span>
+                      {beneficiaryErrors?.houseNumber && <span className="text-red-400 font-bold">*</span>}
+                    </label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
+                        tag
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Ej. 142"
+                        value={newContactHouseNumber}
+                        onChange={(e) => {
+                          setNewContactHouseNumber(e.target.value);
+                          if (beneficiaryErrors?.houseNumber) setBeneficiaryErrors((prev) => prev ? { ...prev, houseNumber: '' } : null);
+                        }}
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                          beneficiaryErrors?.houseNumber
+                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                            : 'border border-white/10 focus:border-primary'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Grid 2 Columnas: Estado & Código Postal */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
+                      <span>Estado / Entidad</span>
+                      {beneficiaryErrors?.state && <span className="text-red-400 font-bold">*</span>}
+                    </label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
+                        map
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Ej. Jalisco"
+                        value={newContactState}
+                        onChange={(e) => {
+                          setNewContactState(e.target.value);
+                          if (beneficiaryErrors?.state) setBeneficiaryErrors((prev) => prev ? { ...prev, state: '' } : null);
+                        }}
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                          beneficiaryErrors?.state
+                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                            : 'border border-white/10 focus:border-primary'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
+                      <span>Código Postal (C.P.)</span>
+                      {beneficiaryErrors?.zipCode && <span className="text-red-400 font-bold">*</span>}
+                    </label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
+                        markunread_mailbox
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Ej. 44100"
+                        maxLength={6}
+                        value={newContactZip}
+                        onChange={(e) => {
+                          setNewContactZip(e.target.value);
+                          if (beneficiaryErrors?.zipCode) setBeneficiaryErrors((prev) => prev ? { ...prev, zipCode: '' } : null);
+                        }}
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                          beneficiaryErrors?.zipCode
+                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                            : 'border border-white/10 focus:border-primary'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Selector de País */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-on-surface-variant">País de Residencia</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewContactCountry('Mexico')}
+                      className={`h-[48px] rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        newContactCountry === 'Mexico'
+                          ? 'bg-primary text-on-primary shadow-sm border border-primary'
+                          : 'bg-[#181928] border border-white/10 text-on-surface-variant hover:text-white'
+                      }`}
+                    >
+                      <span>🇲🇽 México</span>
+                      {newContactCountry === 'Mexico' && <span className="text-xs">✓</span>}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewContactCountry('Estados Unidos')}
+                      className={`h-[48px] rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        newContactCountry === 'Estados Unidos'
+                          ? 'bg-primary text-on-primary shadow-sm border border-primary'
+                          : 'bg-[#181928] border border-white/10 text-on-surface-variant hover:text-white'
+                      }`}
+                    >
+                      <span>🇺🇸 Estados Unidos</span>
+                      {newContactCountry === 'Estados Unidos' && <span className="text-xs">✓</span>}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Guardar en libreta del teléfono */}
+                <div
+                  onClick={() => setSaveBeneficiaryToPhone((prev) => !prev)}
+                  className="p-3 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between cursor-pointer hover:border-white/15 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[20px]">contact_page</span>
+                    <div>
+                      <p className="text-xs font-bold text-white">Guardar en la agenda de mi teléfono</p>
+                      <p className="text-[10px] text-on-surface-variant">Descarga tarjeta vCard (.vcf) de 1 toque</p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={saveBeneficiaryToPhone}
+                    onChange={() => {}}
+                    className="w-4 h-4 accent-primary cursor-pointer"
+                  />
+                </div>
+
+                {/* Botón CTA Principal */}
+                <button
+                  type="button"
+                  onClick={handleAddNewContact}
+                  disabled={isSavingBeneficiary}
+                  className="w-full h-[54px] rounded-full bg-primary hover:bg-primary-container text-on-primary text-sm font-bold transition-all cursor-pointer shadow-[0_8px_24px_rgba(46,213,164,0.3)] flex items-center justify-center gap-2 active:scale-[0.98] mt-2"
+                >
+                  {isSavingBeneficiary ? (
+                    <span>Validando y Guardando...</span>
+                  ) : (
+                    <>
+                      <span>Guardar Beneficiario y Continuar</span>
+                      <span className="material-symbols-outlined text-[18px]">verified</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Footer Done */}
+            {beneficiaryModalTab === 'select' && (
+              <button
+                type="button"
+                onClick={() => setShowContactModal(false)}
+                className="w-full h-12 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer flex-shrink-0 flex items-center justify-center gap-1.5 active:scale-[0.98]"
+              >
+                <span>Cerrar</span>
+              </button>
+            )}
           </div>
         </div>
       )}

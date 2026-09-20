@@ -69,6 +69,12 @@ export interface ContactRecord {
   photoUrl: string;
   clabe?: string;
   phone?: string;
+  // Campos de domicilio estructurado (Regulación AML/CNBV & Banxico para remesas)
+  street?: string;       // calle
+  houseNumber?: string;  // número de casa/exterior
+  state?: string;        // estado
+  zipCode?: string;      // código postal
+  isFamily?: boolean;    // red familiar KIN
 }
 
 interface DatabaseSchema {
@@ -170,12 +176,13 @@ export function findUserByEmailOrPhone(identifier: string): UserProfile | undefi
   );
 }
 
-const LEGACY_ID_MAP: Record<string, string> = {
+export const LEGACY_ID_MAP: Record<string, string> = {
   'user-1789863039309': 'user_jose_eligio',
   'user-1789925173232': 'user_maricela_fernandez',
   'user-1789928316890': 'user_jaime_gutierrez',
   'user-1789928551412': 'user_manuel_gomez',
 };
+export const USER_FALLBACK_MAP = LEGACY_ID_MAP;
 
 export function findUserById(id: string): UserProfile | undefined {
   const db = loadDatabase();
@@ -275,7 +282,39 @@ export function getUserTransactions(userId: string): TransactionRecord[] {
 
 export function getUserContacts(userId: string): ContactRecord[] {
   const db = loadDatabase();
-  return db.contacts.filter((c) => c.userId === userId);
+  const canonicalId = USER_FALLBACK_MAP[userId] || userId;
+  return db.contacts.filter((c) => c.userId === canonicalId || c.userId === userId);
+}
+
+/**
+ * Red de Familiares KIN registrados en el ecosistema
+ */
+export function getFamilyNetwork(excludeUserId?: string): ContactRecord[] {
+  const db = loadDatabase();
+  const canonicalExclude = excludeUserId ? (USER_FALLBACK_MAP[excludeUserId] || excludeUserId) : '';
+
+  return db.users
+    .filter((u) => u.id !== canonicalExclude && (USER_FALLBACK_MAP[u.id] || u.id) !== canonicalExclude)
+    .map((u) => {
+      const isMex = u.country.toLowerCase().includes('mex') || u.phone.startsWith('+52') || u.phone.startsWith('01152');
+      return {
+        id: `fam-${u.id}`,
+        userId: canonicalExclude || 'user-001',
+        name: `${u.firstName} ${u.lastName}`.trim(),
+        fullName: `${u.firstName} ${u.lastName}`.trim(),
+        avatar: u.avatar ? '' : '👨‍👩‍👧‍👦',
+        role: 'Familiar KIN',
+        country: isMex ? 'Mexico' : 'Estados Unidos',
+        bank: isMex ? 'BBVA México' : 'Red Banxico SPEI',
+        photoUrl: u.avatar || '',
+        phone: u.phone || '',
+        street: u.city ? `Av. Juárez, ${u.city}` : 'Av. Reforma',
+        houseNumber: '104',
+        state: u.state || 'San Antonio',
+        zipCode: u.zip || '78201',
+        isFamily: true,
+      };
+    });
 }
 
 export function createContact(params: {
@@ -288,26 +327,113 @@ export function createContact(params: {
   role?: string;
   avatar?: string;
   photoUrl?: string;
+  street?: string;
+  houseNumber?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
 }): ContactRecord {
   const db = loadDatabase();
+  const canonicalUserId = USER_FALLBACK_MAP[params.userId] || params.userId;
   const newContact: ContactRecord = {
     id: `c-${Date.now()}`,
-    userId: params.userId,
+    userId: canonicalUserId,
     name: params.name.trim(),
     fullName: params.fullName?.trim() || params.name.trim(),
     avatar: params.avatar || '👤',
-    role: params.role?.trim() || 'Beneficiario',
-    country: 'Mexico',
+    role: params.role?.trim() || 'Beneficiario directo',
+    country: params.country?.trim() || 'Mexico',
     bank: params.bank?.trim() || 'Banco en México',
     photoUrl: params.photoUrl || '',
     clabe: params.clabe?.trim() || '',
     phone: params.phone?.trim() || '',
+    street: params.street?.trim() || '',
+    houseNumber: params.houseNumber?.trim() || '',
+    state: params.state?.trim() || '',
+    zipCode: params.zipCode?.trim() || '',
   };
 
   db.contacts.unshift(newContact);
   saveDatabase(db);
-  saveContactToFirestore(params.userId, newContact).catch((e) => console.warn('[Firebase Sync Contact Error]', e));
+  saveContactToFirestore(canonicalUserId, newContact).catch((e) => console.warn('[Firebase Sync Contact Error]', e));
   return newContact;
+}
+
+/**
+ * Validador estricto para Envíos USA -> México (Cumplimiento Regulatorio CNBV / Banxico)
+ */
+export function validateRemittanceRecipient(data: {
+  name?: string;
+  phone?: string;
+  street?: string;
+  houseNumber?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+}): { valid: boolean; missingFields: string[]; errors: Record<string, string> } {
+  const missingFields: string[] = [];
+  const errors: Record<string, string> = {};
+
+  if (!data.name || !data.name.trim()) {
+    missingFields.push('name');
+    errors.name = 'El nombre del beneficiario es obligatorio';
+  }
+  if (!data.phone || !data.phone.trim()) {
+    missingFields.push('phone');
+    errors.phone = 'El número de teléfono es obligatorio';
+  }
+  if (!data.street || !data.street.trim()) {
+    missingFields.push('street');
+    errors.street = 'La calle es obligatoria para envíos a México';
+  }
+  if (!data.houseNumber || !data.houseNumber.trim()) {
+    missingFields.push('houseNumber');
+    errors.houseNumber = 'El número de casa o exterior es obligatorio';
+  }
+  if (!data.state || !data.state.trim()) {
+    missingFields.push('state');
+    errors.state = 'El estado o entidad federativa es obligatorio';
+  }
+  if (!data.country || !data.country.trim()) {
+    missingFields.push('country');
+    errors.country = 'El país destino es obligatorio';
+  }
+  if (!data.zipCode || !data.zipCode.trim()) {
+    missingFields.push('zipCode');
+    errors.zipCode = 'El código postal es obligatorio';
+  }
+
+  return {
+    valid: missingFields.length === 0,
+    missingFields,
+    errors,
+  };
+}
+
+/**
+ * Validador para KIN Cash P2P (Nombre y Teléfono requeridos)
+ */
+export function validateKinCashRecipient(data: {
+  name?: string;
+  phone?: string;
+}): { valid: boolean; missingFields: string[]; errors: Record<string, string> } {
+  const missingFields: string[] = [];
+  const errors: Record<string, string> = {};
+
+  if (!data.name || !data.name.trim()) {
+    missingFields.push('name');
+    errors.name = 'El nombre del destinatario es obligatorio';
+  }
+  if (!data.phone || !data.phone.trim()) {
+    missingFields.push('phone');
+    errors.phone = 'El teléfono celular es obligatorio';
+  }
+
+  return {
+    valid: missingFields.length === 0,
+    missingFields,
+    errors,
+  };
 }
 
 export function deleteContact(userId: string, contactId: string): boolean {
