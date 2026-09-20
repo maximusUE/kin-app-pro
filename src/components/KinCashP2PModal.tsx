@@ -23,6 +23,11 @@ export interface ContactItem {
   photoUrl: string;
   phone?: string;
   clabe?: string;
+  street?: string;
+  houseNumber?: string;
+  state?: string;
+  zipCode?: string;
+  isFamily?: boolean;
 }
 
 export const KIN_FAMILY_MEMBERS: ContactItem[] = [
