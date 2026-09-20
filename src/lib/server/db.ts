@@ -189,7 +189,28 @@ export function registerNewUser(params: {
   }
 
   const shortName = `${params.firstName.trim()} ${params.lastName.trim() ? params.lastName.trim()[0] + '.' : ''}`.trim();
-  const newId = `user-${Date.now()}`;
+  
+  // Generar ID con el nombre del cliente (ej: user_sofia_mendoza, user_jose_eligio)
+  const sanitize = (val: string) =>
+    val
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+
+  const firstSlug = sanitize(params.firstName.trim());
+  const lastSlug = sanitize(params.lastName.trim());
+  const baseId = lastSlug ? `user_${firstSlug}_${lastSlug}` : `user_${firstSlug}`;
+
+  let newId = baseId || `user_${Date.now()}`;
+  let counter = 2;
+  while (db.users.some((u) => u.id === newId)) {
+    newId = `${baseId}_${counter}`;
+    counter++;
+  }
+
   const clientId = `KIN-US-${Math.floor(100000 + Math.random() * 900000)}`;
   const nowStr = new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
 

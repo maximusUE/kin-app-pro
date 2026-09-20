@@ -26,7 +26,7 @@
       "pushNotificationsEnabled": true
     },
     {
-      "id": "user-1789863039309",
+      "id": "user_jose_eligio",
       "firstName": "Jose",
       "lastName": "Eligio",
       "name": "Jose E.",
@@ -51,7 +51,7 @@
       "pushNotificationsEnabled": true
     },
     {
-      "id": "user-1789925173232",
+      "id": "user_maricela_fernandez",
       "firstName": "Maricela",
       "lastName": "Fernandez",
       "name": "Maricela F.",
@@ -74,12 +74,62 @@
       "passwordHash": "54321",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true
+    },
+    {
+      "id": "user_jaime_gutierrez",
+      "firstName": "Jaime",
+      "lastName": "Gutierrez",
+      "name": "Jaime G.",
+      "email": "prueba3@test.com",
+      "phone": "+1 3479876543",
+      "city": "San Antonio",
+      "state": "Texas",
+      "zip": "78201",
+      "country": "Estados Unidos 🇺🇸",
+      "avatar": "",
+      "clientId": "KIN-US-819755",
+      "memberSince": "20 sep 2026",
+      "docType": "INE / Pasaporte en Trámite",
+      "docNumber": "••••••••0000",
+      "kycTier": "Tier 1 (Básico - Onboarding)",
+      "dailyLimit": "$300.00 USD / día",
+      "dailyLimitUSD": 300,
+      "monthlyLimitUSD": 750,
+      "balanceUSD": 1000,
+      "passwordHash": "98765",
+      "biometricsEnabled": true,
+      "pushNotificationsEnabled": true
+    },
+    {
+      "id": "user_manuel_gomez",
+      "firstName": "Manuel",
+      "lastName": "Gomez",
+      "name": "Manuel G.",
+      "email": "prueba4@test.com",
+      "phone": "+1 2345678910",
+      "city": "San Antonio",
+      "state": "Texas",
+      "zip": "78201",
+      "country": "Estados Unidos 🇺🇸",
+      "avatar": "",
+      "clientId": "KIN-US-734868",
+      "memberSince": "20 sep 2026",
+      "docType": "INE / Pasaporte en Trámite",
+      "docNumber": "••••••••0000",
+      "kycTier": "Tier 1 (Básico - Onboarding)",
+      "dailyLimit": "$300.00 USD / día",
+      "dailyLimitUSD": 300,
+      "monthlyLimitUSD": 750,
+      "balanceUSD": 1000,
+      "passwordHash": "10987",
+      "biometricsEnabled": true,
+      "pushNotificationsEnabled": true
     }
   ],
   "transactions": [
     {
       "id": "tx-1789917735632",
-      "userId": "user-1789863039309",
+      "userId": "user_jose_eligio",
       "title": "Hernana (OXXO)",
       "category": "oxxo Cash Pickup",
       "time": "Hoy, 11:22 AM",
@@ -100,7 +150,7 @@
   "contacts": [
     {
       "id": "c-1789917730543",
-      "userId": "user-1789863039309",
+      "userId": "user_jose_eligio",
       "name": "Hernana",
       "fullName": "Hernana",
       "avatar": "👨🏽",

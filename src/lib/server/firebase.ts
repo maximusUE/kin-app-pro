@@ -243,3 +243,55 @@ export async function saveTransactionToFirestore(userId: string, tx: any): Promi
     return false;
   }
 }
+
+/**
+ * Elimina un usuario de la colección "users" de Cloud Firestore
+ */
+export async function deleteUserFromFirestore(userId: string): Promise<boolean> {
+  try {
+    const serviceAccount = getServiceAccount();
+    const token = await getAccessToken();
+    if (!serviceAccount || !token) return false;
+
+    const url = `https://firestore.googleapis.com/v1/projects/${serviceAccount.project_id}/databases/(default)/documents/users/${userId}`;
+
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.ok) {
+      console.log(`🗑️ [Firebase Cloud Firestore] Usuario eliminado: ${userId}`);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('❌ [Firebase deleteUser Error]:', error);
+    return false;
+  }
+}
+
+/**
+ * Elimina una transacción de la subcolección de Firestore
+ */
+export async function deleteTransactionFromFirestore(userId: string, txId: string): Promise<boolean> {
+  try {
+    const serviceAccount = getServiceAccount();
+    const token = await getAccessToken();
+    if (!serviceAccount || !token) return false;
+
+    const url = `https://firestore.googleapis.com/v1/projects/${serviceAccount.project_id}/databases/(default)/documents/users/${userId}/transactions/${txId}`;
+
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return res.ok;
+  } catch (error) {
+    console.error('❌ [Firebase deleteTransaction Error]:', error);
+    return false;
+  }
+}
