@@ -164,6 +164,23 @@
   ],
   "contacts": [
     {
+      "id": "c-1789935556742",
+      "userId": "user_jose_eligio",
+      "name": "Manuel Gomez",
+      "fullName": "Manuel Gomez",
+      "avatar": "👤",
+      "role": "Beneficiario directo",
+      "country": "Estados Unidos",
+      "bank": "Banco en México",
+      "photoUrl": "",
+      "clabe": "",
+      "phone": "+1 2345678910",
+      "street": "Av. Juárez",
+      "houseNumber": "104",
+      "state": "Texas",
+      "zipCode": "78201"
+    },
+    {
       "id": "c-1789917730543",
       "userId": "user_jose_eligio",
       "name": "Hernana",
