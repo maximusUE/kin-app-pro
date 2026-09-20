@@ -190,6 +190,67 @@ export function findUserById(id: string): UserProfile | undefined {
   return db.users.find((u) => u.id === effectiveId || u.id === id);
 }
 
+/**
+ * Resolver un usuario destinatario dentro de la red KIN por ID, teléfono o nombre
+ */
+export function findRecipientUser(identifier?: string, phone?: string): UserProfile | undefined {
+  if (!identifier && !phone) return undefined;
+  const db = loadDatabase();
+
+  const cleanId = (identifier || '')
+    .trim()
+    .replace(/^fam-/, '')
+    .toLowerCase();
+
+  const effectiveId = LEGACY_ID_MAP[cleanId] || cleanId;
+
+  // 1. Buscar por ID directo o mapeado
+  const byId = db.users.find(
+    (u) =>
+      u.id.toLowerCase() === effectiveId ||
+      u.id.toLowerCase() === cleanId ||
+      (LEGACY_ID_MAP[u.id] && LEGACY_ID_MAP[u.id].toLowerCase() === cleanId)
+  );
+  if (byId) return byId;
+
+  // 2. Buscar por teléfono (comparando los últimos 8-10 dígitos limpios)
+  const cleanPhoneInput = (phone || identifier || '').replace(/\D/g, '');
+  if (cleanPhoneInput.length >= 7) {
+    const byPhone = db.users.find((u) => {
+      const userPhoneDigits = u.phone.replace(/\D/g, '');
+      return (
+        userPhoneDigits.endsWith(cleanPhoneInput) ||
+        cleanPhoneInput.endsWith(userPhoneDigits)
+      );
+    });
+    if (byPhone) return byPhone;
+  }
+
+  // 3. Buscar por Nombre Completo (removiendo sufijos como " (Familiar KIN)", " (Beneficiario)", etc.)
+  if (identifier) {
+    const cleanName = identifier
+      .replace(/\s*\([^)]*\)/g, '')
+      .trim()
+      .toLowerCase();
+
+    if (cleanName.length >= 3) {
+      const byName = db.users.find((u) => {
+        const uFullName = `${u.firstName} ${u.lastName}`.trim().toLowerCase();
+        const uName = u.name.trim().toLowerCase();
+        return (
+          uFullName === cleanName ||
+          uName === cleanName ||
+          cleanName.includes(uFullName) ||
+          uFullName.includes(cleanName)
+        );
+      });
+      if (byName) return byName;
+    }
+  }
+
+  return undefined;
+}
+
 export function registerNewUser(params: {
   firstName: string;
   lastName: string;
@@ -459,6 +520,8 @@ export function executeSpeiTransfer(params: {
   deliveryMethod?: 'cash' | 'bank' | 'wallet';
   pickupStore?: string;
   concept?: string;
+  recipientId?: string;
+  recipientPhone?: string;
 }): { success: boolean; transaction?: TransactionRecord; error?: string } {
   const db = loadDatabase();
   const user = findUserById(params.userId) || db.users[0];
@@ -503,12 +566,13 @@ export function executeSpeiTransfer(params: {
   const amountMXN = +(params.amountUSD * USD_TO_MXN_RATE).toFixed(2);
   const txId = `SPEI-${Math.floor(100000 + Math.random() * 900000)}`;
 
-  // Descontar saldo
+  // Descontar saldo al emisor
   user.balanceUSD = +(user.balanceUSD - params.amountUSD).toFixed(2);
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+  // Transacción de egreso para el emisor
   const tx: TransactionRecord = {
     id: `tx-${Date.now()}`,
     userId: user.id,
@@ -530,8 +594,44 @@ export function executeSpeiTransfer(params: {
   };
 
   db.transactions.unshift(tx);
+
+  // DOBLE PARTIDA: Buscar si el beneficiario es un cliente / familiar registrado en la red KIN
+  const recipientUser = findRecipientUser(params.recipientId || params.recipientName, params.recipientPhone);
+  if (recipientUser && recipientUser.id !== user.id) {
+    // 1. Acreditar saldo en la cuenta del destinatario
+    recipientUser.balanceUSD = +(recipientUser.balanceUSD + params.amountUSD).toFixed(2);
+
+    // 2. Registrar transacción de ingreso (income) para el destinatario
+    const recipientTx: TransactionRecord = {
+      id: `tx-in-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId: recipientUser.id,
+      title: `Remesa SPEI de ${user.firstName} ${user.lastName}`.trim(),
+      category: 'SPEI Banxico Inmediato',
+      time: `Hoy, ${timeStr}`,
+      dateGroup: 'Hoy',
+      amount: params.amountUSD, // Positivo para ingreso
+      amountMXN,
+      type: 'income',
+      iconType: 'send',
+      status: 'Completado',
+      refNumber: txId,
+      claveRastreoBanxico,
+      bancoDestino: recipientUser.country.toLowerCase().includes('mex') ? 'BBVA México' : 'Red Banxico SPEI',
+      cuentaBeneficiario: params.clabe,
+      nombreBeneficiario: `${recipientUser.firstName} ${recipientUser.lastName}`.trim(),
+      createdAt: now.toISOString(),
+    };
+
+    db.transactions.unshift(recipientTx);
+
+    // 3. Sincronizar usuario y transacción del destinatario a Firestore
+    saveTransactionToFirestore(recipientUser.id, recipientTx).catch((e) => console.warn('[Firebase Sync Rx Tx Error]', e));
+    saveUserToFirestore(recipientUser).catch((e) => console.warn('[Firebase Sync Rx User Error]', e));
+  }
+
   saveDatabase(db);
   saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
+  saveUserToFirestore(user).catch((e) => console.warn('[Firebase Sync User Error]', e));
 
   return { success: true, transaction: tx };
 }
@@ -558,25 +658,18 @@ export function executeBillPayment(params: {
   if (user.balanceUSD < amountUSD) {
     return {
       success: false,
-      error: `Saldo insuficiente para pagar factura. Requiere $${amountUSD} USD. Saldo disponible: $${user.balanceUSD.toFixed(2)} USD`,
+      error: `Saldo insuficiente. Requiere $${amountUSD} USD, saldo disponible: $${user.balanceUSD.toFixed(2)} USD`,
     };
   }
 
-  // Generar Folio Fiscal SAT CFDI 4.0 UUID simulado oficial
-  const uuid = 'CFDI-' + [
-    Math.random().toString(16).substring(2, 10),
-    Math.random().toString(16).substring(2, 6),
-    '4' + Math.random().toString(16).substring(2, 5),
-    Math.random().toString(16).substring(2, 6),
-    Math.random().toString(16).substring(2, 14),
-  ].join('-').toUpperCase();
-
   user.balanceUSD = +(user.balanceUSD - amountUSD).toFixed(2);
 
-  let iconType: 'luz' | 'internet' | 'phone' | 'bill' = 'bill';
-  const lower = (params.serviceName || params.serviceId).toLowerCase();
-  if (lower.includes('luz') || lower.includes('cfe') || lower.includes('electric')) iconType = 'luz';
-  else if (lower.includes('internet') || lower.includes('totalplay') || lower.includes('telmex')) iconType = 'internet';
+  const uuid = `SAT-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+  let iconType: TransactionRecord['iconType'] = 'bill';
+  const lower = params.serviceName.toLowerCase();
+  if (lower.includes('cfe') || lower.includes('luz')) iconType = 'luz';
+  else if (lower.includes('internet') || lower.includes('telmex') || lower.includes('totalplay')) iconType = 'internet';
   else if (lower.includes('celular') || lower.includes('recarga') || lower.includes('telcel')) iconType = 'phone';
 
   const tx: TransactionRecord = {
@@ -599,6 +692,7 @@ export function executeBillPayment(params: {
   db.transactions.unshift(tx);
   saveDatabase(db);
   saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
+  saveUserToFirestore(user).catch((e) => console.warn('[Firebase Sync User Error]', e));
 
   return { success: true, transaction: tx };
 }
@@ -611,6 +705,8 @@ export function executeKinCashSend(params: {
   recipientName: string;
   amountUSD: number;
   concept?: string;
+  recipientId?: string;
+  recipientPhone?: string;
 }): { success: boolean; transaction?: TransactionRecord; error?: string } {
   const db = loadDatabase();
   const user = findUserById(params.userId) || db.users[0];
@@ -629,25 +725,61 @@ export function executeKinCashSend(params: {
   user.balanceUSD = +(user.balanceUSD - params.amountUSD).toFixed(2);
 
   const amountMXN = +(params.amountUSD * USD_TO_MXN_RATE).toFixed(2);
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const txId = `KIN-${Math.floor(100000 + Math.random() * 900000)}`;
+
   const tx: TransactionRecord = {
     id: `tx-kin-${Date.now()}`,
     userId: user.id,
     title: `KIN Cash para ${params.recipientName}`,
     category: 'Recarga / SPEI P2P Inmediato',
-    time: 'Hoy, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    time: `Hoy, ${timeStr}`,
     dateGroup: 'Hoy',
     amount: -params.amountUSD,
     amountMXN,
     type: 'expense',
     iconType: 'wallet',
     status: 'Completado',
-    refNumber: `KIN-${Math.floor(100000 + Math.random() * 900000)}`,
-    createdAt: new Date().toISOString(),
+    refNumber: txId,
+    createdAt: now.toISOString(),
   };
 
   db.transactions.unshift(tx);
+
+  // DOBLE PARTIDA: Si el destinatario es un cliente / familiar KIN registrado, acreditar saldo y registrar transacción de ingreso
+  const recipientUser = findRecipientUser(params.recipientId || params.recipientName, params.recipientPhone);
+  if (recipientUser && recipientUser.id !== user.id) {
+    // 1. Acreditar saldo en la cuenta del destinatario
+    recipientUser.balanceUSD = +(recipientUser.balanceUSD + params.amountUSD).toFixed(2);
+
+    // 2. Registrar transacción de ingreso (income) para el destinatario
+    const recipientTx: TransactionRecord = {
+      id: `tx-kin-in-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId: recipientUser.id,
+      title: `KIN Cash de ${user.firstName} ${user.lastName}`.trim(),
+      category: 'Recarga / SPEI P2P Inmediato',
+      time: `Hoy, ${timeStr}`,
+      dateGroup: 'Hoy',
+      amount: params.amountUSD, // Positivo para ingreso
+      amountMXN,
+      type: 'income',
+      iconType: 'wallet',
+      status: 'Completado',
+      refNumber: txId,
+      createdAt: now.toISOString(),
+    };
+
+    db.transactions.unshift(recipientTx);
+
+    // 3. Sincronizar usuario y transacción del destinatario a Firestore
+    saveTransactionToFirestore(recipientUser.id, recipientTx).catch((e) => console.warn('[Firebase Sync Rx Tx Error]', e));
+    saveUserToFirestore(recipientUser).catch((e) => console.warn('[Firebase Sync Rx User Error]', e));
+  }
+
   saveDatabase(db);
   saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
+  saveUserToFirestore(user).catch((e) => console.warn('[Firebase Sync User Error]', e));
 
   return { success: true, transaction: tx };
 }

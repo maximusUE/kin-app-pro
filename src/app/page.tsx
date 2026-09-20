@@ -420,6 +420,9 @@ export default function MobileApp() {
           if (Array.isArray(data.contacts)) {
             setContactsList(data.contacts);
           }
+          if (Array.isArray(data.familyNetwork)) {
+            setFamilyNetwork(data.familyNetwork);
+          }
         }
       })
       .catch((err) => console.warn('[Backend Sync]', err));
@@ -515,6 +518,7 @@ export default function MobileApp() {
   // Send Money state (Screenshot 1)
   const [sendSearch, setSendSearch] = useState('');
   const [contactsList, setContactsList] = useState<ContactItem[]>([]);
+  const [familyNetwork, setFamilyNetwork] = useState<ContactItem[]>([]);
   const [showContactModal, setShowContactModal] = useState(false);
   const [newContactName, setNewContactName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
@@ -813,6 +817,8 @@ export default function MobileApp() {
       body: JSON.stringify({
         userId,
         recipientName: selectedAvatar.name,
+        recipientId: selectedAvatar.id,
+        recipientPhone: selectedAvatar.phone,
         amountUSD: amt,
         deliveryMethod,
         pickupStore: selectedStore,
@@ -869,6 +875,8 @@ export default function MobileApp() {
       body: JSON.stringify({
         userId,
         recipientName: recipient.name,
+        recipientId: recipient.id,
+        recipientPhone: recipient.phone,
         amountUSD: amt,
         deliveryMethod: 'bank',
       }),
@@ -951,7 +959,7 @@ export default function MobileApp() {
   };
 
   // Callback de recarga KIN Cash
-  const handleP2PSuccess = (recipient: string, amountMXN: number) => {
+  const handleP2PSuccess = (recipient: string, amountMXN: number, contact?: any) => {
     const amountUSD = +(amountMXN / USD_TO_MXN_RATE).toFixed(2);
     const newTx: TransactionItem = {
       id: Date.now().toString(),
@@ -975,6 +983,8 @@ export default function MobileApp() {
       body: JSON.stringify({
         userId,
         recipientName: recipient,
+        recipientId: contact?.id,
+        recipientPhone: contact?.phone,
         amountUSD,
       }),
     }).catch((e) => console.warn('[KIN Cash API error]', e));
@@ -1053,76 +1063,81 @@ export default function MobileApp() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#06070B] text-white flex justify-center selection:bg-[#7047EB]/30 selection:text-[#2ED5A4]">
+    <div className="min-h-[100dvh] w-full bg-[#030407] text-white flex items-center justify-center p-0 sm:py-6 sm:px-4 selection:bg-[#7047EB]/30 selection:text-[#2ED5A4] overflow-hidden">
       {/* Smartphone Frame Silhouette (Centered Flagship Mobile Device Viewport) */}
-      <div className="phone-viewport w-full max-w-[400px] flex flex-col justify-start px-5 pt-3 pb-28 relative">
+      <div className="phone-chassis">
         
         {/* Signature Bicolor Ambient Diffuse Glow (Dribbble Reference 2) */}
         <div className="bicolor-atmosphere-glow" />
 
         {/* ========================================================================= */}
-        {/* TOP STATUS BAR & APP HEADER (STITCH DYNAMIC ISLAND + KIN GLOBAL)          */}
+        {/* TOP STATUS BAR & APP HEADER (STICKY HEADER INSIDE CHASSIS)                */}
         {/* ========================================================================= */}
-        <div className="flex items-center justify-between text-xs text-[#8E91A5] font-semibold mb-2 pt-1 px-1">
-          <span className="font-financial-mono text-white">9:41</span>
-          <div className="h-3.5 w-20 bg-[#121320] rounded-full mx-auto shadow-inner border border-white/5" />
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[13px] text-white">signal_cellular_alt</span>
-            <span className="font-financial-mono text-[10px] text-white">5G</span>
-            <span className="material-symbols-outlined text-[13px] text-white">battery_full</span>
+        <div className="sticky top-0 z-30 bg-[#06070B]/95 backdrop-blur-md px-5 pt-3 pb-2 border-b border-white/5 flex-shrink-0">
+          <div className="flex items-center justify-between text-xs text-[#8E91A5] font-semibold mb-2 pt-1 px-1">
+            <span className="font-financial-mono text-white">9:41</span>
+            <div className="h-3.5 w-20 bg-[#121320] rounded-full mx-auto shadow-inner border border-white/5" />
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[13px] text-white">signal_cellular_alt</span>
+              <span className="font-financial-mono text-[10px] text-white">5G</span>
+              <span className="material-symbols-outlined text-[13px] text-white">battery_full</span>
+            </div>
           </div>
+
+          {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay') && (
+            <header className="flex items-center justify-between gap-2 mb-1 px-0.5">
+              <div className="flex items-center gap-2">
+                <KinLogo size={34} />
+                <div className="flex flex-col leading-none">
+                  <span className="font-headline-md text-[17px] font-bold tracking-tight text-white">KIN</span>
+                  <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>
+                </div>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/80 text-[#2ED5A4] shadow-inner border border-white/5">
+                <span className="font-financial-mono text-caption-sm font-semibold tracking-tight text-white">
+                  1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN
+                </span>
+                <span className="material-symbols-outlined text-[13px] text-[#2ED5A4] animate-pulse">bolt</span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => alert('No tienes notificaciones pendientes')}
+                  aria-label="Notifications"
+                  className="relative w-9 h-9 flex items-center justify-center rounded-full text-on-surface hover:text-white transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[20px]">notifications</span>
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#2ED5A4] shadow-[0_0_8px_#2ED5A4]" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleOpenAvatarPicker}
+                  className="relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border border-white/10 hover:border-[#2ED5A4]/40 transition-colors"
+                  title={userAvatar ? "Ajustes de Perfil" : "Agregar Foto de Perfil"}
+                >
+                  {userAvatar ? (
+                    <img alt={userName || 'Perfil'} className="w-full h-full rounded-full object-cover" src={userAvatar} />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-[#202236] flex items-center justify-center text-[#8E91A5] border border-dashed border-white/25">
+                      <span className="material-symbols-outlined text-[15px] text-[#8E91A5]">person</span>
+                    </div>
+                  )}
+                  {userAvatar && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center shadow-sm">
+                      <span className="material-symbols-outlined text-[9px] text-[#003828] font-bold">check</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </header>
+          )}
         </div>
 
-        {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay') && (
-          <header className="flex items-center justify-between gap-2 mb-3 px-0.5">
-            <div className="flex items-center gap-2">
-              <KinLogo size={34} />
-              <div className="flex flex-col leading-none">
-                <span className="font-headline-md text-[17px] font-bold tracking-tight text-white">KIN</span>
-                <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>
-              </div>
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/80 text-[#2ED5A4] shadow-inner border border-white/5">
-              <span className="font-financial-mono text-caption-sm font-semibold tracking-tight text-white">
-                1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN
-              </span>
-              <span className="material-symbols-outlined text-[13px] text-[#2ED5A4] animate-pulse">bolt</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => alert('No tienes notificaciones pendientes')}
-                aria-label="Notifications"
-                className="relative w-9 h-9 flex items-center justify-center rounded-full text-on-surface hover:text-white transition-colors cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[20px]">notifications</span>
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#2ED5A4] shadow-[0_0_8px_#2ED5A4]" />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleOpenAvatarPicker}
-                className="relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border border-white/10 hover:border-[#2ED5A4]/40 transition-colors"
-                title={userAvatar ? "Ajustes de Perfil" : "Agregar Foto de Perfil"}
-              >
-                {userAvatar ? (
-                  <img alt={userName || 'Perfil'} className="w-full h-full rounded-full object-cover" src={userAvatar} />
-                ) : (
-                  <div className="w-full h-full rounded-full bg-[#202236] flex items-center justify-center text-[#8E91A5] border border-dashed border-white/25">
-                    <span className="material-symbols-outlined text-[15px] text-[#8E91A5]">person</span>
-                  </div>
-                )}
-                {userAvatar && (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center shadow-sm">
-                    <span className="material-symbols-outlined text-[9px] text-[#003828] font-bold">check</span>
-                  </div>
-                )}
-              </button>
-            </div>
-          </header>
-        )}
+        {/* SCROLLABLE SCREEN BODY (Internal scroll inside phone chassis) */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-3 pb-28 scrollbar-none relative">
 
         {/* ========================================================================= */}
         {/* SCREEN 1: "MY CARD / HOME" (STITCH EXECUTIVE DASHBOARD)                   */}
@@ -1527,6 +1542,7 @@ export default function MobileApp() {
               onContactCreated={(c) => setContactsList((prev) => [c, ...prev])}
               onP2PSuccess={handleP2PSuccess}
               contacts={contactsList}
+              familyNetwork={familyNetwork}
               onViewHistory={() => setActiveTab('transactions')}
               exchangeRate={USD_TO_MXN_RATE}
               userBalanceUSD={executiveBalance}
@@ -3184,150 +3200,150 @@ export default function MobileApp() {
             </div>
           </div>
         )}
+        </main>
 
-      </div>
+        {/* ========================================================================= */}
+        {/* STITCH MASTER BOTTOM DOCK (5 TABS: HOME, SEND, KIN CASH, BILL PAY, VAULT) */}
+        {/* ========================================================================= */}
+        {!sendSuccessData && activeTab !== 'send-quick' && (
+          <nav
+            className="stitch-bottom-dock"
+            style={{ backgroundColor: '#000000', opacity: 1 }}
+            data-active-classes="text-primary font-bold scale-105"
+          >
+            <div className="h-16 w-full flex items-center justify-around px-2">
+              {/* 1. Home */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('home');
+                  setShowKinCashModal(false);
+                  setShowBillPayModal(false);
+                  setShowVaultModal(false);
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
+                  activeTab === 'home' && !showKinCashModal && !showBillPayModal && !showVaultModal
+                    ? 'text-primary font-bold scale-105'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+                title="Home"
+              >
+                <span className="material-symbols-outlined text-[24px]">home</span>
+                <span className="font-label-caps text-[10px] tracking-tight">Home</span>
+              </button>
 
-      {/* ========================================================================= */}
-      {/* STITCH MASTER BOTTOM DOCK (5 TABS: HOME, SEND, KIN CASH, BILL PAY, VAULT) */}
-      {/* ========================================================================= */}
-      {!sendSuccessData && activeTab !== 'send-quick' && (
-        <nav
-          className="stitch-bottom-dock"
-          style={{ backgroundColor: '#000000', opacity: 1 }}
-          data-active-classes="text-primary font-bold scale-105"
-        >
-          <div className="h-16 w-full flex items-center justify-around px-2">
-            {/* 1. Home */}
+              {/* 2. Send */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('send');
+                  setShowKinCashModal(false);
+                  setShowBillPayModal(false);
+                  setShowVaultModal(false);
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
+                  activeTab === 'send' && !showKinCashModal && !showBillPayModal && !showVaultModal
+                    ? 'text-primary font-bold scale-105'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+                title="Send"
+              >
+                <span className="material-symbols-outlined text-[24px]">send</span>
+                <span className="font-label-caps text-[10px] tracking-tight">Send</span>
+              </button>
+
+              {/* 3. Kin Cash */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('kin-cash');
+                  setShowKinCashModal(false);
+                  setShowBillPayModal(false);
+                  setShowVaultModal(false);
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
+                  activeTab === 'kin-cash'
+                    ? 'text-primary font-bold scale-105'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+                title="Kin Cash"
+              >
+                <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+                <span className="font-label-caps text-[10px] tracking-tight">Kin Cash</span>
+              </button>
+
+              {/* 4. Bill Pay */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('bill-pay');
+                  setShowBillPayModal(false);
+                  setShowKinCashModal(false);
+                  setShowVaultModal(false);
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
+                  activeTab === 'bill-pay'
+                    ? 'text-primary font-bold scale-105'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+                title="Bill Pay"
+              >
+                <span className="material-symbols-outlined text-[24px]">receipt_long</span>
+                <span className="font-label-caps text-[10px] tracking-tight">Bill Pay</span>
+              </button>
+
+              {/* 5. Vault */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowVaultModal(true);
+                  setShowKinCashModal(false);
+                  setShowBillPayModal(false);
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
+                  showVaultModal || activeTab === 'vault'
+                    ? 'text-primary font-bold scale-105'
+                    : 'text-on-surface-variant hover:text-white'
+                }`}
+                title="Vault"
+              >
+                <span className="material-symbols-outlined text-[24px]">shield_lock</span>
+                <span className="font-label-caps text-[10px] tracking-tight">Vault</span>
+              </button>
+            </div>
+          </nav>
+        )}
+
+        {/* FLOATING ACTION CTA: SEND QUICK (STITCH MINT GRADIENT CTA) */}
+        {activeTab === 'send-quick' && (
+          <div className="send-floating-cta-container">
             <button
               type="button"
-              onClick={() => {
-                setActiveTab('home');
-                setShowKinCashModal(false);
-                setShowBillPayModal(false);
-                setShowVaultModal(false);
-              }}
-              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                activeTab === 'home' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-white'
-              }`}
-              title="Home"
+              onClick={handleSendQuick}
+              className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white px-5 shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer font-bold border border-white/10"
             >
-              <span className="material-symbols-outlined text-[24px]">home</span>
-              <span className="font-label-caps text-[10px] tracking-tight">Home</span>
-            </button>
-
-            {/* 2. Send */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('send');
-                setShowKinCashModal(false);
-                setShowBillPayModal(false);
-                setShowVaultModal(false);
-              }}
-              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                activeTab === 'send' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-white'
-              }`}
-              title="Send"
-            >
-              <span className="material-symbols-outlined text-[24px]">send</span>
-              <span className="font-label-caps text-[10px] tracking-tight">Send</span>
-            </button>
-
-            {/* 3. Kin Cash */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('kin-cash');
-                setShowKinCashModal(false);
-                setShowBillPayModal(false);
-                setShowVaultModal(false);
-              }}
-              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                activeTab === 'kin-cash'
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-white'
-              }`}
-              title="Kin Cash"
-            >
-              <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-              <span className="font-label-caps text-[10px] tracking-tight">Kin Cash</span>
-            </button>
-
-            {/* 4. Bill Pay */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('bill-pay');
-                setShowBillPayModal(false);
-                setShowKinCashModal(false);
-                setShowVaultModal(false);
-              }}
-              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                activeTab === 'bill-pay'
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-white'
-              }`}
-              title="Bill Pay"
-            >
-              <span className="material-symbols-outlined text-[24px]">receipt_long</span>
-              <span className="font-label-caps text-[10px] tracking-tight">Bill Pay</span>
-            </button>
-
-            {/* 5. Vault */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowVaultModal(true);
-                setShowKinCashModal(false);
-                setShowBillPayModal(false);
-              }}
-              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                showVaultModal || activeTab === 'vault'
-                  ? 'text-primary font-bold scale-105'
-                  : 'text-on-surface-variant hover:text-white'
-              }`}
-              title="Vault"
-            >
-              <span className="material-symbols-outlined text-[24px]">shield_lock</span>
-              <span className="font-label-caps text-[10px] tracking-tight">Vault</span>
+              <span className="text-sm font-bold tracking-wide flex items-center gap-2 text-white">
+                <span className="material-symbols-outlined text-[18px]">bolt</span>
+                <span>
+                  {contactsList.length > 0
+                    ? `${language === 'en' ? 'Send to' : 'Enviar a'} ${(contactsList[sendQuickSelectedRecipient] || contactsList[0]).name.split(' ')[0]}`
+                    : (language === 'en' ? 'Add Recipient' : 'Agregar Destinatario')}
+                </span>
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="h-9 px-3.5 rounded-full bg-[#003828] text-primary text-xs font-financial-mono font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                  <span>
+                    {currencyPref === 'USD'
+                      ? `$${(parseFloat(sendQuickAmount) || 50).toFixed(2)} USD`
+                      : `$${((parseFloat(sendQuickAmount) || 50) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`}
+                  </span>
+                  <span className="material-symbols-outlined text-[16px] text-primary">arrow_forward</span>
+                </span>
+              </div>
             </button>
           </div>
-        </nav>
-      )}
-
-      {/* FLOATING ACTION CTA: SEND QUICK (STITCH MINT GRADIENT CTA) */}
-      {activeTab === 'send-quick' && (
-        <div className="send-floating-cta-container">
-          <button
-            type="button"
-            onClick={handleSendQuick}
-            className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white px-5 shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer font-bold border border-white/10"
-          >
-            <span className="text-sm font-bold tracking-wide flex items-center gap-2 text-white">
-              <span className="material-symbols-outlined text-[18px]">bolt</span>
-              <span>
-                {contactsList.length > 0
-                  ? `${language === 'en' ? 'Send to' : 'Enviar a'} ${(contactsList[sendQuickSelectedRecipient] || contactsList[0]).name.split(' ')[0]}`
-                  : (language === 'en' ? 'Add Recipient' : 'Agregar Destinatario')}
-              </span>
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="h-9 px-3.5 rounded-full bg-[#003828] text-primary text-xs font-financial-mono font-bold flex items-center justify-center gap-1.5 shadow-sm">
-                <span>
-                  {currencyPref === 'USD'
-                    ? `$${(parseFloat(sendQuickAmount) || 50).toFixed(2)} USD`
-                    : `$${((parseFloat(sendQuickAmount) || 50) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`}
-                </span>
-                <span className="material-symbols-outlined text-[16px] text-primary">arrow_forward</span>
-              </span>
-            </div>
-          </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Modals con aislamiento total de capas */}
       <MexicanBillPayModal
@@ -3343,6 +3359,7 @@ export default function MobileApp() {
         onClose={() => setShowKinCashModal(false)}
         onP2PSuccess={handleP2PSuccess}
         contacts={contactsList}
+        familyNetwork={familyNetwork}
         onViewHistory={() => {
           setShowKinCashModal(false);
           setActiveTab('transactions');
@@ -3470,18 +3487,18 @@ export default function MobileApp() {
                   </div>
 
                   <div className="space-y-2">
-                    {KIN_FAMILY_MEMBERS.filter((f) => !f.id.includes(userId)).map((fam) => (
+                    {(familyNetwork.length > 0 ? familyNetwork : KIN_FAMILY_MEMBERS).filter((f) => !f.id.includes(userId)).map((fam) => (
                       <div
                         key={fam.id}
                         onClick={() => {
                           const completeFamilyContact: ContactItem = {
                             ...fam,
-                            street: 'Av. Juárez',
-                            houseNumber: '104',
-                            state: 'San Antonio',
-                            country: 'Mexico',
-                            zipCode: '78201',
-                            clabe: '012180001234567890',
+                            street: fam.street || 'Av. Juárez',
+                            houseNumber: fam.houseNumber || '104',
+                            state: fam.state || 'San Antonio',
+                            country: fam.country || 'Mexico',
+                            zipCode: fam.zipCode || '78201',
+                            clabe: fam.clabe || '012180001234567890',
                           };
                           setSelectedAvatar(completeFamilyContact);
                           setShowContactModal(false);

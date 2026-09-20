@@ -4,7 +4,7 @@ import { executeSpeiTransfer } from '@/lib/server/db';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, clabe, recipientName, amountUSD, deliveryMethod, pickupStore, concept } = body;
+    const { userId, clabe, recipientName, amountUSD, deliveryMethod, pickupStore, concept, recipientId, recipientPhone } = body;
 
     if (!recipientName) {
       return NextResponse.json(
@@ -29,6 +29,8 @@ export async function POST(request: Request) {
       deliveryMethod: deliveryMethod || 'cash',
       pickupStore: pickupStore || 'oxxo',
       concept,
+      recipientId,
+      recipientPhone,
     });
 
     if (!result.success) {

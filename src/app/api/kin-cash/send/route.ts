@@ -4,7 +4,7 @@ import { executeKinCashSend } from '@/lib/server/db';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, recipientName, amountUSD, concept } = body;
+    const { userId, recipientName, amountUSD, concept, recipientId, recipientPhone } = body;
 
     if (!recipientName) {
       return NextResponse.json(
@@ -26,6 +26,8 @@ export async function POST(request: Request) {
       recipientName,
       amountUSD: parsedUSD,
       concept,
+      recipientId,
+      recipientPhone,
     });
 
     if (!result.success) {

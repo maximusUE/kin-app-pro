@@ -4,13 +4,42 @@
 
 /* KIN Mobile Native Design System — Pixel-Perfect Dribbble Reference */
 
+.phone-chassis {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #06070B;
+}
+
+@media (min-width: 640px) {
+  .phone-chassis {
+    width: 100%;
+    max-width: 412px;
+    height: 90vh;
+    max-height: 890px;
+    min-height: 720px;
+    border-radius: 52px;
+    border: 10px solid #181928;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+}
+
+@media (max-width: 639px) {
+  .phone-chassis {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    border: none;
+  }
+}
+
 .stitch-bottom-dock {
-  position: fixed;
+  position: absolute;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   width: 100%;
-  max-width: 400px;
   z-index: 50;
   background-color: #000000 !important;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -235,9 +264,9 @@ html, body {
   color: #FFFFFF;
 }
 
-/* Floating Bottom Continue CTA for Send Money (Truly fixed to viewport, floating over everything) */
+/* Floating Bottom Continue CTA for Send Money (Anchored inside phone chassis) */
 .send-floating-cta-container {
-  position: fixed;
+  position: absolute;
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);

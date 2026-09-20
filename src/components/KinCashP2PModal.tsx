@@ -112,8 +112,9 @@ export interface KinCashP2PModalProps {
   isOpen?: boolean;
   isScreen?: boolean;
   onClose?: () => void;
-  onP2PSuccess?: (recipient: string, amountMXN: number) => void;
+  onP2PSuccess?: (recipient: string, amountMXN: number, contact?: ContactItem | null) => void;
   contacts?: ContactItem[];
+  familyNetwork?: ContactItem[];
   onViewHistory?: () => void;
   exchangeRate?: number;
   userBalanceUSD?: number;
@@ -127,6 +128,7 @@ export function KinCashP2PModal({
   onClose,
   onP2PSuccess,
   contacts = DEFAULT_CONTACTS,
+  familyNetwork,
   onViewHistory,
   exchangeRate = 20.45,
   userBalanceUSD = 1000.00,
@@ -160,12 +162,26 @@ export function KinCashP2PModal({
   const numAmount = parseFloat(currentAmount) || 0;
   const mxnEquivalent = (numAmount * exchangeRate).toFixed(2);
 
-  // Sincronizar contacto inicial si cambian los contactos
+  // Lista reactiva de la red familiar KIN
+  const familyList = useMemo(() => {
+    const base = familyNetwork && familyNetwork.length > 0 ? familyNetwork : KIN_FAMILY_MEMBERS;
+    const cleanUser = (userId || '').toLowerCase().replace(/^user_/, '').replace(/^user-/, '');
+    return base.filter((f) => {
+      const fClean = f.id.toLowerCase().replace(/^fam-/, '').replace(/^user_/, '').replace(/^user-/, '');
+      return fClean !== cleanUser && !f.id.toLowerCase().includes(cleanUser);
+    });
+  }, [familyNetwork, userId]);
+
+  // Sincronizar contacto inicial únicamente si NO hay ninguno seleccionado (evita sobreescribir elección del usuario)
   useEffect(() => {
-    if (contacts.length > 0 && (!selectedContact || !contacts.some((c) => c.id === selectedContact.id))) {
-      setSelectedContact(contacts[0]);
+    if (!selectedContact) {
+      if (contacts.length > 0) {
+        setSelectedContact(contacts[0]);
+      } else if (familyList.length > 0) {
+        setSelectedContact(familyList[0]);
+      }
     }
-  }, [contacts, selectedContact]);
+  }, [contacts, familyList, selectedContact]);
 
   // Filtrado reactivo de contactos
   const filteredContacts = useMemo(() => {
@@ -367,7 +383,7 @@ export function KinCashP2PModal({
         : searchQuery.trim() || 'Destinatario KIN Cash';
 
       if (onP2PSuccess) {
-        onP2PSuccess(recipientLabel, numAmount * exchangeRate);
+        onP2PSuccess(recipientLabel, numAmount * exchangeRate, selectedContact);
       }
 
       setTimeout(() => {
@@ -407,7 +423,7 @@ export function KinCashP2PModal({
 
   // Renderizado del contenido central KIN Cash adaptado de Stitch code.html
   const content = (
-    <div className="flex flex-col w-full gap-5 animate-fade-in">
+    <div className="flex flex-col w-full gap-3.5 animate-fade-in pb-3">
       {/* 1. Sub-header & Value Prop Banner */}
       <div className="flex items-start justify-between gap-3 bg-surface-container-high/60 backdrop-blur-md p-4 rounded-xl shadow-lg relative overflow-hidden border border-white/5">
         <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
@@ -621,7 +637,7 @@ export function KinCashP2PModal({
             key={key}
             type="button"
             onClick={() => pressKey(key)}
-            className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
+            className="h-11 py-2 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[20px] font-bold shadow-md cursor-pointer border border-white/5"
           >
             {key}
           </button>
@@ -629,24 +645,24 @@ export function KinCashP2PModal({
         <button
           type="button"
           onClick={() => pressKey('.')}
-          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[24px] font-bold shadow-md cursor-pointer border border-white/5"
+          className="h-11 py-2 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
         >
           •
         </button>
         <button
           type="button"
           onClick={() => pressKey('0')}
-          className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
+          className="h-11 py-2 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[20px] font-bold shadow-md cursor-pointer border border-white/5"
         >
           0
         </button>
         <button
           type="button"
           onClick={pressBackspace}
-          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 active:bg-red-500/25 transition-all flex items-center justify-center text-on-surface-variant hover:text-white shadow-md cursor-pointer border border-white/5"
+          className="h-11 py-2 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 active:bg-red-500/25 transition-all flex items-center justify-center text-on-surface-variant hover:text-white shadow-md cursor-pointer border border-white/5"
           aria-label="Borrar número"
         >
-          <span className="material-symbols-outlined text-[22px]">backspace</span>
+          <span className="material-symbols-outlined text-[20px]">backspace</span>
         </button>
       </div>
 
@@ -904,7 +920,7 @@ export function KinCashP2PModal({
                 </div>
 
                 <div className="space-y-2 overflow-y-auto flex-1 pr-1 scrollbar-thin">
-                  {KIN_FAMILY_MEMBERS.filter((f) => !f.id.includes(userId)).map((fam) => {
+                  {familyList.map((fam) => {
                     const isSelected = selectedContact?.id === fam.id;
                     return (
                       <button

@@ -5,6 +5,7 @@ import {
   updateUserProfile,
   getUserTransactions,
   getUserContacts,
+  getFamilyNetwork,
   USD_TO_MXN_RATE,
 } from '@/lib/server/db';
 
@@ -29,12 +30,14 @@ export async function GET(request: Request) {
 
     const transactions = getUserTransactions(user.id);
     const contacts = getUserContacts(user.id);
+    const familyNetwork = getFamilyNetwork(user.id);
 
     return NextResponse.json({
       success: true,
       user,
       transactions,
       contacts,
+      familyNetwork,
       exchangeRate: USD_TO_MXN_RATE,
     });
   } catch (error: any) {
