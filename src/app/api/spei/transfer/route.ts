@@ -6,9 +6,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { userId, clabe, recipientName, amountUSD, deliveryMethod, pickupStore, concept, recipientId, recipientPhone } = body;
 
-    if (!recipientName) {
+    if (!recipientName || !recipientName.trim()) {
       return NextResponse.json(
-        { success: false, error: 'El nombre del beneficiario es obligatorio' },
+        { success: false, error: 'Regulación CNBV: El nombre del beneficiario es obligatorio' },
+        { status: 400 }
+      );
+    }
+
+    if (!recipientPhone || !recipientPhone.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'Regulación CNBV: El teléfono celular del beneficiario es obligatorio' },
         { status: 400 }
       );
     }

@@ -384,13 +384,40 @@ export function KinCashP2PModal({
     const maxDist = trackRef.current.clientWidth - 46 - 12;
 
     if (slideX >= maxDist * 0.82) {
-      // Éxito: Snap al final y disparo SPEI
+      // 1. Validar monto mayor a 0
+      if (numAmount <= 0) {
+        setSlideX(0);
+        setStatusMessage('⚠️ Ingresa un monto mayor a $0');
+        setTimeout(() => setStatusMessage(null), 2500);
+        return;
+      }
+
+      // 2. Validar requisitos obligatorios de KIN Cash: Nombre y Teléfono
+      const contactName = selectedContact?.name?.trim() || selectedContact?.fullName?.trim() || '';
+      const contactPhone = selectedContact?.phone?.trim() || '';
+
+      if (!contactName || !contactPhone) {
+        setSlideX(0);
+        setStatusMessage('⚠️ Se requiere Nombre y Teléfono');
+        setTimeout(() => setStatusMessage(null), 3000);
+        setNewContactErrors({
+          name: !contactName ? 'El nombre es obligatorio' : undefined,
+          phone: !contactPhone ? 'El teléfono celular es obligatorio' : undefined,
+        });
+        if (contactName) setNewContactName(contactName);
+        if (contactPhone) setNewContactPhone(contactPhone);
+        setPickerTab('add_new');
+        setShowContactPicker(true);
+        return;
+      }
+
+      // Éxito: Snap al final y disparo KIN Cash P2P
       setSlideX(maxDist);
       setIsDispatched(true);
-      setStatusMessage('Transfer Dispatched via SPEI! 🚀');
+      setStatusMessage('¡Envío KIN Cash Exitoso! 🚀');
 
       const recipientLabel = selectedContact
-        ? `${selectedContact.fullName} (${selectedContact.role})`
+        ? (selectedContact.fullName || selectedContact.name)
         : searchQuery.trim() || 'Destinatario KIN Cash';
 
       if (onP2PSuccess) {
@@ -404,7 +431,7 @@ export function KinCashP2PModal({
         if (!isScreen && onClose) {
           onClose();
         }
-      }, 2200);
+      }, 500);
     } else {
       // Regreso suave elástico
       setSlideX(0);
@@ -533,6 +560,11 @@ export function KinCashP2PModal({
                 <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
                   {selectedContact.fullName} {selectedContact.phone ? `• ${selectedContact.phone}` : ''}
                 </span>
+                {!selectedContact.phone && (
+                  <span className="text-[10px] text-red-400 font-bold bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-full mt-0.5 w-fit flex items-center gap-1">
+                    <span>⚠️ Falta teléfono para KIN Cash</span>
+                  </span>
+                )}
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="font-label-caps text-label-caps text-primary-fixed-dim">
                     {selectedContact.bank}

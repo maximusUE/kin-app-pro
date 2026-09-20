@@ -6,9 +6,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { userId, recipientName, amountUSD, concept, recipientId, recipientPhone } = body;
 
-    if (!recipientName) {
+    if (!recipientName || !recipientName.trim()) {
       return NextResponse.json(
-        { success: false, error: 'Nombre del destinatario requerido' },
+        { success: false, error: 'Requisito KIN Cash: El nombre del destinatario es obligatorio' },
+        { status: 400 }
+      );
+    }
+
+    if (!recipientPhone || !recipientPhone.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'Requisito KIN Cash: El teléfono celular del destinatario es obligatorio' },
         { status: 400 }
       );
     }

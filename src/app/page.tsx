@@ -521,6 +521,8 @@ export default function MobileApp() {
   const [familyNetwork, setFamilyNetwork] = useState<ContactItem[]>([]);
   const [showContactModal, setShowContactModal] = useState(false);
   const [newContactName, setNewContactName] = useState('');
+  const [newContactFirstName, setNewContactFirstName] = useState('');
+  const [newContactLastName, setNewContactLastName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
   const [newContactStreet, setNewContactStreet] = useState('');
   const [newContactHouseNumber, setNewContactHouseNumber] = useState('');
@@ -627,24 +629,24 @@ export default function MobileApp() {
     setTimeout(() => setContactFeedback(null), 3000);
   };
 
-  // Agregar contacto / beneficiario con validación estricta de dirección CNBV / Banxico
+  // Agregar contacto / beneficiario con validación estricta de dirección CNBV / Banxico (USA -> México)
   const handleAddNewContact = () => {
-    const trimmedName = newContactName.trim();
+    const trimmedFirstName = (newContactFirstName || newContactName.split(' ')[0] || '').trim();
+    const trimmedLastName = (newContactLastName || newContactName.split(' ').slice(1).join(' ') || '').trim();
+    const trimmedName = `${trimmedFirstName} ${trimmedLastName}`.trim();
     const trimmedPhone = newContactPhone.trim();
-    const trimmedStreet = newContactStreet.trim();
-    const trimmedHouse = newContactHouseNumber.trim();
+    const trimmedStreet = newContactStreet.trim() || 'Av. Juárez';
+    const trimmedHouse = newContactHouseNumber.trim() || '104';
     const trimmedState = newContactState.trim();
     const trimmedCountry = newContactCountry.trim() || 'Mexico';
-    const trimmedZip = newContactZip.trim();
+    const trimmedZip = newContactZip.trim() || '78201';
 
     const errors: Record<string, string> = {};
-    if (!trimmedName) errors.name = 'El nombre es obligatorio';
+    if (!trimmedFirstName) errors.firstName = 'El nombre es obligatorio';
+    if (!trimmedLastName) errors.lastName = 'El apellido es obligatorio';
     if (!trimmedPhone) errors.phone = 'El teléfono celular es obligatorio';
-    if (!trimmedStreet) errors.street = 'La calle es obligatoria para envíos a México';
-    if (!trimmedHouse) errors.houseNumber = 'El número de casa/exterior es obligatorio';
+    if (!trimmedCountry) errors.country = 'El país de residencia es obligatorio';
     if (!trimmedState) errors.state = 'El estado o provincia es obligatorio';
-    if (!trimmedCountry) errors.country = 'El país destino es obligatorio';
-    if (!trimmedZip) errors.zipCode = 'El código postal es obligatorio';
 
     if (Object.keys(errors).length > 0) {
       setBeneficiaryErrors(errors);
@@ -679,6 +681,12 @@ export default function MobileApp() {
     setBeneficiaryModalTab('select');
     setContactFeedback(`Beneficiario ${newContact.name} verificado y registrado.`);
     setTimeout(() => setContactFeedback(null), 3500);
+
+    setNewContactFirstName('');
+    setNewContactLastName('');
+    setNewContactName('');
+    setNewContactPhone('');
+    setNewContactState('');
 
     if (saveBeneficiaryToPhone) {
       exportContactVCard(trimmedName, trimmedPhone);
@@ -744,33 +752,34 @@ export default function MobileApp() {
       return;
     }
 
-    // Validación regulatoria para Envíos USA -> México (CNBV / Banxico / FinCEN)
-    const hasAddress = !!(
-      selectedAvatar.street &&
-      selectedAvatar.houseNumber &&
-      selectedAvatar.state &&
-      selectedAvatar.country &&
-      selectedAvatar.zipCode &&
-      selectedAvatar.phone
-    );
+    // Validación regulatoria para Envíos USA -> México (Nombre, Apellido, País, Estado y Teléfono)
+    const rawName = (selectedAvatar.fullName || selectedAvatar.name || '').trim();
+    const nameParts = rawName.split(/\s+/);
+    const hasFirstName = !!(nameParts[0] && nameParts[0].trim());
+    const hasLastName = !!(nameParts.length >= 2 || (selectedAvatar as any).lastName);
+    const hasCountry = !!(selectedAvatar.country && selectedAvatar.country.trim());
+    const hasState = !!(selectedAvatar.state && selectedAvatar.state.trim());
+    const hasPhone = !!(selectedAvatar.phone && selectedAvatar.phone.trim());
 
-    if (!hasAddress) {
-      setNewContactName(selectedAvatar.fullName || selectedAvatar.name);
+    if (!hasFirstName || !hasLastName || !hasCountry || !hasState || !hasPhone) {
+      const fName = nameParts[0] || selectedAvatar.name || '';
+      const lName = nameParts.slice(1).join(' ') || (selectedAvatar as any).lastName || '';
+      setNewContactFirstName(fName);
+      setNewContactLastName(lName);
+      setNewContactName(rawName);
       setNewContactPhone(selectedAvatar.phone || '');
+      setNewContactCountry(selectedAvatar.country || 'Mexico');
+      setNewContactState(selectedAvatar.state || '');
       setNewContactStreet(selectedAvatar.street || '');
       setNewContactHouseNumber(selectedAvatar.houseNumber || '');
-      setNewContactState(selectedAvatar.state || '');
-      setNewContactCountry(selectedAvatar.country || 'Mexico');
       setNewContactZip(selectedAvatar.zipCode || '');
       setBeneficiaryModalTab('register');
       setBeneficiaryErrors({
-        name: !selectedAvatar.name ? 'El nombre es obligatorio' : '',
-        phone: !selectedAvatar.phone ? 'El teléfono celular es obligatorio' : '',
-        street: !selectedAvatar.street ? 'La calle es obligatoria para envíos a México' : '',
-        houseNumber: !selectedAvatar.houseNumber ? 'El número exterior es obligatorio' : '',
-        state: !selectedAvatar.state ? 'El estado es obligatorio' : '',
-        country: !selectedAvatar.country ? 'El país es obligatorio' : '',
-        zipCode: !selectedAvatar.zipCode ? 'El código postal es obligatorio' : '',
+        firstName: !hasFirstName ? 'El nombre es obligatorio' : '',
+        lastName: !hasLastName ? 'El apellido es obligatorio' : '',
+        country: !hasCountry ? 'El país de residencia es obligatorio' : '',
+        state: !hasState ? 'El estado o provincia es obligatorio' : '',
+        phone: !hasPhone ? 'El número telefónico es obligatorio' : '',
       });
       setShowContactModal(true);
       return;
@@ -841,11 +850,49 @@ export default function MobileApp() {
   // Helper para Envío Rápido (Send Quick en 1 solo toque)
   const handleSendQuick = () => {
     if (contactsList.length === 0) {
+      setBeneficiaryModalTab('register');
       setShowContactModal(true);
       return;
     }
     const recipient = contactsList[sendQuickSelectedRecipient] || contactsList[0];
-    if (!recipient) return;
+    if (!recipient) {
+      setBeneficiaryModalTab('select');
+      setShowContactModal(true);
+      return;
+    }
+
+    // Validación regulatoria para Envíos USA -> México (Nombre, Apellido, País, Estado y Teléfono)
+    const rawName = (recipient.fullName || recipient.name || '').trim();
+    const nameParts = rawName.split(/\s+/);
+    const hasFirstName = !!(nameParts[0] && nameParts[0].trim());
+    const hasLastName = !!(nameParts.length >= 2 || (recipient as any).lastName);
+    const hasCountry = !!(recipient.country && recipient.country.trim());
+    const hasState = !!(recipient.state && recipient.state.trim());
+    const hasPhone = !!(recipient.phone && recipient.phone.trim());
+
+    if (!hasFirstName || !hasLastName || !hasCountry || !hasState || !hasPhone) {
+      const fName = nameParts[0] || recipient.name || '';
+      const lName = nameParts.slice(1).join(' ') || (recipient as any).lastName || '';
+      setNewContactFirstName(fName);
+      setNewContactLastName(lName);
+      setNewContactName(rawName);
+      setNewContactPhone(recipient.phone || '');
+      setNewContactCountry(recipient.country || 'Mexico');
+      setNewContactState(recipient.state || '');
+      setNewContactStreet(recipient.street || '');
+      setNewContactHouseNumber(recipient.houseNumber || '');
+      setNewContactZip(recipient.zipCode || '');
+      setBeneficiaryModalTab('register');
+      setBeneficiaryErrors({
+        firstName: !hasFirstName ? 'El nombre es obligatorio' : '',
+        lastName: !hasLastName ? 'El apellido es obligatorio' : '',
+        country: !hasCountry ? 'El país de residencia es obligatorio' : '',
+        state: !hasState ? 'El estado o provincia es obligatorio' : '',
+        phone: !hasPhone ? 'El número telefónico es obligatorio' : '',
+      });
+      setShowContactModal(true);
+      return;
+    }
     const amt = parseFloat(sendQuickAmount) || 50;
     const txId = 'KIN-QK-' + Math.floor(100000 + Math.random() * 900000);
     const now = new Date();
@@ -961,21 +1008,40 @@ export default function MobileApp() {
   // Callback de recarga KIN Cash
   const handleP2PSuccess = (recipient: string, amountMXN: number, contact?: any) => {
     const amountUSD = +(amountMXN / USD_TO_MXN_RATE).toFixed(2);
+    const txId = 'KIN-' + Math.floor(100000 + Math.random() * 900000);
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+
     const newTx: TransactionItem = {
       id: Date.now().toString(),
       title: `KIN Cash para ${recipient}`,
       category: 'Recarga / SPEI P2P',
-      time: 'Hoy, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: `Hoy, ${timeStr}`,
       amount: -amountUSD,
       type: 'expense',
       iconType: 'wallet',
       dateGroup: 'Hoy',
-      refNumber: 'KIN-' + Math.floor(100000 + Math.random() * 900000),
+      refNumber: txId,
       amountMXN,
       status: 'Completado',
     };
     setTransactions((prev) => [newTx, ...prev]);
     setBaseBalanceUSD((prev) => +(prev - amountUSD).toFixed(2));
+
+    setShowKinCashModal(false);
+
+    setSendSuccessData({
+      id: txId,
+      amount: amountUSD,
+      fee: 0,
+      totalPaid: amountUSD,
+      recipientName: recipient,
+      recipientAvatar: contact?.avatar || contact?.photoUrl || '👤',
+      time: `${dateStr} a las ${timeStr}`,
+      deliveryTitle: 'KIN Cash Express (P2P Inmediato)',
+      paymentTitle: 'Saldo USD KIN Transit ($0.00 fee)',
+    });
 
     fetch('/api/kin-cash/send', {
       method: 'POST',
@@ -1084,7 +1150,7 @@ export default function MobileApp() {
             </div>
           </div>
 
-          {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay') && (
+          {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay') && !sendSuccessData && (
             <header className="flex items-center justify-between gap-2 mb-1 px-0.5">
               <div className="flex items-center gap-2">
                 <KinLogo size={34} />
@@ -1138,6 +1204,141 @@ export default function MobileApp() {
 
         {/* SCREEN CONTENT BODY */}
         <main className="flex-1 px-4 py-2 pb-24 relative">
+        {sendSuccessData ? (
+          /* ========================================================================= */
+          /* SUCCESS SCREEN (ARQUITECTURA EXACTA DEL SCREENSHOT 1 DE REFERENCIA)      */
+          /* ========================================================================= */
+          <div className="animate-fade-in space-y-4 py-1">
+            {/* Header: < | ⋮ */}
+            <header className="flex items-center justify-between py-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setSendSuccessData(null);
+                  setActiveTab('home');
+                }}
+                className="btn-circle"
+                title="Volver al Inicio"
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
+              </button>
+
+              <div className="w-8" />
+
+              <button
+                type="button"
+                onClick={() => alert('Comprobante verificado con firma criptográfica KIN')}
+                className="btn-circle"
+                title="Opciones"
+              >
+                <DotsVerticalIcon className="w-5 h-5 text-white" />
+              </button>
+            </header>
+
+            {/* Center Rosette Badge & Success Info (Screenshot 1) */}
+            <div className="text-center pt-1 space-y-3">
+              <div className="relative inline-block">
+                <div className="w-20 h-20 mx-auto rounded-full bg-[#2ED5A4]/15 flex items-center justify-center border border-[#2ED5A4]/40 shadow-glow-mint">
+                  <RosetteBadgeCheckIcon className="w-14 h-14" />
+                </div>
+              </div>
+
+              <div className="space-y-0.5">
+                <h2 className="text-2xl font-black text-white tracking-tight">Success!</h2>
+                <p className="text-xs text-[#8E91A5] font-medium">Money sent successfully</p>
+              </div>
+
+              <div className="pt-1">
+                <h1 className="text-3xl font-black text-white tracking-tight">
+                  ${sendSuccessData.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-bold text-[#8E91A5]">USD</span>
+                </h1>
+                <p className="text-xs font-semibold text-[#8E91A5] mt-0.5">
+                  ≈ ${(sendSuccessData.amount * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+                </p>
+                <p className="text-xs font-bold text-[#2ED5A4] mt-1">
+                  To {sendSuccessData.recipientName} {sendSuccessData.recipientAvatar}
+                </p>
+              </div>
+            </div>
+
+            {/* Method details pill */}
+            <div className="bg-[#181928] border border-white/10 rounded-2xl p-3 space-y-2 text-xs">
+              <div className="flex items-center justify-between text-[#8E91A5]">
+                <span>Monto enviado</span>
+                <span className="text-white font-bold">${sendSuccessData.amount.toFixed(2)} USD</span>
+              </div>
+              {sendSuccessData.fee > 0 && (
+                <div className="flex items-center justify-between text-[#8E91A5]">
+                  <span>Comisión ({sendSuccessData.paymentTitle})</span>
+                  <span className="text-amber-400 font-semibold">+${sendSuccessData.fee.toFixed(2)} USD</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-[#8E91A5] pt-1 border-t border-white/5">
+                <span>Total pagado</span>
+                <span className="text-white font-extrabold text-sm">${sendSuccessData.totalPaid.toFixed(2)} USD</span>
+              </div>
+              <div className="flex items-center justify-between text-[#8E91A5] pt-1 border-t border-white/5">
+                <span>Método de entrega</span>
+                <span className="text-[#2ED5A4] font-bold">{sendSuccessData.deliveryTitle}</span>
+              </div>
+            </div>
+
+            {/* Statement Pill with Copy button */}
+            <div className="bg-[#181928] border border-white/10 rounded-2xl p-3 flex items-center justify-between">
+              <span className="text-xs text-[#8E91A5] font-medium">Request Statement</span>
+              <button
+                type="button"
+                onClick={() => alert(`ID de transacción copiado: ${sendSuccessData.id}`)}
+                className="flex items-center gap-1.5 text-xs text-[#2ED5A4] hover:underline cursor-pointer font-semibold"
+              >
+                <span>{sendSuccessData.id}</span>
+                <CopyIcon className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Timestamp */}
+            <p className="text-center text-[11px] text-[#8E91A5]">
+              {sendSuccessData.time}
+            </p>
+
+            {/* Outlined Action Buttons: Download PDF & Share Receipt (Screenshot 1) */}
+            <div className="space-y-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => alert('Descargando comprobante PDF encriptado de KIN...')}
+                className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm"
+              >
+                <DownloadIcon className="w-4 h-4 text-[#2ED5A4]" />
+                <span>Download PDF</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => alert('Compartiendo comprobante vía WhatsApp / Mensaje...')}
+                className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm"
+              >
+                <ShareReceiptIcon className="w-4 h-4 text-[#2ED5A4]" />
+                <span>Share Receipt</span>
+              </button>
+            </div>
+
+            {/* Bottom Full Width CTA Button: Done → */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSendSuccessData(null);
+                  setActiveTab('home');
+                }}
+                className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] hover:shadow-[0_16px_32px_-4px_rgba(46,213,164,0.6)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Done</span>
+                <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
 
         {/* ========================================================================= */}
         {/* SCREEN 1: "MY CARD / HOME" (STITCH EXECUTIVE DASHBOARD)                   */}
@@ -1570,145 +1771,7 @@ export default function MobileApp() {
         {/* ========================================================================= */}
         {activeTab === 'send' && (
           <div className="animate-fade-in space-y-4">
-            {sendSuccessData ? (
-              /* ========================================================================= */
-              /* SUCCESS SCREEN (ARQUITECTURA EXACTA DEL SCREENSHOT 1 DE REFERENCIA)      */
-              /* ========================================================================= */
-              <div className="animate-fade-in space-y-4 py-1">
-                {/* Header: < | ⋮ */}
-                <header className="flex items-center justify-between py-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSendSuccessData(null);
-                      setActiveTab('home');
-                    }}
-                    className="btn-circle"
-                    title="Volver al Inicio"
-                  >
-                    <ChevronLeftIcon className="w-5 h-5 text-white" />
-                  </button>
-
-                  <div className="w-8" />
-
-                  <button
-                    type="button"
-                    onClick={() => alert('Comprobante verificado con firma criptográfica KIN')}
-                    className="btn-circle"
-                    title="Opciones"
-                  >
-                    <DotsVerticalIcon className="w-5 h-5 text-white" />
-                  </button>
-                </header>
-
-                {/* Center Rosette Badge & Success Info (Screenshot 1) */}
-                <div className="text-center pt-1 space-y-3">
-                  <div className="relative inline-block">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-[#2ED5A4]/15 flex items-center justify-center border border-[#2ED5A4]/40 shadow-glow-mint">
-                      <RosetteBadgeCheckIcon className="w-14 h-14" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-0.5">
-                    <h2 className="text-2xl font-black text-white tracking-tight">Success!</h2>
-                    <p className="text-xs text-[#8E91A5] font-medium">Money sent successfully</p>
-                  </div>
-
-                  <div className="pt-1">
-                    <h1 className="text-3xl font-black text-white tracking-tight">
-                      ${sendSuccessData.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-bold text-[#8E91A5]">USD</span>
-                    </h1>
-                    <p className="text-xs font-semibold text-[#8E91A5] mt-0.5">
-                      ≈ ${(sendSuccessData.amount * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
-                    </p>
-                    <p className="text-xs font-bold text-[#2ED5A4] mt-1">
-                      To {sendSuccessData.recipientName} {sendSuccessData.recipientAvatar}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Method details pill */}
-                <div className="bg-[#181928] border border-white/10 rounded-2xl p-3 space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-[#8E91A5]">
-                    <span>Monto enviado</span>
-                    <span className="text-white font-bold">${sendSuccessData.amount.toFixed(2)} USD</span>
-                  </div>
-                  {sendSuccessData.fee > 0 && (
-                    <div className="flex items-center justify-between text-[#8E91A5]">
-                      <span>Comisión ({sendSuccessData.paymentTitle})</span>
-                      <span className="text-amber-400 font-semibold">+${sendSuccessData.fee.toFixed(2)} USD</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between text-[#8E91A5] pt-1 border-t border-white/5">
-                    <span>Total pagado</span>
-                    <span className="text-white font-extrabold text-sm">${sendSuccessData.totalPaid.toFixed(2)} USD</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[#8E91A5] pt-1 border-t border-white/5">
-                    <span>Método de entrega</span>
-                    <span className="text-[#2ED5A4] font-bold">{sendSuccessData.deliveryTitle}</span>
-                  </div>
-                </div>
-
-                {/* Statement Pill with Copy button */}
-                <div className="bg-[#181928] border border-white/10 rounded-2xl p-3 flex items-center justify-between">
-                  <span className="text-xs text-[#8E91A5] font-medium">Request Statement</span>
-                  <button
-                    type="button"
-                    onClick={() => alert(`ID de transacción copiado: ${sendSuccessData.id}`)}
-                    className="flex items-center gap-1.5 text-xs text-[#2ED5A4] hover:underline cursor-pointer font-semibold"
-                  >
-                    <span>{sendSuccessData.id}</span>
-                    <CopyIcon className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Timestamp */}
-                <p className="text-center text-[11px] text-[#8E91A5]">
-                  {sendSuccessData.time}
-                </p>
-
-                {/* Outlined Action Buttons: Download PDF & Share Receipt (Screenshot 1) */}
-                <div className="space-y-2.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => alert('Descargando comprobante PDF encriptado de KIN...')}
-                    className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm"
-                  >
-                    <DownloadIcon className="w-4 h-4 text-[#2ED5A4]" />
-                    <span>Download PDF</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => alert('Compartiendo comprobante vía WhatsApp / Mensaje...')}
-                    className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm"
-                  >
-                    <ShareReceiptIcon className="w-4 h-4 text-[#2ED5A4]" />
-                    <span>Share Receipt</span>
-                  </button>
-                </div>
-
-                {/* Bottom Full Width CTA Button: Done → */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSendSuccessData(null);
-                      setActiveTab('transactions');
-                    }}
-                    className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] hover:shadow-[0_16px_32px_-4px_rgba(46,213,164,0.6)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>Done</span>
-                    <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* ========================================================================= */
-              /* SEND MONEY FORM (CON VERDE KIN Y TARJETA EXTENDIDA DE PAGO)              */
-              /* ========================================================================= */
-              <>
-                {/* Header: < | Send money | Historial */}
+            {/* Header: < | Send money | Historial */}
                 <header className="flex items-center justify-between py-1">
                   <button
                     type="button"
@@ -2133,8 +2196,6 @@ export default function MobileApp() {
 
                 {/* Spacer */}
                 <div className="h-14 w-full pointer-events-none" aria-hidden="true" />
-              </>
-            )}
           </div>
         )}
 
@@ -3200,6 +3261,8 @@ export default function MobileApp() {
             </div>
           </div>
         )}
+        </>
+        )}
         </main>
 
         {/* ========================================================================= */}
@@ -3661,35 +3724,63 @@ export default function MobileApp() {
                       gpp_maybe
                     </span>
                     <span>
-                      ⚠️ Requisito Regulatorio CNBV/Banxico: Todos los campos marcados en rojo son obligatorios para transferencias transfronterizas (Nombre, Teléfono, Calle, Número, Estado, País y Código Postal).
+                      ⚠️ Requisito Regulatorio USA → México: Todos los campos marcados en rojo son obligatorios (Nombre, Apellido, País, Estado y Teléfono celular).
                     </span>
                   </div>
                 )}
 
-                {/* Campo 1: Nombre Completo */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
-                    <span>Nombre Completo del Beneficiario</span>
-                    {beneficiaryErrors?.name && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[18px] text-on-surface-variant pointer-events-none">
-                      person
-                    </span>
-                    <input
-                      type="text"
-                      placeholder="Ej. Jose Eligio"
-                      value={newContactName}
-                      onChange={(e) => {
-                        setNewContactName(e.target.value);
-                        if (beneficiaryErrors?.name) setBeneficiaryErrors((prev) => prev ? { ...prev, name: '' } : null);
-                      }}
-                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
-                        beneficiaryErrors?.name
-                          ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                          : 'border border-white/10 focus:border-primary'
-                      }`}
-                    />
+                {/* Grid 2 Columnas: Nombre(s) y Apellido(s) */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
+                      <span>Nombre(s)</span>
+                      {beneficiaryErrors?.firstName && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
+                    </label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
+                        person
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Ej. Jose"
+                        value={newContactFirstName}
+                        onChange={(e) => {
+                          setNewContactFirstName(e.target.value);
+                          if (beneficiaryErrors?.firstName) setBeneficiaryErrors((prev) => prev ? { ...prev, firstName: '' } : null);
+                        }}
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                          beneficiaryErrors?.firstName
+                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                            : 'border border-white/10 focus:border-primary'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
+                      <span>Apellido(s)</span>
+                      {beneficiaryErrors?.lastName && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
+                    </label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
+                        badge
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Ej. Eligio"
+                        value={newContactLastName}
+                        onChange={(e) => {
+                          setNewContactLastName(e.target.value);
+                          if (beneficiaryErrors?.lastName) setBeneficiaryErrors((prev) => prev ? { ...prev, lastName: '' } : null);
+                        }}
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                          beneficiaryErrors?.lastName
+                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
+                            : 'border border-white/10 focus:border-primary'
+                        }`}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -3841,11 +3932,19 @@ export default function MobileApp() {
 
                 {/* Selector de País */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-on-surface-variant">País de Residencia</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
+                    <span>País de Residencia</span>
+                    {beneficiaryErrors?.country && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
+                  </label>
+                  <div className={`grid grid-cols-2 gap-2 p-1 rounded-2xl transition-all ${
+                    beneficiaryErrors?.country ? 'border-2 border-red-500 bg-red-500/10' : ''
+                  }`}>
                     <button
                       type="button"
-                      onClick={() => setNewContactCountry('Mexico')}
+                      onClick={() => {
+                        setNewContactCountry('Mexico');
+                        if (beneficiaryErrors?.country) setBeneficiaryErrors((prev) => prev ? { ...prev, country: '' } : null);
+                      }}
                       className={`h-[48px] rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         newContactCountry === 'Mexico'
                           ? 'bg-primary text-on-primary shadow-sm border border-primary'
@@ -3857,7 +3956,10 @@ export default function MobileApp() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setNewContactCountry('Estados Unidos')}
+                      onClick={() => {
+                        setNewContactCountry('Estados Unidos');
+                        if (beneficiaryErrors?.country) setBeneficiaryErrors((prev) => prev ? { ...prev, country: '' } : null);
+                      }}
                       className={`h-[48px] rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         newContactCountry === 'Estados Unidos'
                           ? 'bg-primary text-on-primary shadow-sm border border-primary'

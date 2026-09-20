@@ -422,9 +422,12 @@ export function createContact(params: {
 
 /**
  * Validador estricto para Envíos USA -> México (Cumplimiento Regulatorio CNBV / Banxico)
+ * Requiere obligatoriamente: Nombre, Apellido, País, Estado y Teléfono
  */
 export function validateRemittanceRecipient(data: {
   name?: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
   street?: string;
   houseNumber?: string;
@@ -435,33 +438,29 @@ export function validateRemittanceRecipient(data: {
   const missingFields: string[] = [];
   const errors: Record<string, string> = {};
 
-  if (!data.name || !data.name.trim()) {
-    missingFields.push('name');
-    errors.name = 'El nombre del beneficiario es obligatorio';
+  const nameParts = (data.name || '').trim().split(/\s+/);
+  const effectiveFirstName = (data.firstName || nameParts[0] || '').trim();
+  const effectiveLastName = (data.lastName || nameParts.slice(1).join(' ') || '').trim();
+
+  if (!effectiveFirstName) {
+    missingFields.push('firstName');
+    errors.firstName = 'El nombre del beneficiario es obligatorio';
+  }
+  if (!effectiveLastName) {
+    missingFields.push('lastName');
+    errors.lastName = 'El apellido del beneficiario es obligatorio';
   }
   if (!data.phone || !data.phone.trim()) {
     missingFields.push('phone');
-    errors.phone = 'El número de teléfono es obligatorio';
+    errors.phone = 'El número de teléfono celular (+52 / +1) es obligatorio';
   }
-  if (!data.street || !data.street.trim()) {
-    missingFields.push('street');
-    errors.street = 'La calle es obligatoria para envíos a México';
-  }
-  if (!data.houseNumber || !data.houseNumber.trim()) {
-    missingFields.push('houseNumber');
-    errors.houseNumber = 'El número de casa o exterior es obligatorio';
+  if (!data.country || !data.country.trim()) {
+    missingFields.push('country');
+    errors.country = 'El país de residencia (México / USA) es obligatorio';
   }
   if (!data.state || !data.state.trim()) {
     missingFields.push('state');
     errors.state = 'El estado o entidad federativa es obligatorio';
-  }
-  if (!data.country || !data.country.trim()) {
-    missingFields.push('country');
-    errors.country = 'El país destino es obligatorio';
-  }
-  if (!data.zipCode || !data.zipCode.trim()) {
-    missingFields.push('zipCode');
-    errors.zipCode = 'El código postal es obligatorio';
   }
 
   return {
@@ -528,6 +527,13 @@ export function executeSpeiTransfer(params: {
 
   if (!user) {
     return { success: false, error: 'Usuario no encontrado' };
+  }
+
+  if (!params.recipientName || !params.recipientName.trim()) {
+    return { success: false, error: 'Requisito regulatorio CNBV: El nombre del beneficiario es obligatorio' };
+  }
+  if (!params.recipientPhone || !params.recipientPhone.trim()) {
+    return { success: false, error: 'Requisito regulatorio CNBV: El teléfono del beneficiario es obligatorio' };
   }
 
   // Verificar Fondos
@@ -713,6 +719,13 @@ export function executeKinCashSend(params: {
 
   if (!user) {
     return { success: false, error: 'Usuario no encontrado' };
+  }
+
+  if (!params.recipientName || !params.recipientName.trim()) {
+    return { success: false, error: 'Requisito KIN Cash: El nombre del destinatario es obligatorio' };
+  }
+  if (!params.recipientPhone || !params.recipientPhone.trim()) {
+    return { success: false, error: 'Requisito KIN Cash: El teléfono celular del destinatario es obligatorio' };
   }
 
   if (user.balanceUSD < params.amountUSD) {
