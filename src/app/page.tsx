@@ -269,25 +269,25 @@ export default function MobileApp() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'home' | 'send' | 'bills' | 'transactions' | 'wallet' | 'send-quick' | 'profile' | 'kin-cash' | 'bill-pay' | 'vault'>('home');
 
-  // Client registration & KYC profile state
-  const [userId, setUserId] = useState<string>('user-001');
-  const [baseBalanceUSD, setBaseBalanceUSD] = useState<number>(2450.00);
-  const [userName, setUserName] = useState('César U.');
-  const [userFirstName, setUserFirstName] = useState('César');
-  const [userLastName, setUserLastName] = useState('Urrutia');
-  const [userEmail, setUserEmail] = useState('cesar.urrutia@gmail.com');
-  const [userPhone, setUserPhone] = useState('+1 (555) 349-2810');
-  const [userCity, setUserCity] = useState('Los Ángeles');
-  const [userState, setUserState] = useState('California');
-  const [userZip, setUserZip] = useState('90210');
+  // Client registration & KYC profile state (Sin datos hardcodeados para evitar sobreescritura de nuevos clientes)
+  const [userId, setUserId] = useState<string>('');
+  const [baseBalanceUSD, setBaseBalanceUSD] = useState<number>(0);
+  const [userName, setUserName] = useState('');
+  const [userFirstName, setUserFirstName] = useState('');
+  const [userLastName, setUserLastName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPhone, setUserPhone] = useState('');
+  const [userCity, setUserCity] = useState('');
+  const [userState, setUserState] = useState('');
+  const [userZip, setUserZip] = useState('');
   const [userCountry, setUserCountry] = useState('Estados Unidos 🇺🇸');
-  const [userAvatar, setUserAvatar] = useState(DEFAULT_AVATARS[0]);
-  const [userClientId, setUserClientId] = useState('KIN-US-892401');
-  const [userMemberSince, setUserMemberSince] = useState('14 Sep 2024');
-  const [userDocType, setUserDocType] = useState('Pasaporte Oficial USA');
-  const [userDocNumber, setUserDocNumber] = useState('••••••••8492');
-  const [userKycTier, setUserKycTier] = useState('Tier 2 (Identidad Oficial Verificada)');
-  const [userDailyLimit, setUserDailyLimit] = useState('$3,000.00 USD / día');
+  const [userAvatar, setUserAvatar] = useState('');
+  const [userClientId, setUserClientId] = useState('');
+  const [userMemberSince, setUserMemberSince] = useState('');
+  const [userDocType, setUserDocType] = useState('INE / Pasaporte en Trámite');
+  const [userDocNumber, setUserDocNumber] = useState('••••••••0000');
+  const [userKycTier, setUserKycTier] = useState('Tier 1 (Básico - Onboarding)');
+  const [userDailyLimit, setUserDailyLimit] = useState('$300.00 USD / día');
   const [biometricsEnabled, setBiometricsEnabled] = useState(true);
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
   const [currencyPref, setCurrencyPref] = useState<'USD' | 'MXN'>('USD');
@@ -300,14 +300,20 @@ export default function MobileApp() {
     if (user.id) setUserId(user.id);
     if (user.firstName) setUserFirstName(user.firstName);
     if (user.lastName) setUserLastName(user.lastName);
-    if (user.name) setUserName(user.name);
+    if (user.name) {
+      setUserName(user.name);
+    } else if (user.firstName) {
+      const short = `${user.firstName.trim()} ${user.lastName ? user.lastName.trim()[0] + '.' : ''}`.trim();
+      setUserName(short);
+    }
     if (user.email) setUserEmail(user.email);
     if (user.phone) setUserPhone(user.phone);
     if (user.city) setUserCity(user.city);
     if (user.state) setUserState(user.state);
     if (user.zip) setUserZip(user.zip);
     if (user.country) setUserCountry(user.country);
-    if (user.avatar) setUserAvatar(user.avatar);
+    // Asignar el avatar explícito (si está vacío, deja recuadro vacío sin foto)
+    setUserAvatar(user.avatar || '');
     if (user.clientId) setUserClientId(user.clientId);
     if (user.memberSince) setUserMemberSince(user.memberSince);
     if (user.docType) setUserDocType(user.docType);
@@ -323,14 +329,14 @@ export default function MobileApp() {
   };
   
   // Draft buffer state for profile editing (Solo se aplica al dar clic en 'Guardar')
-  const [draftUserName, setDraftUserName] = useState('César U.');
-  const [draftUserFirstName, setDraftUserFirstName] = useState('César');
-  const [draftUserLastName, setDraftUserLastName] = useState('Urrutia');
-  const [draftUserEmail, setDraftUserEmail] = useState('cesar.urrutia@gmail.com');
-  const [draftUserPhone, setDraftUserPhone] = useState('+1 (555) 349-2810');
-  const [draftUserCity, setDraftUserCity] = useState('Los Ángeles');
-  const [draftUserState, setDraftUserState] = useState('California');
-  const [draftUserAvatar, setDraftUserAvatar] = useState(DEFAULT_AVATARS[0]);
+  const [draftUserName, setDraftUserName] = useState('');
+  const [draftUserFirstName, setDraftUserFirstName] = useState('');
+  const [draftUserLastName, setDraftUserLastName] = useState('');
+  const [draftUserEmail, setDraftUserEmail] = useState('');
+  const [draftUserPhone, setDraftUserPhone] = useState('');
+  const [draftUserCity, setDraftUserCity] = useState('');
+  const [draftUserState, setDraftUserState] = useState('');
+  const [draftUserAvatar, setDraftUserAvatar] = useState('');
   const [customAvatarInput, setCustomAvatarInput] = useState('');
 
   // Stitch Executive Dashboard state
@@ -351,59 +357,71 @@ export default function MobileApp() {
 
   // Sincronizar parámetros de URL y usuario activo (?view=login, ?view=dashboard, ?userId=...)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const view = params.get('view');
-      const auth = params.get('auth');
-      const queryUserId = params.get('userId');
+    if (typeof window === 'undefined') return;
 
-      if (view === 'login' || auth === 'login') {
-        setIsAuthenticated(false);
-      } else if (view === 'dashboard' || auth === 'skip' || auth === 'dashboard') {
-        setIsAuthenticated(true);
-      }
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    const auth = params.get('auth');
+    const queryUserId = params.get('userId');
 
-      // Priorizar el usuario especificado en URL o en localStorage
-      let targetId = queryUserId;
-      if (!targetId) {
-        const saved = localStorage.getItem('kin_active_user');
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (parsed.id) {
-              targetId = parsed.id;
-              loadUserData(parsed);
-            }
-          } catch (e) {
-            console.warn('[LocalStorage] parse error', e);
-          }
-        }
-      }
+    if (view === 'login' || auth === 'login') {
+      setIsAuthenticated(false);
+    } else if (view === 'dashboard' || auth === 'skip' || auth === 'dashboard') {
+      setIsAuthenticated(true);
+    }
 
-      if (targetId && targetId !== userId) {
-        setUserId(targetId);
+    // 1. Recuperar usuario guardado en localStorage (sesión activa tras login/registro)
+    let savedUser: any = null;
+    const saved = localStorage.getItem('kin_active_user');
+    if (saved) {
+      try {
+        savedUser = JSON.parse(saved);
+      } catch (e) {
+        console.warn('[LocalStorage] parse error', e);
       }
+    }
+
+    // 2. Prioridad de sincronización:
+    if (queryUserId) {
+      // Si la URL pide un usuario específico y coincide con localStorage, cargarlo inmediatamente para 0ms latency
+      if (savedUser && savedUser.id === queryUserId) {
+        loadUserData(savedUser);
+      }
+      setUserId(queryUserId);
+    } else if (savedUser && savedUser.id) {
+      // Si no viene en URL pero hay un usuario con sesión activa en el navegador
+      loadUserData(savedUser);
+      setUserId(savedUser.id);
+    } else {
+      // Fallback predeterminado solo si es una visita en frío sin sesión ni parámetros
+      setUserId('user-001');
     }
   }, []);
 
-  // Sincronizar datos reactivos de cuenta desde el backend
+  // Sincronizar datos reactivos de cuenta desde el backend con protección de carrera
   useEffect(() => {
-    if (userId) {
-      fetch(`/api/account/data?userId=${encodeURIComponent(userId)}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && data.user) {
-            loadUserData(data.user);
-            if (Array.isArray(data.transactions)) {
-              setTransactions(data.transactions);
-            }
-            if (Array.isArray(data.contacts)) {
-              setContactsList(data.contacts);
-            }
+    if (!userId) return;
+    let isCancelled = false;
+
+    fetch(`/api/account/data?userId=${encodeURIComponent(userId)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isCancelled) return;
+        if (data.success && data.user) {
+          loadUserData(data.user);
+          if (Array.isArray(data.transactions)) {
+            setTransactions(data.transactions);
           }
-        })
-        .catch((err) => console.warn('[Backend Sync]', err));
-    }
+          if (Array.isArray(data.contacts)) {
+            setContactsList(data.contacts);
+          }
+        }
+      })
+      .catch((err) => console.warn('[Backend Sync]', err));
+
+    return () => {
+      isCancelled = true;
+    };
   }, [userId]);
 
   // Helper para Cerrar Sesión Segura
@@ -455,8 +473,25 @@ export default function MobileApp() {
     if (draftUserState.trim()) {
       setUserState(draftUserState.trim());
     }
-    if (draftUserAvatar) {
-      setUserAvatar(draftUserAvatar);
+    setUserAvatar(draftUserAvatar);
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('kin_active_user');
+        const prev = saved ? JSON.parse(saved) : {};
+        const updated = {
+          ...prev,
+          id: userId,
+          firstName: draftUserFirstName.trim() || userFirstName,
+          lastName: draftUserLastName.trim() || userLastName,
+          name: draftUserFirstName.trim() ? (draftUserFirstName.trim() + (draftUserLastName.trim() ? ` ${draftUserLastName.trim().charAt(0)}.` : '')) : userName,
+          email: draftUserEmail.trim() || userEmail,
+          phone: draftUserPhone.trim() || userPhone,
+          city: draftUserCity.trim() || userCity,
+          state: draftUserState.trim() || userState,
+          avatar: draftUserAvatar,
+        };
+        localStorage.setItem('kin_active_user', JSON.stringify(updated));
+      } catch (_) {}
     }
     setShowAvatarPicker(false);
   };
@@ -977,13 +1012,21 @@ export default function MobileApp() {
               <button
                 type="button"
                 onClick={handleOpenAvatarPicker}
-                className="relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border border-white/10"
-                title="Ajustes de Perfil"
+                className="relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border border-white/10 hover:border-[#2ED5A4]/40 transition-colors"
+                title={userAvatar ? "Ajustes de Perfil" : "Agregar Foto de Perfil"}
               >
-                <img alt={userName} className="w-full h-full rounded-full object-cover" src={userAvatar} />
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center shadow-sm">
-                  <span className="material-symbols-outlined text-[9px] text-[#003828] font-bold">check</span>
-                </div>
+                {userAvatar ? (
+                  <img alt={userName || 'Perfil'} className="w-full h-full rounded-full object-cover" src={userAvatar} />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-[#202236] flex items-center justify-center text-[#8E91A5] border border-dashed border-white/25">
+                    <span className="material-symbols-outlined text-[15px] text-[#8E91A5]">person</span>
+                  </div>
+                )}
+                {userAvatar && (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined text-[9px] text-[#003828] font-bold">check</span>
+                  </div>
+                )}
               </button>
             </div>
           </header>
@@ -1001,12 +1044,14 @@ export default function MobileApp() {
                   Executive Overview
                 </span>
                 <h1 className="font-headline-md text-headline-md text-white flex items-center gap-1.5 mt-0.5">
-                  Hola, {userFirstName || userName.split(' ')[0]} <span className="inline-block animate-bounce text-xl">👋</span>
+                  Hola, {userFirstName || (userName ? userName.split(' ')[0] : 'Bienvenido')} <span className="inline-block animate-bounce text-xl">👋</span>
                 </h1>
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-md border border-white/5">
                 <span className="w-2 h-2 rounded-full bg-[#2ED5A4] animate-pulse shadow-[0_0_8px_#2ED5A4]" />
-                <span className="font-caption-sm text-caption-sm text-[#2ED5A4] font-semibold">Tier-3 Verified</span>
+                <span className="font-caption-sm text-caption-sm text-[#2ED5A4] font-semibold">
+                  {userKycTier ? (userKycTier.includes('Tier 1') ? 'Tier-1 Básico' : userKycTier.includes('Tier 2') ? 'Tier-2 Verificado' : 'Tier-3 Avanzado') : 'Tier-1 Básico'}
+                </span>
               </div>
             </div>
 
@@ -2710,7 +2755,7 @@ export default function MobileApp() {
                 <h1 className="text-base font-bold text-white tracking-wide">My Profile</h1>
                 <p className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
-                  Cuenta Verificada • Tier 2
+                  {userKycTier ? userKycTier.split(' (')[0] : 'Tier 1'} • Cuenta Activa
                 </p>
               </div>
               <button
@@ -2730,22 +2775,30 @@ export default function MobileApp() {
 
               {/* Avatar Estándar Móvil (56px) con micro-badge de cámara ergonómico */}
               <div className="relative inline-block mx-auto">
-                <div className="w-14 h-14 rounded-full p-0.5 border-2 border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/15 overflow-hidden">
-                  <img
-                    src={userAvatar}
-                    alt={userName}
-                    className="w-full h-full rounded-full object-cover"
-                  />
+                <div className="w-14 h-14 rounded-full p-0.5 border-2 border-[#2ED5A4]/40 shadow-md shadow-[#2ED5A4]/15 overflow-hidden bg-[#202236] flex items-center justify-center">
+                  {userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={userName || 'Perfil'}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full flex flex-col items-center justify-center bg-white/5 text-[#8E91A5]">
+                      <span className="material-symbols-outlined text-[28px] text-[#8E91A5]">person</span>
+                    </div>
+                  )}
                 </div>
                 <button
                   type="button"
                   onClick={handleOpenAvatarPicker}
                   className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-[#202236] border border-white/20 flex items-center justify-center text-[#2ED5A4] shadow-md hover:scale-110 active:scale-95 transition-all cursor-pointer"
-                  title="Cambiar foto de perfil"
+                  title={userAvatar ? "Cambiar foto de perfil" : "Agregar foto de perfil"}
                 >
                   <CameraIcon className="w-3 h-3" />
                 </button>
-                <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-[#2ED5A4] border-2 border-[#181928]" />
+                {userAvatar && (
+                  <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-[#2ED5A4] border-2 border-[#181928]" />
+                )}
               </div>
 
               {/* Nombre y Correo en Escala Proporcional Estándar */}
@@ -3550,10 +3603,32 @@ export default function MobileApp() {
               </div>
             </div>
 
+            {/* Opción Sin Foto / Dejar Recuadro Vacío */}
+            <div>
+              <label className="text-xs font-semibold text-[#8E91A5] block mb-1.5 px-0.5">
+                Opciones de foto de perfil:
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setDraftUserAvatar('');
+                  setCustomAvatarInput('');
+                }}
+                className={`w-full py-2.5 px-3 rounded-2xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  !draftUserAvatar
+                    ? 'border-[#2ED5A4] bg-[#2ED5A4]/15 text-[#2ED5A4] shadow-sm'
+                    : 'border-white/10 bg-[#181928] text-[#8E91A5] hover:text-white'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[17px]">no_accounts</span>
+                <span>Sin foto de perfil (Recuadro vacío)</span>
+              </button>
+            </div>
+
             {/* Subir foto de la galería / dispositivo del cliente */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-1.5 px-0.5">
-                Foto desde la galería de tu dispositivo:
+                O subir desde la galería de tu dispositivo:
               </label>
               <label className="w-full h-11 rounded-2xl bg-[#222338] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white cursor-pointer transition-colors shadow-sm">
                 <CameraIcon className="w-4 h-4 text-[#2ED5A4]" />

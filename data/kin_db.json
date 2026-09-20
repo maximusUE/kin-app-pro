@@ -36,7 +36,7 @@
       "state": "Texas",
       "zip": "78201",
       "country": "Estados Unidos 🇺🇸",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+      "avatar": "",
       "clientId": "KIN-US-976852",
       "memberSince": "19 sep 2026",
       "docType": "INE / Pasaporte en Trámite",
@@ -45,12 +45,71 @@
       "dailyLimit": "$300.00 USD / día",
       "dailyLimitUSD": 300,
       "monthlyLimitUSD": 750,
-      "balanceUSD": 1000,
+      "balanceUSD": 910,
       "passwordHash": "12345",
+      "biometricsEnabled": true,
+      "pushNotificationsEnabled": true
+    },
+    {
+      "id": "user-1789925173232",
+      "firstName": "Maricela",
+      "lastName": "Fernandez",
+      "name": "Maricela F.",
+      "email": "prueba2@test.com",
+      "phone": "+1 0115212345678",
+      "city": "San Antonio",
+      "state": "Texas",
+      "zip": "78201",
+      "country": "Estados Unidos 🇺🇸",
+      "avatar": "",
+      "clientId": "KIN-US-103145",
+      "memberSince": "20 sep 2026",
+      "docType": "INE / Pasaporte en Trámite",
+      "docNumber": "••••••••0000",
+      "kycTier": "Tier 1 (Básico - Onboarding)",
+      "dailyLimit": "$300.00 USD / día",
+      "dailyLimitUSD": 300,
+      "monthlyLimitUSD": 750,
+      "balanceUSD": 1000,
+      "passwordHash": "54321",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true
     }
   ],
-  "transactions": [],
-  "contacts": []
+  "transactions": [
+    {
+      "id": "tx-1789917735632",
+      "userId": "user-1789863039309",
+      "title": "Hernana (OXXO)",
+      "category": "oxxo Cash Pickup",
+      "time": "Hoy, 11:22 AM",
+      "dateGroup": "Hoy",
+      "amount": -90,
+      "amountMXN": 1840.5,
+      "type": "expense",
+      "iconType": "send",
+      "status": "Completado",
+      "refNumber": "SPEI-931789",
+      "claveRastreoBanxico": "KIN20260920152215YHGSES0",
+      "bancoDestino": "Red Banxico SPEI",
+      "cuentaBeneficiario": "",
+      "nombreBeneficiario": "Hernana",
+      "createdAt": "2026-09-20T15:22:15.613Z"
+    }
+  ],
+  "contacts": [
+    {
+      "id": "c-1789917730543",
+      "userId": "user-1789863039309",
+      "name": "Hernana",
+      "fullName": "Hernana",
+      "avatar": "👨🏽",
+      "role": "Familiar",
+      "country": "Mexico",
+      "bank": "SPEI Banxico",
+      "photoUrl": "",
+      "clabe": "",
+      "phone": "011598765432"
+    }
+  ]
 }

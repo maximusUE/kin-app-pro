@@ -204,7 +204,7 @@ export function registerNewUser(params: {
     state: 'Texas',
     zip: '78201',
     country: 'Estados Unidos 🇺🇸',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    avatar: '', // Nuevo cliente inicia sin foto de perfil (recuadro vacío)
     clientId,
     memberSince: nowStr,
     docType: 'INE / Pasaporte en Trámite',
@@ -223,6 +223,20 @@ export function registerNewUser(params: {
   saveDatabase(db);
   saveUserToFirestore(newUser).catch((e) => console.warn('[Firebase Sync User Error]', e));
   return newUser;
+}
+
+export function updateUserProfile(userId: string, updates: Partial<UserProfile>): UserProfile | null {
+  const db = loadDatabase();
+  const idx = db.users.findIndex((u) => u.id === userId);
+  if (idx === -1) return null;
+
+  db.users[idx] = {
+    ...db.users[idx],
+    ...updates,
+  };
+  saveDatabase(db);
+  saveUserToFirestore(db.users[idx]).catch((e) => console.warn('[Firebase Sync User Error]', e));
+  return db.users[idx];
 }
 
 export function getUserTransactions(userId: string): TransactionRecord[] {
