@@ -10,11 +10,15 @@ export default function AuthPage() {
   return (
     <BilingualAuthScreen
       initialMode="login"
-      onLoginSuccess={() => {
+      onLoginSuccess={(userData) => {
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('kin_auth', 'true');
+          if (userData) {
+            localStorage.setItem('kin_active_user', JSON.stringify(userData));
+          }
         }
-        router.push('/?view=dashboard');
+        const userParam = userData?.id ? `&userId=${encodeURIComponent(userData.id)}` : '';
+        router.push(`/?view=dashboard${userParam}`);
       }}
     />
   );

@@ -315,22 +315,12 @@ export default function MobileApp() {
     if (user.kycTier) setUserKycTier(user.kycTier);
     if (user.dailyLimit) setUserDailyLimit(user.dailyLimit);
     if (typeof user.balanceUSD === 'number') setBaseBalanceUSD(user.balanceUSD);
-  };
-
-  // Cargar usuario guardado en localStorage al inicio
-  useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedUser = localStorage.getItem('kin_active_user');
-      if (savedUser) {
-        try {
-          const parsed = JSON.parse(savedUser);
-          loadUserData(parsed);
-        } catch (e) {
-          console.warn('[LocalStorage] parse error', e);
-        }
-      }
+      try {
+        localStorage.setItem('kin_active_user', JSON.stringify(user));
+      } catch (_) {}
     }
-  }, []);
+  };
   
   // Draft buffer state for profile editing (Solo se aplica al dar clic en 'Guardar')
   const [draftUserName, setDraftUserName] = useState('César U.');
@@ -359,16 +349,39 @@ export default function MobileApp() {
   // Authentication Gate State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
 
-  // Sincronizar parámetros de URL (?view=login para Login, ?view=dashboard para Dashboard)
+  // Sincronizar parámetros de URL y usuario activo (?view=login, ?view=dashboard, ?userId=...)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const view = params.get('view');
       const auth = params.get('auth');
+      const queryUserId = params.get('userId');
+
       if (view === 'login' || auth === 'login') {
         setIsAuthenticated(false);
       } else if (view === 'dashboard' || auth === 'skip' || auth === 'dashboard') {
         setIsAuthenticated(true);
+      }
+
+      // Priorizar el usuario especificado en URL o en localStorage
+      let targetId = queryUserId;
+      if (!targetId) {
+        const saved = localStorage.getItem('kin_active_user');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed.id) {
+              targetId = parsed.id;
+              loadUserData(parsed);
+            }
+          } catch (e) {
+            console.warn('[LocalStorage] parse error', e);
+          }
+        }
+      }
+
+      if (targetId && targetId !== userId) {
+        setUserId(targetId);
       }
     }
   }, []);
@@ -381,10 +394,10 @@ export default function MobileApp() {
         .then((data) => {
           if (data.success && data.user) {
             loadUserData(data.user);
-            if (Array.isArray(data.transactions) && data.transactions.length > 0) {
+            if (Array.isArray(data.transactions)) {
               setTransactions(data.transactions);
             }
-            if (Array.isArray(data.contacts) && data.contacts.length > 0) {
+            if (Array.isArray(data.contacts)) {
               setContactsList(data.contacts);
             }
           }
@@ -900,6 +913,9 @@ export default function MobileApp() {
           setIsAuthenticated(true);
           if (userData) {
             loadUserData(userData);
+            if (userData.id) {
+              setUserId(userData.id);
+            }
           }
           if (typeof window !== 'undefined') {
             sessionStorage.setItem('kin_auth', 'true');
