@@ -742,11 +742,11 @@ export function KinCashP2PModal({
       {/* Contact Picker Bottom Sheet Modal */}
       {showContactPicker && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end justify-center animate-fade-in"
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center animate-fade-in"
           onClick={() => setShowContactPicker(false)}
         >
           <div
-            className="w-full max-w-[400px] bg-surface-container border-t border-white/10 rounded-t-3xl p-5 max-h-[88vh] flex flex-col shadow-2xl animate-slide-up"
+            className="w-full max-w-[412px] bg-[#121320] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 h-[82vh] max-h-[640px] flex flex-col shadow-2xl animate-slide-up z-[101] pb-6"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Grab handle */}

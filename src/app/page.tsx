@@ -1063,17 +1063,17 @@ export default function MobileApp() {
   }
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#030407] text-white flex items-center justify-center p-0 sm:py-6 sm:px-4 selection:bg-[#7047EB]/30 selection:text-[#2ED5A4] overflow-hidden">
-      {/* Smartphone Frame Silhouette (Centered Flagship Mobile Device Viewport) */}
-      <div className="phone-chassis">
+    <div className="min-h-[100dvh] w-full bg-[#06070B] text-white flex justify-center selection:bg-[#7047EB]/30 selection:text-[#2ED5A4]">
+      {/* Centered Mobile Layout (Clean, Upright & Frameless) */}
+      <div className="w-full max-w-[412px] min-h-[100dvh] flex flex-col relative bg-[#06070B] pb-24">
         
         {/* Signature Bicolor Ambient Diffuse Glow (Dribbble Reference 2) */}
         <div className="bicolor-atmosphere-glow" />
 
         {/* ========================================================================= */}
-        {/* TOP STATUS BAR & APP HEADER (STICKY HEADER INSIDE CHASSIS)                */}
+        {/* TOP STATUS BAR & APP HEADER (STICKY HEADER AT THE VERY TOP)               */}
         {/* ========================================================================= */}
-        <div className="sticky top-0 z-30 bg-[#06070B]/95 backdrop-blur-md px-5 pt-3 pb-2 border-b border-white/5 flex-shrink-0">
+        <div className="sticky top-0 z-30 bg-[#06070B]/95 backdrop-blur-md px-4 pt-1.5 pb-2 border-b border-white/5 flex-shrink-0">
           <div className="flex items-center justify-between text-xs text-[#8E91A5] font-semibold mb-2 pt-1 px-1">
             <span className="font-financial-mono text-white">9:41</span>
             <div className="h-3.5 w-20 bg-[#121320] rounded-full mx-auto shadow-inner border border-white/5" />
@@ -1136,8 +1136,8 @@ export default function MobileApp() {
           )}
         </div>
 
-        {/* SCROLLABLE SCREEN BODY (Internal scroll inside phone chassis) */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-3 pb-28 scrollbar-none relative">
+        {/* SCREEN CONTENT BODY */}
+        <main className="flex-1 px-4 py-2 pb-24 relative">
 
         {/* ========================================================================= */}
         {/* SCREEN 1: "MY CARD / HOME" (STITCH EXECUTIVE DASHBOARD)                   */}

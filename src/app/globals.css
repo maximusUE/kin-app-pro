@@ -2,49 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* KIN Mobile Native Design System — Pixel-Perfect Dribbble Reference */
-
-.phone-chassis {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background-color: #06070B;
-}
-
-@media (min-width: 640px) {
-  .phone-chassis {
-    width: 100%;
-    max-width: 412px;
-    height: 90vh;
-    max-height: 890px;
-    min-height: 720px;
-    border-radius: 52px;
-    border: 10px solid #181928;
-    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  }
-}
-
-@media (max-width: 639px) {
-  .phone-chassis {
-    width: 100%;
-    height: 100dvh;
-    border-radius: 0;
-    border: none;
-  }
-}
+/* KIN Mobile Native Design System — Clean Seamless Viewport */
 
 .stitch-bottom-dock {
-  position: absolute;
+  position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-  z-index: 50;
+  max-width: 412px;
+  z-index: 40;
   background-color: #000000 !important;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
-  padding-top: 4px;
+  padding-top: 6px;
   pointer-events: auto;
   box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.95);
 }
@@ -264,15 +235,15 @@ html, body {
   color: #FFFFFF;
 }
 
-/* Floating Bottom Continue CTA for Send Money (Anchored inside phone chassis) */
+/* Floating Bottom Continue CTA for Send Money */
 .send-floating-cta-container {
-  position: absolute;
+  position: fixed;
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 36px);
-  max-width: 364px;
-  z-index: 60;
+  width: calc(100% - 32px);
+  max-width: 380px;
+  z-index: 45;
   pointer-events: auto;
 }
 
