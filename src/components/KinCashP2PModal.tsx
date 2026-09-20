@@ -20,6 +20,8 @@ export interface ContactItem {
   country: string;
   bank: string;
   photoUrl: string;
+  phone?: string;
+  clabe?: string;
 }
 
 const DEFAULT_CONTACTS: ContactItem[] = [];
