@@ -93,15 +93,13 @@ export function ClientVaultModal({ isOpen, onClose }: ClientVaultModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300"
+      className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[420px] max-h-[92vh] overflow-y-auto scrollbar-none rounded-t-[32px] sm:rounded-3xl bg-[#06070B] border border-white/10 text-on-surface shadow-2xl relative p-5 pb-10 space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-300"
+        className="w-full max-w-[400px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-[#06070B] border border-white/10 text-on-surface shadow-2xl relative p-5 pb-8 space-y-4 my-auto animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Mobile Drag Indicator */}
-        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto -mt-1 mb-3 sm:hidden" />
 
         {/* Modal Top Header */}
         <div className="flex items-center justify-between">

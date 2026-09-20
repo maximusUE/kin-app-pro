@@ -281,7 +281,7 @@ html, body {
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 100;
+  z-index: 150;
   background-color: rgba(6, 7, 11, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -312,6 +312,15 @@ html, body {
 
 .animate-fade-in {
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Anti-zoom and base reset for inputs */

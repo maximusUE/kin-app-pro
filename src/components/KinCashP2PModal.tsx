@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   CloseIcon,
   SearchIcon,
@@ -140,6 +141,11 @@ export function KinCashP2PModal({
   const [conceptNote, setConceptNote] = useState('Groceries & medicine for the week');
   const [showContactPicker, setShowContactPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Selector de destinatarios (Pestañas ergonómicas)
   const [pickerTab, setPickerTab] = useState<'contacts' | 'family' | 'add_new'>('contacts');
@@ -739,18 +745,17 @@ export function KinCashP2PModal({
         </p>
       </div>
 
-      {/* Contact Picker Bottom Sheet Modal */}
-      {showContactPicker && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center animate-fade-in"
-          onClick={() => setShowContactPicker(false)}
-        >
+      {/* Contact Picker Dialog Modal (Elevado, Centrado y Portaleado) */}
+      {showContactPicker && mounted && typeof document !== 'undefined' &&
+        createPortal(
           <div
-            className="w-full max-w-[412px] bg-[#121320] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 h-[82vh] max-h-[640px] flex flex-col shadow-2xl animate-slide-up z-[101] pb-6"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+            onClick={() => setShowContactPicker(false)}
           >
-            {/* Grab handle */}
-            <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4" />
+            <div
+              className="w-full max-w-[392px] bg-[#121320] border border-white/15 rounded-3xl p-5 max-h-[84vh] flex flex-col shadow-2xl relative my-auto animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
 
             {/* Header */}
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
@@ -971,7 +976,7 @@ export function KinCashP2PModal({
 
             {/* TAB 3: Agregar Nuevo Destinatario (Manual / Celular) */}
             {pickerTab === 'add_new' && (
-              <div className="flex flex-col flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+              <div className="flex flex-col flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin pb-4">
                 <div className="flex items-center justify-between flex-shrink-0">
                   <div>
                     <h4 className="text-xs font-bold text-white uppercase tracking-wider">
@@ -1085,7 +1090,7 @@ export function KinCashP2PModal({
                   type="button"
                   onClick={handleAddNewKinCashContact}
                   disabled={isSubmittingContact}
-                  className="w-full h-[52px] rounded-2xl bg-primary hover:bg-primary-container text-on-primary text-sm font-bold transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] mt-2"
+                  className="w-full h-[52px] rounded-2xl bg-primary hover:bg-primary-container text-on-primary text-sm font-bold transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] mt-2 mb-2 flex-shrink-0"
                 >
                   {isSubmittingContact ? (
                     <span>Guardando contacto...</span>
@@ -1099,7 +1104,8 @@ export function KinCashP2PModal({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
