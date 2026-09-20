@@ -4,6 +4,9 @@
 .env.local
 *.pem
 *.key
+*firebase*.json
+*service-account*.json
+config/*.json
 
 # Dependencias de Node
 node_modules/

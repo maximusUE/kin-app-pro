@@ -1,6 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { validarCLABE } from '@/domain/spei/clabeValidator';
+import {
+  saveUserToFirestore,
+  saveContactToFirestore,
+  deleteContactFromFirestore,
+  saveTransactionToFirestore,
+} from './firebase';
 
 export const USD_TO_MXN_RATE = 20.45;
 
@@ -215,6 +221,7 @@ export function registerNewUser(params: {
 
   db.users.push(newUser);
   saveDatabase(db);
+  saveUserToFirestore(newUser).catch((e) => console.warn('[Firebase Sync User Error]', e));
   return newUser;
 }
 
@@ -256,6 +263,7 @@ export function createContact(params: {
 
   db.contacts.unshift(newContact);
   saveDatabase(db);
+  saveContactToFirestore(params.userId, newContact).catch((e) => console.warn('[Firebase Sync Contact Error]', e));
   return newContact;
 }
 
@@ -265,6 +273,7 @@ export function deleteContact(userId: string, contactId: string): boolean {
   db.contacts = db.contacts.filter((c) => !(c.userId === userId && c.id === contactId));
   if (db.contacts.length !== initialLength) {
     saveDatabase(db);
+    deleteContactFromFirestore(userId, contactId).catch((e) => console.warn('[Firebase Sync Delete Contact Error]', e));
     return true;
   }
   return false;
@@ -353,6 +362,7 @@ export function executeSpeiTransfer(params: {
 
   db.transactions.unshift(tx);
   saveDatabase(db);
+  saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
 
   return { success: true, transaction: tx };
 }
@@ -419,6 +429,7 @@ export function executeBillPayment(params: {
 
   db.transactions.unshift(tx);
   saveDatabase(db);
+  saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
 
   return { success: true, transaction: tx };
 }
@@ -467,6 +478,7 @@ export function executeKinCashSend(params: {
 
   db.transactions.unshift(tx);
   saveDatabase(db);
+  saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
 
   return { success: true, transaction: tx };
 }
