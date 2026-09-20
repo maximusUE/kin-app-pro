@@ -3266,9 +3266,12 @@ export default function MobileApp() {
                 <input
                   type="text"
                   placeholder="Nombre (ej. Hermano)"
+                  autoCapitalize="words"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={newContactName}
-                  onChange={(e) => setNewContactName(e.target.value)}
-                  className="bg-[#181928] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-[#8E91A5] focus:outline-none focus:border-[#2ED5A4]"
+                  onChange={(e) => setNewContactName(e.target.value.replace(/(^|\s)(\p{L})/gu, (_, s, c) => s + c.toUpperCase()))}
+                  className="bg-[#181928] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-[#8E91A5] focus:outline-none focus:border-[#2ED5A4] capitalize"
                 />
                 <input
                   type="tel"
@@ -3430,10 +3433,13 @@ export default function MobileApp() {
                 <div className="auth-input-group">
                   <input
                     type="text"
+                    autoCapitalize="words"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={draftUserFirstName}
-                    onChange={(e) => setDraftUserFirstName(e.target.value)}
+                    onChange={(e) => setDraftUserFirstName(e.target.value.replace(/(^|\s)(\p{L})/gu, (_, s, c) => s + c.toUpperCase()))}
                     placeholder="Nombre"
-                    className="auth-input-field"
+                    className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
                 </div>
@@ -3446,10 +3452,13 @@ export default function MobileApp() {
                 <div className="auth-input-group">
                   <input
                     type="text"
+                    autoCapitalize="words"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={draftUserLastName}
-                    onChange={(e) => setDraftUserLastName(e.target.value)}
+                    onChange={(e) => setDraftUserLastName(e.target.value.replace(/(^|\s)(\p{L})/gu, (_, s, c) => s + c.toUpperCase()))}
                     placeholder="Apellido"
-                    className="auth-input-field"
+                    className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
                 </div>

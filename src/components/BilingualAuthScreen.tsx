@@ -34,6 +34,11 @@ export function BilingualAuthScreen({
   const [isFaceIdLoading, setIsFaceIdLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Formatear automáticamente la primera letra de cada palabra a mayúscula
+  const capitalizeWords = (val: string) => {
+    return val.replace(/(^|\s)(\p{L})/gu, (_, space, char) => space + char.toUpperCase());
+  };
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
@@ -54,8 +59,8 @@ export function BilingualAuthScreen({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
+          firstName: capitalizeWords(firstName.trim()),
+          lastName: capitalizeWords(lastName.trim()),
           phone: `${phonePrefix} ${phone}`.trim(),
           email: email.trim(),
           password: password.trim() || 'KinVault2025$Secure',
@@ -378,11 +383,14 @@ export function BilingualAuthScreen({
                     </label>
                     <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
                       <input
-                        className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline"
+                        className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline capitalize"
                         placeholder="Nombre"
                         type="text"
+                        autoCapitalize="words"
+                        autoCorrect="off"
+                        spellCheck={false}
                         value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        onChange={(e) => setFirstName(capitalizeWords(e.target.value))}
                         required
                       />
                     </div>
@@ -393,11 +401,14 @@ export function BilingualAuthScreen({
                     </label>
                     <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
                       <input
-                        className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline"
+                        className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline capitalize"
                         placeholder="Apellidos"
                         type="text"
+                        autoCapitalize="words"
+                        autoCorrect="off"
+                        spellCheck={false}
                         value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        onChange={(e) => setLastName(capitalizeWords(e.target.value))}
                         required
                       />
                     </div>

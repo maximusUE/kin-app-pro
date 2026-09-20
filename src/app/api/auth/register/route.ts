@@ -13,6 +13,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const capitalizeWords = (val: string) =>
+      val.replace(/(^|\s)(\p{L})/gu, (_, space, char) => space + char.toUpperCase());
+
+    const cleanFirstName = capitalizeWords(firstName.trim());
+    const cleanLastName = capitalizeWords((lastName || '').trim());
+
     const existing = findUserByEmailOrPhone(email);
     if (existing) {
       return NextResponse.json({
@@ -24,8 +30,8 @@ export async function POST(request: Request) {
     }
 
     const newUser = registerNewUser({
-      firstName,
-      lastName: lastName || '',
+      firstName: cleanFirstName,
+      lastName: cleanLastName,
       email,
       phone: phone || '+1 (555) 000-0000',
       password: password || 'KinVault2025$Secure',
