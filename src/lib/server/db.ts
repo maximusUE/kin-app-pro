@@ -6,6 +6,8 @@ import {
   saveContactToFirestore,
   deleteContactFromFirestore,
   saveTransactionToFirestore,
+  saveTransferToFirestore,
+  saveAuditLogToFirestore,
 } from './firebase';
 
 export const USD_TO_MXN_RATE = 20.45;
@@ -639,6 +641,45 @@ export function executeSpeiTransfer(params: {
   saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
   saveUserToFirestore(user).catch((e) => console.warn('[Firebase Sync User Error]', e));
 
+  // 4. Sincronizar en la colección raíz 'transfers' de Cloud Firestore (Vista Administrador)
+  const transferDocId = `TX-2026-${txId.replace(/\D/g, '') || Math.floor(100000 + Math.random() * 900000)}`;
+  saveTransferToFirestore({
+    id: transferDocId,
+    amountMxn: amountMXN,
+    amountUsd: params.amountUSD,
+    createdAt: now.toISOString(),
+    exchangeRate: USD_TO_MXN_RATE,
+    feeUsd: 0,
+    recipientBank: bancoNombre || 'Red Banxico SPEI',
+    recipientCity: recipientUser?.state ? `${recipientUser.state}, ${recipientUser.country}` : 'México',
+    recipientName: params.recipientName,
+    senderName: `${user.firstName} ${user.lastName}`.trim(),
+    senderId: user.id,
+    recipientId: recipientUser?.id || '',
+    recipientPhone: params.recipientPhone || '',
+    status: 'SPEI_LIQUIDADO',
+    trackingNumber: claveRastreoBanxico || txId,
+    type: 'REMESAS_SPEI',
+    deliveryMethod: params.deliveryMethod || (params.pickupStore ? 'cash' : 'bank'),
+    updatedAt: now.toISOString(),
+    concept: params.concept || 'Envío de remesa USA -> México',
+  }).catch((e) => console.warn('[Firebase Sync Transfer Error]', e));
+
+  // 5. Registrar evento en audit_logs de Firestore
+  saveAuditLogToFirestore({
+    action: 'SPEI_TRANSFER_EXECUTED',
+    details: {
+      transferId: transferDocId,
+      trackingNumber: claveRastreoBanxico,
+      amountUSD: params.amountUSD,
+      amountMXN,
+      senderName: `${user.firstName} ${user.lastName}`.trim(),
+      recipientName: params.recipientName,
+      status: 'SPEI_LIQUIDADO',
+    },
+    userEmailOrPhone: user.email || user.phone || user.id,
+  }).catch((e) => console.warn('[Firebase Audit Error]', e));
+
   return { success: true, transaction: tx };
 }
 
@@ -699,6 +740,43 @@ export function executeBillPayment(params: {
   saveDatabase(db);
   saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
   saveUserToFirestore(user).catch((e) => console.warn('[Firebase Sync User Error]', e));
+
+  // 4. Sincronizar en la colección raíz 'transfers' de Cloud Firestore (Vista Administrador)
+  const transferDocId = `TX-2026-${tx.refNumber.replace(/\D/g, '') || Math.floor(100000 + Math.random() * 900000)}`;
+  saveTransferToFirestore({
+    id: transferDocId,
+    amountMxn: params.amountMXN,
+    amountUsd: amountUSD,
+    createdAt: tx.createdAt,
+    exchangeRate: USD_TO_MXN_RATE,
+    feeUsd: 0,
+    recipientBank: params.serviceName,
+    recipientCity: 'México',
+    recipientName: params.serviceName,
+    senderName: `${user.firstName} ${user.lastName}`.trim(),
+    senderId: user.id,
+    status: 'SPEI_LIQUIDADO',
+    trackingNumber: `CFDI-${params.referenceNumber}`,
+    type: 'BILL_PAYMENT',
+    deliveryMethod: 'service_pay',
+    updatedAt: tx.createdAt,
+    concept: `Pago de servicio ${params.serviceName} (${params.referenceNumber})`,
+  }).catch((e) => console.warn('[Firebase Sync Transfer Error]', e));
+
+  // 5. Registrar evento en audit_logs de Firestore
+  saveAuditLogToFirestore({
+    action: 'BILL_PAYMENT_EXECUTED',
+    details: {
+      transferId: transferDocId,
+      service: params.serviceName,
+      reference: params.referenceNumber,
+      amountMXN: params.amountMXN,
+      amountUSD,
+      senderName: `${user.firstName} ${user.lastName}`.trim(),
+      status: 'SPEI_LIQUIDADO',
+    },
+    userEmailOrPhone: user.email || user.phone || user.id,
+  }).catch((e) => console.warn('[Firebase Audit Error]', e));
 
   return { success: true, transaction: tx };
 }
@@ -793,6 +871,44 @@ export function executeKinCashSend(params: {
   saveDatabase(db);
   saveTransactionToFirestore(params.userId, tx).catch((e) => console.warn('[Firebase Sync Tx Error]', e));
   saveUserToFirestore(user).catch((e) => console.warn('[Firebase Sync User Error]', e));
+
+  // 4. Sincronizar en la colección raíz 'transfers' de Cloud Firestore (Vista Administrador)
+  const transferDocId = `TX-2026-${txId.replace(/\D/g, '') || Math.floor(100000 + Math.random() * 900000)}`;
+  saveTransferToFirestore({
+    id: transferDocId,
+    amountMxn: amountMXN,
+    amountUsd: params.amountUSD,
+    createdAt: now.toISOString(),
+    exchangeRate: USD_TO_MXN_RATE,
+    feeUsd: 0,
+    recipientBank: 'Red KIN Cash P2P',
+    recipientCity: recipientUser?.state ? `${recipientUser.state}, ${recipientUser.country}` : 'México',
+    recipientName: params.recipientName,
+    senderName: `${user.firstName} ${user.lastName}`.trim(),
+    senderId: user.id,
+    recipientId: recipientUser?.id || '',
+    recipientPhone: params.recipientPhone || '',
+    status: 'SPEI_LIQUIDADO',
+    trackingNumber: `KIN-P2P-${txId.replace(/\D/g, '')}`,
+    type: 'KIN_CASH_P2P',
+    deliveryMethod: 'kincash',
+    updatedAt: now.toISOString(),
+    concept: params.concept || 'Transferencia KIN Cash P2P Express',
+  }).catch((e) => console.warn('[Firebase Sync Transfer Error]', e));
+
+  // 5. Registrar evento en audit_logs de Firestore
+  saveAuditLogToFirestore({
+    action: 'KIN_CASH_SENT',
+    details: {
+      transferId: transferDocId,
+      amountUSD: params.amountUSD,
+      amountMXN,
+      senderName: `${user.firstName} ${user.lastName}`.trim(),
+      recipientName: params.recipientName,
+      status: 'SPEI_LIQUIDADO',
+    },
+    userEmailOrPhone: user.email || user.phone || user.id,
+  }).catch((e) => console.warn('[Firebase Audit Error]', e));
 
   return { success: true, transaction: tx };
 }

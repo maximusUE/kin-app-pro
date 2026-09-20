@@ -84,8 +84,14 @@ function toFirestoreFields(obj: Record<string, any>): Record<string, any> {
   const fields: Record<string, any> = {};
   for (const [key, val] of Object.entries(obj)) {
     if (val === undefined || val === null) continue;
-    if (typeof val === 'string') {
-      fields[key] = { stringValue: val };
+    if (val instanceof Date) {
+      fields[key] = { timestampValue: val.toISOString() };
+    } else if (typeof val === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(val)) {
+        fields[key] = { timestampValue: val.endsWith('Z') ? val : `${val}Z` };
+      } else {
+        fields[key] = { stringValue: val };
+      }
     } else if (typeof val === 'number') {
       fields[key] = Number.isInteger(val) ? { integerValue: val.toString() } : { doubleValue: val };
     } else if (typeof val === 'boolean') {
@@ -295,3 +301,132 @@ export async function deleteTransactionFromFirestore(userId: string, txId: strin
     return false;
   }
 }
+
+export interface FirestoreTransferRecord {
+  id?: string;
+  amountMxn: number;
+  amountUsd: number;
+  createdAt?: string | Date;
+  exchangeRate: number;
+  feeUsd: number;
+  recipientBank: string;
+  recipientCity: string;
+  recipientName: string;
+  senderName: string;
+  senderId?: string;
+  recipientId?: string;
+  recipientPhone?: string;
+  status: string; // e.g. "SPEI_LIQUIDADO", "COMPLETADO"
+  trackingNumber: string;
+  updatedAt?: string | Date;
+  type?: string; // e.g. "REMESAS_SPEI", "KIN_CASH_P2P", "BILL_PAYMENT"
+  deliveryMethod?: string;
+  concept?: string;
+}
+
+/**
+ * Guarda una transferencia en la colección raíz "transfers" de Cloud Firestore
+ * Corresponde a la vista principal del Administrador mostrada en Firebase Console
+ */
+export async function saveTransferToFirestore(transfer: FirestoreTransferRecord): Promise<boolean> {
+  try {
+    const serviceAccount = getServiceAccount();
+    const token = await getAccessToken();
+    if (!serviceAccount || !token) return false;
+
+    const docId = transfer.id || `TX-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+    const url = `https://firestore.googleapis.com/v1/projects/${serviceAccount.project_id}/databases/(default)/documents/transfers/${docId}`;
+
+    const nowIso = new Date().toISOString();
+    const payload = {
+      amountMxn: Number(transfer.amountMxn) || 0,
+      amountUsd: Number(transfer.amountUsd) || 0,
+      createdAt: transfer.createdAt || nowIso,
+      exchangeRate: Number(transfer.exchangeRate) || 20.45,
+      feeUsd: Number(transfer.feeUsd) || 0,
+      recipientBank: transfer.recipientBank || 'Red Banxico SPEI',
+      recipientCity: transfer.recipientCity || 'México',
+      recipientName: transfer.recipientName || 'Beneficiario',
+      senderName: transfer.senderName || 'Usuario KIN',
+      status: transfer.status || 'SPEI_LIQUIDADO',
+      trackingNumber: transfer.trackingNumber || `KIN-${Date.now()}`,
+      updatedAt: transfer.updatedAt || nowIso,
+      ...(transfer.type && { type: transfer.type }),
+      ...(transfer.senderId && { senderId: transfer.senderId }),
+      ...(transfer.recipientId && { recipientId: transfer.recipientId }),
+      ...(transfer.recipientPhone && { recipientPhone: transfer.recipientPhone }),
+      ...(transfer.deliveryMethod && { deliveryMethod: transfer.deliveryMethod }),
+      ...(transfer.concept && { concept: transfer.concept }),
+    };
+
+    const fields = toFirestoreFields(payload);
+
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fields }),
+    });
+
+    if (res.ok) {
+      console.log(`✅ [Firebase Cloud Firestore] Transferencia guardada en transfers/${docId}: ${payload.senderName} ➔ ${payload.recipientName} ($${payload.amountUsd} USD)`);
+      return true;
+    } else {
+      const err = await res.json();
+      console.warn(`⚠️ [Firebase Firestore Warning transfers] HTTP ${res.status}:`, err);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ [Firebase saveTransfer Error]:', error);
+    return false;
+  }
+}
+
+export interface FirestoreAuditRecord {
+  action: string;
+  details: Record<string, any>;
+  userEmailOrPhone?: string;
+  createdAt?: string | Date;
+  timestampIso?: string;
+}
+
+/**
+ * Guarda un registro de auditoría en la colección "audit_logs" de Cloud Firestore
+ */
+export async function saveAuditLogToFirestore(audit: FirestoreAuditRecord): Promise<boolean> {
+  try {
+    const serviceAccount = getServiceAccount();
+    const token = await getAccessToken();
+    if (!serviceAccount || !token) return false;
+
+    const url = `https://firestore.googleapis.com/v1/projects/${serviceAccount.project_id}/databases/(default)/documents/audit_logs`;
+
+    const nowIso = new Date().toISOString();
+    const payload = {
+      action: audit.action,
+      details: audit.details,
+      createdAt: audit.createdAt || nowIso,
+      userEmailOrPhone: audit.userEmailOrPhone || 'app@kin-app.com',
+      timestampIso: audit.timestampIso || nowIso,
+    };
+
+    const fields = toFirestoreFields(payload);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fields }),
+    });
+
+    return res.ok;
+  } catch (error) {
+    console.error('❌ [Firebase saveAuditLog Error]:', error);
+    return false;
+  }
+}
+
