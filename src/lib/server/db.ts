@@ -170,9 +170,17 @@ export function findUserByEmailOrPhone(identifier: string): UserProfile | undefi
   );
 }
 
+const LEGACY_ID_MAP: Record<string, string> = {
+  'user-1789863039309': 'user_jose_eligio',
+  'user-1789925173232': 'user_maricela_fernandez',
+  'user-1789928316890': 'user_jaime_gutierrez',
+  'user-1789928551412': 'user_manuel_gomez',
+};
+
 export function findUserById(id: string): UserProfile | undefined {
   const db = loadDatabase();
-  return db.users.find((u) => u.id === id);
+  const effectiveId = LEGACY_ID_MAP[id] || id;
+  return db.users.find((u) => u.id === effectiveId || u.id === id);
 }
 
 export function registerNewUser(params: {

@@ -1435,6 +1435,7 @@ export default function MobileApp() {
               contacts={contactsList}
               onViewHistory={() => setActiveTab('transactions')}
               exchangeRate={USD_TO_MXN_RATE}
+              userBalanceUSD={executiveBalance}
             />
           </div>
         )}
@@ -3250,6 +3251,8 @@ export default function MobileApp() {
           setShowKinCashModal(false);
           setActiveTab('transactions');
         }}
+        exchangeRate={USD_TO_MXN_RATE}
+        userBalanceUSD={executiveBalance}
       />
       <ClientVaultModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
       <AppSettingsModal

@@ -34,6 +34,7 @@ export interface KinCashP2PModalProps {
   contacts?: ContactItem[];
   onViewHistory?: () => void;
   exchangeRate?: number;
+  userBalanceUSD?: number;
 }
 
 export function KinCashP2PModal({
@@ -44,8 +45,9 @@ export function KinCashP2PModal({
   contacts = DEFAULT_CONTACTS,
   onViewHistory,
   exchangeRate = 20.45,
+  userBalanceUSD = 1000.00,
 }: KinCashP2PModalProps) {
-  const [currentAmount, setCurrentAmount] = useState('120.00');
+  const [currentAmount, setCurrentAmount] = useState('0');
   const [selectedContact, setSelectedContact] = useState<ContactItem | null>(contacts[0] || null);
   const [conceptNote, setConceptNote] = useState('Groceries & medicine for the week');
   const [showContactPicker, setShowContactPicker] = useState(false);
@@ -83,27 +85,68 @@ export function KinCashP2PModal({
     );
   }, [contacts, searchQuery]);
 
-  // Manejo del Teclado Numérico Táctil
+  // Manejo del Teclado Numérico Táctil Reactivo
   const pressKey = (key: string) => {
     if (isDispatched) return;
-    if (currentAmount === '0' || currentAmount === '0.00') {
-      setCurrentAmount(key === '.' ? '0.' : key);
-    } else {
-      if (key === '.' && currentAmount.includes('.')) return;
-      const parts = currentAmount.split('.');
-      if (parts.length > 1 && parts[1].length >= 2) return;
-      setCurrentAmount((prev) => prev + key);
-    }
+    setCurrentAmount((prev) => {
+      // Si el valor actual es 0, reemplazar directamente excepto si es punto decimal
+      if (prev === '0' || prev === '0.00' || prev === '') {
+        if (key === '.') return '0.';
+        return key;
+      }
+
+      // Evitar múltiples puntos decimales
+      if (key === '.' && prev.includes('.')) return prev;
+
+      // Limitar a máximo 2 decimales después del punto
+      if (prev.includes('.')) {
+        const [, decimals] = prev.split('.');
+        if (decimals && decimals.length >= 2) return prev;
+      }
+
+      // Limitar a 6 cifras enteras ($999,999 máximo)
+      const intPart = prev.split('.')[0];
+      if (key !== '.' && !prev.includes('.') && intPart.length >= 6) return prev;
+
+      return prev + key;
+    });
   };
 
   const pressBackspace = () => {
     if (isDispatched) return;
-    if (currentAmount.length > 1) {
-      setCurrentAmount((prev) => prev.slice(0, -1));
-    } else {
-      setCurrentAmount('0');
-    }
+    setCurrentAmount((prev) => {
+      if (prev.length <= 1 || prev === '0.00') return '0';
+      const next = prev.slice(0, -1);
+      return next === '' ? '0' : next;
+    });
   };
+
+  const clearAmount = () => {
+    if (isDispatched) return;
+    setCurrentAmount('0');
+  };
+
+  // Escuchar teclado físico para pruebas en computadora
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        return;
+      }
+      if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'].includes(e.key)) {
+        e.preventDefault();
+        pressKey(e.key);
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault();
+        pressBackspace();
+      } else if (e.key === 'Escape') {
+        clearAmount();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDispatched]);
 
   // Slider Drag Interactions (Mouse & Touch)
   const handleDragStart = (clientX: number) => {
@@ -312,7 +355,7 @@ export function KinCashP2PModal({
       <div className="flex flex-col items-center justify-center pt-2 pb-1 relative">
         <div className="flex items-center gap-2 mb-1">
           <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-caption-sm text-caption-sm font-medium">
-            USD Transit Balance: $1,450.80
+            USD Transit Balance: ${Number(userBalanceUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
 
@@ -320,8 +363,18 @@ export function KinCashP2PModal({
         <div className="flex items-baseline justify-center gap-1.5 select-none tracking-tight">
           <span className="font-display-hero text-headline-lg text-primary font-bold leading-none">$</span>
           <span className="font-headline-lg text-[44px] text-white font-bold leading-none tracking-tight">
-            {currentAmount}
+            {currentAmount === '' || currentAmount === '0' ? '0' : currentAmount}
           </span>
+          {currentAmount !== '0' && (
+            <button
+              type="button"
+              onClick={clearAmount}
+              className="ml-2 text-on-surface-variant hover:text-white text-xs px-2.5 py-1 rounded-full bg-surface-container-high border border-white/10 cursor-pointer active:scale-90 transition-all"
+              title="Borrar monto a cero"
+            >
+              Borrar
+            </button>
+          )}
         </div>
 
         {/* Live FX & Fee Guarantee */}
@@ -335,16 +388,42 @@ export function KinCashP2PModal({
         </div>
 
         {/* Transfer Concept Note Chip (Editable) */}
-        <div className="mt-4 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-all cursor-pointer shadow-sm border border-white/5">
+        <div className="mt-3.5 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-all cursor-pointer shadow-sm border border-white/5">
           <span className="text-[14px]">🛒</span>
           <input
             className="bg-transparent border-none text-white font-caption-sm text-caption-sm focus:outline-none w-56 text-center truncate"
-            placeholder="Add payment concept note..."
+            placeholder="Concepto de pago..."
             type="text"
             value={conceptNote}
             onChange={(e) => setConceptNote(e.target.value)}
           />
           <span className="material-symbols-outlined text-on-surface-variant text-[14px]">edit</span>
+        </div>
+
+        {/* Quick Amount Chips */}
+        <div className="flex items-center justify-center gap-2 mt-2.5 flex-wrap">
+          {['20', '50', '100', '200'].map((amt) => (
+            <button
+              key={amt}
+              type="button"
+              onClick={() => setCurrentAmount(amt)}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer border active:scale-95 ${
+                currentAmount === amt
+                  ? 'bg-primary text-[#002116] border-primary shadow-sm scale-105'
+                  : 'bg-surface-container text-white/80 border-white/10 hover:border-primary/40'
+              }`}
+            >
+              ${amt}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={clearAmount}
+            className="px-2.5 py-1 rounded-full text-[11px] font-semibold text-on-surface-variant hover:text-white bg-white/5 border border-white/10 cursor-pointer active:scale-95"
+            title="Borrar a cero"
+          >
+            C
+          </button>
         </div>
       </div>
 
@@ -355,7 +434,7 @@ export function KinCashP2PModal({
             key={key}
             type="button"
             onClick={() => pressKey(key)}
-            className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
+            className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
           >
             {key}
           </button>
@@ -363,21 +442,21 @@ export function KinCashP2PModal({
         <button
           type="button"
           onClick={() => pressKey('.')}
-          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[24px] font-bold shadow-md cursor-pointer border border-white/5"
+          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[24px] font-bold shadow-md cursor-pointer border border-white/5"
         >
           •
         </button>
         <button
           type="button"
           onClick={() => pressKey('0')}
-          className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
+          className="h-13 py-3 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest active:scale-95 active:bg-primary/25 transition-all flex items-center justify-center text-white font-financial-mono text-[22px] font-bold shadow-md cursor-pointer border border-white/5"
         >
           0
         </button>
         <button
           type="button"
           onClick={pressBackspace}
-          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 transition-all flex items-center justify-center text-on-surface-variant hover:text-white shadow-md cursor-pointer border border-white/5"
+          className="h-13 py-3 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-highest active:scale-95 active:bg-red-500/25 transition-all flex items-center justify-center text-on-surface-variant hover:text-white shadow-md cursor-pointer border border-white/5"
           aria-label="Borrar número"
         >
           <span className="material-symbols-outlined text-[22px]">backspace</span>
@@ -405,11 +484,17 @@ export function KinCashP2PModal({
                 : 1,
             }}
           >
-            <span className="text-white font-semibold">Slide to send</span>
-            <span className="text-primary font-financial-mono font-bold">
-              ${Number(numAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            <span className="material-symbols-outlined text-[18px] text-white">chevron_right</span>
+            {numAmount <= 0 ? (
+              <span className="text-white/60 text-xs font-semibold">Teclea un monto para enviar</span>
+            ) : (
+              <>
+                <span className="text-white font-semibold">Desliza para enviar</span>
+                <span className="text-primary font-financial-mono font-bold">
+                  ${Number(numAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className="material-symbols-outlined text-[18px] text-white">chevron_right</span>
+              </>
+            )}
           </div>
 
           {/* Transfer status overlay message */}
