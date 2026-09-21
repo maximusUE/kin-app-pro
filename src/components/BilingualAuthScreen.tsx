@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export interface BilingualAuthScreenProps {
   onLoginSuccess?: (userData?: any) => void;
@@ -33,11 +34,6 @@ export function BilingualAuthScreen({
   const [isLoading, setIsLoading] = useState(false);
   const [isFaceIdLoading, setIsFaceIdLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Formatear automáticamente la primera letra de cada palabra a mayúscula
-  const capitalizeWords = (val: string) => {
-    return val.replace(/(^|\s)(\p{L})/gu, (_, space, char) => space + char.toUpperCase());
-  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);

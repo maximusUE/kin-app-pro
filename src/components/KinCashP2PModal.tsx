@@ -11,6 +11,7 @@ import {
   StatusBatteryIcon,
 } from './Icons';
 import { KinLogo } from './KinLogo';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export interface ContactItem {
   id: string;
@@ -209,7 +210,7 @@ export function KinCashP2PModal({
 
   // Manejo de alta inmediata de contacto para KIN Cash (P2P)
   const handleAddNewKinCashContact = async () => {
-    const trimmedName = newContactName.trim();
+    const trimmedName = capitalizeWords(newContactName.trim());
     const trimmedPhone = newContactPhone.trim();
 
     const errors: { name?: string; phone?: string } = {};
@@ -1061,12 +1062,16 @@ export function KinCashP2PModal({
                     <input
                       type="text"
                       placeholder="Ej. Jose Eligio"
+                      autoCapitalize="words"
+                      autoCorrect="off"
+                      spellCheck={false}
                       value={newContactName}
                       onChange={(e) => {
-                        setNewContactName(e.target.value);
+                        const cap = capitalizeWords(e.target.value);
+                        setNewContactName(cap);
                         if (newContactErrors?.name) setNewContactErrors((prev) => ({ ...prev, name: undefined }));
                       }}
-                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
                         newContactErrors?.name
                           ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
                           : 'border border-white/10 focus:border-primary'

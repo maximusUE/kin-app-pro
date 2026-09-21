@@ -9,6 +9,7 @@ import {
   saveTransferToFirestore,
   saveAuditLogToFirestore,
 } from './firebase';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export const USD_TO_MXN_RATE = 20.45;
 
@@ -266,7 +267,9 @@ export function registerNewUser(params: {
     return existing;
   }
 
-  const shortName = `${params.firstName.trim()} ${params.lastName.trim() ? params.lastName.trim()[0] + '.' : ''}`.trim();
+  const cleanFirstName = capitalizeWords(params.firstName.trim());
+  const cleanLastName = capitalizeWords(params.lastName.trim());
+  const shortName = `${cleanFirstName} ${cleanLastName ? cleanLastName[0] + '.' : ''}`.trim();
   
   // Generar ID con el nombre del cliente (ej: user_sofia_mendoza, user_jose_eligio)
   const sanitize = (val: string) =>
@@ -278,8 +281,8 @@ export function registerNewUser(params: {
       .replace(/_+/g, '_')
       .replace(/^_|_$/g, '');
 
-  const firstSlug = sanitize(params.firstName.trim());
-  const lastSlug = sanitize(params.lastName.trim());
+  const firstSlug = sanitize(cleanFirstName);
+  const lastSlug = sanitize(cleanLastName);
   const baseId = lastSlug ? `user_${firstSlug}_${lastSlug}` : `user_${firstSlug}`;
 
   let newId = baseId || `user_${Date.now()}`;
@@ -294,8 +297,8 @@ export function registerNewUser(params: {
 
   const newUser: UserProfile = {
     id: newId,
-    firstName: params.firstName.trim(),
-    lastName: params.lastName.trim(),
+    firstName: cleanFirstName,
+    lastName: cleanLastName,
     name: shortName,
     email: params.email.trim().toLowerCase(),
     phone: params.phone.trim(),
@@ -329,9 +332,17 @@ export function updateUserProfile(userId: string, updates: Partial<UserProfile>)
   const idx = db.users.findIndex((u) => u.id === userId);
   if (idx === -1) return null;
 
+  const sanitizedUpdates: Partial<UserProfile> = { ...updates };
+  if (sanitizedUpdates.firstName) sanitizedUpdates.firstName = capitalizeWords(sanitizedUpdates.firstName);
+  if (sanitizedUpdates.lastName) sanitizedUpdates.lastName = capitalizeWords(sanitizedUpdates.lastName);
+  if (sanitizedUpdates.name) sanitizedUpdates.name = capitalizeWords(sanitizedUpdates.name);
+  if (sanitizedUpdates.city) sanitizedUpdates.city = capitalizeWords(sanitizedUpdates.city);
+  if (sanitizedUpdates.state) sanitizedUpdates.state = capitalizeWords(sanitizedUpdates.state);
+  if (sanitizedUpdates.country) sanitizedUpdates.country = capitalizeWords(sanitizedUpdates.country);
+
   db.users[idx] = {
     ...db.users[idx],
-    ...updates,
+    ...sanitizedUpdates,
   };
   saveDatabase(db);
   saveUserToFirestore(db.users[idx]).catch((e) => console.warn('[Firebase Sync User Error]', e));
@@ -398,21 +409,27 @@ export function createContact(params: {
 }): ContactRecord {
   const db = loadDatabase();
   const canonicalUserId = USER_FALLBACK_MAP[params.userId] || params.userId;
+  const cleanName = capitalizeWords(params.name.trim());
+  const cleanFullName = capitalizeWords(params.fullName?.trim() || params.name.trim());
+  const cleanStreet = capitalizeWords(params.street?.trim() || '');
+  const cleanState = capitalizeWords(params.state?.trim() || '');
+  const cleanCountry = capitalizeWords(params.country?.trim() || 'Mexico');
+
   const newContact: ContactRecord = {
     id: `c-${Date.now()}`,
     userId: canonicalUserId,
-    name: params.name.trim(),
-    fullName: params.fullName?.trim() || params.name.trim(),
+    name: cleanName,
+    fullName: cleanFullName,
     avatar: params.avatar || '👤',
     role: params.role?.trim() || 'Beneficiario directo',
-    country: params.country?.trim() || 'Mexico',
+    country: cleanCountry,
     bank: params.bank?.trim() || 'Banco en México',
     photoUrl: params.photoUrl || '',
     clabe: params.clabe?.trim() || '',
     phone: params.phone?.trim() || '',
-    street: params.street?.trim() || '',
+    street: cleanStreet,
     houseNumber: params.houseNumber?.trim() || '',
-    state: params.state?.trim() || '',
+    state: cleanState,
     zipCode: params.zipCode?.trim() || '',
   };
 
@@ -538,6 +555,8 @@ export function executeSpeiTransfer(params: {
     return { success: false, error: 'Requisito regulatorio CNBV: El teléfono del beneficiario es obligatorio' };
   }
 
+  const cleanRecipientName = capitalizeWords(params.recipientName.trim());
+
   // Verificar Fondos
   if (user.balanceUSD < params.amountUSD) {
     return {
@@ -584,7 +603,7 @@ export function executeSpeiTransfer(params: {
   const tx: TransactionRecord = {
     id: `tx-${Date.now()}`,
     userId: user.id,
-    title: `${params.recipientName} (${params.pickupStore ? params.pickupStore.toUpperCase() : bancoNombre})`,
+    title: `${cleanRecipientName} (${params.pickupStore ? params.pickupStore.toUpperCase() : bancoNombre})`,
     category: params.pickupStore ? `${params.pickupStore} Cash Pickup` : 'SPEI Banxico Inmediato',
     time: `Hoy, ${timeStr}`,
     dateGroup: 'Hoy',
@@ -597,7 +616,7 @@ export function executeSpeiTransfer(params: {
     claveRastreoBanxico,
     bancoDestino: bancoNombre,
     cuentaBeneficiario: params.clabe,
-    nombreBeneficiario: params.recipientName,
+    nombreBeneficiario: cleanRecipientName,
     createdAt: now.toISOString(),
   };
 
@@ -652,7 +671,7 @@ export function executeSpeiTransfer(params: {
     feeUsd: 0,
     recipientBank: bancoNombre || 'Red Banxico SPEI',
     recipientCity: recipientUser?.state ? `${recipientUser.state}, ${recipientUser.country}` : 'México',
-    recipientName: params.recipientName,
+    recipientName: cleanRecipientName,
     senderName: `${user.firstName} ${user.lastName}`.trim(),
     senderId: user.id,
     recipientId: recipientUser?.id || '',
@@ -674,7 +693,7 @@ export function executeSpeiTransfer(params: {
       amountUSD: params.amountUSD,
       amountMXN,
       senderName: `${user.firstName} ${user.lastName}`.trim(),
-      recipientName: params.recipientName,
+      recipientName: cleanRecipientName,
       status: 'SPEI_LIQUIDADO',
     },
     userEmailOrPhone: user.email || user.phone || user.id,
@@ -806,6 +825,8 @@ export function executeKinCashSend(params: {
     return { success: false, error: 'Requisito KIN Cash: El teléfono celular del destinatario es obligatorio' };
   }
 
+  const cleanRecipientName = capitalizeWords(params.recipientName.trim());
+
   if (user.balanceUSD < params.amountUSD) {
     return {
       success: false,
@@ -823,7 +844,7 @@ export function executeKinCashSend(params: {
   const tx: TransactionRecord = {
     id: `tx-kin-${Date.now()}`,
     userId: user.id,
-    title: `KIN Cash para ${params.recipientName}`,
+    title: `KIN Cash para ${cleanRecipientName}`,
     category: 'Recarga / SPEI P2P Inmediato',
     time: `Hoy, ${timeStr}`,
     dateGroup: 'Hoy',
@@ -839,7 +860,7 @@ export function executeKinCashSend(params: {
   db.transactions.unshift(tx);
 
   // DOBLE PARTIDA: Si el destinatario es un cliente / familiar KIN registrado, acreditar saldo y registrar transacción de ingreso
-  const recipientUser = findRecipientUser(params.recipientId || params.recipientName, params.recipientPhone);
+  const recipientUser = findRecipientUser(params.recipientId || cleanRecipientName, params.recipientPhone);
   if (recipientUser && recipientUser.id !== user.id) {
     // 1. Acreditar saldo en la cuenta del destinatario
     recipientUser.balanceUSD = +(recipientUser.balanceUSD + params.amountUSD).toFixed(2);
@@ -883,7 +904,7 @@ export function executeKinCashSend(params: {
     feeUsd: 0,
     recipientBank: 'Red KIN Cash P2P',
     recipientCity: recipientUser?.state ? `${recipientUser.state}, ${recipientUser.country}` : 'México',
-    recipientName: params.recipientName,
+    recipientName: cleanRecipientName,
     senderName: `${user.firstName} ${user.lastName}`.trim(),
     senderId: user.id,
     recipientId: recipientUser?.id || '',
@@ -904,7 +925,7 @@ export function executeKinCashSend(params: {
       amountUSD: params.amountUSD,
       amountMXN,
       senderName: `${user.firstName} ${user.lastName}`.trim(),
-      recipientName: params.recipientName,
+      recipientName: cleanRecipientName,
       status: 'SPEI_LIQUIDADO',
     },
     userEmailOrPhone: user.email || user.phone || user.id,

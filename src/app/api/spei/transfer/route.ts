@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { executeSpeiTransfer } from '@/lib/server/db';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { userId, clabe, recipientName, amountUSD, deliveryMethod, pickupStore, concept, recipientId, recipientPhone } = body;
 
-    if (!recipientName || !recipientName.trim()) {
+    const cleanRecipientName = capitalizeWords(recipientName?.trim());
+
+    if (!cleanRecipientName) {
       return NextResponse.json(
         { success: false, error: 'Regulación CNBV: El nombre del beneficiario es obligatorio' },
         { status: 400 }
@@ -31,7 +34,7 @@ export async function POST(request: Request) {
     const result = executeSpeiTransfer({
       userId: userId || 'user-001',
       clabe: clabe || '',
-      recipientName,
+      recipientName: cleanRecipientName,
       amountUSD: parsedAmount,
       deliveryMethod: deliveryMethod || 'cash',
       pickupStore: pickupStore || 'oxxo',

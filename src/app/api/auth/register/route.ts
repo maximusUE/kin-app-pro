@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { registerNewUser, findUserByEmailOrPhone } from '@/lib/server/db';
+import { registerNewUser, findUserByEmailOrPhone, updateUserProfile } from '@/lib/server/db';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export async function POST(request: Request) {
   try {
@@ -13,18 +14,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const capitalizeWords = (val: string) =>
-      val.replace(/(^|\s)(\p{L})/gu, (_, space, char) => space + char.toUpperCase());
-
     const cleanFirstName = capitalizeWords(firstName.trim());
     const cleanLastName = capitalizeWords((lastName || '').trim());
 
     const existing = findUserByEmailOrPhone(email);
     if (existing) {
+      // Garantizar ley de mayúsculas en usuarios recuperados
+      const updatedExisting = updateUserProfile(existing.id, {
+        firstName: cleanFirstName || existing.firstName,
+        lastName: cleanLastName || existing.lastName,
+      }) || existing;
+
       return NextResponse.json({
         success: true,
         message: 'Usuario existente recuperado con éxito',
-        user: existing,
+        user: updatedExisting,
         token: `kin-jwt-${existing.id}-${Date.now()}`,
       });
     }

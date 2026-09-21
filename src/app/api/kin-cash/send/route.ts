@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { executeKinCashSend } from '@/lib/server/db';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { userId, recipientName, amountUSD, concept, recipientId, recipientPhone } = body;
 
-    if (!recipientName || !recipientName.trim()) {
+    const cleanRecipientName = capitalizeWords(recipientName?.trim());
+
+    if (!cleanRecipientName) {
       return NextResponse.json(
         { success: false, error: 'Requisito KIN Cash: El nombre del destinatario es obligatorio' },
         { status: 400 }
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
 
     const result = executeKinCashSend({
       userId: userId || 'user-001',
-      recipientName,
+      recipientName: cleanRecipientName,
       amountUSD: parsedUSD,
       concept,
       recipientId,

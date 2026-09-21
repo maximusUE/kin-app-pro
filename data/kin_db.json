@@ -45,7 +45,7 @@
       "dailyLimit": "$300.00 USD / día",
       "dailyLimitUSD": 300,
       "monthlyLimitUSD": 750,
-      "balanceUSD": 755,
+      "balanceUSD": 655,
       "passwordHash": "12345",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true
@@ -127,6 +127,25 @@
     }
   ],
   "transactions": [
+    {
+      "id": "tx-1789998563297",
+      "userId": "user_jose_eligio",
+      "title": "Vicente Eligio (OXXO)",
+      "category": "oxxo Cash Pickup",
+      "time": "Hoy, 09:49 AM",
+      "dateGroup": "Hoy",
+      "amount": -100,
+      "amountMXN": 2045,
+      "type": "expense",
+      "iconType": "send",
+      "status": "Completado",
+      "refNumber": "SPEI-462932",
+      "claveRastreoBanxico": "KIN20260921134923JZT6L00",
+      "bancoDestino": "Red Banxico SPEI",
+      "cuentaBeneficiario": "",
+      "nombreBeneficiario": "Vicente Eligio",
+      "createdAt": "2026-09-21T13:49:23.272Z"
+    },
     {
       "id": "tx-bill-1789945956603",
       "userId": "user_jaime_gutierrez",
@@ -717,6 +736,23 @@
   ],
   "contacts": [
     {
+      "id": "c-1789998551803",
+      "userId": "user_jose_eligio",
+      "name": "Vicente Eligio",
+      "fullName": "Vicente Eligio",
+      "avatar": "🧑🏻",
+      "role": "Beneficiario directo",
+      "country": "Mexico",
+      "bank": "Red Banxico SPEI",
+      "photoUrl": "",
+      "clabe": "",
+      "phone": "1098765432",
+      "street": "Yuca",
+      "houseNumber": "82",
+      "state": "Distrito Federal",
+      "zipCode": "55510"
+    },
+    {
       "id": "c-1789944453638",
       "userId": "user-001",
       "name": "Jose Eligio",
@@ -761,7 +797,9 @@
       "bank": "SPEI Banxico",
       "photoUrl": "",
       "clabe": "",
-      "phone": "011598765432"
+      "phone": "011598765432",
+      "street": "",
+      "state": ""
     }
   ]
 }

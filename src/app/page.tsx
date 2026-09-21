@@ -83,6 +83,7 @@ import { ClientVaultModal } from '@/components/ClientVaultModal';
 import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
 import { KinLogo } from '@/components/KinLogo';
 import { BilingualAuthScreen } from '@/components/BilingualAuthScreen';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 // Tasa de cambio real de mercado USD/MXN
 const USD_TO_MXN_RATE = 20.45;
@@ -303,20 +304,22 @@ export default function MobileApp() {
   const loadUserData = (user: any) => {
     if (!user) return;
     if (user.id) setUserId(user.id);
-    if (user.firstName) setUserFirstName(user.firstName);
-    if (user.lastName) setUserLastName(user.lastName);
+    const cleanFirst = capitalizeWords(user.firstName);
+    const cleanLast = capitalizeWords(user.lastName);
+    if (cleanFirst) setUserFirstName(cleanFirst);
+    if (cleanLast) setUserLastName(cleanLast);
     if (user.name) {
-      setUserName(user.name);
-    } else if (user.firstName) {
-      const short = `${user.firstName.trim()} ${user.lastName ? user.lastName.trim()[0] + '.' : ''}`.trim();
+      setUserName(capitalizeWords(user.name));
+    } else if (cleanFirst) {
+      const short = `${cleanFirst} ${cleanLast ? cleanLast[0] + '.' : ''}`.trim();
       setUserName(short);
     }
     if (user.email) setUserEmail(user.email);
     if (user.phone) setUserPhone(user.phone);
-    if (user.city) setUserCity(user.city);
-    if (user.state) setUserState(user.state);
+    if (user.city) setUserCity(capitalizeWords(user.city));
+    if (user.state) setUserState(capitalizeWords(user.state));
     if (user.zip) setUserZip(user.zip);
-    if (user.country) setUserCountry(user.country);
+    if (user.country) setUserCountry(capitalizeWords(user.country));
     // Asignar el avatar explícito (si está vacío, deja recuadro vacío sin foto)
     setUserAvatar(user.avatar || '');
     if (user.clientId) setUserClientId(user.clientId);
@@ -447,13 +450,13 @@ export default function MobileApp() {
 
   // Abrir modal cargando valores actuales
   const handleOpenAvatarPicker = () => {
-    setDraftUserName(userName);
-    setDraftUserFirstName(userFirstName);
-    setDraftUserLastName(userLastName);
+    setDraftUserName(capitalizeWords(userName));
+    setDraftUserFirstName(capitalizeWords(userFirstName));
+    setDraftUserLastName(capitalizeWords(userLastName));
     setDraftUserEmail(userEmail);
     setDraftUserPhone(userPhone);
-    setDraftUserCity(userCity);
-    setDraftUserState(userState);
+    setDraftUserCity(capitalizeWords(userCity));
+    setDraftUserState(capitalizeWords(userState));
     setDraftUserAvatar(userAvatar);
     setCustomAvatarInput('');
     setShowAvatarPicker(true);
@@ -461,13 +464,18 @@ export default function MobileApp() {
 
   // Guardar cambios de perfil confirmados
   const handleSaveProfile = () => {
-    if (draftUserFirstName.trim()) {
-      setUserFirstName(draftUserFirstName.trim());
-      const shortName = draftUserFirstName.trim() + (draftUserLastName.trim() ? ` ${draftUserLastName.trim().charAt(0)}.` : '');
+    const cleanFirst = capitalizeWords(draftUserFirstName.trim());
+    const cleanLast = capitalizeWords(draftUserLastName.trim());
+    const cleanCity = capitalizeWords(draftUserCity.trim());
+    const cleanState = capitalizeWords(draftUserState.trim());
+
+    if (cleanFirst) {
+      setUserFirstName(cleanFirst);
+      const shortName = cleanFirst + (cleanLast ? ` ${cleanLast.charAt(0)}.` : '');
       setUserName(shortName);
     }
-    if (draftUserLastName.trim()) {
-      setUserLastName(draftUserLastName.trim());
+    if (cleanLast) {
+      setUserLastName(cleanLast);
     }
     if (draftUserEmail.trim()) {
       setUserEmail(draftUserEmail.trim());
@@ -475,32 +483,48 @@ export default function MobileApp() {
     if (draftUserPhone.trim()) {
       setUserPhone(draftUserPhone.trim());
     }
-    if (draftUserCity.trim()) {
-      setUserCity(draftUserCity.trim());
+    if (cleanCity) {
+      setUserCity(cleanCity);
     }
-    if (draftUserState.trim()) {
-      setUserState(draftUserState.trim());
+    if (cleanState) {
+      setUserState(cleanState);
     }
     setUserAvatar(draftUserAvatar);
+
+    const updatedUserObj = {
+      id: userId,
+      firstName: cleanFirst || userFirstName,
+      lastName: cleanLast || userLastName,
+      name: cleanFirst ? (cleanFirst + (cleanLast ? ` ${cleanLast.charAt(0)}.` : '')) : userName,
+      email: draftUserEmail.trim() || userEmail,
+      phone: draftUserPhone.trim() || userPhone,
+      city: cleanCity || userCity,
+      state: cleanState || userState,
+      avatar: draftUserAvatar,
+    };
+
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('kin_active_user');
         const prev = saved ? JSON.parse(saved) : {};
         const updated = {
           ...prev,
-          id: userId,
-          firstName: draftUserFirstName.trim() || userFirstName,
-          lastName: draftUserLastName.trim() || userLastName,
-          name: draftUserFirstName.trim() ? (draftUserFirstName.trim() + (draftUserLastName.trim() ? ` ${draftUserLastName.trim().charAt(0)}.` : '')) : userName,
-          email: draftUserEmail.trim() || userEmail,
-          phone: draftUserPhone.trim() || userPhone,
-          city: draftUserCity.trim() || userCity,
-          state: draftUserState.trim() || userState,
-          avatar: draftUserAvatar,
+          ...updatedUserObj,
         };
         localStorage.setItem('kin_active_user', JSON.stringify(updated));
       } catch (_) {}
     }
+
+    // Sincronizar inmediatamente con backend y Firestore
+    fetch('/api/account/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        updates: updatedUserObj,
+      }),
+    }).catch((e) => console.warn('[Profile Save Sync Error]', e));
+
     setShowAvatarPicker(false);
   };
 
@@ -631,14 +655,14 @@ export default function MobileApp() {
 
   // Agregar contacto / beneficiario con validación estricta de dirección CNBV / Banxico (USA -> México)
   const handleAddNewContact = () => {
-    const trimmedFirstName = (newContactFirstName || newContactName.split(' ')[0] || '').trim();
-    const trimmedLastName = (newContactLastName || newContactName.split(' ').slice(1).join(' ') || '').trim();
-    const trimmedName = `${trimmedFirstName} ${trimmedLastName}`.trim();
+    const trimmedFirstName = capitalizeWords((newContactFirstName || newContactName.split(' ')[0] || '').trim());
+    const trimmedLastName = capitalizeWords((newContactLastName || newContactName.split(' ').slice(1).join(' ') || '').trim());
+    const trimmedName = capitalizeWords(`${trimmedFirstName} ${trimmedLastName}`.trim());
     const trimmedPhone = newContactPhone.trim();
-    const trimmedStreet = newContactStreet.trim() || 'Av. Juárez';
+    const trimmedStreet = capitalizeWords((newContactStreet.trim() || 'Av. Juárez'));
     const trimmedHouse = newContactHouseNumber.trim() || '104';
-    const trimmedState = newContactState.trim();
-    const trimmedCountry = newContactCountry.trim() || 'Mexico';
+    const trimmedState = capitalizeWords(newContactState.trim());
+    const trimmedCountry = capitalizeWords((newContactCountry.trim() || 'Mexico'));
     const trimmedZip = newContactZip.trim() || '78201';
 
     const errors: Record<string, string> = {};
@@ -3743,12 +3767,16 @@ export default function MobileApp() {
                       <input
                         type="text"
                         placeholder="Ej. Jose"
+                        autoCapitalize="words"
+                        autoCorrect="off"
+                        spellCheck={false}
                         value={newContactFirstName}
                         onChange={(e) => {
-                          setNewContactFirstName(e.target.value);
+                          const cap = capitalizeWords(e.target.value);
+                          setNewContactFirstName(cap);
                           if (beneficiaryErrors?.firstName) setBeneficiaryErrors((prev) => prev ? { ...prev, firstName: '' } : null);
                         }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
                           beneficiaryErrors?.firstName
                             ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
                             : 'border border-white/10 focus:border-primary'
@@ -3769,12 +3797,16 @@ export default function MobileApp() {
                       <input
                         type="text"
                         placeholder="Ej. Eligio"
+                        autoCapitalize="words"
+                        autoCorrect="off"
+                        spellCheck={false}
                         value={newContactLastName}
                         onChange={(e) => {
-                          setNewContactLastName(e.target.value);
+                          const cap = capitalizeWords(e.target.value);
+                          setNewContactLastName(cap);
                           if (beneficiaryErrors?.lastName) setBeneficiaryErrors((prev) => prev ? { ...prev, lastName: '' } : null);
                         }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
                           beneficiaryErrors?.lastName
                             ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
                             : 'border border-white/10 focus:border-primary'
@@ -3833,12 +3865,16 @@ export default function MobileApp() {
                       <input
                         type="text"
                         placeholder="Ej. Av. Hidalgo"
+                        autoCapitalize="words"
+                        autoCorrect="off"
+                        spellCheck={false}
                         value={newContactStreet}
                         onChange={(e) => {
-                          setNewContactStreet(e.target.value);
+                          const cap = capitalizeWords(e.target.value);
+                          setNewContactStreet(cap);
                           if (beneficiaryErrors?.street) setBeneficiaryErrors((prev) => prev ? { ...prev, street: '' } : null);
                         }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
                           beneficiaryErrors?.street
                             ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
                             : 'border border-white/10 focus:border-primary'
@@ -3888,12 +3924,16 @@ export default function MobileApp() {
                       <input
                         type="text"
                         placeholder="Ej. Jalisco"
+                        autoCapitalize="words"
+                        autoCorrect="off"
+                        spellCheck={false}
                         value={newContactState}
                         onChange={(e) => {
-                          setNewContactState(e.target.value);
+                          const cap = capitalizeWords(e.target.value);
+                          setNewContactState(cap);
                           if (beneficiaryErrors?.state) setBeneficiaryErrors((prev) => prev ? { ...prev, state: '' } : null);
                         }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
+                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
                           beneficiaryErrors?.state
                             ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
                             : 'border border-white/10 focus:border-primary'
@@ -4066,7 +4106,7 @@ export default function MobileApp() {
                     autoCorrect="off"
                     spellCheck={false}
                     value={draftUserFirstName}
-                    onChange={(e) => setDraftUserFirstName(e.target.value.replace(/(^|\s)(\p{L})/gu, (_, s, c) => s + c.toUpperCase()))}
+                    onChange={(e) => setDraftUserFirstName(capitalizeWords(e.target.value))}
                     placeholder="Nombre"
                     className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
@@ -4085,7 +4125,7 @@ export default function MobileApp() {
                     autoCorrect="off"
                     spellCheck={false}
                     value={draftUserLastName}
-                    onChange={(e) => setDraftUserLastName(e.target.value.replace(/(^|\s)(\p{L})/gu, (_, s, c) => s + c.toUpperCase()))}
+                    onChange={(e) => setDraftUserLastName(capitalizeWords(e.target.value))}
                     placeholder="Apellido"
                     className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
@@ -4137,10 +4177,13 @@ export default function MobileApp() {
                 <div className="auth-input-group">
                   <input
                     type="text"
+                    autoCapitalize="words"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={draftUserCity}
-                    onChange={(e) => setDraftUserCity(e.target.value)}
+                    onChange={(e) => setDraftUserCity(capitalizeWords(e.target.value))}
                     placeholder="Ciudad"
-                    className="auth-input-field"
+                    className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
                 </div>
@@ -4153,10 +4196,13 @@ export default function MobileApp() {
                 <div className="auth-input-group">
                   <input
                     type="text"
+                    autoCapitalize="words"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={draftUserState}
-                    onChange={(e) => setDraftUserState(e.target.value)}
+                    onChange={(e) => setDraftUserState(capitalizeWords(e.target.value))}
                     placeholder="Estado"
-                    className="auth-input-field"
+                    className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
                 </div>

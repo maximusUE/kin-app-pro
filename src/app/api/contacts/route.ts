@@ -7,6 +7,7 @@ import {
   validateRemittanceRecipient,
   validateKinCashRecipient,
 } from '@/lib/server/db';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export async function GET(request: Request) {
   try {
@@ -40,15 +41,21 @@ export async function POST(request: Request) {
       validateFor, // 'remittance' | 'kincash'
     } = body;
 
+    const cleanName = capitalizeWords(name);
+    const cleanFullName = capitalizeWords(fullName || name);
+    const cleanStreet = capitalizeWords(street);
+    const cleanState = capitalizeWords(state);
+    const cleanCountry = capitalizeWords(country || 'Mexico');
+
     // Validación estricta según el tipo de operación
     if (validateFor === 'remittance') {
       const val = validateRemittanceRecipient({
-        name,
+        name: cleanName,
         phone,
-        street,
+        street: cleanStreet,
         houseNumber,
-        state,
-        country,
+        state: cleanState,
+        country: cleanCountry,
         zipCode,
       });
       if (!val.valid) {
@@ -63,7 +70,7 @@ export async function POST(request: Request) {
         );
       }
     } else if (validateFor === 'kincash') {
-      const val = validateKinCashRecipient({ name, phone });
+      const val = validateKinCashRecipient({ name: cleanName, phone });
       if (!val.valid) {
         return NextResponse.json(
           {
@@ -75,7 +82,7 @@ export async function POST(request: Request) {
           { status: 400 }
         );
       }
-    } else if (!name) {
+    } else if (!cleanName) {
       return NextResponse.json(
         { success: false, error: 'El nombre del contacto es requerido' },
         { status: 400 }
@@ -84,17 +91,17 @@ export async function POST(request: Request) {
 
     const contact = createContact({
       userId: userId || 'user-001',
-      name,
-      fullName: fullName || name,
+      name: cleanName,
+      fullName: cleanFullName,
       phone,
       clabe,
       bank: bank || 'Banco en México',
       role: role || 'Beneficiario directo',
       avatar: avatar || '👤',
-      street,
+      street: cleanStreet,
       houseNumber,
-      state,
-      country,
+      state: cleanState,
+      country: cleanCountry,
       zipCode,
     });
 
