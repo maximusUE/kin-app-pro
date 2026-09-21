@@ -236,6 +236,13 @@ interface TransactionItem {
   claveRastreoBanxico?: string;
   claveRetiroEfectivo?: string;
   pickupStore?: string;
+  bancoDestino?: string;
+  cuentaBeneficiario?: string;
+  nombreBeneficiario?: string;
+  recipientPhone?: string;
+  paymentMethod?: string;
+  feeUSD?: number;
+  createdAt?: string;
 }
 
 // Estado limpio inicial (Clean Slate): sin transacciones ficticias
@@ -781,6 +788,12 @@ export default function MobileApp() {
   const [copiedWithdrawalPin, setCopiedWithdrawalPin] = useState(false);
   const [copiedTrackingBanxico, setCopiedTrackingBanxico] = useState(false);
 
+  // Transaction Detail Dashboard Modal State (Actividades Recientes a Detalle)
+  const [selectedTransactionDetail, setSelectedTransactionDetail] = useState<TransactionItem | null>(null);
+  const [copiedDetailPin, setCopiedDetailPin] = useState(false);
+  const [copiedDetailTracking, setCopiedDetailTracking] = useState(false);
+  const [copiedDetailRef, setCopiedDetailRef] = useState(false);
+
   // Modals
   const [showBillPayModal, setShowBillPayModal] = useState(false);
   const [selectedBillServiceId, setSelectedBillServiceId] = useState<string>('electricidad');
@@ -888,6 +901,13 @@ export default function MobileApp() {
       claveRastreoBanxico: clientClaveBanxico,
       claveRetiroEfectivo: deliveryMethod === 'cash' ? clientClaveRetiro : undefined,
       pickupStore: storeObj?.name || 'OXXO',
+      nombreBeneficiario: selectedAvatar.name,
+      recipientPhone: selectedAvatar.phone,
+      bancoDestino: deliveryMethod === 'cash' ? (storeObj?.name || 'OXXO') : 'Red Banxico SPEI',
+      cuentaBeneficiario: selectedAvatar.clabe || '',
+      paymentMethod: paymentTitle,
+      feeUSD: fee,
+      createdAt: now.toISOString(),
     };
 
     setTransactions((prev) => [newTx, ...prev]);
@@ -911,6 +931,18 @@ export default function MobileApp() {
       const data = await res.json();
       const finalClaveRetiro = data.claveRetiroEfectivo || clientClaveRetiro;
       const finalClaveBanxico = data.claveRastreoBanxico || clientClaveBanxico;
+
+      setTransactions((prev) =>
+        prev.map((t) =>
+          t.refNumber === txId
+            ? {
+                ...t,
+                claveRetiroEfectivo: deliveryMethod === 'cash' ? finalClaveRetiro : undefined,
+                claveRastreoBanxico: finalClaveBanxico,
+              }
+            : t
+        )
+      );
 
       setSendSuccessData({
         id: txId,
@@ -1024,6 +1056,13 @@ export default function MobileApp() {
       refNumber: txId,
       amountMXN: +(amt * USD_TO_MXN_RATE).toFixed(2),
       status: 'Completado',
+      nombreBeneficiario: recipient.name,
+      recipientPhone: recipient.phone,
+      bancoDestino: recipient.bank || 'Red Banxico SPEI',
+      cuentaBeneficiario: recipient.clabe || '',
+      paymentMethod: 'KIN Balance ($0.00 fee)',
+      feeUSD: 0,
+      createdAt: now.toISOString(),
     };
 
     setTransactions((prev) => [newTx, ...prev]);
@@ -1077,6 +1116,11 @@ export default function MobileApp() {
       refNumber: 'CFE-' + Math.floor(100000 + Math.random() * 900000),
       amountMXN,
       status: 'Completado',
+      nombreBeneficiario: service,
+      bancoDestino: 'Proveedor de Servicio',
+      paymentMethod: 'Saldo USD KIN Transit',
+      feeUSD: 0,
+      createdAt: new Date().toISOString(),
     };
     setTransactions((prev) => [newTx, ...prev]);
     setBaseBalanceUSD((prev) => +(prev - amountUSD).toFixed(2));
@@ -1138,6 +1182,12 @@ export default function MobileApp() {
       refNumber: txId,
       amountMXN,
       status: 'Completado',
+      nombreBeneficiario: recipient,
+      recipientPhone: contact?.phone,
+      bancoDestino: 'Red KIN Cash P2P',
+      paymentMethod: 'Saldo USD KIN Transit ($0.00 fee)',
+      feeUSD: 0,
+      createdAt: now.toISOString(),
     };
     setTransactions((prev) => [newTx, ...prev]);
     setBaseBalanceUSD((prev) => +(prev - amountUSD).toFixed(2));
@@ -1904,9 +1954,11 @@ export default function MobileApp() {
                     const isIncome = tx.type === 'income';
                     const bankLogo = getBankLogoUrl(tx.title) || getBankLogoUrl(tx.category);
                     return (
-                      <div
+                      <button
                         key={tx.id}
-                        className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-colors shadow-md border border-white/5"
+                        type="button"
+                        onClick={() => setSelectedTransactionDetail(tx)}
+                        className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all shadow-md border border-white/5 hover:border-primary/40 cursor-pointer text-left group active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div
@@ -1944,7 +1996,7 @@ export default function MobileApp() {
                             ) : null}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-body-medium text-body-medium text-white font-bold truncate">
+                            <span className="font-body-medium text-body-medium text-white font-bold truncate group-hover:text-primary transition-colors">
                               {tx.title}
                             </span>
                             <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
@@ -1952,33 +2004,38 @@ export default function MobileApp() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end flex-shrink-0 pl-2">
-                          <span
-                            className={`font-financial-mono text-financial-mono font-bold ${
-                              isIncome ? 'text-primary' : 'text-white'
-                            }`}
-                          >
-                            {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+                        <div className="flex items-center gap-2 flex-shrink-0 pl-2">
+                          <div className="flex flex-col items-end">
+                            <span
+                              className={`font-financial-mono text-financial-mono font-bold ${
+                                isIncome ? 'text-primary' : 'text-white'
+                              }`}
+                            >
+                              {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+                            </span>
+                            {tx.iconType === 'luz' ? (
+                              <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
+                                ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                              </span>
+                            ) : tx.iconType === 'bank' ? (
+                              <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
+                                Direct USD
+                              </span>
+                            ) : isIncome ? (
+                              <span className="font-caption-sm text-caption-sm text-primary/80 font-medium">
+                                USD Balance
+                              </span>
+                            ) : (
+                              <span className="font-caption-sm text-caption-sm font-semibold text-primary">
+                                ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
+                              </span>
+                            )}
+                          </div>
+                          <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">
+                            chevron_right
                           </span>
-                          {tx.iconType === 'luz' ? (
-                            <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
-                              ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
-                            </span>
-                          ) : tx.iconType === 'bank' ? (
-                            <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">
-                              Direct USD
-                            </span>
-                          ) : isIncome ? (
-                            <span className="font-caption-sm text-caption-sm text-primary/80 font-medium">
-                              USD Balance
-                            </span>
-                          ) : (
-                            <span className="font-caption-sm text-caption-sm font-semibold text-primary">
-                              ${(tx.amountMXN || Math.abs(tx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
-                            </span>
-                          )}
                         </div>
-                      </div>
+                      </button>
                     );
                   })
                 )}
@@ -2547,23 +2604,30 @@ export default function MobileApp() {
                   {transactions
                     .filter(t => t.category.includes('Servicio') || t.category.includes('Factura') || t.iconType === 'luz' || t.iconType === 'internet' || t.iconType === 'phone' || t.iconType === 'bill')
                     .map((tx) => (
-                      <div
+                      <button
                         key={tx.id}
-                        className="p-3 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between hover:border-white/15 transition-all"
+                        type="button"
+                        onClick={() => setSelectedTransactionDetail(tx)}
+                        className="w-full p-3 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between hover:border-primary/40 hover:bg-[#1E2033] transition-all cursor-pointer text-left group active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white flex-shrink-0">
                             {renderTransactionIcon(tx)}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-white leading-tight">{tx.title}</p>
+                            <p className="text-xs font-bold text-white leading-tight group-hover:text-primary transition-colors">{tx.title}</p>
                             <p className="text-[10px] text-[#8E91A5] mt-0.5">{tx.category} • {tx.time}</p>
                           </div>
                         </div>
-                        <span className="text-xs font-bold text-[#FF5555]" style={{ color: '#FF5555' }}>
-                          {tx.amount > 0 ? `+$${tx.amount.toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
-                        </span>
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#FF5555]" style={{ color: '#FF5555' }}>
+                            {tx.amount > 0 ? `+$${tx.amount.toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+                          </span>
+                          <span className="material-symbols-outlined text-[16px] text-[#8E91A5] group-hover:text-primary transition-colors">
+                            chevron_right
+                          </span>
+                        </div>
+                      </button>
                     ))}
                 </div>
               )}
@@ -2637,9 +2701,11 @@ export default function MobileApp() {
                         {itemsInGroup.map((tx) => {
                           const isIncome = tx.type === 'income';
                           return (
-                            <div
+                            <button
                               key={tx.id}
-                              className="p-3.5 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between hover:border-white/15 hover:bg-[#1E2033] transition-all cursor-default"
+                              type="button"
+                              onClick={() => setSelectedTransactionDetail(tx)}
+                              className="w-full p-3.5 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between hover:border-primary/40 hover:bg-[#1E2033] transition-all cursor-pointer text-left group active:scale-[0.99]"
                             >
                               <div className="flex items-center gap-3">
                                 {/* Icono del movimiento con micro-badge de flujo */}
@@ -2657,7 +2723,7 @@ export default function MobileApp() {
                                 </div>
 
                                 <div>
-                                  <p className="text-xs font-bold text-white leading-tight">{tx.title}</p>
+                                  <p className="text-xs font-bold text-white leading-tight group-hover:text-primary transition-colors">{tx.title}</p>
                                   <p className="text-[10px] text-[#8E91A5] mt-0.5 flex items-center gap-1.5">
                                     <span>{tx.category}</span>
                                     <span>•</span>
@@ -2675,50 +2741,55 @@ export default function MobileApp() {
                               </div>
 
                               {/* Monto e importe en moneda local / estatus */}
-                              <div className="text-right flex-shrink-0">
-                                {currencyPref === 'USD' ? (
-                                  <>
-                                    <p
-                                      className={`text-xs font-black tracking-tight ${
-                                        isIncome ? 'text-[#2ED5A4]' : 'text-white'
-                                      }`}
-                                    >
-                                      {isIncome ? `+$${tx.amount.toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
-                                      <span className="text-[10px] text-[#8E91A5] font-semibold ml-0.5">USD</span>
-                                    </p>
-                                    <p className="text-[10px] text-[#8E91A5] mt-0.5 font-medium">
-                                      {tx.amountMXN ? (
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className="text-right">
+                                  {currencyPref === 'USD' ? (
+                                    <>
+                                      <p
+                                        className={`text-xs font-black tracking-tight ${
+                                          isIncome ? 'text-[#2ED5A4]' : 'text-white'
+                                        }`}
+                                      >
+                                        {isIncome ? `+$${tx.amount.toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+                                        <span className="text-[10px] text-[#8E91A5] font-semibold ml-0.5">USD</span>
+                                      </p>
+                                      <p className="text-[10px] text-[#8E91A5] mt-0.5 font-medium">
+                                        {tx.amountMXN ? (
+                                          <span>
+                                            ≈ ${tx.amountMXN.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+                                          </span>
+                                        ) : (
+                                          <span className="text-[#2ED5A4] font-semibold">
+                                            {language === 'en' ? 'Completed ✓' : 'Completado ✓'}
+                                          </span>
+                                        )}
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p
+                                        className={`text-xs font-black tracking-tight ${
+                                          isIncome ? 'text-[#2ED5A4]' : 'text-white'
+                                        }`}
+                                      >
+                                        {isIncome
+                                          ? `+$${(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                          : `-$${Math.abs(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                        <span className="text-[10px] text-[#8E91A5] font-semibold ml-0.5">MXN</span>
+                                      </p>
+                                      <p className="text-[10px] text-[#8E91A5] mt-0.5 font-medium">
                                         <span>
-                                          ≈ ${tx.amountMXN.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+                                          ≈ ${Math.abs(tx.amount).toFixed(2)} USD
                                         </span>
-                                      ) : (
-                                        <span className="text-[#2ED5A4] font-semibold">
-                                          {language === 'en' ? 'Completed ✓' : 'Completado ✓'}
-                                        </span>
-                                      )}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <>
-                                    <p
-                                      className={`text-xs font-black tracking-tight ${
-                                        isIncome ? 'text-[#2ED5A4]' : 'text-white'
-                                      }`}
-                                    >
-                                      {isIncome
-                                        ? `+$${(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                        : `-$${Math.abs(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                      <span className="text-[10px] text-[#8E91A5] font-semibold ml-0.5">MXN</span>
-                                    </p>
-                                    <p className="text-[10px] text-[#8E91A5] mt-0.5 font-medium">
-                                      <span>
-                                        ≈ ${Math.abs(tx.amount).toFixed(2)} USD
-                                      </span>
-                                    </p>
-                                  </>
-                                )}
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
+                                <span className="material-symbols-outlined text-[16px] text-[#8E91A5] group-hover:text-primary transition-colors">
+                                  chevron_right
+                                </span>
                               </div>
-                            </div>
+                            </button>
                           );
                         })}
                       </div>
@@ -4850,6 +4921,446 @@ export default function MobileApp() {
                 className="w-full h-10 rounded-full bg-transparent hover:bg-white/5 text-[#8E91A5] hover:text-white text-xs font-semibold transition-all cursor-pointer flex items-center justify-center disabled:opacity-40"
               >
                 Modificar datos de envío
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DASHBOARD DE DETALLE DE TRANSACCIÓN Y ACTIVIDADES RECIENTES (KIN AUDIT)   */}
+      {/* ========================================================================= */}
+      {selectedTransactionDetail && (
+        <div
+          className="modal-backdrop animate-fade-in"
+          onClick={() => setSelectedTransactionDetail(null)}
+        >
+          <div
+            className="modal-card space-y-4 max-h-[92vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del Comprobante */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTransactionDetail(null)}
+                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white cursor-pointer transition-all"
+                  title="Volver"
+                >
+                  <ChevronLeftIcon className="w-4 h-4 text-white" />
+                </button>
+                <div>
+                  <h3 className="text-sm font-bold text-white leading-tight font-title-base flex items-center gap-1.5">
+                    <span>Detalle de Transacción</span>
+                    <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                      Oficial
+                    </span>
+                  </h3>
+                  <p className="text-[10px] text-on-surface-variant">
+                    Comprobante Electrónico KIN • Banxico
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedTransactionDetail(null)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Contenido con Scroll Ergonómico */}
+            <div className="flex-1 overflow-y-auto space-y-3.5 pr-0.5 no-scrollbar">
+              {/* Tarjeta Hero Principal: Monto, Estatus y Conversión */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#1c242c] via-[#12161b] to-[#0d1014] border border-[#2ED5A4]/30 shadow-[0_4px_20px_rgba(46,213,164,0.12)] space-y-2 text-center">
+                {/* Badge de Estatus */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[11px] font-bold text-[#2ED5A4]">
+                  <span className="w-2 h-2 rounded-full bg-[#2ED5A4] animate-pulse" />
+                  <span>{selectedTransactionDetail.status || 'Completado'} • Fondos Entregados</span>
+                </div>
+
+                {/* Importe en USD */}
+                <div className="text-3xl sm:text-4xl font-black font-financial-mono text-white tracking-tight">
+                  {selectedTransactionDetail.type === 'income'
+                    ? `+$${Math.abs(selectedTransactionDetail.amount).toFixed(2)}`
+                    : `-$${Math.abs(selectedTransactionDetail.amount).toFixed(2)}`}{' '}
+                  <span className="text-sm font-bold text-[#8E91A5]">USD</span>
+                </div>
+
+                {/* Equivalente en MXN */}
+                <p className="text-sm font-bold text-[#2ED5A4] font-financial-mono">
+                  ≈ ${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+                </p>
+
+                {/* Concepto y Fecha */}
+                <div className="pt-1 border-t border-white/5 space-y-0.5">
+                  <h4 className="text-sm font-bold text-white">
+                    {selectedTransactionDetail.title}
+                  </h4>
+                  <p className="text-[11px] text-[#8E91A5]">
+                    {selectedTransactionDetail.category} • {selectedTransactionDetail.time}
+                  </p>
+                </div>
+              </div>
+
+              {/* MÓDULO: Clave de Retiro en Efectivo (Si aplica) */}
+              {selectedTransactionDetail.claveRetiroEfectivo && (
+                <div className="bg-gradient-to-b from-[#182322] to-[#12161b] border-2 border-[#2ED5A4]/50 rounded-3xl p-4 shadow-[0_0_35px_rgba(46,213,164,0.22)] space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-[#2ED5A4]/20 flex items-center justify-center text-base">
+                        🔑
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black tracking-wider uppercase text-[#2ED5A4] block">
+                          Clave Oficial de Retiro en Efectivo
+                        </span>
+                        <p className="text-xs font-bold text-white">
+                          Cobro en ventanilla: {selectedTransactionDetail.pickupStore || 'OXXO'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4]/40 text-[10px] font-black text-[#2ED5A4] tracking-wider uppercase">
+                      LISTA EN CAJA
+                    </span>
+                  </div>
+
+                  {/* Clave de Retiro PIN */}
+                  <div className="py-2.5 px-3 bg-black/60 rounded-2xl border border-[#2ED5A4]/40 text-center">
+                    <div className="text-[10px] text-[#8E91A5] font-semibold mb-0.5 tracking-wider uppercase">
+                      Código de Retiro Único (PIN)
+                    </div>
+                    <div className="text-3xl font-black font-financial-mono text-[#2ED5A4] tracking-widest select-all">
+                      {selectedTransactionDetail.claveRetiroEfectivo}
+                    </div>
+                    <div className="text-[10px] text-on-surface-variant mt-0.5 font-medium">
+                      Vigencia: 30 días • Sin costo adicional para el beneficiario
+                    </div>
+                  </div>
+
+                  {/* Botones: Copiar Clave & WhatsApp */}
+                  <div className="grid grid-cols-2 gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedTransactionDetail.claveRetiroEfectivo) {
+                          navigator.clipboard?.writeText(selectedTransactionDetail.claveRetiroEfectivo);
+                          setCopiedDetailPin(true);
+                          setTimeout(() => setCopiedDetailPin(false), 2500);
+                        }
+                      }}
+                      className="h-11 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer active:scale-[0.98]"
+                    >
+                      {copiedDetailPin ? (
+                        <>
+                          <CheckCircleIcon className="w-4 h-4 text-[#2ED5A4]" />
+                          <span className="text-[#2ED5A4]">¡Clave Copiada!</span>
+                        </>
+                      ) : (
+                        <>
+                          <CopyIcon className="w-4 h-4 text-white" />
+                          <span>Copiar Clave</span>
+                        </>
+                      )}
+                    </button>
+
+                    <a
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                        `¡Hola ${selectedTransactionDetail.nombreBeneficiario || 'familiar'}! 💵 Te comparto los datos de tu cobro por KIN de $${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN.\n\n` +
+                        `📍 Retiro en ventanilla en cualquier sucursal ${selectedTransactionDetail.pickupStore || 'OXXO'} de México.\n\n` +
+                        `🔑 CLAVE DE RETIRO: ${selectedTransactionDetail.claveRetiroEfectivo}\n\n` +
+                        `Solo acude a caja, menciona cobro de remesa KIN y presenta tu identificación oficial vigente (INE o Pasaporte). ¡Listo!`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-11 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-black font-extrabold flex items-center justify-center gap-2 text-xs transition-all cursor-pointer shadow-[0_4px_16px_rgba(37,211,102,0.35)] active:scale-[0.98]"
+                    >
+                      <WhatsAppIcon className="w-4 h-4 text-black" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
+
+                  {/* Instrucciones de cobro */}
+                  <div className="bg-black/30 rounded-2xl p-2.5 border border-white/5 space-y-1 text-[10.5px] text-[#A6A9BC]">
+                    <div className="font-bold text-white text-[10.5px] flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[13px] text-[#2ED5A4]">storefront</span>
+                      Pasos para cobrar en ventanilla:
+                    </div>
+                    <ol className="list-decimal list-inside space-y-0.5 pl-0.5">
+                      <li>Acudir a cualquier sucursal <strong>{selectedTransactionDetail.pickupStore || 'OXXO'}</strong> en México.</li>
+                      <li>Solicitar en caja el <strong>cobro de remesa KIN</strong>.</li>
+                      <li>Presentar <strong>INE vigente</strong> y la Clave: <strong className="text-[#2ED5A4] font-mono">{selectedTransactionDetail.claveRetiroEfectivo}</strong>.</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* MÓDULO: Clave de Rastreo Banxico CEP (Si aplica) */}
+              {selectedTransactionDetail.claveRastreoBanxico && !selectedTransactionDetail.claveRetiroEfectivo && (
+                <div className="bg-[#181928] border border-[#2ED5A4]/30 rounded-2xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#8E91A5] font-medium flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-[#2ED5A4]">verified_user</span>
+                      Clave de Rastreo Banxico (CEP)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedTransactionDetail.claveRastreoBanxico) {
+                          navigator.clipboard?.writeText(selectedTransactionDetail.claveRastreoBanxico);
+                          setCopiedDetailTracking(true);
+                          setTimeout(() => setCopiedDetailTracking(false), 2500);
+                        }
+                      }}
+                      className="flex items-center gap-1 text-xs text-[#2ED5A4] hover:underline font-semibold cursor-pointer"
+                    >
+                      <span>{copiedDetailTracking ? '¡Copiado!' : 'Copiar CEP'}</span>
+                      <CopyIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="bg-black/40 rounded-xl p-2 font-financial-mono text-xs text-white break-all select-all border border-white/5">
+                    {selectedTransactionDetail.claveRastreoBanxico}
+                  </div>
+                  <p className="text-[10px] text-[#8E91A5]">
+                    Transferencia SPEI interbancaria verificable en el portal de Banco de México.
+                  </p>
+                </div>
+              )}
+
+              {/* Tarjeta: Desglose Financiero Transparente */}
+              <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 space-y-2.5 text-xs">
+                <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">receipt_long</span>
+                    Desglose de la Transacción
+                  </span>
+                  <span className="text-[10px] text-[#2ED5A4] font-extrabold uppercase">Transparencia Total</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Monto de la Operación</span>
+                  <span className="text-white font-mono font-bold">
+                    ${(Math.abs(selectedTransactionDetail.amount) - (selectedTransactionDetail.feeUSD || 0)).toFixed(2)} USD
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Tipo de cambio aplicado</span>
+                  <span className="text-white font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Monto recibido en México</span>
+                  <span className="text-[#2ED5A4] font-extrabold font-financial-mono">
+                    ${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Tarifa por transferencia KIN</span>
+                  <span className="text-[#2ED5A4] font-bold">GRATIS ($0.00 USD)</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Comisión método de pago</span>
+                  {selectedTransactionDetail.feeUSD && selectedTransactionDetail.feeUSD > 0 ? (
+                    <span className="text-amber-400 font-mono font-semibold">+${selectedTransactionDetail.feeUSD.toFixed(2)} USD</span>
+                  ) : (
+                    <span className="text-white font-mono font-bold">$0.00 USD</span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Comisión por retiro en sucursal</span>
+                  <span className="text-[#2ED5A4] font-bold">$0.00 USD</span>
+                </div>
+
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                  <span className="font-title-base text-xs text-white font-bold">
+                    Total debitado
+                  </span>
+                  <span className="text-base font-black font-financial-mono text-white">
+                    ${Math.abs(selectedTransactionDetail.amount).toFixed(2)} <span className="text-xs text-[#8E91A5]">USD</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Tarjeta: Información del Beneficiario y Destino */}
+              <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 space-y-2 text-xs">
+                <div className="flex items-center justify-between pb-1 border-b border-white/5">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">person</span>
+                    Información del Destinatario
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
+                    Verificado
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 pt-0.5 text-[#A6A9BC]">
+                  <div className="flex items-center justify-between">
+                    <span>Nombre:</span>
+                    <span className="text-white font-bold">
+                      {capitalizeWords(selectedTransactionDetail.nombreBeneficiario || selectedTransactionDetail.title)}
+                    </span>
+                  </div>
+                  {selectedTransactionDetail.recipientPhone && (
+                    <div className="flex items-center justify-between">
+                      <span>Teléfono:</span>
+                      <span className="text-primary font-mono">{selectedTransactionDetail.recipientPhone}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span>Destino:</span>
+                    <span className="text-white font-medium">
+                      {selectedTransactionDetail.pickupStore
+                        ? `Retiro en Efectivo (${selectedTransactionDetail.pickupStore})`
+                        : selectedTransactionDetail.bancoDestino || selectedTransactionDetail.category}
+                    </span>
+                  </div>
+                  {selectedTransactionDetail.cuentaBeneficiario && (
+                    <div className="flex items-center justify-between">
+                      <span>Cuenta / CLABE:</span>
+                      <span className="text-white font-mono">•••• {selectedTransactionDetail.cuentaBeneficiario.slice(-4)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span>Método de Pago:</span>
+                    <span className="text-white font-medium">
+                      {selectedTransactionDetail.paymentMethod || 'Balance KIN / Débito'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tarjeta: Folio y Auditoría Criptográfica */}
+              <div className="p-3 rounded-2xl bg-[#181928] border border-white/10 flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-[10px] text-[#8E91A5] block">Folio de Rastreo KIN</span>
+                  <span className="font-mono font-bold text-white text-xs">
+                    {selectedTransactionDetail.refNumber || selectedTransactionDetail.id}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ref = selectedTransactionDetail.refNumber || selectedTransactionDetail.id;
+                    navigator.clipboard?.writeText(ref);
+                    setCopiedDetailRef(true);
+                    setTimeout(() => setCopiedDetailRef(false), 2500);
+                  }}
+                  className="flex items-center gap-1 text-xs text-[#2ED5A4] hover:underline font-semibold cursor-pointer"
+                >
+                  <span>{copiedDetailRef ? '¡Copiado!' : 'Copiar Folio'}</span>
+                  <CopyIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Tarjeta: Trazabilidad / Timeline en 4 Pasos */}
+              <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 space-y-2 text-xs">
+                <span className="font-bold text-white flex items-center gap-1.5 pb-1 border-b border-white/5">
+                  <span className="material-symbols-outlined text-[16px] text-primary">timeline</span>
+                  Trazabilidad de la Operación
+                </span>
+
+                <div className="space-y-2.5 pt-1 pl-1">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4] flex items-center justify-center text-[10px] text-[#2ED5A4] font-bold flex-shrink-0 mt-0.5">
+                      ✓
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Solicitud creada y autorizada</p>
+                      <p className="text-[10px] text-[#8E91A5]">{selectedTransactionDetail.time}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4] flex items-center justify-center text-[10px] text-[#2ED5A4] font-bold flex-shrink-0 mt-0.5">
+                      ✓
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Validación regulatoria y fondos asegurados</p>
+                      <p className="text-[10px] text-[#8E91A5]">Filtros AML/PLD CNBV y FinCEN aprobados</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4] flex items-center justify-center text-[10px] text-[#2ED5A4] font-bold flex-shrink-0 mt-0.5">
+                      ✓
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">
+                        {selectedTransactionDetail.claveRetiroEfectivo
+                          ? 'Clave de retiro generada para ventanilla'
+                          : 'Riel Banxico SPEI conectado'}
+                      </p>
+                      <p className="text-[10px] text-[#8E91A5]">
+                        {selectedTransactionDetail.claveRetiroEfectivo
+                          ? `PIN emitido para cobro en ${selectedTransactionDetail.pickupStore || 'sucursal'}`
+                          : 'Comprobante Electrónico CEP registrado'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4] flex items-center justify-center text-[10px] text-[#2ED5A4] font-bold flex-shrink-0 mt-0.5">
+                      ✓
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#2ED5A4]">Fondos entregados / disponibles</p>
+                      <p className="text-[10px] text-on-surface-variant">Listo para retiro o acreditado en cuenta</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sello de Cumplimiento Regulatorio */}
+              <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-[10px] text-[#8E91A5]">
+                <ShieldCheckIcon className="w-4 h-4 text-[#2ED5A4] flex-shrink-0" />
+                <span>
+                  Comprobante digital verificado con firma criptográfica KIN. Auditado bajo normativas CNBV, Banxico y SAT.
+                </span>
+              </div>
+            </div>
+
+            {/* Sticky Footer: Acciones */}
+            <div className="pt-2 border-t border-white/10 space-y-2 flex-shrink-0">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => alert(`Descargando comprobante PDF encriptado del movimiento ${selectedTransactionDetail.refNumber || selectedTransactionDetail.id}...`)}
+                  className="h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+                >
+                  <DownloadIcon className="w-4 h-4 text-[#2ED5A4]" />
+                  <span>Descargar PDF</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = `Comprobante KIN: ${selectedTransactionDetail.title} por $${Math.abs(selectedTransactionDetail.amount).toFixed(2)} USD (≈ $${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN). Folio: ${selectedTransactionDetail.refNumber || selectedTransactionDetail.id}`;
+                    if (navigator.share) {
+                      navigator.share({ title: 'Comprobante KIN', text }).catch(() => {});
+                    } else {
+                      navigator.clipboard?.writeText(text);
+                      alert('Resumen del comprobante copiado al portapapeles');
+                    }
+                  }}
+                  className="h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+                >
+                  <ShareReceiptIcon className="w-4 h-4 text-[#2ED5A4]" />
+                  <span>Compartir</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedTransactionDetail(null)}
+                className="w-full h-11 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center active:scale-[0.98]"
+              >
+                Cerrar Detalle
               </button>
             </div>
           </div>
