@@ -6,6 +6,17 @@ import crypto from 'crypto';
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
 function getServiceAccount() {
+  // 1) Vercel / producción: leer desde variable de entorno FIREBASE_SERVICE_ACCOUNT_JSON
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    try {
+      return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    } catch (e) {
+      console.error('❌ [Firebase] Error al parsear FIREBASE_SERVICE_ACCOUNT_JSON:', e);
+      return null;
+    }
+  }
+
+  // 2) Desarrollo local: leer desde archivo en disco
   const serviceAccountPath = path.resolve(
     process.cwd(),
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH || './config/firebase-service-account.json'
