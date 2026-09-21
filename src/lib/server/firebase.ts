@@ -322,6 +322,8 @@ export interface FirestoreTransferRecord {
   type?: string; // e.g. "REMESAS_SPEI", "KIN_CASH_P2P", "BILL_PAYMENT"
   deliveryMethod?: string;
   concept?: string;
+  pickupStore?: string;
+  claveRetiroEfectivo?: string;
 }
 
 /**

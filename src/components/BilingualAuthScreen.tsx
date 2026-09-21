@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export interface BilingualAuthScreenProps {
@@ -14,6 +14,23 @@ export function BilingualAuthScreen({
 }: BilingualAuthScreenProps) {
   const [authMode, setAuthMode] = useState<'login' | 'register'>(initialMode);
   const [language, setLanguage] = useState<'es' | 'en'>('es');
+
+  // Load saved language on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('kin_language');
+      if (savedLang === 'es' || savedLang === 'en') {
+        setLanguage(savedLang);
+      }
+    }
+  }, []);
+
+  const handleLanguageChange = (lang: 'es' | 'en') => {
+    setLanguage(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('kin_language', lang);
+    }
+  };
 
   // Register state
   const [firstName, setFirstName] = useState('');
@@ -185,7 +202,7 @@ export function BilingualAuthScreen({
               <div className="flex items-center bg-surface-container-low p-1 rounded-full shadow-inner border border-white/5" id="lang-switch-container">
                 <button
                   type="button"
-                  onClick={() => setLanguage('es')}
+                  onClick={() => handleLanguageChange('es')}
                   className={`px-3 py-1 rounded-full font-caption-sm text-caption-sm transition-all duration-200 shadow-sm flex items-center gap-1 cursor-pointer ${
                     language === 'es'
                       ? 'bg-surface-container-high text-primary font-bold shadow-md'
@@ -198,7 +215,7 @@ export function BilingualAuthScreen({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setLanguage('en')}
+                  onClick={() => handleLanguageChange('en')}
                   className={`px-3 py-1 rounded-full font-caption-sm text-caption-sm transition-all duration-200 flex items-center gap-1 hover:text-on-surface cursor-pointer ${
                     language === 'en'
                       ? 'bg-surface-container-high text-primary font-bold shadow-md'

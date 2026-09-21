@@ -77,6 +77,7 @@ import {
   LockIcon,
   ShieldCheckIcon,
   WhatsAppIcon,
+  LanguageIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
 import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/components/KinCashP2PModal';
@@ -340,6 +341,22 @@ export default function MobileApp() {
     if (user.kycTier) setUserKycTier(user.kycTier);
     if (user.dailyLimit) setUserDailyLimit(user.dailyLimit);
     if (typeof user.balanceUSD === 'number') setBaseBalanceUSD(user.balanceUSD);
+    if (user.language === 'es' || user.language === 'en') {
+      setLanguage(user.language);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('kin_language', user.language);
+        } catch (_) {}
+      }
+    }
+    if (user.currencyPref === 'USD' || user.currencyPref === 'MXN') {
+      setCurrencyPref(user.currencyPref);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('kin_currency_pref', user.currencyPref);
+        } catch (_) {}
+      }
+    }
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('kin_active_user', JSON.stringify(user));
@@ -356,6 +373,8 @@ export default function MobileApp() {
   const [draftUserCity, setDraftUserCity] = useState('');
   const [draftUserState, setDraftUserState] = useState('');
   const [draftUserAvatar, setDraftUserAvatar] = useState('');
+  const [draftUserLanguage, setDraftUserLanguage] = useState<'es' | 'en'>('es');
+  const [draftUserCurrencyPref, setDraftUserCurrencyPref] = useState<'USD' | 'MXN'>('USD');
   const [customAvatarInput, setCustomAvatarInput] = useState('');
 
   // Stitch Executive Dashboard state
@@ -387,6 +406,16 @@ export default function MobileApp() {
       setIsAuthenticated(false);
     } else if (view === 'dashboard' || auth === 'skip' || auth === 'dashboard') {
       setIsAuthenticated(true);
+    }
+
+    // 0. Recuperar idioma y moneda guardados en localStorage
+    const savedLang = localStorage.getItem('kin_language');
+    if (savedLang === 'es' || savedLang === 'en') {
+      setLanguage(savedLang);
+    }
+    const savedCurr = localStorage.getItem('kin_currency_pref');
+    if (savedCurr === 'USD' || savedCurr === 'MXN') {
+      setCurrencyPref(savedCurr);
     }
 
     // 1. Recuperar usuario guardado en localStorage (sesión activa tras login/registro)
@@ -469,8 +498,27 @@ export default function MobileApp() {
     setDraftUserCity(capitalizeWords(userCity));
     setDraftUserState(capitalizeWords(userState));
     setDraftUserAvatar(userAvatar);
+    setDraftUserLanguage(language);
+    setDraftUserCurrencyPref(currencyPref);
     setCustomAvatarInput('');
     setShowAvatarPicker(true);
+  };
+
+  // Conmutador rápido bimonetario para Dashboard y Modo Viajero
+  const handleToggleCurrency = (newCurr: 'USD' | 'MXN') => {
+    setCurrencyPref(newCurr);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_currency_pref', newCurr);
+      } catch (_) {}
+    }
+    if (userId) {
+      fetch('/api/account/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, updates: { currencyPref: newCurr } }),
+      }).catch(() => {});
+    }
   };
 
   // Guardar cambios de perfil confirmados
@@ -501,6 +549,15 @@ export default function MobileApp() {
       setUserState(cleanState);
     }
     setUserAvatar(draftUserAvatar);
+    setLanguage(draftUserLanguage);
+    setCurrencyPref(draftUserCurrencyPref);
+
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_language', draftUserLanguage);
+        localStorage.setItem('kin_currency_pref', draftUserCurrencyPref);
+      } catch (_) {}
+    }
 
     const updatedUserObj = {
       id: userId,
@@ -512,6 +569,8 @@ export default function MobileApp() {
       city: cleanCity || userCity,
       state: cleanState || userState,
       avatar: draftUserAvatar,
+      language: draftUserLanguage,
+      currencyPref: draftUserCurrencyPref,
     };
 
     if (typeof window !== 'undefined') {
@@ -764,7 +823,7 @@ export default function MobileApp() {
   const [sendSuccessData, setSendSuccessData] = useState<{
     id: string;
     amount: number;
-    amountMXN: number;
+    amountMXN?: number;
     fee: number;
     totalPaid: number;
     recipientName: string;
@@ -775,7 +834,7 @@ export default function MobileApp() {
     recipientCountry?: string;
     time: string;
     deliveryTitle: string;
-    deliveryMethod: 'cash' | 'bank' | string;
+    deliveryMethod?: 'cash' | 'bank' | string;
     pickupStore?: string;
     paymentTitle: string;
     claveRastreoBanxico?: string;
@@ -1084,12 +1143,15 @@ export default function MobileApp() {
     setSendSuccessData({
       id: txId,
       amount: amt,
+      amountMXN: amt * USD_TO_MXN_RATE,
       fee: 0,
       totalPaid: amt,
       recipientName: recipient.name,
       recipientAvatar: recipient.avatar,
+      recipientPhone: recipient.phone,
       time: `${dateStr} a las ${timeStr}`,
       deliveryTitle: 'SPEI Exprés Inmediato (Banxico)',
+      deliveryMethod: 'bank',
       paymentTitle: 'KIN Balance ($0.00 fee)',
     });
     setActiveTab('send');
@@ -1197,12 +1259,15 @@ export default function MobileApp() {
     setSendSuccessData({
       id: txId,
       amount: amountUSD,
+      amountMXN: +(amountUSD * USD_TO_MXN_RATE).toFixed(2),
       fee: 0,
       totalPaid: amountUSD,
       recipientName: recipient,
       recipientAvatar: contact?.avatar || contact?.photoUrl || '👤',
+      recipientPhone: contact?.phone,
       time: `${dateStr} a las ${timeStr}`,
       deliveryTitle: 'KIN Cash Express (P2P Inmediato)',
+      deliveryMethod: 'cash',
       paymentTitle: 'Saldo USD KIN Transit ($0.00 fee)',
     });
 
@@ -1675,48 +1740,118 @@ export default function MobileApp() {
               <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-[#2ED5A4]/20 blur-3xl pointer-events-none" />
 
               <div className="relative z-10 flex flex-col space-y-4">
-                {/* Balance Header & Privacy Toggle */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
-                      Combined Liquid Capital
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-[#2ED5A4] font-financial-mono text-[11px] font-bold">
-                      USD/SPEI
-                    </span>
+                {/* Balance Header & Dual Currency Segmented Switch */}
+                <div className="flex items-center justify-between gap-2">
+                  {/* Conmutador Bimonetario Transfronterizo 🇺🇸 USD / 🇲🇽 MXN */}
+                  <div className="flex items-center bg-[#0C0D18] p-1 rounded-2xl border border-white/10 shadow-inner">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleCurrency('USD')}
+                      className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                        currencyPref === 'USD'
+                          ? 'bg-[#2ED5A4] text-[#06070B] shadow-md shadow-[#2ED5A4]/20 font-black'
+                          : 'text-[#8E91A5] hover:text-white'
+                      }`}
+                      title="Activar Cuenta USA en Dólares"
+                    >
+                      <span className="text-sm">🇺🇸</span>
+                      <span>USD</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleCurrency('MXN')}
+                      className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                        currencyPref === 'MXN'
+                          ? 'bg-[#2ED5A4] text-[#06070B] shadow-md shadow-[#2ED5A4]/20 font-black'
+                          : 'text-[#8E91A5] hover:text-white'
+                      }`}
+                      title="Activar Billetera México en Pesos (Modo Viajero)"
+                    >
+                      <span className="text-sm">🇲🇽</span>
+                      <span>MXN</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setHideBalance(!hideBalance)}
-                    aria-label="Toggle Balance Visibility"
-                    className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white transition-colors cursor-pointer border border-white/5"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">
-                      {hideBalance ? 'visibility_off' : 'visibility'}
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2.5 py-1 rounded-full bg-surface-container-highest text-[#2ED5A4] font-financial-mono text-[11px] font-bold border border-[#2ED5A4]/20">
+                      {currencyPref === 'USD' ? '🇺🇸 Cuenta USA' : '🇲🇽 Billetera MX'}
                     </span>
-                  </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setHideBalance(!hideBalance)}
+                      aria-label="Toggle Balance Visibility"
+                      className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white transition-colors cursor-pointer border border-white/5"
+                      title={hideBalance ? 'Mostrar saldo' : 'Ocultar saldo'}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {hideBalance ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Main USD Balance Display */}
+                {/* Banner Inteligente de Modo Viajero cuando está activo en Pesos MXN */}
+                {currencyPref === 'MXN' && (
+                  <div className="flex items-center justify-between p-2 px-3 rounded-xl bg-[#2ED5A4]/10 border border-[#2ED5A4]/25 text-[11px] text-[#2ED5A4] animate-fade-in">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">📍</span>
+                      <span className="font-semibold text-white">
+                        {language === 'en' ? 'Travel Mode Active: México' : 'Modo Viajero Activo: México'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-[#2ED5A4] font-bold">
+                      {language === 'en' ? 'Local Spending & SPEI' : 'Pesos para KIN CASH & SPEI'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Main Dynamic Balance Display (USD o MXN según preferencia activa) */}
                 <div className="flex flex-col">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-display-hero text-display-hero text-white tracking-tight font-extrabold">
-                      {hideBalance
-                        ? '••••••••'
-                        : `$${executiveBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                    </span>
-                    <span className="font-financial-mono text-financial-mono text-on-surface-variant">USD</span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="font-body-medium text-body-medium text-on-surface font-semibold">
-                      {hideBalance
-                        ? '≈ •••••••• MXN'
-                        : `≈ $${(executiveBalance * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-primary/15 text-[#2ED5A4] font-caption-sm text-caption-sm font-bold">
-                      <span className="material-symbols-outlined text-[12px]">trending_up</span>+1.2%
-                    </span>
-                  </div>
+                  {currencyPref === 'USD' ? (
+                    <>
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-display-hero text-display-hero text-white tracking-tight font-extrabold">
+                          {hideBalance
+                            ? '••••••••'
+                            : `$${executiveBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        </span>
+                        <span className="font-financial-mono text-financial-mono text-[#2ED5A4] font-black">USD</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="font-body-medium text-body-medium text-[#8E91A5] font-semibold">
+                          {hideBalance
+                            ? '≈ •••••••• MXN'
+                            : `≈ $${(executiveBalance * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`}
+                        </span>
+                        <span className="text-[10px] text-[#8E91A5]">
+                          (en México al tipo de cambio)
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-display-hero text-display-hero text-white tracking-tight font-extrabold">
+                          {hideBalance
+                            ? '••••••••'
+                            : `$${(executiveBalance * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        </span>
+                        <span className="font-financial-mono text-financial-mono text-[#2ED5A4] font-black">MXN</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="font-body-medium text-body-medium text-[#8E91A5] font-semibold">
+                          {hideBalance
+                            ? '≈ •••••••• USD'
+                            : `≈ $${executiveBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`}
+                        </span>
+                        <span className="text-[10px] text-[#8E91A5]">
+                          (equivalente en cuenta origen USA)
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Live FX Guarantee Badge */}
@@ -1761,55 +1896,111 @@ export default function MobileApp() {
               </div>
             </div>
 
-            {/* Quick Action Rail */}
+            {/* Quick Action Rail Adaptable por Moneda (USA USD vs México MXN) */}
             <div className="grid grid-cols-4 gap-2.5">
-              {/* Send Money */}
-              <button
-                type="button"
-                onClick={() => setActiveTab('send')}
-                className="group flex flex-col items-center gap-1.5 cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
-                  <span className="material-symbols-outlined text-[26px]">send</span>
-                </div>
-                <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Send MX</span>
-              </button>
+              {currencyPref === 'USD' ? (
+                <>
+                  {/* Send Money to Mexico */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('send')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+                      <span className="material-symbols-outlined text-[26px]">send</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">
+                      {language === 'en' ? 'Send MX' : 'Enviar MX'}
+                    </span>
+                  </button>
 
-              {/* Kin Cash P2P */}
-              <button
-                type="button"
-                onClick={() => setActiveTab('kin-cash')}
-                className="group flex flex-col items-center gap-1.5 cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary-container to-secondary flex items-center justify-center text-white shadow-[0_8px_20px_-4px_rgba(112,71,235,0.45)] transition-transform group-hover:scale-105 active:scale-95">
-                  <span className="material-symbols-outlined text-[26px]">bolt</span>
-                </div>
-                <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Kin Cash</span>
-              </button>
+                  {/* Kin Cash P2P */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('kin-cash')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary-container to-secondary flex items-center justify-center text-white shadow-[0_8px_20px_-4px_rgba(112,71,235,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+                      <span className="material-symbols-outlined text-[26px]">bolt</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Kin Cash</span>
+                  </button>
 
-              {/* 1-Tap Send */}
-              <button
-                type="button"
-                onClick={() => setActiveTab('send-quick')}
-                className="group flex flex-col items-center gap-1.5 cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
-                  <span className="material-symbols-outlined text-[26px]">touch_app</span>
-                </div>
-                <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">1-Tap Send</span>
-              </button>
+                  {/* 1-Tap Send */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('send-quick')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                      <span className="material-symbols-outlined text-[26px]">touch_app</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">1-Tap Send</span>
+                  </button>
 
-              {/* Bill Pay */}
-              <button
-                type="button"
-                onClick={() => setActiveTab('bill-pay')}
-                className="group flex flex-col items-center gap-1.5 cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
-                  <span className="material-symbols-outlined text-[26px]">receipt_long</span>
-                </div>
-                <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">Bill Pay</span>
-              </button>
+                  {/* Bill Pay */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('bill-pay')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                      <span className="material-symbols-outlined text-[26px]">receipt_long</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">Bill Pay</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* KIN CASH MX: P2P en Pesos para México / Viajeros */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('kin-cash')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+                      <span className="material-symbols-outlined text-[26px]">bolt</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">KIN CASH</span>
+                  </button>
+
+                  {/* Retirar SPEI a banco de México */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('send')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                      <span className="material-symbols-outlined text-[26px]">account_balance</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">Retiro SPEI</span>
+                  </button>
+
+                  {/* 1-Tap Send a Familia */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('send-quick')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                      <span className="material-symbols-outlined text-[26px]">touch_app</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">1-Tap Send</span>
+                  </button>
+
+                  {/* Pagar Servicios en México (CFE, recargas, etc.) */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('bill-pay')}
+                    className="group flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+                      <span className="material-symbols-outlined text-[26px]">receipt_long</span>
+                    </div>
+                    <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">Servicios</span>
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Beneficiaries Horizontal Carousel */}
@@ -3570,6 +3761,78 @@ export default function MobileApp() {
                   title={language === 'en' ? 'Notifications' : 'Notificaciones'}
                 />
               </div>
+
+              {/* Selector de Idioma / Language */}
+              <div className="flex items-center justify-between py-1.5 border-t border-white/5">
+                <div>
+                  <span className="text-xs font-bold text-white block">
+                    {language === 'en' ? 'App Language' : 'Idioma de la Aplicación'}
+                  </span>
+                  <span className="text-[10px] text-[#8E91A5]">
+                    {language === 'en' ? 'Active language preference' : 'Preferencia de idioma activa'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 bg-[#202236] p-1 rounded-xl border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLanguage('es');
+                      if (typeof window !== 'undefined') localStorage.setItem('kin_language', 'es');
+                      if (userId) fetch('/api/account/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, updates: { language: 'es' } }) }).catch(() => {});
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                      language === 'es' ? 'bg-[#2ED5A4] text-[#06070B] shadow-sm' : 'text-[#8E91A5] hover:text-white'
+                    }`}
+                  >
+                    🇲🇽 ES
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLanguage('en');
+                      if (typeof window !== 'undefined') localStorage.setItem('kin_language', 'en');
+                      if (userId) fetch('/api/account/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, updates: { language: 'en' } }) }).catch(() => {});
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                      language === 'en' ? 'bg-[#2ED5A4] text-[#06070B] shadow-sm' : 'text-[#8E91A5] hover:text-white'
+                    }`}
+                  >
+                    🇺🇸 EN
+                  </button>
+                </div>
+              </div>
+
+              {/* Selector de Moneda Base / Currency */}
+              <div className="flex items-center justify-between py-1.5 border-t border-white/5">
+                <div>
+                  <span className="text-xs font-bold text-white block">
+                    {language === 'en' ? 'Base Currency / Region' : 'Moneda Base / Región'}
+                  </span>
+                  <span className="text-[10px] text-[#8E91A5]">
+                    {language === 'en' ? 'Primary account balance mode' : 'Modo de saldo principal'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 bg-[#202236] p-1 rounded-xl border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleCurrency('USD')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                      currencyPref === 'USD' ? 'bg-[#2ED5A4] text-[#06070B] shadow-sm' : 'text-[#8E91A5] hover:text-white'
+                    }`}
+                  >
+                    🇺🇸 USD
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleCurrency('MXN')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                      currencyPref === 'MXN' ? 'bg-[#2ED5A4] text-[#06070B] shadow-sm' : 'text-[#8E91A5] hover:text-white'
+                    }`}
+                  >
+                    🇲🇽 MXN
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* 6. Botones de Acción: Editar Perfil & Cerrar Sesión */}
@@ -3580,7 +3843,7 @@ export default function MobileApp() {
                 className="w-full h-13 rounded-2xl bg-[#202236] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-black text-white hover:bg-[#2B2C42] transition-all cursor-pointer shadow-md"
               >
                 <span>✎</span>
-                <span>Editar Información del Perfil</span>
+                <span>{language === 'en' ? 'Edit Profile, Language & Currency' : 'Editar Información, Idioma y Moneda'}</span>
               </button>
 
               <button
@@ -3588,7 +3851,7 @@ export default function MobileApp() {
                 onClick={handleLogout}
                 className="w-full h-12 rounded-2xl bg-[#181928] border border-[#FF5555]/20 hover:border-[#FF5555]/50 hover:bg-[#FF5555]/10 flex items-center justify-center gap-2 text-xs font-bold text-[#FF5555] transition-all cursor-pointer shadow-sm"
               >
-                <span>Cerrar Sesión Segura</span>
+                <span>{language === 'en' ? 'Secure Log Out' : 'Cerrar Sesión Segura'}</span>
               </button>
             </div>
           </div>
@@ -3775,9 +4038,23 @@ export default function MobileApp() {
         userEmail={userEmail}
         userPhone={userPhone}
         currencyPref={currencyPref}
-        onCurrencyChange={setCurrencyPref}
+        onCurrencyChange={handleToggleCurrency}
         language={language}
-        onLanguageChange={setLanguage}
+        onLanguageChange={(newLang) => {
+          setLanguage(newLang);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('kin_language', newLang);
+            } catch (_) {}
+          }
+          if (userId) {
+            fetch('/api/account/data', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, updates: { language: newLang } }),
+            }).catch(() => {});
+          }
+        }}
       />
 
       {/* Modal: Gestión de Beneficiarios y Contactos (Regulación CNBV / Banxico / FinCEN) */}
@@ -4393,25 +4670,159 @@ export default function MobileApp() {
                   <CameraIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Editar Perfil & Datos</h3>
-                  <p className="text-[11px] text-[#8E91A5]">Actualiza tu información de contacto y foto</p>
+                  <h3 className="text-sm font-bold text-white">
+                    {draftUserLanguage === 'en' ? 'Edit Profile & Settings' : 'Editar Perfil & Datos'}
+                  </h3>
+                  <p className="text-[11px] text-[#8E91A5]">
+                    {draftUserLanguage === 'en' ? 'Update contact info, photo & app language' : 'Actualiza tu información de contacto, foto e idioma'}
+                  </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleCancelProfile}
                 className="p-1 rounded-full text-[#8E91A5] hover:text-white cursor-pointer"
-                title="Cerrar sin guardar"
+                title={draftUserLanguage === 'en' ? 'Close without saving' : 'Cerrar sin guardar'}
               >
                 <CloseIcon className="w-5 h-5" />
               </button>
+            </div>
+
+            {/* SECCIÓN PREMIER: SELECTOR DE IDIOMA DEL CLIENTE (BILINGÜE ES / EN) */}
+            <div className="p-3.5 rounded-2xl bg-[#141524] border border-[#2ED5A4]/25 shadow-sm space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4]">
+                    <LanguageIcon className="w-4 h-4 text-[#2ED5A4]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-white block">
+                      {draftUserLanguage === 'en' ? 'App Language' : 'Idioma de la Aplicación'}
+                    </span>
+                    <span className="text-[10px] text-[#8E91A5]">
+                      {draftUserLanguage === 'en' ? 'Interface & notifications language' : 'Idioma para interfaz y avisos'}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] border border-[#2ED5A4]/30">
+                  {draftUserLanguage === 'en' ? '🇺🇸 EN Active' : '🇲🇽 ES Activo'}
+                </span>
+              </div>
+
+              {/* Segmented Touch Targets (min 48-52px de altura para ergonomía móvil HIG) */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => setDraftUserLanguage('es')}
+                  className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    draftUserLanguage === 'es'
+                      ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black scale-[1.01]'
+                      : 'bg-[#1E2033] text-[#8E91A5] border-white/5 hover:border-white/20 hover:text-white font-semibold'
+                  }`}
+                >
+                  <span className="text-base">🇲🇽</span>
+                  <span>Español</span>
+                  {draftUserLanguage === 'es' && (
+                    <span className="text-sm font-black">✓</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDraftUserLanguage('en')}
+                  className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    draftUserLanguage === 'en'
+                      ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black scale-[1.01]'
+                      : 'bg-[#1E2033] text-[#8E91A5] border-white/5 hover:border-white/20 hover:text-white font-semibold'
+                  }`}
+                >
+                  <span className="text-base">🇺🇸</span>
+                  <span>English</span>
+                  {draftUserLanguage === 'en' && (
+                    <span className="text-sm font-black">✓</span>
+                  )}
+                </button>
+              </div>
+
+              <p className="text-[10px] text-[#8E91A5] text-center">
+                {draftUserLanguage === 'en'
+                  ? 'The application, notifications and SPEI receipts will display in English.'
+                  : 'Toda la interfaz, notificaciones y comprobantes SPEI se mostrarán en español.'}
+              </p>
+            </div>
+
+            {/* SECCIÓN PREMIER 2: BILLETERA & MONEDA BASE (USA USD 🇺🇸 / MÉXICO MXN 🇲🇽) */}
+            <div className="p-3.5 rounded-2xl bg-[#141524] border border-[#2ED5A4]/25 shadow-sm space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4]">
+                    <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-white block">
+                      {draftUserLanguage === 'en' ? 'Default Account Currency' : 'Moneda Base de la Cuenta'}
+                    </span>
+                    <span className="text-[10px] text-[#8E91A5]">
+                      {draftUserLanguage === 'en' ? 'Select primary balance & region mode' : 'Selecciona tu moneda principal y región'}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] border border-[#2ED5A4]/30">
+                  {draftUserCurrencyPref === 'USD' ? '🇺🇸 USD Activo' : '🇲🇽 MXN Activo'}
+                </span>
+              </div>
+
+              {/* Segmented Control 2 Opciones: 🇺🇸 Dólares (USA) y 🇲🇽 Pesos (México) */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => setDraftUserCurrencyPref('USD')}
+                  className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    draftUserCurrencyPref === 'USD'
+                      ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black scale-[1.01]'
+                      : 'bg-[#1E2033] text-[#8E91A5] border-white/5 hover:border-white/20 hover:text-white font-semibold'
+                  }`}
+                >
+                  <span className="text-base">🇺🇸</span>
+                  <span>{draftUserLanguage === 'en' ? 'US Dollars (USD)' : 'Dólares (USD)'}</span>
+                  {draftUserCurrencyPref === 'USD' && (
+                    <span className="text-sm font-black">✓</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDraftUserCurrencyPref('MXN')}
+                  className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    draftUserCurrencyPref === 'MXN'
+                      ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black scale-[1.01]'
+                      : 'bg-[#1E2033] text-[#8E91A5] border-white/5 hover:border-white/20 hover:text-white font-semibold'
+                  }`}
+                >
+                  <span className="text-base">🇲🇽</span>
+                  <span>{draftUserLanguage === 'en' ? 'Mexican Pesos (MXN)' : 'Pesos (MXN)'}</span>
+                  {draftUserCurrencyPref === 'MXN' && (
+                    <span className="text-sm font-black">✓</span>
+                  )}
+                </button>
+              </div>
+
+              <p className="text-[10px] text-[#8E91A5] text-center">
+                {draftUserCurrencyPref === 'USD'
+                  ? (draftUserLanguage === 'en' 
+                      ? 'Configured for US residents: Send money to Mexico and domestic USD transfers.'
+                      : 'Configurado para residentes en EE. UU.: Envíos a México y transferencias en dólares.')
+                  : (draftUserLanguage === 'en'
+                      ? 'Configured for Mexico residents & travelers: KIN CASH in pesos and local SPEI withdrawals.'
+                      : 'Configurado para residentes en México y viajeros: KIN CASH en pesos y retiros locales SPEI.')}
+              </p>
             </div>
 
             {/* Nombre y Apellido (2 Columnas) */}
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="text-xs font-semibold text-[#8E91A5] block mb-1 px-0.5">
-                  Nombre(s):
+                  {draftUserLanguage === 'en' ? 'First Name(s):' : 'Nombre(s):'}
                 </label>
                 <div className="auth-input-group">
                   <input
@@ -4421,7 +4832,7 @@ export default function MobileApp() {
                     spellCheck={false}
                     value={draftUserFirstName}
                     onChange={(e) => setDraftUserFirstName(capitalizeWords(e.target.value))}
-                    placeholder="Nombre"
+                    placeholder={draftUserLanguage === 'en' ? 'First Name' : 'Nombre'}
                     className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
@@ -4430,7 +4841,7 @@ export default function MobileApp() {
 
               <div>
                 <label className="text-xs font-semibold text-[#8E91A5] block mb-1 px-0.5">
-                  Apellido(s):
+                  {draftUserLanguage === 'en' ? 'Last Name(s):' : 'Apellido(s):'}
                 </label>
                 <div className="auth-input-group">
                   <input
@@ -4440,7 +4851,7 @@ export default function MobileApp() {
                     spellCheck={false}
                     value={draftUserLastName}
                     onChange={(e) => setDraftUserLastName(capitalizeWords(e.target.value))}
-                    placeholder="Apellido"
+                    placeholder={draftUserLanguage === 'en' ? 'Last Name' : 'Apellido'}
                     className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
@@ -4451,14 +4862,14 @@ export default function MobileApp() {
             {/* Correo Electrónico Registrado */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-1 px-0.5">
-                Correo Electrónico:
+                {draftUserLanguage === 'en' ? 'Registered Email:' : 'Correo Electrónico Registrado:'}
               </label>
               <div className="auth-input-group">
                 <input
                   type="email"
                   value={draftUserEmail}
                   onChange={(e) => setDraftUserEmail(e.target.value)}
-                  placeholder="tu@correo.com"
+                  placeholder={draftUserLanguage === 'en' ? 'your@email.com' : 'tu@correo.com'}
                   className="auth-input-field"
                   style={{ paddingLeft: '14px' }}
                 />
@@ -4468,7 +4879,7 @@ export default function MobileApp() {
             {/* Teléfono Móvil */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-1 px-0.5">
-                Teléfono Móvil (con lada):
+                {draftUserLanguage === 'en' ? 'Mobile Phone (with country code):' : 'Teléfono Móvil (con lada):'}
               </label>
               <div className="auth-input-group">
                 <input
@@ -4486,7 +4897,7 @@ export default function MobileApp() {
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="text-xs font-semibold text-[#8E91A5] block mb-1 px-0.5">
-                  Ciudad:
+                  {draftUserLanguage === 'en' ? 'City:' : 'Ciudad:'}
                 </label>
                 <div className="auth-input-group">
                   <input
@@ -4496,7 +4907,7 @@ export default function MobileApp() {
                     spellCheck={false}
                     value={draftUserCity}
                     onChange={(e) => setDraftUserCity(capitalizeWords(e.target.value))}
-                    placeholder="Ciudad"
+                    placeholder={draftUserLanguage === 'en' ? 'City' : 'Ciudad'}
                     className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
@@ -4505,7 +4916,7 @@ export default function MobileApp() {
 
               <div>
                 <label className="text-xs font-semibold text-[#8E91A5] block mb-1 px-0.5">
-                  Estado:
+                  {draftUserLanguage === 'en' ? 'State:' : 'Estado:'}
                 </label>
                 <div className="auth-input-group">
                   <input
@@ -4515,7 +4926,7 @@ export default function MobileApp() {
                     spellCheck={false}
                     value={draftUserState}
                     onChange={(e) => setDraftUserState(capitalizeWords(e.target.value))}
-                    placeholder="Estado"
+                    placeholder={draftUserLanguage === 'en' ? 'State' : 'Estado'}
                     className="auth-input-field capitalize"
                     style={{ paddingLeft: '14px' }}
                   />
@@ -4526,7 +4937,7 @@ export default function MobileApp() {
             {/* Opción Sin Foto / Dejar Recuadro Vacío */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-1.5 px-0.5">
-                Opciones de foto de perfil:
+                {draftUserLanguage === 'en' ? 'Profile photo options:' : 'Opciones de foto de perfil:'}
               </label>
               <button
                 type="button"
@@ -4541,18 +4952,18 @@ export default function MobileApp() {
                 }`}
               >
                 <span className="material-symbols-outlined text-[17px]">no_accounts</span>
-                <span>Sin foto de perfil (Recuadro vacío)</span>
+                <span>{draftUserLanguage === 'en' ? 'No profile photo (Empty frame)' : 'Sin foto de perfil (Recuadro vacío)'}</span>
               </button>
             </div>
 
             {/* Subir foto de la galería / dispositivo del cliente */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-1.5 px-0.5">
-                O subir desde la galería de tu dispositivo:
+                {draftUserLanguage === 'en' ? 'Or upload from your device gallery:' : 'O subir desde la galería de tu dispositivo:'}
               </label>
               <label className="w-full h-11 rounded-2xl bg-[#222338] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white cursor-pointer transition-colors shadow-sm">
                 <CameraIcon className="w-4 h-4 text-[#2ED5A4]" />
-                <span>Elegir foto de mi galería</span>
+                <span>{draftUserLanguage === 'en' ? 'Choose photo from gallery' : 'Elegir foto de mi galería'}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -4576,7 +4987,7 @@ export default function MobileApp() {
             {/* Galería de Avatares Predefinidos */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-2 px-0.5">
-                O selecciona uno de los avatares predefinidos:
+                {draftUserLanguage === 'en' ? 'Or select a predefined avatar:' : 'O selecciona uno de los avatares predefinidos:'}
               </label>
               <div className="grid grid-cols-3 gap-2.5">
                 {DEFAULT_AVATARS.map((url, idx) => {
@@ -4605,7 +5016,7 @@ export default function MobileApp() {
                         )}
                       </div>
                       <span className="text-[10px] text-white font-medium">
-                        Opción {idx + 1}
+                        {draftUserLanguage === 'en' ? `Option ${idx + 1}` : `Opción ${idx + 1}`}
                       </span>
                     </button>
                   );
@@ -4616,7 +5027,7 @@ export default function MobileApp() {
             {/* O ingresar URL personalizada */}
             <div>
               <label className="text-xs font-semibold text-[#8E91A5] block mb-1 px-0.5">
-                O ingresa la URL de tu imagen:
+                {draftUserLanguage === 'en' ? 'Or enter custom image URL:' : 'O ingresa la URL de tu imagen:'}
               </label>
               <div className="flex gap-2">
                 <div className="auth-input-group flex-1">
@@ -4639,7 +5050,7 @@ export default function MobileApp() {
                   }}
                   className="px-4 rounded-2xl bg-[#2B2C42] text-white text-xs font-bold hover:bg-[#343552] border border-white/10 cursor-pointer"
                 >
-                  Usar
+                  {draftUserLanguage === 'en' ? 'Apply' : 'Usar'}
                 </button>
               </div>
             </div>
@@ -4650,7 +5061,7 @@ export default function MobileApp() {
               onClick={handleSaveProfile}
               className="auth-btn-cta active mt-3"
             >
-              Guardar
+              {draftUserLanguage === 'en' ? 'Save Changes' : 'Guardar'}
             </button>
           </div>
         </div>

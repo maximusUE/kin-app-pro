@@ -37,6 +37,8 @@ export interface UserProfile {
   passwordHash?: string;
   biometricsEnabled: boolean;
   pushNotificationsEnabled: boolean;
+  language?: 'es' | 'en';
+  currencyPref?: 'USD' | 'MXN';
 }
 
 export interface TransactionRecord {
@@ -118,6 +120,8 @@ const DEFAULT_USERS: UserProfile[] = [
     passwordHash: 'KinVault2025$Secure',
     biometricsEnabled: true,
     pushNotificationsEnabled: true,
+    language: 'es',
+    currencyPref: 'USD',
   },
 ];
 
