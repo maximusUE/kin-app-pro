@@ -231,10 +231,14 @@ export function BilingualAuthScreen({
               <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">
                 KIN <span className="text-primary">Mobile</span>
               </h1>
-              <p className="font-body-medium text-body-medium text-on-surface-variant mt-1 max-w-[280px]">
-                {language === 'es'
-                  ? 'El puente financiero de tu familia en México'
-                  : "Your family's trusted financial bridge to Mexico"}
+              <p className="font-body-medium text-body-medium text-on-surface-variant mt-1 max-w-[340px] transition-all duration-300">
+                {authMode === 'login'
+                  ? (language === 'es'
+                      ? '¡Bienvenido de vuelta! Ingresa a tu cuenta'
+                      : 'Welcome back! Sign in to your account')
+                  : (language === 'es'
+                      ? '¡Bienvenido a KIN! Te damos una cordial bienvenida como nuevo cliente'
+                      : 'Welcome to KIN! A warm welcome as a new customer')}
               </p>
             </div>
 
@@ -269,6 +273,13 @@ export function BilingualAuthScreen({
             {/* Mode 1: Login Form */}
             {authMode === 'login' ? (
               <form onSubmit={handleLogin} className="flex flex-col gap-space-md w-full relative z-10">
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                  <span className="text-base">👋</span>
+                  <span className="font-title-base text-body-medium font-semibold">
+                    {language === 'es' ? '¡Bienvenido de vuelta! Nos alegra verte de nuevo' : 'Welcome back! Glad to see you again'}
+                  </span>
+                </div>
+
                 {/* Email input */}
                 <div className="flex flex-col gap-1.5">
                   <label className="font-caption-sm text-caption-sm text-on-surface-variant flex items-center justify-between">
@@ -375,6 +386,13 @@ export function BilingualAuthScreen({
             ) : (
               /* Mode 2: Register Form */
               <form onSubmit={handleRegister} className="flex flex-col gap-space-md w-full relative z-10">
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                  <span className="text-base">🎉</span>
+                  <span className="font-title-base text-body-medium font-semibold">
+                    {language === 'es' ? '¡Bienvenido nuevo cliente! Crea tu cuenta KIN' : 'Welcome new customer! Create your KIN account'}
+                  </span>
+                </div>
+
                 {/* First Name & Last Name (2 columns) */}
                 <div className="grid grid-cols-2 gap-space-sm w-full">
                   <div className="flex flex-col gap-1.5">
@@ -531,7 +549,7 @@ export function BilingualAuthScreen({
                       <span className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
-                        <span>{language === 'es' ? 'Crear Cuenta Segura' : 'Create Secure Account'}</span>
+                        <span>{language === 'es' ? '¡Bienvenido! Crear Cuenta' : 'Welcome! Create Account'}</span>
                         <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                       </>
                     )}
