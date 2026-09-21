@@ -515,7 +515,9 @@ export default function MobileApp() {
                 phone: data.user.draftP2P.contactPhone || '',
                 bank: data.user.draftP2P.contactBank || 'Red KIN Cash P2P',
                 role: 'Familiar',
-                avatar: data.user.draftP2P.contactAvatar,
+                avatar: data.user.draftP2P.contactAvatar || '',
+                country: 'Mexico',
+                photoUrl: '',
               };
             });
             if (data.user.draftP2P.amount) {
@@ -537,7 +539,9 @@ export default function MobileApp() {
                 phone: data.user.draftSend.recipientPhone || '',
                 bank: 'Red Banxico SPEI',
                 role: 'Beneficiario',
-                avatar: data.user.draftSend.recipientAvatar,
+                avatar: data.user.draftSend.recipientAvatar || '',
+                country: 'Mexico',
+                photoUrl: data.user.draftSend.recipientPhotoUrl || '',
               };
             });
             if (data.user.draftSend.amount) {
