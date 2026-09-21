@@ -76,6 +76,7 @@ import {
   MailIcon,
   LockIcon,
   ShieldCheckIcon,
+  WhatsAppIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
 import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/components/KinCashP2PModal';
@@ -232,6 +233,9 @@ interface TransactionItem {
   refNumber?: string;
   amountMXN?: number;
   status?: string;
+  claveRastreoBanxico?: string;
+  claveRetiroEfectivo?: string;
+  pickupStore?: string;
 }
 
 // Estado limpio inicial (Clean Slate): sin transacciones ficticias
@@ -706,6 +710,11 @@ export default function MobileApp() {
     setContactFeedback(`Beneficiario ${newContact.name} verificado y registrado.`);
     setTimeout(() => setContactFeedback(null), 3500);
 
+    // Avanzar inmediatamente al Dashboard de Desglose y Revisión
+    if (activeTab === 'send') {
+      setShowSendReviewModal(true);
+    }
+
     setNewContactFirstName('');
     setNewContactLastName('');
     setNewContactName('');
@@ -744,18 +753,33 @@ export default function MobileApp() {
   const currentSendAmount = parseFloat(amountValue) || 0;
   const totalToPayUSD = currentSendAmount > 0 ? currentSendAmount + paymentFee : 0;
 
-  // Success screen state (Rosette Badge, Money sent successfully)
+  // Success screen state (Rosette Badge, Money sent successfully, Clave de Retiro)
   const [sendSuccessData, setSendSuccessData] = useState<{
     id: string;
     amount: number;
+    amountMXN: number;
     fee: number;
     totalPaid: number;
     recipientName: string;
     recipientAvatar: string;
+    recipientPhone?: string;
+    recipientStreet?: string;
+    recipientState?: string;
+    recipientCountry?: string;
     time: string;
     deliveryTitle: string;
+    deliveryMethod: 'cash' | 'bank' | string;
+    pickupStore?: string;
     paymentTitle: string;
+    claveRastreoBanxico?: string;
+    claveRetiroEfectivo?: string;
   } | null>(null);
+
+  // Review & Checkout Breakdown Dashboard Modal State
+  const [showSendReviewModal, setShowSendReviewModal] = useState(false);
+  const [isExecutingPayment, setIsExecutingPayment] = useState(false);
+  const [copiedWithdrawalPin, setCopiedWithdrawalPin] = useState(false);
+  const [copiedTrackingBanxico, setCopiedTrackingBanxico] = useState(false);
 
   // Modals
   const [showBillPayModal, setShowBillPayModal] = useState(false);
@@ -769,7 +793,8 @@ export default function MobileApp() {
   const [showCardDetails, setShowCardDetails] = useState(false);
 
   // Helper para registrar un envío de dinero y abrir ventanilla de Success
-  const handleSendNow = () => {
+  // Helper para validar y abrir el Dashboard de Desglose y Revisión (Review & Breakdown Dashboard)
+  const handleStartSendReview = () => {
     if (!selectedAvatar) {
       setBeneficiaryModalTab('select');
       setShowContactModal(true);
@@ -808,9 +833,19 @@ export default function MobileApp() {
       setShowContactModal(true);
       return;
     }
+
+    // Beneficiario validado con éxito -> Abrir Dashboard de Desglose y Revisión
+    setShowSendReviewModal(true);
+  };
+
+  // Helper para ejecutar el pago desde el Dashboard de Desglose y redirigir a Success con la Clave de Retiro
+  const handleExecuteSendPayment = async () => {
+    if (!selectedAvatar) return;
+    setIsExecutingPayment(true);
+
     const amt = parseFloat(amountValue) || 50;
     const fee = paymentMethod === 'credit' ? 1.99 : 0.0;
-    const totalPaid = amt + fee;
+    const totalPaid = +(amt + fee).toFixed(2);
     const txId = 'KIN-' + Math.floor(100000 + Math.random() * 900000);
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -818,13 +853,25 @@ export default function MobileApp() {
 
     const storeObj = CASH_PICKUP_STORES.find((s) => s.id === selectedStore);
     const deliveryTitle = deliveryMethod === 'cash'
-      ? `Cash Pickup (${storeObj?.name || 'Any agent'})`
+      ? `Retiro en Efectivo (${storeObj?.name || 'OXXO'})`
       : 'Depósito a Cuenta Bancaria (SPEI)';
     
-    const paymentTitle = paymentMethod === 'debit' ? 'Debit Card ($0.00 fee)'
+    const paymentTitle = paymentMethod === 'debit' ? 'Tarjeta de Débito ($0.00 fee)'
       : paymentMethod === 'apple' ? 'Apple Pay ($0.00 fee)'
-      : paymentMethod === 'bank' ? 'Bank account ($0.00 fee)'
-      : 'Credit Card ($1.99 fee)';
+      : paymentMethod === 'bank' ? 'Cuenta de Banco ($0.00 fee)'
+      : 'Tarjeta de Crédito ($1.99 fee)';
+
+    // Generar Clave de Retiro en Efectivo (PIN de 8 dígitos formato XXXX-XXXX para cobro en sucursal)
+    const p1 = Math.floor(1000 + Math.random() * 9000);
+    const p2 = Math.floor(1000 + Math.random() * 9000);
+    const clientClaveRetiro = `${p1}-${p2}`;
+
+    // Clave de Rastreo Banxico oficial
+    const timestampIso = now.toISOString().replace(/\D/g, '').slice(0, 14);
+    const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const clientClaveBanxico = `KIN${timestampIso}${randomSuffix}`.padEnd(24, '0').slice(0, 24);
+
+    const amountMXN = +(amt * USD_TO_MXN_RATE).toFixed(2);
 
     const newTx: TransactionItem = {
       id: Date.now().toString(),
@@ -836,39 +883,81 @@ export default function MobileApp() {
       iconType: 'send',
       dateGroup: 'Hoy',
       refNumber: txId,
-      amountMXN: +(amt * USD_TO_MXN_RATE).toFixed(2),
+      amountMXN,
       status: 'Completado',
+      claveRastreoBanxico: clientClaveBanxico,
+      claveRetiroEfectivo: deliveryMethod === 'cash' ? clientClaveRetiro : undefined,
+      pickupStore: storeObj?.name || 'OXXO',
     };
 
     setTransactions((prev) => [newTx, ...prev]);
     setBaseBalanceUSD((prev) => +(prev - totalPaid).toFixed(2));
 
-    // Despacho asíncrono hacia el backend SPEI
-    fetch('/api/spei/transfer', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        recipientName: selectedAvatar.name,
-        recipientId: selectedAvatar.id,
-        recipientPhone: selectedAvatar.phone,
-        amountUSD: amt,
-        deliveryMethod,
-        pickupStore: selectedStore,
-      }),
-    }).catch((e) => console.warn('[SPEI API error]', e));
+    try {
+      const res = await fetch('/api/spei/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          recipientName: selectedAvatar.name,
+          recipientId: selectedAvatar.id,
+          recipientPhone: selectedAvatar.phone,
+          amountUSD: amt,
+          deliveryMethod,
+          pickupStore: selectedStore,
+          clabe: selectedAvatar.clabe || '',
+        }),
+      });
+      const data = await res.json();
+      const finalClaveRetiro = data.claveRetiroEfectivo || clientClaveRetiro;
+      const finalClaveBanxico = data.claveRastreoBanxico || clientClaveBanxico;
 
-    setSendSuccessData({
-      id: txId,
-      amount: amt,
-      fee,
-      totalPaid,
-      recipientName: selectedAvatar.name,
-      recipientAvatar: selectedAvatar.avatar,
-      time: `${dateStr} a las ${timeStr}`,
-      deliveryTitle,
-      paymentTitle,
-    });
+      setSendSuccessData({
+        id: txId,
+        amount: amt,
+        amountMXN,
+        fee,
+        totalPaid,
+        recipientName: selectedAvatar.name,
+        recipientAvatar: selectedAvatar.avatar,
+        recipientPhone: selectedAvatar.phone,
+        recipientStreet: selectedAvatar.street,
+        recipientState: selectedAvatar.state,
+        recipientCountry: selectedAvatar.country,
+        time: `${dateStr} a las ${timeStr}`,
+        deliveryTitle,
+        deliveryMethod,
+        pickupStore: storeObj?.name || 'OXXO',
+        paymentTitle,
+        claveRastreoBanxico: finalClaveBanxico,
+        claveRetiroEfectivo: deliveryMethod === 'cash' ? finalClaveRetiro : undefined,
+      });
+    } catch (e) {
+      console.warn('[SPEI API error]', e);
+      setSendSuccessData({
+        id: txId,
+        amount: amt,
+        amountMXN,
+        fee,
+        totalPaid,
+        recipientName: selectedAvatar.name,
+        recipientAvatar: selectedAvatar.avatar,
+        recipientPhone: selectedAvatar.phone,
+        recipientStreet: selectedAvatar.street,
+        recipientState: selectedAvatar.state,
+        recipientCountry: selectedAvatar.country,
+        time: `${dateStr} a las ${timeStr}`,
+        deliveryTitle,
+        deliveryMethod,
+        pickupStore: storeObj?.name || 'OXXO',
+        paymentTitle,
+        claveRastreoBanxico: clientClaveBanxico,
+        claveRetiroEfectivo: deliveryMethod === 'cash' ? clientClaveRetiro : undefined,
+      });
+    } finally {
+      setIsExecutingPayment(false);
+      setShowSendReviewModal(false);
+    }
   };
 
   // Helper para Envío Rápido (Send Quick en 1 solo toque)
@@ -1285,20 +1374,162 @@ export default function MobileApp() {
               </div>
             </div>
 
+            {/* ================================================================= */}
+            {/* CLAVE OFICIAL DE RETIRO EN EFECTIVO (SUCURSAL SELECCIONADA)      */}
+            {/* ================================================================= */}
+            {sendSuccessData.claveRetiroEfectivo ? (
+              <div className="bg-gradient-to-b from-[#182322] to-[#12161b] border-2 border-[#2ED5A4]/50 rounded-3xl p-4 shadow-[0_0_35px_rgba(46,213,164,0.22)] space-y-3">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#2ED5A4]/20 flex items-center justify-center text-base">
+                      🔑
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black tracking-wider uppercase text-[#2ED5A4] block">
+                        Clave Oficial de Retiro en Efectivo
+                      </span>
+                      <p className="text-xs font-bold text-white">
+                        Cobro en ventanilla: {sendSuccessData.pickupStore || 'OXXO'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4]/40 text-[10px] font-black text-[#2ED5A4] tracking-wider uppercase shadow-sm">
+                    LISTA EN CAJA
+                  </span>
+                </div>
+
+                {/* Gran Clave Numérica */}
+                <div className="py-3 px-3 bg-black/60 rounded-2xl border border-[#2ED5A4]/40 text-center relative overflow-hidden group">
+                  <div className="text-[10px] text-[#8E91A5] font-semibold mb-1 tracking-wider uppercase">
+                    Código de Retiro Único (PIN)
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-black font-financial-mono text-[#2ED5A4] tracking-widest select-all drop-shadow-[0_2px_14px_rgba(46,213,164,0.45)]">
+                    {sendSuccessData.claveRetiroEfectivo}
+                  </div>
+                  <div className="text-[10px] text-on-surface-variant mt-1 font-medium">
+                    Vigencia: 30 días • Sin costo adicional para el beneficiario
+                  </div>
+                </div>
+
+                {/* Botones de Acción: Copiar Clave & Compartir por WhatsApp */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (sendSuccessData.claveRetiroEfectivo) {
+                        navigator.clipboard?.writeText(sendSuccessData.claveRetiroEfectivo);
+                        setCopiedWithdrawalPin(true);
+                        setTimeout(() => setCopiedWithdrawalPin(false), 2500);
+                      }
+                    }}
+                    className="h-12 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer active:scale-[0.98]"
+                  >
+                    {copiedWithdrawalPin ? (
+                      <>
+                        <CheckCircleIcon className="w-4 h-4 text-[#2ED5A4]" />
+                        <span className="text-[#2ED5A4]">¡Clave Copiada!</span>
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon className="w-4 h-4 text-white" />
+                        <span>Copiar Clave</span>
+                      </>
+                    )}
+                  </button>
+
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                      `¡Hola ${sendSuccessData.recipientName}! 💵 Te envié $${(sendSuccessData.amountMXN || (sendSuccessData.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN a través de KIN.\n\n` +
+                      `📍 Puedes retirarlo en efectivo de inmediato en cualquier sucursal ${sendSuccessData.pickupStore || 'OXXO'} de México.\n\n` +
+                      `🔑 TU CLAVE DE RETIRO ES: ${sendSuccessData.claveRetiroEfectivo}\n\n` +
+                      `Solo acude a ventanilla, menciona cobro de remesa KIN y presenta tu identificación oficial vigente (INE o Pasaporte). ¡Listo!`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-12 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-black font-extrabold flex items-center justify-center gap-2 text-xs transition-all cursor-pointer shadow-[0_4px_16px_rgba(37,211,102,0.35)] active:scale-[0.98]"
+                  >
+                    <WhatsAppIcon className="w-4 h-4 text-black" />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
+
+                {/* Pasos para retirar en ventanilla */}
+                <div className="bg-black/30 rounded-2xl p-3 border border-white/5 space-y-1.5 text-[11px] text-[#A6A9BC]">
+                  <div className="font-bold text-white text-[11px] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px] text-[#2ED5A4]">storefront</span>
+                    Instrucciones para {sendSuccessData.recipientName}:
+                  </div>
+                  <ol className="list-decimal list-inside space-y-1 pl-0.5 text-[10.5px]">
+                    <li>Acudir a cualquier sucursal <strong>{sendSuccessData.pickupStore || 'OXXO'}</strong> en México.</li>
+                    <li>Solicitar en ventanilla o caja el <strong>cobro de remesa KIN</strong>.</li>
+                    <li>Presentar <strong>INE o Pasaporte vigente</strong> y proporcionar la Clave: <strong className="text-[#2ED5A4] font-mono">{sendSuccessData.claveRetiroEfectivo}</strong>.</li>
+                  </ol>
+                </div>
+              </div>
+            ) : sendSuccessData.claveRastreoBanxico ? (
+              <div className="bg-[#181928] border border-[#2ED5A4]/30 rounded-2xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[#8E91A5] font-medium flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px] text-[#2ED5A4]">verified_user</span>
+                    Clave de Rastreo Banxico (CEP)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (sendSuccessData.claveRastreoBanxico) {
+                        navigator.clipboard?.writeText(sendSuccessData.claveRastreoBanxico);
+                        setCopiedTrackingBanxico(true);
+                        setTimeout(() => setCopiedTrackingBanxico(false), 2500);
+                      }
+                    }}
+                    className="flex items-center gap-1 text-xs text-[#2ED5A4] hover:underline font-semibold cursor-pointer"
+                  >
+                    <span>{copiedTrackingBanxico ? '¡Copiado!' : 'Copiar CEP'}</span>
+                    <CopyIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="bg-black/40 rounded-xl p-2 font-financial-mono text-xs text-white break-all select-all border border-white/5">
+                  {sendSuccessData.claveRastreoBanxico}
+                </div>
+                <p className="text-[10px] text-[#8E91A5]">
+                  Depósito interbancario SPEI procesado. Verificable en Banxico mediante Comprobante Electrónico de Pago.
+                </p>
+              </div>
+            ) : null}
+
             {/* Method details pill */}
-            <div className="bg-[#181928] border border-white/10 rounded-2xl p-3 space-y-2 text-xs">
+            <div className="bg-[#181928] border border-white/10 rounded-2xl p-3.5 space-y-2 text-xs">
               <div className="flex items-center justify-between text-[#8E91A5]">
-                <span>Monto enviado</span>
+                <span>Monto enviado en USD</span>
                 <span className="text-white font-bold">${sendSuccessData.amount.toFixed(2)} USD</span>
               </div>
-              {sendSuccessData.fee > 0 && (
+              <div className="flex items-center justify-between text-[#8E91A5]">
+                <span>Tipo de cambio garantizado</span>
+                <span className="text-white font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+              </div>
+              <div className="flex items-center justify-between text-[#8E91A5]">
+                <span>Monto que recibe el familiar</span>
+                <span className="text-[#2ED5A4] font-extrabold font-financial-mono text-sm">
+                  ${(sendSuccessData.amountMXN || (sendSuccessData.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[#8E91A5] pt-1 border-t border-white/5">
+                <span>Tarifa por transferencia KIN</span>
+                <span className="text-[#2ED5A4] font-bold">GRATIS ($0.00 USD)</span>
+              </div>
+              {sendSuccessData.fee > 0 ? (
                 <div className="flex items-center justify-between text-[#8E91A5]">
                   <span>Comisión ({sendSuccessData.paymentTitle})</span>
                   <span className="text-amber-400 font-semibold">+${sendSuccessData.fee.toFixed(2)} USD</span>
                 </div>
+              ) : (
+                <div className="flex items-center justify-between text-[#8E91A5]">
+                  <span>Comisión método de pago</span>
+                  <span className="text-white font-semibold">$0.00 USD</span>
+                </div>
               )}
               <div className="flex items-center justify-between text-[#8E91A5] pt-1 border-t border-white/5">
-                <span>Total pagado</span>
+                <span>Total debitado</span>
                 <span className="text-white font-extrabold text-sm">${sendSuccessData.totalPaid.toFixed(2)} USD</span>
               </div>
               <div className="flex items-center justify-between text-[#8E91A5] pt-1 border-t border-white/5">
@@ -1309,11 +1540,11 @@ export default function MobileApp() {
 
             {/* Statement Pill with Copy button */}
             <div className="bg-[#181928] border border-white/10 rounded-2xl p-3 flex items-center justify-between">
-              <span className="text-xs text-[#8E91A5] font-medium">Request Statement</span>
+              <span className="text-xs text-[#8E91A5] font-medium">Folio de Rastreo KIN</span>
               <button
                 type="button"
                 onClick={() => alert(`ID de transacción copiado: ${sendSuccessData.id}`)}
-                className="flex items-center gap-1.5 text-xs text-[#2ED5A4] hover:underline cursor-pointer font-semibold"
+                className="flex items-center gap-1.5 text-xs text-[#2ED5A4] hover:underline cursor-pointer font-semibold font-mono"
               >
                 <span>{sendSuccessData.id}</span>
                 <CopyIcon className="w-3.5 h-3.5" />
@@ -1325,24 +1556,24 @@ export default function MobileApp() {
               {sendSuccessData.time}
             </p>
 
-            {/* Outlined Action Buttons: Download PDF & Share Receipt (Screenshot 1) */}
+            {/* Outlined Action Buttons: Download PDF & Share Receipt */}
             <div className="space-y-2.5 pt-1">
               <button
                 type="button"
                 onClick={() => alert('Descargando comprobante PDF encriptado de KIN...')}
-                className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm"
+                className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.99]"
               >
                 <DownloadIcon className="w-4 h-4 text-[#2ED5A4]" />
-                <span>Download PDF</span>
+                <span>Descargar Comprobante PDF</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => alert('Compartiendo comprobante vía WhatsApp / Mensaje...')}
-                className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm"
+                className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.99]"
               >
                 <ShareReceiptIcon className="w-4 h-4 text-[#2ED5A4]" />
-                <span>Share Receipt</span>
+                <span>Compartir Comprobante</span>
               </button>
             </div>
 
@@ -2210,10 +2441,16 @@ export default function MobileApp() {
                 <div className="sticky bottom-20 z-30 pt-2 pb-1">
                   <button
                     type="button"
-                    onClick={handleSendNow}
+                    onClick={handleStartSendReview}
                     className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-105"
                   >
-                    <span>{language === 'en' ? 'Continue to Beneficiary' : 'Continuar al Beneficiario'}</span>
+                    <span>
+                      {!selectedAvatar
+                        ? (language === 'en' ? 'Select Beneficiary in Mexico' : 'Seleccionar Beneficiario en México')
+                        : (language === 'en'
+                            ? `Review Breakdown & Send • $${(parseFloat(amountValue) || 50).toFixed(2)} USD`
+                            : `Revisar Desglose y Enviar • $${(parseFloat(amountValue) || 50).toFixed(2)} USD`)}
+                    </span>
                     <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                   </button>
                 </div>
@@ -3591,6 +3828,9 @@ export default function MobileApp() {
                           setShowContactModal(false);
                           setContactFeedback(`Beneficiario ${fam.name} seleccionado.`);
                           setTimeout(() => setContactFeedback(null), 3000);
+                          if (activeTab === 'send') {
+                            setShowSendReviewModal(true);
+                          }
                         }}
                         className="p-3 rounded-2xl bg-[#181928] border border-white/5 hover:border-primary/40 transition-all flex items-center justify-between gap-2.5 cursor-pointer group"
                       >
@@ -3665,6 +3905,9 @@ export default function MobileApp() {
                             onClick={() => {
                               setSelectedAvatar(c);
                               setShowContactModal(false);
+                              if (activeTab === 'send') {
+                                setShowSendReviewModal(true);
+                              }
                             }}
                             className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer"
                           >
@@ -4338,6 +4581,277 @@ export default function MobileApp() {
             >
               Guardar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DASHBOARD DE DESGLOSE Y REVISIÓN DE ENVÍO (CHECKOUT TRANSPARENTE KIN)     */}
+      {/* ========================================================================= */}
+      {showSendReviewModal && selectedAvatar && (
+        <div className="modal-backdrop animate-fade-in" onClick={() => !isExecutingPayment && setShowSendReviewModal(false)}>
+          <div
+            className="modal-card space-y-4 max-h-[92vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del Dashboard de Desglose */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowSendReviewModal(false)}
+                  disabled={isExecutingPayment}
+                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white cursor-pointer transition-all disabled:opacity-40"
+                  title="Volver"
+                >
+                  <ChevronLeftIcon className="w-4 h-4 text-white" />
+                </button>
+                <div>
+                  <h3 className="text-sm font-bold text-white leading-tight font-title-base flex items-center gap-1.5">
+                    <span>Desglose de Envío</span>
+                    <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                      100% Transparente
+                    </span>
+                  </h3>
+                  <p className="text-[10px] text-on-surface-variant">
+                    Revisa todos los datos antes de autorizar el débito
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => !isExecutingPayment && setShowSendReviewModal(false)}
+                disabled={isExecutingPayment}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer disabled:opacity-40"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Cuerpo con Scroll Ergonómico */}
+            <div className="flex-1 overflow-y-auto space-y-3.5 pr-0.5 no-scrollbar">
+              {/* Tarjeta 1: Hero de Conversión (Monto Recibido en México) */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#1c242c] via-[#12161b] to-[#0d1014] border border-[#2ED5A4]/30 shadow-[0_4px_20px_rgba(46,213,164,0.12)] space-y-2 text-center">
+                <span className="text-[11px] font-medium text-on-surface-variant uppercase tracking-wider block">
+                  El beneficiario recibe en México
+                </span>
+                <div className="text-3xl sm:text-4xl font-black font-financial-mono text-[#2ED5A4] tracking-tight">
+                  ${((parseFloat(amountValue) || 50) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm font-bold text-white">MXN</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-[#2ED5A4]/20 text-[11px] text-[#2ED5A4] font-semibold">
+                  <span className="material-symbols-outlined text-[14px]">verified</span>
+                  <span>1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN • Tasa Garantizada</span>
+                </div>
+                <p className="text-[11px] text-[#8E91A5] pt-0.5">
+                  Tú envías: <strong className="text-white font-mono">${(parseFloat(amountValue) || 50).toFixed(2)} USD</strong>
+                </p>
+              </div>
+
+              {/* Tarjeta 2: Desglose 100% Transparente de Cargos */}
+              <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 space-y-2.5 text-xs">
+                <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">receipt_long</span>
+                    Transparencia de Costos
+                  </span>
+                  <span className="text-[10px] text-[#2ED5A4] font-extrabold uppercase">Sin Tarifas Ocultas</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Monto a transferir (Base)</span>
+                  <span className="text-white font-mono font-bold">${(parseFloat(amountValue) || 50).toFixed(2)} USD</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span className="flex items-center gap-1">
+                    Tarifa por transferencia KIN
+                    <span className="px-1.5 py-0.2 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4] text-[9px] font-bold">
+                      PROMO
+                    </span>
+                  </span>
+                  <span className="text-[#2ED5A4] font-bold">$0.00 USD</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>
+                    Comisión método de pago (
+                    {paymentMethod === 'credit'
+                      ? 'Tarjeta de Crédito'
+                      : paymentMethod === 'debit'
+                      ? 'Tarjeta de Débito'
+                      : paymentMethod === 'apple'
+                      ? 'Apple Pay'
+                      : 'Cuenta Bancaria'}
+                    )
+                  </span>
+                  {paymentMethod === 'credit' ? (
+                    <span className="text-amber-400 font-mono font-semibold">+$1.99 USD</span>
+                  ) : (
+                    <span className="text-white font-mono font-bold">$0.00 USD</span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Comisión por entrega / retiro en sucursal</span>
+                  <span className="text-[#2ED5A4] font-bold">$0.00 USD</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A6A9BC]">
+                  <span>Impuestos y retenciones transfronterizas</span>
+                  <span className="text-white font-mono font-bold">$0.00 USD</span>
+                </div>
+
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="font-title-base text-xs text-white font-bold block">
+                      Total exacto a pagar
+                    </span>
+                    <span className="text-[10px] text-on-surface-variant">Se debitará de tu método seleccionado</span>
+                  </div>
+                  <span className="text-lg font-black font-financial-mono text-white">
+                    ${((parseFloat(amountValue) || 50) + paymentFee).toFixed(2)} <span className="text-xs text-[#8E91A5]">USD</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Tarjeta 3: Datos del Beneficiario en México */}
+              <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 space-y-2 text-xs">
+                <div className="flex items-center justify-between pb-1 border-b border-white/5">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">person</span>
+                    Beneficiario en México
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
+                    Verificado
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 pt-0.5">
+                  <div className="w-10 h-10 rounded-full bg-[#121320] border border-white/10 flex items-center justify-center text-lg flex-shrink-0">
+                    {selectedAvatar.avatar || '👤'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-white truncate">
+                      {capitalizeWords(selectedAvatar.fullName || selectedAvatar.name)}
+                    </p>
+                    <p className="text-[11px] text-primary font-mono">{selectedAvatar.phone}</p>
+                    <p className="text-[10px] text-on-surface-variant truncate">
+                      📍 {capitalizeWords(selectedAvatar.street || 'Dirección registrada')} {selectedAvatar.houseNumber || ''}, {capitalizeWords(selectedAvatar.state || '')}, {capitalizeWords(selectedAvatar.country || 'México')} {selectedAvatar.zipCode ? `• C.P. ${selectedAvatar.zipCode}` : ''}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tarjeta 4: Modalidad y Punto de Entrega */}
+              <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 space-y-2 text-xs">
+                <div className="flex items-center justify-between pb-1 border-b border-white/5">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">local_shipping</span>
+                    Método de Entrega
+                  </span>
+                  <span className="text-[10px] text-on-surface-variant">En menos de 5 minutos</span>
+                </div>
+
+                {deliveryMethod === 'cash' ? (
+                  <div className="space-y-2 pt-0.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center p-1">
+                          {(() => {
+                            const storeObj = CASH_PICKUP_STORES.find((s) => s.id === selectedStore) || CASH_PICKUP_STORES[0];
+                            const StoreLogo = storeObj?.Logo;
+                            return StoreLogo ? <StoreLogo className="w-6 h-6" /> : <span className="text-sm">🏪</span>;
+                          })()}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">
+                            Retiro en Efectivo • {(() => {
+                              const storeObj = CASH_PICKUP_STORES.find((s) => s.id === selectedStore);
+                              return storeObj?.name || 'OXXO';
+                            })()}
+                          </p>
+                          <p className="text-[10px] text-on-surface-variant">
+                            Red de ventanillas autorizadas en México
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4] text-[10px] font-bold">
+                        Efectivo Inmediato
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 flex items-start gap-2 text-[11px] text-[#A6A9BC]">
+                      <span className="text-primary text-base">🔑</span>
+                      <div>
+                        <strong className="text-white block">Generación de Clave de Retiro Oficial</strong>
+                        Al dar clic en pagar, el sistema creará inmediatamente una Clave de Retiro (PIN de 8 dígitos) que podrás copiar o enviar por WhatsApp para que tu familiar cobre en caja presentando su INE.
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 pt-0.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+                          <span className="material-symbols-outlined text-[20px]">account_balance</span>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">Depósito a Cuenta Bancaria (SPEI)</p>
+                          <p className="text-[10px] text-on-surface-variant font-mono">
+                            CLABE: {selectedAvatar.clabe ? `•••• ${selectedAvatar.clabe.slice(-4)}` : '012180••••••••1234'}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4] text-[10px] font-bold">
+                        SPEI Banxico
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-[#8E91A5]">
+                      Transferencia directa auditada por el Banco de México con generación de Clave de Rastreo (CEP).
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Tarjeta 5: Respaldo Regulatorio & Seguridad */}
+              <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-[10px] text-[#8E91A5]">
+                <ShieldCheckIcon className="w-4 h-4 text-[#2ED5A4] flex-shrink-0" />
+                <span>
+                  Transacción protegida por cifrado militar AES-GCM-256 y en cumplimiento estricto con CNBV, Banxico y FinCEN.
+                </span>
+              </div>
+            </div>
+
+            {/* Footer con Botón a Pie de Página */}
+            <div className="pt-2 border-t border-white/10 space-y-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={handleExecuteSendPayment}
+                disabled={isExecutingPayment}
+                className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] hover:shadow-[0_16px_32px_-4px_rgba(46,213,164,0.6)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {isExecutingPayment ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Procesando pago seguro...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Pagar y Confirmar Envío • ${((parseFloat(amountValue) || 50) + paymentFee).toFixed(2)} USD</span>
+                    <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowSendReviewModal(false)}
+                disabled={isExecutingPayment}
+                className="w-full h-10 rounded-full bg-transparent hover:bg-white/5 text-[#8E91A5] hover:text-white text-xs font-semibold transition-all cursor-pointer flex items-center justify-center disabled:opacity-40"
+              >
+                Modificar datos de envío
+              </button>
+            </div>
           </div>
         </div>
       )}

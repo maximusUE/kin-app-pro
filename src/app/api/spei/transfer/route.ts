@@ -52,8 +52,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Transferencia SPEI procesada con éxito a través de Banxico',
+      message: 'Transferencia procesada con éxito a través de KIN / Banxico',
       transaction: result.transaction,
+      claveRetiroEfectivo: result.transaction?.claveRetiroEfectivo,
+      claveRastreoBanxico: result.transaction?.claveRastreoBanxico,
     });
   } catch (error: any) {
     console.error('[API /spei/transfer] Error:', error);

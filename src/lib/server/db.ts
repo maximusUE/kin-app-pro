@@ -53,6 +53,8 @@ export interface TransactionRecord {
   status: 'Completado' | 'En Proceso' | 'Pendiente' | 'Fallido';
   refNumber: string;
   claveRastreoBanxico?: string;
+  claveRetiroEfectivo?: string; // Clave PIN secreta para retiro en sucursal (OXXO, Elektra, etc.)
+  pickupStore?: string;         // Sucursal de retiro seleccionada
   bancoDestino?: string;
   cuentaBeneficiario?: string;
   nombreBeneficiario?: string;
@@ -593,6 +595,12 @@ export function executeSpeiTransfer(params: {
   const amountMXN = +(params.amountUSD * USD_TO_MXN_RATE).toFixed(2);
   const txId = `SPEI-${Math.floor(100000 + Math.random() * 900000)}`;
 
+  // Generar Clave Oficial de Retiro en Efectivo (8 dígitos formato XXXX-XXXX) para cobro en sucursal
+  const p1 = Math.floor(1000 + Math.random() * 9000);
+  const p2 = Math.floor(1000 + Math.random() * 9000);
+  const claveRetiroEfectivo = `${p1}-${p2}`;
+  const isCashPickup = params.deliveryMethod === 'cash' || !!params.pickupStore;
+
   // Descontar saldo al emisor
   user.balanceUSD = +(user.balanceUSD - params.amountUSD).toFixed(2);
 
@@ -614,6 +622,8 @@ export function executeSpeiTransfer(params: {
     status: 'Completado',
     refNumber: txId,
     claveRastreoBanxico,
+    claveRetiroEfectivo: isCashPickup ? claveRetiroEfectivo : undefined,
+    pickupStore: params.pickupStore,
     bancoDestino: bancoNombre,
     cuentaBeneficiario: params.clabe,
     nombreBeneficiario: cleanRecipientName,
@@ -680,6 +690,8 @@ export function executeSpeiTransfer(params: {
     trackingNumber: claveRastreoBanxico || txId,
     type: 'REMESAS_SPEI',
     deliveryMethod: params.deliveryMethod || (params.pickupStore ? 'cash' : 'bank'),
+    pickupStore: params.pickupStore,
+    claveRetiroEfectivo: isCashPickup ? claveRetiroEfectivo : undefined,
     updatedAt: now.toISOString(),
     concept: params.concept || 'Envío de remesa USA -> México',
   }).catch((e) => console.warn('[Firebase Sync Transfer Error]', e));
@@ -690,6 +702,8 @@ export function executeSpeiTransfer(params: {
     details: {
       transferId: transferDocId,
       trackingNumber: claveRastreoBanxico,
+      claveRetiroEfectivo: isCashPickup ? claveRetiroEfectivo : undefined,
+      pickupStore: params.pickupStore,
       amountUSD: params.amountUSD,
       amountMXN,
       senderName: `${user.firstName} ${user.lastName}`.trim(),
