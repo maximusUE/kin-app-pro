@@ -11,7 +11,7 @@
       "state": "California",
       "zip": "90210",
       "country": "Estados Unidos 🇺🇸",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+      "avatar": "",
       "clientId": "KIN-US-892401",
       "memberSince": "19 Sep 2026",
       "docType": "Pasaporte Oficial USA",
@@ -51,7 +51,17 @@
       "passwordHash": "12345",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true,
-      "currencyPref": "MXN"
+      "currencyPref": "MXN",
+      "draftP2P": {
+        "contactId": "fam-user_jose_eligio",
+        "contactName": "Jose Eligio",
+        "contactPhone": "+1 3472486386",
+        "contactBank": "Banxico SPEI Directo",
+        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "amount": "0",
+        "note": "Groceries & medicine for the week",
+        "updatedAt": "2026-09-21T18:36:24.726Z"
+      }
     },
     {
       "id": "user_maricela_fernandez",
@@ -77,7 +87,17 @@
       "passwordHash": "54321",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true,
-      "currencyPref": "MXN"
+      "currencyPref": "MXN",
+      "draftP2P": {
+        "contactId": "fam-user_jose_eligio",
+        "contactName": "Jose Eligio",
+        "contactPhone": "+1 3472486386",
+        "contactBank": "Banxico SPEI Directo",
+        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "amount": "0",
+        "note": "Groceries & medicine for the week",
+        "updatedAt": "2026-09-21T18:36:24.688Z"
+      }
     },
     {
       "id": "user_jaime_gutierrez",
@@ -103,7 +123,17 @@
       "passwordHash": "98765",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true,
-      "currencyPref": "MXN"
+      "currencyPref": "MXN",
+      "draftP2P": {
+        "contactId": "fam-user_jose_eligio",
+        "contactName": "Jose Eligio",
+        "contactPhone": "+1 3472486386",
+        "contactBank": "Banxico SPEI Directo",
+        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "amount": "0",
+        "note": "Groceries & medicine for the week",
+        "updatedAt": "2026-09-21T18:36:24.748Z"
+      }
     },
     {
       "id": "user_manuel_gomez",
@@ -129,7 +159,17 @@
       "passwordHash": "10987",
       "biometricsEnabled": true,
       "pushNotificationsEnabled": true,
-      "currencyPref": "MXN"
+      "currencyPref": "MXN",
+      "draftP2P": {
+        "contactId": "fam-user_jose_eligio",
+        "contactName": "Jose Eligio",
+        "contactPhone": "+1 3472486386",
+        "contactBank": "Banxico SPEI Directo",
+        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "amount": "0",
+        "note": "Groceries & medicine for the week",
+        "updatedAt": "2026-09-21T18:36:24.670Z"
+      }
     }
   ],
   "transactions": [
@@ -822,7 +862,7 @@
       "userId": "user_jose_eligio",
       "name": "Vicente Eligio",
       "fullName": "Vicente Eligio",
-      "avatar": "🧑🏻",
+      "avatar": "",
       "role": "Beneficiario directo",
       "country": "Mexico",
       "bank": "Red Banxico SPEI",
@@ -839,7 +879,7 @@
       "userId": "user-001",
       "name": "Jose Eligio",
       "fullName": "Jose Eligio",
-      "avatar": "👤",
+      "avatar": "",
       "role": "Beneficiario directo",
       "country": "Mexico",
       "bank": "Banco en México",
@@ -856,7 +896,7 @@
       "userId": "user_jose_eligio",
       "name": "Manuel Gomez",
       "fullName": "Manuel Gomez",
-      "avatar": "👤",
+      "avatar": "",
       "role": "Beneficiario directo",
       "country": "Estados Unidos",
       "bank": "Banco en México",
@@ -873,7 +913,7 @@
       "userId": "user_jose_eligio",
       "name": "Hernana",
       "fullName": "Hernana",
-      "avatar": "👨🏽",
+      "avatar": "",
       "role": "Familiar",
       "country": "Mexico",
       "bank": "SPEI Banxico",

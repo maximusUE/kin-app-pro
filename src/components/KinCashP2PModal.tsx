@@ -12,6 +12,7 @@ import {
 } from './Icons';
 import { KinLogo } from './KinLogo';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { ContactAvatar } from './ContactAvatar';
 
 export interface ContactItem {
   id: string;
@@ -23,8 +24,8 @@ export interface ContactItem {
   bank: string;
   photoUrl: string;
   phone?: string;
-  clabe?: string;
   street?: string;
+  clabe?: string;
   houseNumber?: string;
   state?: string;
   zipCode?: string;
@@ -36,55 +37,55 @@ export const KIN_FAMILY_MEMBERS: ContactItem[] = [
     id: 'fam-user_jose_eligio',
     name: 'Jose Eligio',
     fullName: 'Jose Eligio',
-    avatar: '👨🏽',
+    avatar: '',
     role: 'Familiar KIN',
     country: 'Mexico',
     bank: 'Banxico SPEI Directo',
-    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+    photoUrl: '',
     phone: '+1 3472486386',
   },
   {
     id: 'fam-user_maricela_fernandez',
     name: 'Maricela Fernandez',
     fullName: 'Maricela Fernandez',
-    avatar: '👩🏻',
+    avatar: '',
     role: 'Familiar KIN',
     country: 'Mexico',
     bank: 'BBVA Bancomer',
-    photoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+    photoUrl: '',
     phone: '+1 0115212345678',
   },
   {
     id: 'fam-user_jaime_gutierrez',
     name: 'Jaime Gutierrez',
     fullName: 'Jaime Gutierrez',
-    avatar: '🧔🏽',
+    avatar: '',
     role: 'Familiar KIN',
     country: 'Mexico',
     bank: 'Santander México',
-    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+    photoUrl: '',
     phone: '+1 3479876543',
   },
   {
     id: 'fam-user_manuel_gomez',
     name: 'Manuel Gomez',
     fullName: 'Manuel Gomez',
-    avatar: '👱🏼',
+    avatar: '',
     role: 'Familiar KIN',
     country: 'Mexico',
     bank: 'Banorte',
-    photoUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
+    photoUrl: '',
     phone: '+1 2345678910',
   },
   {
     id: 'fam-user-001',
     name: 'César Urrutia',
     fullName: 'César Urrutia',
-    avatar: '🧑🏻',
+    avatar: '',
     role: 'Familiar KIN',
     country: 'Estados Unidos',
     bank: 'KIN Global Network',
-    photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    photoUrl: '',
     phone: '+1 (555) 349-2810',
   },
 ];
@@ -375,11 +376,11 @@ export function KinCashP2PModal({
         id: data.contact?.id || `c-${Date.now()}`,
         name: trimmedName,
         fullName: trimmedName,
-        avatar: '👤',
+        avatar: '',
         role: 'Destinatario KIN',
         country: 'Mexico',
         bank: 'Red KIN Cash P2P',
-        photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+        photoUrl: '', // Silueta de usuario sin foto
         phone: trimmedPhone,
       };
 
@@ -696,11 +697,12 @@ export function KinCashP2PModal({
         >
           {selectedContact ? (
             <div className="flex items-center gap-3 min-w-0">
-              <div className="relative shrink-0 w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-primary to-secondary">
-                <img
-                  className="w-full h-full rounded-full object-cover"
-                  alt={selectedContact.name}
-                  src={selectedContact.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
+              <div className="relative shrink-0">
+                <ContactAvatar
+                  photoUrl={selectedContact.photoUrl}
+                  name={selectedContact.name}
+                  className="w-12 h-12 rounded-full border border-white/10"
+                  iconSize="text-[26px]"
                 />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shadow-md">
                   <span
@@ -1071,13 +1073,12 @@ export function KinCashP2PModal({
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-white/10 flex-shrink-0 bg-surface-container-high flex items-center justify-center">
-                              {c.photoUrl ? (
-                                <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <span className="text-lg">{c.avatar || '👤'}</span>
-                              )}
-                            </div>
+                            <ContactAvatar
+                              photoUrl={c.photoUrl}
+                              name={c.name}
+                              className="w-11 h-11"
+                              iconSize="text-[24px]"
+                            />
                             <div>
                               <div className="flex items-center gap-1.5">
                                 <span className="text-xs font-bold text-white leading-tight font-title-base">
@@ -1142,13 +1143,12 @@ export function KinCashP2PModal({
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="relative w-11 h-11 rounded-full overflow-hidden border border-white/10 flex-shrink-0 bg-surface-container-high flex items-center justify-center">
-                            {fam.photoUrl ? (
-                              <img src={fam.photoUrl} alt={fam.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="text-lg">{fam.avatar}</span>
-                            )}
-                          </div>
+                          <ContactAvatar
+                            photoUrl={fam.photoUrl}
+                            name={fam.name}
+                            className="w-11 h-11"
+                            iconSize="text-[24px]"
+                          />
                           <div>
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs font-bold text-white leading-tight font-title-base">

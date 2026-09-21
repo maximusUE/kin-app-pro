@@ -86,6 +86,7 @@ import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
 import { KinLogo } from '@/components/KinLogo';
 import { BilingualAuthScreen } from '@/components/BilingualAuthScreen';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { ContactAvatar } from '@/components/ContactAvatar';
 
 // Tasa de cambio real de mercado USD/MXN
 const USD_TO_MXN_RATE = 20.45;
@@ -332,8 +333,8 @@ export default function MobileApp() {
     if (user.state) setUserState(capitalizeWords(user.state));
     if (user.zip) setUserZip(user.zip);
     if (user.country) setUserCountry(capitalizeWords(user.country));
-    // Asignar el avatar explícito (si está vacío, deja recuadro vacío sin foto)
-    setUserAvatar(user.avatar || '');
+    // Asignar el avatar explícito (si está vacío o es foto de stock ficticia, deja recuadro vacío sin foto)
+    setUserAvatar(user.avatar && !user.avatar.includes('images.unsplash.com') ? user.avatar : '');
     if (user.clientId) setUserClientId(user.clientId);
     if (user.memberSince) setUserMemberSince(user.memberSince);
     if (user.docType) setUserDocType(user.docType);
@@ -883,20 +884,18 @@ export default function MobileApp() {
         const props = ['name', 'tel'];
         const contacts = await (navigator as any).contacts.select(props, { multiple: true });
         if (contacts && contacts.length > 0) {
-          const emojis = ['🧑🏻', '👩🏻', '🧔🏽', '👱🏼', '👵🏼', '👨🏽', '👧🏻'];
           const newEntries: ContactItem[] = contacts.map((c: any, idx: number) => {
             const rawName = c.name?.[0] || 'Contacto Teléfono';
             const tel = c.tel?.[0] || '';
-            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
             return {
               id: `phone-${Date.now()}-${idx}`,
               name: rawName.split(' ')[0],
               fullName: rawName,
-              avatar: randomEmoji,
+              avatar: '',
               role: tel || 'Móvil directo',
               country: 'Mexico',
               bank: 'SPEI Banxico',
-              photoUrl: DEFAULT_AVATARS[idx % DEFAULT_AVATARS.length],
+              photoUrl: '', // Silueta de usuario sin foto
               phone: tel,
             };
           });
@@ -945,17 +944,15 @@ export default function MobileApp() {
     setBeneficiaryErrors(null);
     setIsSavingBeneficiary(true);
 
-    const emojis = ['🧑🏻', '👩🏻', '🧔🏽', '👱🏼', '👵🏼', '👨🏽', '👧🏻'];
-    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     const newContact: ContactItem = {
       id: `manual-${Date.now()}`,
       name: trimmedName,
       fullName: trimmedName,
-      avatar: randomEmoji,
+      avatar: '',
       role: `${trimmedState}, ${trimmedCountry} • ${trimmedPhone}`,
       country: trimmedCountry,
       bank: newContactBank || (deliveryMethod === 'cash' ? 'OXXO Cash Pickup' : 'SPEI Banxico'),
-      photoUrl: DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)],
+      photoUrl: '', // Silueta de usuario sin foto
       phone: trimmedPhone,
       street: trimmedStreet,
       houseNumber: trimmedHouse,
@@ -1022,7 +1019,8 @@ export default function MobileApp() {
     fee: number;
     totalPaid: number;
     recipientName: string;
-    recipientAvatar: string;
+    recipientAvatar?: string;
+    recipientPhotoUrl?: string;
     recipientPhone?: string;
     recipientStreet?: string;
     recipientState?: string;
@@ -1206,6 +1204,7 @@ export default function MobileApp() {
         totalPaid,
         recipientName: selectedAvatar.name,
         recipientAvatar: selectedAvatar.avatar,
+        recipientPhotoUrl: selectedAvatar.photoUrl,
         recipientPhone: selectedAvatar.phone,
         recipientStreet: selectedAvatar.street,
         recipientState: selectedAvatar.state,
@@ -1228,6 +1227,7 @@ export default function MobileApp() {
         totalPaid,
         recipientName: selectedAvatar.name,
         recipientAvatar: selectedAvatar.avatar,
+        recipientPhotoUrl: selectedAvatar.photoUrl,
         recipientPhone: selectedAvatar.phone,
         recipientStreet: selectedAvatar.street,
         recipientState: selectedAvatar.state,
@@ -1344,6 +1344,7 @@ export default function MobileApp() {
       totalPaid: amt,
       recipientName: recipient.name,
       recipientAvatar: recipient.avatar,
+      recipientPhotoUrl: recipient.photoUrl,
       recipientPhone: recipient.phone,
       time: `${dateStr} a las ${timeStr}`,
       deliveryTitle: 'SPEI Exprés Inmediato (Banxico)',
@@ -1460,7 +1461,8 @@ export default function MobileApp() {
       fee: 0,
       totalPaid: amountUSD,
       recipientName: recipient,
-      recipientAvatar: contact?.avatar || contact?.photoUrl || '👤',
+      recipientAvatar: contact?.avatar || '',
+      recipientPhotoUrl: contact?.photoUrl || '',
       recipientPhone: contact?.phone,
       time: `${dateStr} a las ${timeStr}`,
       deliveryTitle: 'KIN Cash Express (P2P Inmediato)',
@@ -1681,7 +1683,7 @@ export default function MobileApp() {
                   ≈ ${(sendSuccessData.amount * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
                 </p>
                 <p className="text-xs font-bold text-[#2ED5A4] mt-1">
-                  To {sendSuccessData.recipientName} {sendSuccessData.recipientAvatar}
+                  To {sendSuccessData.recipientName}
                 </p>
               </div>
             </div>
@@ -2257,10 +2259,11 @@ export default function MobileApp() {
                       className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer text-left"
                     >
                       <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-md border border-white/10">
-                        <img
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          src={contact.photoUrl}
-                          alt={contact.name}
+                        <ContactAvatar
+                          photoUrl={contact.photoUrl}
+                          name={contact.name}
+                          className="w-full h-full rounded-2xl group-hover:scale-105 transition-transform"
+                          iconSize="text-[32px]"
                         />
                         {bankLogo ? (
                           <div className="absolute bottom-1 right-1 w-5 h-5 rounded-md bg-white flex items-center justify-center shadow-md p-0.5">
@@ -2816,13 +2819,12 @@ export default function MobileApp() {
                         <div className="flex items-center gap-2.5 min-w-0">
                           {selectedAvatar ? (
                             <>
-                              <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm overflow-hidden flex-shrink-0">
-                                {selectedAvatar.avatar ? (
-                                  <span className="text-xl">{selectedAvatar.avatar}</span>
-                                ) : (
-                                  <span className="material-symbols-outlined text-primary text-[22px]">person</span>
-                                )}
-                              </div>
+                              <ContactAvatar
+                                photoUrl={selectedAvatar.photoUrl}
+                                name={selectedAvatar.name}
+                                className="w-10 h-10 rounded-xl"
+                                iconSize="text-[22px]"
+                              />
                               <div className="min-w-0">
                                 <p className="font-title-base text-xs font-bold text-white truncate">
                                   {selectedAvatar.fullName || selectedAvatar.name}
@@ -3626,12 +3628,13 @@ export default function MobileApp() {
                           style={{ minWidth: '78px' }}
                         >
                           <div className="relative">
-                            <img
-                              src={c.photoUrl}
-                              alt={c.name}
-                              className={`w-12 h-12 rounded-full object-cover border-2 transition-all ${
+                            <ContactAvatar
+                              photoUrl={c.photoUrl}
+                              name={c.name}
+                              className={`w-12 h-12 rounded-full border-2 transition-all ${
                                 isSelected ? 'border-[#2ED5A4]' : 'border-white/10'
                               }`}
+                              iconSize="text-[26px]"
                             />
                             {isSelected && (
                               <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2ED5A4] flex items-center justify-center text-white text-[9px] font-black shadow-sm">
@@ -4518,13 +4521,12 @@ export default function MobileApp() {
                         className="p-3 rounded-2xl bg-[#181928] border border-white/5 hover:border-primary/40 transition-all flex items-center justify-between gap-2.5 cursor-pointer group"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0 bg-surface-container-high flex items-center justify-center">
-                            {fam.photoUrl ? (
-                              <img src={fam.photoUrl} alt={fam.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="text-lg">{fam.avatar}</span>
-                            )}
-                          </div>
+                          <ContactAvatar
+                            photoUrl={fam.photoUrl}
+                            name={fam.name}
+                            className="w-10 h-10 border border-white/10"
+                            iconSize="text-[22px]"
+                          />
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
                               <p className="text-xs font-bold text-white truncate group-hover:text-primary transition-colors">
@@ -4594,9 +4596,12 @@ export default function MobileApp() {
                             }}
                             className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer"
                           >
-                            <div className="w-9 h-9 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-base flex-shrink-0">
-                              {c.avatar}
-                            </div>
+                            <ContactAvatar
+                              photoUrl={c.photoUrl}
+                              name={c.name}
+                              className="w-9 h-9 border border-white/10"
+                              iconSize="text-[20px]"
+                            />
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
                                 <p className="text-xs font-bold text-white truncate">{c.name}</p>
@@ -5544,9 +5549,12 @@ export default function MobileApp() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-0.5">
-                  <div className="w-10 h-10 rounded-full bg-[#121320] border border-white/10 flex items-center justify-center text-lg flex-shrink-0">
-                    {selectedAvatar.avatar || '👤'}
-                  </div>
+                  <ContactAvatar
+                    photoUrl={selectedAvatar.photoUrl}
+                    name={selectedAvatar.name}
+                    className="w-10 h-10 border border-white/10"
+                    iconSize="text-[22px]"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-white truncate">
                       {capitalizeWords(selectedAvatar.fullName || selectedAvatar.name)}
