@@ -39,6 +39,26 @@ export interface UserProfile {
   pushNotificationsEnabled: boolean;
   language?: 'es' | 'en';
   currencyPref?: 'USD' | 'MXN';
+  draftP2P?: {
+    contactId?: string;
+    contactName?: string;
+    contactPhone?: string;
+    contactBank?: string;
+    contactAvatar?: string;
+    amount?: string;
+    note?: string;
+    updatedAt?: string;
+  } | null;
+  draftSend?: {
+    recipientId?: string;
+    recipientName?: string;
+    recipientPhone?: string;
+    recipientAvatar?: string;
+    amount?: string;
+    deliveryMethod?: string;
+    selectedStore?: string;
+    updatedAt?: string;
+  } | null;
 }
 
 export interface TransactionRecord {

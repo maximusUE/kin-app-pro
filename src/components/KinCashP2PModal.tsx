@@ -127,6 +127,14 @@ export interface KinCashP2PModalProps {
   userBalanceUSD?: number;
   userId?: string;
   onContactCreated?: (contact: ContactItem) => void;
+  // Propiedades para Borrador Persistente
+  draftContact?: ContactItem | null;
+  onDraftContactChange?: (contact: ContactItem | null) => void;
+  draftAmount?: string;
+  onDraftAmountChange?: (amount: string) => void;
+  draftNote?: string;
+  onDraftNoteChange?: (note: string) => void;
+  onClearDraft?: () => void;
 }
 
 export function KinCashP2PModal({
@@ -141,10 +149,48 @@ export function KinCashP2PModal({
   userBalanceUSD = 1000.00,
   userId = 'user-001',
   onContactCreated,
+  draftContact,
+  onDraftContactChange,
+  draftAmount,
+  onDraftAmountChange,
+  draftNote,
+  onDraftNoteChange,
+  onClearDraft,
 }: KinCashP2PModalProps) {
-  const [currentAmount, setCurrentAmount] = useState('0');
-  const [selectedContact, setSelectedContact] = useState<ContactItem | null>(contacts[0] || null);
-  const [conceptNote, setConceptNote] = useState('Groceries & medicine for the week');
+  // Inicialización resiliente con persistencia en localStorage y props controladas
+  const [currentAmount, setCurrentAmount] = useState<string>(() => {
+    if (draftAmount !== undefined && draftAmount !== '') return draftAmount;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('kin_draft_kincash_amount');
+        if (saved) return saved;
+      } catch (_) {}
+    }
+    return '0';
+  });
+
+  const [selectedContact, setSelectedContact] = useState<ContactItem | null>(() => {
+    if (draftContact !== undefined) return draftContact;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('kin_draft_kincash_contact');
+        if (saved) return JSON.parse(saved);
+      } catch (_) {}
+    }
+    return null;
+  });
+
+  const [conceptNote, setConceptNote] = useState<string>(() => {
+    if (draftNote !== undefined && draftNote !== '') return draftNote;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('kin_draft_kincash_note');
+        if (saved) return saved;
+      } catch (_) {}
+    }
+    return 'Groceries & medicine for the week';
+  });
+
   const [showContactPicker, setShowContactPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -152,6 +198,54 @@ export function KinCashP2PModal({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Sincronizar hacia abajo si el padre actualiza props controladas
+  useEffect(() => {
+    if (draftContact !== undefined) {
+      setSelectedContact(draftContact);
+    }
+  }, [draftContact]);
+
+  useEffect(() => {
+    if (draftAmount !== undefined) {
+      setCurrentAmount(draftAmount);
+    }
+  }, [draftAmount]);
+
+  useEffect(() => {
+    if (draftNote !== undefined) {
+      setConceptNote(draftNote);
+    }
+  }, [draftNote]);
+
+  // Persistir en localStorage y notificar al padre en tiempo real
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (selectedContact) {
+      localStorage.setItem('kin_draft_kincash_contact', JSON.stringify(selectedContact));
+    } else {
+      localStorage.removeItem('kin_draft_kincash_contact');
+    }
+    onDraftContactChange?.(selectedContact);
+  }, [selectedContact]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (currentAmount && currentAmount !== '0') {
+      localStorage.setItem('kin_draft_kincash_amount', currentAmount);
+    } else {
+      localStorage.removeItem('kin_draft_kincash_amount');
+    }
+    onDraftAmountChange?.(currentAmount);
+  }, [currentAmount]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (conceptNote) {
+      localStorage.setItem('kin_draft_kincash_note', conceptNote);
+    }
+    onDraftNoteChange?.(conceptNote);
+  }, [conceptNote]);
 
   // Selector de destinatarios (Pestañas ergonómicas)
   const [pickerTab, setPickerTab] = useState<'contacts' | 'family' | 'add_new'>('contacts');
@@ -184,16 +278,48 @@ export function KinCashP2PModal({
     });
   }, [familyNetwork, userId]);
 
-  // Sincronizar contacto inicial únicamente si NO hay ninguno seleccionado (evita sobreescribir elección del usuario)
+  // Sincronizar contacto inicial de forma segura solo si NO hay ningún contacto seleccionado ni borrador existente
+  const initialContactAssignedRef = useRef(false);
   useEffect(() => {
+    if (initialContactAssignedRef.current) return;
     if (!selectedContact) {
-      if (contacts.length > 0) {
-        setSelectedContact(contacts[0]);
-      } else if (familyList.length > 0) {
-        setSelectedContact(familyList[0]);
+      let saved: string | null = null;
+      if (typeof window !== 'undefined') {
+        try {
+          saved = localStorage.getItem('kin_draft_kincash_contact');
+        } catch (_) {}
       }
+      if (!saved) {
+        if (contacts.length > 0) {
+          setSelectedContact(contacts[0]);
+          initialContactAssignedRef.current = true;
+        } else if (familyList.length > 0) {
+          setSelectedContact(familyList[0]);
+          initialContactAssignedRef.current = true;
+        }
+      } else {
+        initialContactAssignedRef.current = true;
+      }
+    } else {
+      initialContactAssignedRef.current = true;
     }
   }, [contacts, familyList, selectedContact]);
+
+  // Función para limpiar borrador manualmente (Botón ✕ Limpiar / Nuevo envío)
+  const handleClearDraft = () => {
+    setSelectedContact(null);
+    setCurrentAmount('0');
+    setConceptNote('Groceries & medicine for the week');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kin_draft_kincash_contact');
+      localStorage.removeItem('kin_draft_kincash_amount');
+      localStorage.removeItem('kin_draft_kincash_note');
+    }
+    onDraftContactChange?.(null);
+    onDraftAmountChange?.('0');
+    onDraftNoteChange?.('Groceries & medicine for the week');
+    onClearDraft?.();
+  };
 
   // Filtrado reactivo de contactos
   const filteredContacts = useMemo(() => {
@@ -425,6 +551,15 @@ export function KinCashP2PModal({
         onP2PSuccess(recipientLabel, numAmount * exchangeRate, selectedContact);
       }
 
+      // Purgar borrador de forma automática tras envío confirmado
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('kin_draft_kincash_contact');
+        localStorage.removeItem('kin_draft_kincash_amount');
+        localStorage.removeItem('kin_draft_kincash_note');
+      }
+      setCurrentAmount('0');
+      onDraftAmountChange?.('0');
+
       setTimeout(() => {
         setIsDispatched(false);
         setSlideX(0);
@@ -486,6 +621,33 @@ export function KinCashP2PModal({
 
       {/* 2. Recipient Picker Module */}
       <div className="flex flex-col gap-3 bg-surface-container p-4 rounded-xl shadow-xl relative border border-white/5">
+        {/* Active Draft Auto-Save Banner */}
+        {(selectedContact || numAmount > 0) && (
+          <div className="flex items-center justify-between bg-primary/10 border border-primary/30 rounded-xl px-3 py-2 text-xs animate-fade-in shadow-inner">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="material-symbols-outlined text-primary text-[18px] shrink-0 animate-pulse">
+                save
+              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-white font-semibold text-[11px] truncate">
+                  Borrador guardado automáticamente
+                </span>
+                <span className="text-primary text-[10px] font-medium truncate">
+                  {selectedContact ? `Envío para ${selectedContact.name || selectedContact.fullName}` : 'Destinatario pendiente'} {numAmount > 0 ? `• $${numAmount} USD` : ''}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleClearDraft}
+              className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
+              title="Descartar borrador y empezar de nuevo"
+            >
+              <span>✕ Limpiar</span>
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
             Recipient

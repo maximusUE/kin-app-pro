@@ -20,10 +20,12 @@
       "dailyLimit": "$3,000.00 USD / día",
       "dailyLimitUSD": 3000,
       "monthlyLimitUSD": 5000,
-      "balanceUSD": 850,
+      "balanceUSD": 800,
       "passwordHash": "KinVault2025$Secure",
       "biometricsEnabled": true,
-      "pushNotificationsEnabled": true
+      "pushNotificationsEnabled": true,
+      "draftP2P": null,
+      "draftSend": null
     },
     {
       "id": "user_jose_eligio",
@@ -48,7 +50,8 @@
       "balanceUSD": 735,
       "passwordHash": "12345",
       "biometricsEnabled": true,
-      "pushNotificationsEnabled": true
+      "pushNotificationsEnabled": true,
+      "currencyPref": "MXN"
     },
     {
       "id": "user_maricela_fernandez",
@@ -73,7 +76,8 @@
       "balanceUSD": 550,
       "passwordHash": "54321",
       "biometricsEnabled": true,
-      "pushNotificationsEnabled": true
+      "pushNotificationsEnabled": true,
+      "currencyPref": "MXN"
     },
     {
       "id": "user_jaime_gutierrez",
@@ -98,7 +102,8 @@
       "balanceUSD": 558,
       "passwordHash": "98765",
       "biometricsEnabled": true,
-      "pushNotificationsEnabled": true
+      "pushNotificationsEnabled": true,
+      "currencyPref": "MXN"
     },
     {
       "id": "user_manuel_gomez",
@@ -123,10 +128,26 @@
       "balanceUSD": 595,
       "passwordHash": "10987",
       "biometricsEnabled": true,
-      "pushNotificationsEnabled": true
+      "pushNotificationsEnabled": true,
+      "currencyPref": "MXN"
     }
   ],
   "transactions": [
+    {
+      "id": "tx-kin-1790014224100",
+      "userId": "user-001",
+      "title": "KIN Cash para Elena Vázquez",
+      "category": "Recarga / SPEI P2P Inmediato",
+      "time": "Hoy, 02:10 PM",
+      "dateGroup": "Hoy",
+      "amount": -50,
+      "amountMXN": 1022.5,
+      "type": "expense",
+      "iconType": "wallet",
+      "status": "Completado",
+      "refNumber": "KIN-328821",
+      "createdAt": "2026-09-21T18:10:24.097Z"
+    },
     {
       "id": "tx-in-1790000383554-534",
       "userId": "user_jose_eligio",

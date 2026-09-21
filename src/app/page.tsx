@@ -444,6 +444,41 @@ export default function MobileApp() {
       // Fallback predeterminado solo si es una visita en frío sin sesión ni parámetros
       setUserId('user-001');
     }
+
+    // 3. Recuperar borradores de KIN Cash y Send Money desde localStorage
+    try {
+      const savedKinContact = localStorage.getItem('kin_draft_kincash_contact');
+      if (savedKinContact) {
+        setKinCashDraftContact(JSON.parse(savedKinContact));
+      }
+      const savedKinAmt = localStorage.getItem('kin_draft_kincash_amount');
+      if (savedKinAmt) {
+        setKinCashDraftAmount(savedKinAmt);
+      }
+      const savedKinNote = localStorage.getItem('kin_draft_kincash_note');
+      if (savedKinNote) {
+        setKinCashDraftNote(savedKinNote);
+      }
+
+      const savedSendRecipient = localStorage.getItem('kin_draft_send_recipient');
+      if (savedSendRecipient) {
+        setSelectedAvatar(JSON.parse(savedSendRecipient));
+      }
+      const savedSendAmt = localStorage.getItem('kin_draft_send_amount');
+      if (savedSendAmt) {
+        setAmountValue(savedSendAmt);
+      }
+      const savedSendDelivery = localStorage.getItem('kin_draft_send_delivery');
+      if (savedSendDelivery === 'cash' || savedSendDelivery === 'bank' || savedSendDelivery === 'wallet') {
+        setDeliveryMethod(savedSendDelivery);
+      }
+      const savedSendStore = localStorage.getItem('kin_draft_send_store');
+      if (savedSendStore) {
+        setSelectedStore(savedSendStore);
+      }
+    } catch (e) {
+      console.warn('[Draft Restore Error]', e);
+    }
   }, []);
 
   // Sincronizar datos reactivos de cuenta desde el backend con protección de carrera
@@ -465,6 +500,51 @@ export default function MobileApp() {
           }
           if (Array.isArray(data.familyNetwork)) {
             setFamilyNetwork(data.familyNetwork);
+          }
+
+          // Hidratación de respaldo desde backend si el cliente no tenía borrador en localStorage
+          if (data.user.draftP2P) {
+            setKinCashDraftContact((prev) => {
+              if (prev) return prev;
+              if (!data.user.draftP2P?.contactName) return null;
+              return {
+                id: data.user.draftP2P.contactId || 'p2p-draft',
+                name: data.user.draftP2P.contactName,
+                fullName: data.user.draftP2P.contactName,
+                phone: data.user.draftP2P.contactPhone || '',
+                bank: data.user.draftP2P.contactBank || 'Red KIN Cash P2P',
+                role: 'Familiar',
+                avatar: data.user.draftP2P.contactAvatar,
+              };
+            });
+            if (data.user.draftP2P.amount) {
+              setKinCashDraftAmount((prev) => (prev && prev !== '0' ? prev : data.user.draftP2P.amount));
+            }
+            if (data.user.draftP2P.note) {
+              setKinCashDraftNote((prev) => (prev && prev !== 'Groceries & medicine for the week' ? prev : data.user.draftP2P.note));
+            }
+          }
+
+          if (data.user.draftSend) {
+            setSelectedAvatar((prev) => {
+              if (prev) return prev;
+              if (!data.user.draftSend?.recipientName) return null;
+              return {
+                id: data.user.draftSend.recipientId || 'send-draft',
+                name: data.user.draftSend.recipientName,
+                fullName: data.user.draftSend.recipientName,
+                phone: data.user.draftSend.recipientPhone || '',
+                bank: 'Red Banxico SPEI',
+                role: 'Beneficiario',
+                avatar: data.user.draftSend.recipientAvatar,
+              };
+            });
+            if (data.user.draftSend.amount) {
+              setAmountValue((prev) => (prev && prev !== '50' ? prev : data.user.draftSend.amount));
+            }
+            if (data.user.draftSend.deliveryMethod) {
+              setDeliveryMethod(data.user.draftSend.deliveryMethod as any);
+            }
           }
         }
       })
@@ -641,6 +721,121 @@ export default function MobileApp() {
   const [showRateAlertToast, setShowRateAlertToast] = useState(false);
   const [showReceiverPicker, setShowReceiverPicker] = useState(false);
   const [isCashPickupExpanded, setIsCashPickupExpanded] = useState(false);
+
+  // KIN Cash P2P Unbreakable Persistent Draft state
+  const [kinCashDraftContact, setKinCashDraftContact] = useState<ContactItem | null>(null);
+  const [kinCashDraftAmount, setKinCashDraftAmount] = useState<string>('0');
+  const [kinCashDraftNote, setKinCashDraftNote] = useState<string>('Groceries & medicine for the week');
+
+  // Limpiar borrador de KIN Cash
+  const handleClearKinCashDraft = () => {
+    setKinCashDraftContact(null);
+    setKinCashDraftAmount('0');
+    setKinCashDraftNote('Groceries & medicine for the week');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kin_draft_kincash_contact');
+      localStorage.removeItem('kin_draft_kincash_amount');
+      localStorage.removeItem('kin_draft_kincash_note');
+    }
+    if (userId) {
+      fetch('/api/account/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, updates: { draftP2P: null } }),
+      }).catch(() => {});
+    }
+  };
+
+  // Limpiar borrador de Send Money (Remesas)
+  const handleClearSendDraft = () => {
+    setSelectedAvatar(null);
+    setAmountValue('50');
+    setDeliveryMethod('cash');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kin_draft_send_recipient');
+      localStorage.removeItem('kin_draft_send_amount');
+      localStorage.removeItem('kin_draft_send_delivery');
+      localStorage.removeItem('kin_draft_send_store');
+    }
+    if (userId) {
+      fetch('/api/account/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, updates: { draftSend: null } }),
+      }).catch(() => {});
+    }
+  };
+
+  // Persistencia reactiva de Send Money en localStorage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (selectedAvatar) {
+      localStorage.setItem('kin_draft_send_recipient', JSON.stringify(selectedAvatar));
+    } else {
+      localStorage.removeItem('kin_draft_send_recipient');
+    }
+  }, [selectedAvatar]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (amountValue && amountValue !== '50') {
+      localStorage.setItem('kin_draft_send_amount', amountValue);
+    }
+  }, [amountValue]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (deliveryMethod) {
+      localStorage.setItem('kin_draft_send_delivery', deliveryMethod);
+    }
+  }, [deliveryMethod]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (selectedStore) {
+      localStorage.setItem('kin_draft_send_store', selectedStore);
+    }
+  }, [selectedStore]);
+
+  // Sincronización continua de borradores al backend de manera asíncrona (debounce 1200ms)
+  useEffect(() => {
+    if (!userId) return;
+    const timer = setTimeout(() => {
+      const updates: any = {};
+      if (kinCashDraftContact || (kinCashDraftAmount && kinCashDraftAmount !== '0')) {
+        updates.draftP2P = {
+          contactId: kinCashDraftContact?.id,
+          contactName: kinCashDraftContact?.fullName || kinCashDraftContact?.name,
+          contactPhone: kinCashDraftContact?.phone,
+          contactBank: kinCashDraftContact?.bank,
+          contactAvatar: kinCashDraftContact?.avatar || (kinCashDraftContact as any)?.photoUrl,
+          amount: kinCashDraftAmount,
+          note: kinCashDraftNote,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      if (selectedAvatar) {
+        updates.draftSend = {
+          recipientId: selectedAvatar.id,
+          recipientName: selectedAvatar.fullName || selectedAvatar.name,
+          recipientPhone: selectedAvatar.phone,
+          recipientAvatar: selectedAvatar.avatar,
+          amount: amountValue,
+          deliveryMethod,
+          selectedStore,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      if (Object.keys(updates).length > 0) {
+        fetch('/api/account/data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, updates }),
+        }).catch(() => {});
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [userId, kinCashDraftContact, kinCashDraftAmount, kinCashDraftNote, selectedAvatar, amountValue, deliveryMethod, selectedStore]);
 
   // Reordenar contactos hacia arriba (subir orden)
   const handleMoveContactUp = (index: number) => {
@@ -1048,6 +1243,7 @@ export default function MobileApp() {
     } finally {
       setIsExecutingPayment(false);
       setShowSendReviewModal(false);
+      handleClearSendDraft();
     }
   };
 
@@ -1255,6 +1451,7 @@ export default function MobileApp() {
     setBaseBalanceUSD((prev) => +(prev - amountUSD).toFixed(2));
 
     setShowKinCashModal(false);
+    handleClearKinCashDraft();
 
     setSendSuccessData({
       id: txId,
@@ -2250,6 +2447,13 @@ export default function MobileApp() {
               onViewHistory={() => setActiveTab('transactions')}
               exchangeRate={USD_TO_MXN_RATE}
               userBalanceUSD={executiveBalance}
+              draftContact={kinCashDraftContact}
+              onDraftContactChange={setKinCashDraftContact}
+              draftAmount={kinCashDraftAmount}
+              onDraftAmountChange={setKinCashDraftAmount}
+              draftNote={kinCashDraftNote}
+              onDraftNoteChange={setKinCashDraftNote}
+              onClearDraft={handleClearKinCashDraft}
             />
           </div>
         )}
@@ -2563,6 +2767,99 @@ export default function MobileApp() {
                 )}
 
                 {/* ========================================================================= */}
+                {/* CASH PICKUP BENEFICIARY SELECTION                                         */}
+                {/* ========================================================================= */}
+                {deliveryMethod === 'cash' && (
+                  <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <span className="font-title-base text-xs text-on-surface font-bold">
+                        Persona que Retira en México
+                      </span>
+                      <span className="font-caption-sm text-[11px] text-primary font-bold">INE / Pasaporte Requerido</span>
+                    </div>
+
+                    {/* Active Draft Auto-Save Banner */}
+                    {selectedAvatar && (
+                      <div className="flex items-center justify-between bg-primary/10 border border-primary/30 rounded-xl px-3 py-2 text-xs animate-fade-in shadow-inner">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="material-symbols-outlined text-primary text-[18px] shrink-0 animate-pulse">
+                            save
+                          </span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-white font-semibold text-[11px] truncate">
+                              Borrador guardado automáticamente
+                            </span>
+                            <span className="text-primary text-[10px] font-medium truncate">
+                              Beneficiario: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleClearSendDraft();
+                          }}
+                          className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
+                          title="Descartar borrador y seleccionar otro destinatario"
+                        >
+                          <span>✕ Limpiar</span>
+                        </button>
+                      </div>
+                    )}
+
+                    <div
+                      onClick={() => setShowContactModal(true)}
+                      className="p-3.5 rounded-2xl bg-surface-container border border-white/10 space-y-2 cursor-pointer hover:border-primary/40 transition-colors shadow-md"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {selectedAvatar ? (
+                            <>
+                              <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm overflow-hidden flex-shrink-0">
+                                {selectedAvatar.avatar ? (
+                                  <span className="text-xl">{selectedAvatar.avatar}</span>
+                                ) : (
+                                  <span className="material-symbols-outlined text-primary text-[22px]">person</span>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-title-base text-xs font-bold text-white truncate">
+                                  {selectedAvatar.fullName || selectedAvatar.name}
+                                </p>
+                                <p className="font-financial-mono text-[11px] text-on-surface-variant truncate">
+                                  {selectedAvatar.phone ? `Tel: ${selectedAvatar.phone}` : 'Retiro con Clave KIN y Cédula/INE'}
+                                </p>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary border border-dashed border-primary/30 flex-shrink-0">
+                                <span className="material-symbols-outlined text-[20px]">person_add</span>
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-title-base text-xs font-bold text-white truncate">Selecciona quién retira en sucursal</p>
+                                <p className="text-[11px] text-on-surface-variant truncate">Toca para elegir familiar o agregar uno nuevo</p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        {selectedAvatar ? (
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className="text-[10px] text-primary font-semibold">Cambiar</span>
+                            <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
+                          </div>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold flex-shrink-0">
+                            Elegir
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================================================= */}
                 {/* BANK (SPEI) SELECTION                                                     */}
                 {/* ========================================================================= */}
                 {deliveryMethod === 'bank' && (
@@ -2571,6 +2868,37 @@ export default function MobileApp() {
                       <span className="font-title-base text-xs text-on-surface font-bold">Bank SPEI Beneficiary</span>
                       <span className="font-caption-sm text-[11px] text-primary font-bold">24/7 Instant</span>
                     </div>
+
+                    {/* Active Draft Auto-Save Banner */}
+                    {selectedAvatar && (
+                      <div className="flex items-center justify-between bg-primary/10 border border-primary/30 rounded-xl px-3 py-2 text-xs animate-fade-in shadow-inner">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="material-symbols-outlined text-primary text-[18px] shrink-0 animate-pulse">
+                            save
+                          </span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-white font-semibold text-[11px] truncate">
+                              Borrador guardado automáticamente
+                            </span>
+                            <span className="text-primary text-[10px] font-medium truncate">
+                              Beneficiario: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleClearSendDraft();
+                          }}
+                          className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
+                          title="Descartar borrador y seleccionar otro destinatario"
+                        >
+                          <span>✕ Limpiar</span>
+                        </button>
+                      </div>
+                    )}
+
                     <div
                       onClick={() => setShowContactModal(true)}
                       className="p-3.5 rounded-2xl bg-surface-container border border-white/10 space-y-2 cursor-pointer hover:border-primary/40 transition-colors shadow-md"
@@ -4024,6 +4352,13 @@ export default function MobileApp() {
         }}
         exchangeRate={USD_TO_MXN_RATE}
         userBalanceUSD={executiveBalance}
+        draftContact={kinCashDraftContact}
+        onDraftContactChange={setKinCashDraftContact}
+        draftAmount={kinCashDraftAmount}
+        onDraftAmountChange={setKinCashDraftAmount}
+        draftNote={kinCashDraftNote}
+        onDraftNoteChange={setKinCashDraftNote}
+        onClearDraft={handleClearKinCashDraft}
       />
       <ClientVaultModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
       <AppSettingsModal
