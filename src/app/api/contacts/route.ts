@@ -3,6 +3,8 @@ import {
   getUserContacts,
   getFamilyNetwork,
   createContact,
+  updateContact,
+  updateContactsOrder,
   deleteContact,
   validateRemittanceRecipient,
   validateKinCashRecipient,
@@ -132,6 +134,49 @@ export async function DELETE(request: Request) {
 
     const deleted = deleteContact(userId, contactId);
     return NextResponse.json({ success: deleted });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const { userId, contactId, updates, reorderList } = body;
+
+    const user = userId || 'user-001';
+
+    // Manejo de reordenamiento de lista completa
+    if (Array.isArray(reorderList)) {
+      updateContactsOrder(user, reorderList);
+      return NextResponse.json({ success: true, message: 'Orden de contactos actualizado' });
+    }
+
+    if (!contactId) {
+      return NextResponse.json(
+        { success: false, error: 'contactId es requerido para actualizar' },
+        { status: 400 }
+      );
+    }
+
+    const updated = updateContact({
+      userId: user,
+      contactId,
+      updates: updates || {},
+    });
+
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, error: 'Contacto no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Contacto actualizado exitosamente',
+      contact: updated,
+    });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

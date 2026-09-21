@@ -727,6 +727,13 @@ export default function MobileApp() {
   const [showReceiverPicker, setShowReceiverPicker] = useState(false);
   const [isCashPickupExpanded, setIsCashPickupExpanded] = useState(false);
 
+  // Estados para Gestión Táctil de Contactos Rápidos (Action Sheet & Avatar Editor)
+  const [quickContactActionTarget, setQuickContactActionTarget] = useState<{ contact: ContactItem; index: number } | null>(null);
+  const [editingContactAvatarTarget, setEditingContactAvatarTarget] = useState<ContactItem | null>(null);
+  const [editingContactPhotoInput, setEditingContactPhotoInput] = useState('');
+  const [isUpdatingContactPhoto, setIsUpdatingContactPhoto] = useState(false);
+  const [smartContactQuery, setSmartContactQuery] = useState('');
+
   // KIN Cash P2P Unbreakable Persistent Draft state
   const [kinCashDraftContact, setKinCashDraftContact] = useState<ContactItem | null>(null);
   const [kinCashDraftAmount, setKinCashDraftAmount] = useState<string>('0');
@@ -850,6 +857,14 @@ export default function MobileApp() {
       const temp = updated[index];
       updated[index] = updated[index - 1];
       updated[index - 1] = temp;
+      
+      // Sincronizar nuevo orden al backend
+      fetch('/api/contacts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, reorderList: updated }),
+      }).catch((e) => console.warn('[Reorder contacts API error]', e));
+
       return updated;
     });
   };
@@ -862,6 +877,14 @@ export default function MobileApp() {
       const temp = updated[index];
       updated[index] = updated[index + 1];
       updated[index + 1] = temp;
+
+      // Sincronizar nuevo orden al backend
+      fetch('/api/contacts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, reorderList: updated }),
+      }).catch((e) => console.warn('[Reorder contacts API error]', e));
+
       return updated;
     });
   };
@@ -879,6 +902,43 @@ export default function MobileApp() {
     fetch(`/api/contacts?userId=${encodeURIComponent(userId)}&contactId=${encodeURIComponent(id)}`, {
       method: 'DELETE',
     }).catch((e) => console.warn('[Delete contact API error]', e));
+  };
+
+  // Guardar foto / avatar personalizado de un contacto
+  const handleSaveContactPhoto = async (targetContact: ContactItem, newPhotoUrl: string) => {
+    setIsUpdatingContactPhoto(true);
+    const updatedPhoto = newPhotoUrl.trim();
+
+    setContactsList((prev) =>
+      prev.map((c) => (c.id === targetContact.id ? { ...c, photoUrl: updatedPhoto } : c))
+    );
+
+    if (selectedAvatar?.id === targetContact.id) {
+      setSelectedAvatar((prev) => (prev ? { ...prev, photoUrl: updatedPhoto } : null));
+    }
+    if (kinCashDraftContact?.id === targetContact.id) {
+      setKinCashDraftContact((prev) => (prev ? { ...prev, photoUrl: updatedPhoto } : null));
+    }
+
+    try {
+      await fetch('/api/contacts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          contactId: targetContact.id,
+          updates: { photoUrl: updatedPhoto },
+        }),
+      });
+      setContactFeedback(`Foto de ${targetContact.name} actualizada correctamente.`);
+      setTimeout(() => setContactFeedback(null), 3500);
+    } catch (err) {
+      console.warn('[Update Contact Photo API Error]', err);
+    } finally {
+      setIsUpdatingContactPhoto(false);
+      setEditingContactAvatarTarget(null);
+      setEditingContactPhotoInput('');
+    }
   };
 
   // Acceso directo a los contactos del teléfono móvil (Web Contact Picker API)
@@ -2257,12 +2317,12 @@ export default function MobileApp() {
                       key={contact.id || idx}
                       type="button"
                       onClick={() => {
-                        setSendQuickSelectedRecipient(idx);
-                        setActiveTab('send');
+                        setQuickContactActionTarget({ contact, index: idx });
                       }}
-                      className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer text-left"
+                      className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer text-left relative"
+                      title="Toca para gestionar o enviar dinero"
                     >
-                      <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-md border border-white/10">
+                      <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-md border border-white/10 group-active:scale-95 transition-transform">
                         <ContactAvatar
                           photoUrl={contact.photoUrl}
                           name={contact.name}
@@ -2278,6 +2338,11 @@ export default function MobileApp() {
                             <span className="font-financial-mono text-[7px] text-[#004481] font-extrabold leading-none">SPEI</span>
                           </div>
                         )}
+
+                        {/* Indicador táctil sutil de opciones */}
+                        <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/60 backdrop-blur-xs flex items-center justify-center text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="material-symbols-outlined text-[10px]">more_vert</span>
+                        </div>
                       </div>
                       <span className="font-caption-sm text-caption-sm text-white font-semibold text-center truncate max-w-[70px]">
                         {contact.name}
@@ -4469,6 +4534,41 @@ export default function MobileApp() {
             {/* ========================================================================= */}
             {beneficiaryModalTab === 'select' && (
               <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-thin">
+                {/* 🔍 BARRA DE BÚSQUEDA PREDICTIVA INTELIGENTE ("¿CÓMO TE LLAMAS?") */}
+                <div className="p-3 rounded-2xl bg-[#151726] border border-primary/30 shadow-md space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-primary text-[18px]">person_search</span>
+                      <span>¿Cómo te llamas?</span>
+                    </label>
+                    <span className="text-[10px] text-primary font-semibold">Búsqueda rápida en 1 toque</span>
+                  </div>
+
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[20px] text-primary pointer-events-none">
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      value={smartContactQuery}
+                      onChange={(e) => setSmartContactQuery(e.target.value)}
+                      placeholder="Teclea el nombre, apellido o celular..."
+                      className="w-full h-[48px] pl-11 pr-9 rounded-xl bg-[#1A1C2E] text-sm text-white placeholder:text-on-surface-variant/50 border border-white/10 focus:border-primary focus:outline-none transition-all"
+                      autoFocus={false}
+                    />
+                    {smartContactQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSmartContactQuery('')}
+                        className="absolute right-2.5 top-3 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center text-xs cursor-pointer"
+                        title="Borrar búsqueda"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 {/* Sincronizar libreta telefónica */}
                 <button
                   type="button"
@@ -4501,7 +4601,25 @@ export default function MobileApp() {
                   </div>
 
                   <div className="space-y-2">
-                    {(familyNetwork.length > 0 ? familyNetwork : KIN_FAMILY_MEMBERS).filter((f) => !f.id.includes(userId)).map((fam) => (
+                    {(() => {
+                      const allFamily = (familyNetwork.length > 0 ? familyNetwork : KIN_FAMILY_MEMBERS).filter((f) => !f.id.includes(userId));
+                      const filteredFamily = smartContactQuery.trim()
+                        ? allFamily.filter((f) =>
+                            f.name.toLowerCase().includes(smartContactQuery.toLowerCase()) ||
+                            (f.fullName && f.fullName.toLowerCase().includes(smartContactQuery.toLowerCase())) ||
+                            (f.phone && f.phone.replace(/\D/g, '').includes(smartContactQuery.replace(/\D/g, '')))
+                          )
+                        : allFamily;
+
+                      if (filteredFamily.length === 0 && smartContactQuery.trim()) {
+                        return (
+                          <div className="p-3 text-center rounded-xl bg-white/5 border border-white/5 text-[11px] text-on-surface-variant">
+                            No se encontraron familiares que coincidan con "{smartContactQuery}"
+                          </div>
+                        );
+                      }
+
+                      return filteredFamily.map((fam) => (
                       <div
                         key={fam.id}
                         onClick={() => {
@@ -4551,7 +4669,8 @@ export default function MobileApp() {
                           <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </div>
                       </div>
-                    ))}
+                    ));
+                    })()}
                   </div>
                 </div>
 
@@ -4562,23 +4681,45 @@ export default function MobileApp() {
                     <span className="text-[10px] text-primary">Usa ▲ ▼ para ordenar</span>
                   </div>
 
-                  {contactsList.length === 0 ? (
-                    <div className="p-5 text-center rounded-2xl bg-[#121320] border border-dashed border-white/10 space-y-2">
-                      <p className="text-xs font-semibold text-white">No tienes contactos guardados aún</p>
-                      <p className="text-[11px] text-on-surface-variant">
-                        Selecciona a un familiar arriba o usa la pestaña "Registrar Beneficiario" para dar de alta a una persona con dirección completa.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setBeneficiaryModalTab('register')}
-                        className="py-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5"
-                      >
-                        <PlusIcon className="w-3.5 h-3.5" />
-                        <span>Registrar Nuevo Beneficiario</span>
-                      </button>
-                    </div>
-                  ) : (
-                    contactsList.map((c, idx) => {
+                  {(() => {
+                    const filteredContacts = smartContactQuery.trim()
+                      ? contactsList.filter((c) =>
+                          c.name.toLowerCase().includes(smartContactQuery.toLowerCase()) ||
+                          (c.fullName && c.fullName.toLowerCase().includes(smartContactQuery.toLowerCase())) ||
+                          (c.phone && c.phone.replace(/\D/g, '').includes(smartContactQuery.replace(/\D/g, '')))
+                        )
+                      : contactsList;
+
+                    if (filteredContacts.length === 0) {
+                      return (
+                        <div className="p-5 text-center rounded-2xl bg-[#121320] border border-dashed border-white/10 space-y-2">
+                          <p className="text-xs font-semibold text-white">
+                            {smartContactQuery.trim() ? `Sin resultados para "${smartContactQuery}"` : 'No tienes contactos guardados aún'}
+                          </p>
+                          <p className="text-[11px] text-on-surface-variant">
+                            {smartContactQuery.trim()
+                              ? 'Puedes registrarlo de inmediato tocando el botón a continuación:'
+                              : 'Selecciona a un familiar arriba o usa la pestaña "Registrar Beneficiario" para dar de alta a una persona con dirección completa.'}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (smartContactQuery.trim()) {
+                                setNewContactFirstName(capitalizeWords(smartContactQuery.trim().split(' ')[0] || ''));
+                                setNewContactLastName(capitalizeWords(smartContactQuery.trim().split(' ').slice(1).join(' ') || ''));
+                              }
+                              setBeneficiaryModalTab('register');
+                            }}
+                            className="py-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5"
+                          >
+                            <PlusIcon className="w-3.5 h-3.5" />
+                            <span>Registrar {smartContactQuery.trim() ? `a "${smartContactQuery}"` : 'Nuevo Beneficiario'}</span>
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return filteredContacts.map((c, idx) => {
                       const isSelected = selectedAvatar?.id === c.id;
                       return (
                         <div
@@ -4652,8 +4793,8 @@ export default function MobileApp() {
                           </div>
                         </div>
                       );
-                    })
-                  )}
+                    });
+                  })()}
                 </div>
               </div>
             )}
@@ -4996,6 +5137,322 @@ export default function MobileApp() {
                 <span>Cerrar</span>
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 1: ACTION SHEET NATIVO PARA CONTACTO RÁPIDO (ENVIAR/EDITAR/MOVER/BORRAR) */}
+      {/* ========================================================================= */}
+      {quickContactActionTarget && (
+        <div
+          className="modal-backdrop animate-fade-in"
+          onClick={() => setQuickContactActionTarget(null)}
+        >
+          <div
+            className="modal-card space-y-4 max-h-[85vh] overflow-y-auto flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header con Avatar & Datos del Beneficiario */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-white/10 flex-shrink-0">
+                  <ContactAvatar
+                    photoUrl={quickContactActionTarget.contact.photoUrl}
+                    name={quickContactActionTarget.contact.name}
+                    className="w-full h-full rounded-2xl"
+                    iconSize="text-[28px]"
+                  />
+                  {getBankLogoUrl(quickContactActionTarget.contact.bank) && (
+                    <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-md bg-white p-0.5 flex items-center justify-center">
+                      <img
+                        src={getBankLogoUrl(quickContactActionTarget.contact.bank)!}
+                        alt={quickContactActionTarget.contact.bank}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-white truncate font-title-base">
+                    {quickContactActionTarget.contact.fullName || quickContactActionTarget.contact.name}
+                  </h3>
+                  <p className="text-[11px] text-primary font-mono truncate">
+                    {quickContactActionTarget.contact.phone || 'Destinatario KIN'}
+                  </p>
+                  <p className="text-[10px] text-on-surface-variant truncate">
+                    {quickContactActionTarget.contact.bank || 'Red Bancaria SPEI / Efectivo'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickContactActionTarget(null)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Opciones de Acción Ergonómicas (Touch targets de 52px con Apple HIG & Material 3) */}
+            <div className="space-y-2.5">
+              {/* Acción 1: Enviar Dinero Ahora */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedAvatar(quickContactActionTarget.contact);
+                  setQuickContactActionTarget(null);
+                  setActiveTab('send');
+                }}
+                className="w-full h-[52px] px-4 rounded-2xl bg-gradient-to-r from-primary to-[#26BC90] hover:brightness-110 text-on-primary font-bold text-sm flex items-center justify-between shadow-lg shadow-primary/20 cursor-pointer active:scale-[0.98] transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[22px]">send_money</span>
+                  <span>Enviar Dinero Ahora (SPEI / Efectivo)</span>
+                </div>
+                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+
+              {/* Acción 2: Enviar por KIN CASH P2P */}
+              <button
+                type="button"
+                onClick={() => {
+                  setKinCashDraftContact(quickContactActionTarget.contact);
+                  setQuickContactActionTarget(null);
+                  setActiveTab('kin-cash');
+                }}
+                className="w-full h-[52px] px-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-white/10 text-white font-bold text-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-secondary text-[22px]">bolt</span>
+                  <span>Transferir con KIN CASH Instantáneo</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-[10px] font-black">
+                  $0 FEE
+                </span>
+              </button>
+
+              {/* Acción 3: Editar Foto / Cambiar Avatar */}
+              <button
+                type="button"
+                onClick={() => {
+                  const target = quickContactActionTarget.contact;
+                  setEditingContactAvatarTarget(target);
+                  setEditingContactPhotoInput(target.photoUrl || '');
+                  setQuickContactActionTarget(null);
+                }}
+                className="w-full h-[52px] px-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-white/10 text-white font-medium text-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-primary text-[22px]">add_a_photo</span>
+                  <span>Editar Foto / Avatar del Contacto</span>
+                </div>
+                <span className="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
+              </button>
+
+              {/* Acción 4: Reordenar / Mover de posición en el carrusel */}
+              <div className="p-3 rounded-2xl bg-[#131422] border border-white/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-on-surface-variant flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">swap_horiz</span>
+                    <span>Mover posición en el carrusel</span>
+                  </span>
+                  <span className="text-[10px] text-primary font-bold">
+                    Posición #{quickContactActionTarget.index + 1} de {contactsList.length}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={quickContactActionTarget.index === 0}
+                    onClick={() => {
+                      handleMoveContactUp(quickContactActionTarget.index);
+                      setQuickContactActionTarget((prev) =>
+                        prev ? { ...prev, index: Math.max(0, prev.index - 1) } : null
+                      );
+                    }}
+                    className="h-11 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-25 text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/5 disabled:cursor-not-allowed"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                    <span>Mover Izquierda</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={quickContactActionTarget.index === contactsList.length - 1}
+                    onClick={() => {
+                      handleMoveContactDown(quickContactActionTarget.index);
+                      setQuickContactActionTarget((prev) =>
+                        prev ? { ...prev, index: Math.min(contactsList.length - 1, prev.index + 1) } : null
+                      );
+                    }}
+                    className="h-11 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-25 text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/5 disabled:cursor-not-allowed"
+                  >
+                    <span>Mover Derecha</span>
+                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Acción 5: Eliminar contacto (Alerta Destructiva Sutil) */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`¿Estás seguro de que deseas eliminar a ${quickContactActionTarget.contact.name} de tus envíos rápidos?`)) {
+                    handleDeleteContact(quickContactActionTarget.contact.id);
+                    setQuickContactActionTarget(null);
+                    setContactFeedback(`Contacto ${quickContactActionTarget.contact.name} eliminado de la lista.`);
+                    setTimeout(() => setContactFeedback(null), 3000);
+                  }
+                }}
+                className="w-full h-[52px] px-4 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold text-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[22px] text-rose-400">delete</span>
+                  <span>Eliminar de Envíos Rápidos</span>
+                </div>
+                <span className="text-[10px] uppercase font-bold text-rose-400/80 bg-rose-500/20 px-2 py-0.5 rounded-full">
+                  Quitar
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: EDITOR DE FOTO / AVATAR DE BENEFICIARIO (SUBIR / CAMBIAR / QUITAR) */}
+      {/* ========================================================================= */}
+      {editingContactAvatarTarget && (
+        <div
+          className="modal-backdrop animate-fade-in"
+          onClick={() => {
+            if (!isUpdatingContactPhoto) setEditingContactAvatarTarget(null);
+          }}
+        >
+          <div
+            className="modal-card space-y-4 max-h-[85vh] overflow-y-auto flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del modal */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary">
+                  <span className="material-symbols-outlined text-[20px]">account_circle</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white font-title-base">
+                    Foto de {editingContactAvatarTarget.name}
+                  </h3>
+                  <p className="text-[10px] text-on-surface-variant">
+                    Personaliza la imagen o mantén una silueta limpia
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingContactAvatarTarget(null)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Vista previa en vivo del avatar */}
+            <div className="flex flex-col items-center justify-center py-2 space-y-2">
+              <div className="relative w-20 h-20 rounded-3xl overflow-hidden border-2 border-primary/40 shadow-xl bg-surface-container-high">
+                <ContactAvatar
+                  photoUrl={editingContactPhotoInput}
+                  name={editingContactAvatarTarget.name}
+                  className="w-full h-full rounded-3xl"
+                  iconSize="text-[44px]"
+                />
+              </div>
+              <span className="text-[11px] text-on-surface-variant font-medium">
+                {editingContactPhotoInput ? 'Vista previa de la foto' : 'Silueta de usuario limpia activa'}
+              </span>
+            </div>
+
+            {/* Opción 1: Subir imagen desde galería / cámara del celular */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[18px]">photo_camera</span>
+                <span>Subir foto desde tu dispositivo</span>
+              </label>
+              <label className="w-full h-[52px] rounded-2xl bg-surface-container hover:bg-surface-container-high border border-dashed border-primary/50 flex items-center justify-center gap-2 text-primary font-bold text-xs cursor-pointer transition-all active:scale-[0.98]">
+                <span className="material-symbols-outlined text-[20px]">upload</span>
+                <span>Elegir archivo (Cámara / Galería)</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (loadEvent) => {
+                        const result = loadEvent.target?.result as string;
+                        if (result) setEditingContactPhotoInput(result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* Opción 2: Pegar enlace URL de imagen */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[18px]">link</span>
+                <span>O pegar URL de imagen</span>
+              </label>
+              <input
+                type="url"
+                value={editingContactPhotoInput}
+                onChange={(e) => setEditingContactPhotoInput(e.target.value)}
+                placeholder="https://ejemplo.com/foto.jpg"
+                className="w-full h-[48px] px-3.5 rounded-xl bg-[#181928] text-sm text-white placeholder:text-on-surface-variant/40 border border-white/10 focus:border-primary focus:outline-none transition-all"
+              />
+            </div>
+
+            {/* Opción 3: Restablecer a silueta limpia sin foto */}
+            {editingContactPhotoInput && (
+              <button
+                type="button"
+                onClick={() => setEditingContactPhotoInput('')}
+                className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-on-surface-variant hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">no_accounts</span>
+                <span>Quitar foto y usar Silueta Limpia</span>
+              </button>
+            )}
+
+            {/* Botones de acción */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setEditingContactAvatarTarget(null)}
+                disabled={isUpdatingContactPhoto}
+                className="h-[48px] rounded-full bg-white/10 hover:bg-white/15 text-white font-bold text-xs transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isUpdatingContactPhoto}
+                onClick={() => handleSaveContactPhoto(editingContactAvatarTarget, editingContactPhotoInput)}
+                className="h-[48px] rounded-full bg-primary hover:bg-[#26BC90] text-on-primary font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-primary/20 transition-all cursor-pointer active:scale-[0.98]"
+              >
+                {isUpdatingContactPhoto ? (
+                  <span className="animate-spin text-sm">⏳</span>
+                ) : (
+                  <>
+                    <span>Guardar Foto</span>
+                    <span className="material-symbols-outlined text-[16px]">check</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

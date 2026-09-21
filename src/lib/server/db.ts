@@ -465,6 +465,46 @@ export function createContact(params: {
   return newContact;
 }
 
+export function updateContact(params: {
+  userId: string;
+  contactId: string;
+  updates: Partial<ContactRecord>;
+}): ContactRecord | null {
+  const db = loadDatabase();
+  const canonicalUserId = USER_FALLBACK_MAP[params.userId] || params.userId;
+  const idx = db.contacts.findIndex(
+    (c) => (c.userId === canonicalUserId || c.userId === params.userId) && c.id === params.contactId
+  );
+  if (idx === -1) return null;
+
+  const current = db.contacts[idx];
+  const updated: ContactRecord = {
+    ...current,
+    ...params.updates,
+    name: params.updates.name ? capitalizeWords(params.updates.name.trim()) : current.name,
+    fullName: params.updates.fullName
+      ? capitalizeWords(params.updates.fullName.trim())
+      : (params.updates.name ? capitalizeWords(params.updates.name.trim()) : current.fullName),
+    street: params.updates.street !== undefined ? capitalizeWords(params.updates.street.trim()) : current.street,
+    state: params.updates.state !== undefined ? capitalizeWords(params.updates.state.trim()) : current.state,
+    country: params.updates.country !== undefined ? capitalizeWords(params.updates.country.trim()) : current.country,
+  };
+
+  db.contacts[idx] = updated;
+  saveDatabase(db);
+  saveContactToFirestore(canonicalUserId, updated).catch((e) => console.warn('[Firebase Sync Update Contact Error]', e));
+  return updated;
+}
+
+export function updateContactsOrder(userId: string, contacts: ContactRecord[]): boolean {
+  const db = loadDatabase();
+  const canonicalUserId = USER_FALLBACK_MAP[userId] || userId;
+  const otherContacts = db.contacts.filter((c) => c.userId !== canonicalUserId && c.userId !== userId);
+  db.contacts = [...contacts, ...otherContacts];
+  saveDatabase(db);
+  return true;
+}
+
 /**
  * Validador estricto para Envíos USA -> México (Cumplimiento Regulatorio CNBV / Banxico)
  * Requiere obligatoriamente: Nombre, Apellido, País, Estado y Teléfono

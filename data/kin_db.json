@@ -57,10 +57,10 @@
         "contactName": "Jose Eligio",
         "contactPhone": "+1 3472486386",
         "contactBank": "Banxico SPEI Directo",
-        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "contactAvatar": "",
         "amount": "0",
         "note": "Groceries & medicine for the week",
-        "updatedAt": "2026-09-21T18:36:24.726Z"
+        "updatedAt": "2026-09-21T18:55:18.663Z"
       }
     },
     {
@@ -93,10 +93,10 @@
         "contactName": "Jose Eligio",
         "contactPhone": "+1 3472486386",
         "contactBank": "Banxico SPEI Directo",
-        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "contactAvatar": "",
         "amount": "0",
         "note": "Groceries & medicine for the week",
-        "updatedAt": "2026-09-21T18:36:24.688Z"
+        "updatedAt": "2026-09-21T18:55:18.662Z"
       }
     },
     {
@@ -129,10 +129,10 @@
         "contactName": "Jose Eligio",
         "contactPhone": "+1 3472486386",
         "contactBank": "Banxico SPEI Directo",
-        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "contactAvatar": "",
         "amount": "0",
         "note": "Groceries & medicine for the week",
-        "updatedAt": "2026-09-21T18:36:24.748Z"
+        "updatedAt": "2026-09-21T18:55:18.770Z"
       }
     },
     {
@@ -165,10 +165,10 @@
         "contactName": "Jose Eligio",
         "contactPhone": "+1 3472486386",
         "contactBank": "Banxico SPEI Directo",
-        "contactAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        "contactAvatar": "",
         "amount": "0",
         "note": "Groceries & medicine for the week",
-        "updatedAt": "2026-09-21T18:36:24.670Z"
+        "updatedAt": "2026-09-21T18:55:18.669Z"
       }
     }
   ],
@@ -873,23 +873,6 @@
       "houseNumber": "82",
       "state": "Distrito Federal",
       "zipCode": "55510"
-    },
-    {
-      "id": "c-1789944453638",
-      "userId": "user-001",
-      "name": "Jose Eligio",
-      "fullName": "Jose Eligio",
-      "avatar": "",
-      "role": "Beneficiario directo",
-      "country": "Mexico",
-      "bank": "Banco en México",
-      "photoUrl": "",
-      "clabe": "",
-      "phone": "+13472486386",
-      "street": "",
-      "houseNumber": "",
-      "state": "",
-      "zipCode": ""
     },
     {
       "id": "c-1789935556742",
