@@ -4545,25 +4545,25 @@ export default function MobileApp() {
         }}
       />
 
-      {/* Modal: Gestión de Beneficiarios y Contactos (Regulación CNBV / Banxico / FinCEN) */}
+      {/* Modal: Agenda de Contactos del Teléfono & Red KIN (Acceso Directo Ergonómico) */}
       {showContactModal && (
         <div className="modal-backdrop animate-fade-in" onClick={() => setShowContactModal(false)}>
           <div
             className="modal-card space-y-3.5 max-h-[90vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header del modal */}
+            {/* Header del modal tipo Agenda Nativa iOS / Android */}
             <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-sm">
-                  <span className="material-symbols-outlined text-[20px]">shield_person</span>
+                <div className="w-10 h-10 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-sm">
+                  <span className="material-symbols-outlined text-[24px]">contacts</span>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white leading-tight font-title-base">
-                    Beneficiario de Envío (México / USA)
+                  <h3 className="text-base font-bold text-white leading-tight font-title-base">
+                    Contactos del Teléfono
                   </h3>
-                  <p className="text-[10px] text-on-surface-variant">
-                    Cumplimiento Regulatorio CNBV • Banxico • FinCEN
+                  <p className="text-[11px] text-primary font-medium">
+                    Toca a cualquier persona para enviar al instante
                   </p>
                 </div>
               </div>
@@ -4576,32 +4576,6 @@ export default function MobileApp() {
               </button>
             </div>
 
-            {/* Selector de Pestañas Ergonómicas (iOS 18 HIG & Material 3) */}
-            <div className="flex items-center gap-1.5 p-1 bg-surface-container-lowest rounded-2xl border border-white/5 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setBeneficiaryModalTab('select')}
-                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                  beneficiaryModalTab === 'select'
-                    ? 'bg-primary text-on-primary shadow-sm'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-              >
-                👥 Contactos y Familiares ({contactsList.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setBeneficiaryModalTab('register')}
-                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                  beneficiaryModalTab === 'register'
-                    ? 'bg-primary text-on-primary shadow-sm'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-              >
-                ➕ Registrar Beneficiario
-              </button>
-            </div>
-
             {/* Notification / Feedback Banner */}
             {contactFeedback && (
               <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30 text-primary text-xs font-semibold flex items-center gap-2 animate-fade-in flex-shrink-0">
@@ -4611,69 +4585,58 @@ export default function MobileApp() {
             )}
 
             {/* ========================================================================= */}
-            {/* PESTAÑA 1: SELECCIONAR DE CONTACTOS / RED FAMILIAR                        */}
+            {/* DIRECTORIO DIRECTO DE CONTACTOS (ESTILO AGENDA TELEFÓNICA)                 */}
             {/* ========================================================================= */}
-            {beneficiaryModalTab === 'select' && (
-              <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-thin">
-                {/* 🔍 BARRA DE BÚSQUEDA PREDICTIVA INTELIGENTE ("¿CÓMO TE LLAMAS?") */}
-                <div className="p-3 rounded-2xl bg-[#151726] border border-primary/30 shadow-md space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-primary text-[18px]">person_search</span>
-                      <span>¿Cómo te llamas?</span>
-                    </label>
-                    <span className="text-[10px] text-primary font-semibold">Búsqueda rápida en 1 toque</span>
-                  </div>
+            <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-thin">
+              {/* 🔍 BARRA DE BÚSQUEDA PREDICTIVA INSTANTÁNEA */}
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[20px] text-primary pointer-events-none">
+                  search
+                </span>
+                <input
+                  type="text"
+                  value={smartContactQuery}
+                  onChange={(e) => setSmartContactQuery(e.target.value)}
+                  placeholder="Escribe el nombre o teléfono de quien buscas..."
+                  className="w-full h-[50px] pl-11 pr-9 rounded-2xl bg-[#161828] text-sm text-white placeholder:text-on-surface-variant/50 border border-white/10 focus:border-primary focus:outline-none transition-all"
+                  autoFocus={true}
+                />
+                {smartContactQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSmartContactQuery('')}
+                    className="absolute right-3 top-3.5 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center text-xs cursor-pointer"
+                    title="Borrar búsqueda"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
 
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[20px] text-primary pointer-events-none">
-                      search
-                    </span>
-                    <input
-                      type="text"
-                      value={smartContactQuery}
-                      onChange={(e) => setSmartContactQuery(e.target.value)}
-                      placeholder="Teclea el nombre, apellido o celular..."
-                      className="w-full h-[48px] pl-11 pr-9 rounded-xl bg-[#1A1C2E] text-sm text-white placeholder:text-on-surface-variant/50 border border-white/10 focus:border-primary focus:outline-none transition-all"
-                      autoFocus={false}
-                    />
-                    {smartContactQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setSmartContactQuery('')}
-                        className="absolute right-2.5 top-3 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center text-xs cursor-pointer"
-                        title="Borrar búsqueda"
-                      >
-                        ✕
-                      </button>
-                    )}
+              {/* Botón de Sincronización Directa con Agenda Nativa del Celular */}
+              <button
+                type="button"
+                onClick={handlePickPhoneContacts}
+                className="w-full py-3 px-3.5 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/15 to-[#7047EB]/20 border border-primary/40 hover:border-primary flex items-center justify-between text-left transition-all cursor-pointer group flex-shrink-0"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">📲</span>
+                  <div>
+                    <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
+                      Importar desde tu Agenda de Contactos
+                    </p>
+                    <p className="text-[10px] text-on-surface-variant">
+                      Abre el selector nativo de tu teléfono (iOS / Android)
+                    </p>
                   </div>
                 </div>
+                <div className="px-2.5 py-1 rounded-lg bg-primary text-on-primary text-[10px] font-black tracking-wide">
+                  ABRIR
+                </div>
+              </button>
 
-                {/* Sincronizar libreta telefónica */}
-                <button
-                  type="button"
-                  onClick={handlePickPhoneContacts}
-                  className="w-full py-3 px-3.5 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/15 to-[#7047EB]/20 border border-primary/40 hover:border-primary flex items-center justify-between text-left transition-all cursor-pointer group flex-shrink-0"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xl">📱</span>
-                    <div>
-                      <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
-                        Sincronizar contactos del celular
-                      </p>
-                      <p className="text-[10px] text-on-surface-variant">
-                        Acceso directo a tu agenda telefónica (iOS / Android)
-                      </p>
-                    </div>
-                  </div>
-                  <div className="px-2.5 py-1 rounded-lg bg-primary text-on-primary text-[10px] font-black tracking-wide">
-                    ACCEDER
-                  </div>
-                </button>
-
-                {/* Red Familiar KIN Registrada */}
-                <div className="space-y-2">
+              {/* Red de Contactos Registrados */}
+              <div className="space-y-2">
                   <div className="flex items-center justify-between px-1">
                     <span className="text-[11px] uppercase tracking-wider text-primary font-bold">
                       👨‍👩‍👧‍👦 Red Familiar KIN (1 toque para enviar)
@@ -4878,346 +4841,17 @@ export default function MobileApp() {
                   })()}
                 </div>
               </div>
-            )}
-
-            {/* ========================================================================= */}
-            {/* PESTAÑA 2: REGISTRAR NUEVO BENEFICIARIO (CUMPLIMIENTO CNBV / BANXICO)      */}
-            {/* ========================================================================= */}
-            {beneficiaryModalTab === 'register' && (
-              <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
-                {/* Banner Regulatorio */}
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-primary/10 via-[#181928] to-transparent border border-primary/20 flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-[20px] text-primary flex-shrink-0 mt-0.5">
-                    verified_user
-                  </span>
-                  <div>
-                    <p className="text-xs font-bold text-white">Requisito Obligatorio CNBV & Banxico</p>
-                    <p className="text-[10px] text-on-surface-variant">
-                      Para envíos USA $\rightarrow$ México, la ley exige nombre completo, teléfono y domicilio estructurado.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Banner de Validación en Rojo si faltan datos */}
-                {beneficiaryErrors && Object.keys(beneficiaryErrors).length > 0 && (
-                  <div className="p-3 rounded-2xl bg-red-500/15 border-2 border-red-500/40 text-red-400 text-xs font-bold flex items-start gap-2 animate-fade-in">
-                    <span className="material-symbols-outlined text-[20px] text-red-400 flex-shrink-0">
-                      gpp_maybe
-                    </span>
-                    <span>
-                      ⚠️ Requisito Regulatorio USA → México: Todos los campos marcados en rojo son obligatorios (Nombre, Apellido, País, Estado y Teléfono celular).
-                    </span>
-                  </div>
-                )}
-
-                {/* Grid 2 Columnas: Nombre(s) y Apellido(s) */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
-                      <span>Nombre(s)</span>
-                      {beneficiaryErrors?.firstName && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
-                        person
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Ej. Jose"
-                        autoCapitalize="words"
-                        autoCorrect="off"
-                        spellCheck={false}
-                        value={newContactFirstName}
-                        onChange={(e) => {
-                          const cap = capitalizeWords(e.target.value);
-                          setNewContactFirstName(cap);
-                          if (beneficiaryErrors?.firstName) setBeneficiaryErrors((prev) => prev ? { ...prev, firstName: '' } : null);
-                        }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
-                          beneficiaryErrors?.firstName
-                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                            : 'border border-white/10 focus:border-primary'
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
-                      <span>Apellido(s)</span>
-                      {beneficiaryErrors?.lastName && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
-                        badge
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Ej. Eligio"
-                        autoCapitalize="words"
-                        autoCorrect="off"
-                        spellCheck={false}
-                        value={newContactLastName}
-                        onChange={(e) => {
-                          const cap = capitalizeWords(e.target.value);
-                          setNewContactLastName(cap);
-                          if (beneficiaryErrors?.lastName) setBeneficiaryErrors((prev) => prev ? { ...prev, lastName: '' } : null);
-                        }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
-                          beneficiaryErrors?.lastName
-                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                            : 'border border-white/10 focus:border-primary'
-                        }`}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Campo 2: Teléfono Celular */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
-                    <span>Teléfono Celular (+52 / +1)</span>
-                    {beneficiaryErrors?.phone && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[18px] text-on-surface-variant pointer-events-none">
-                      smartphone
-                    </span>
-                    <input
-                      type="tel"
-                      placeholder="+1 (347) 248-6386 ó +52..."
-                      value={newContactPhone}
-                      onChange={(e) => {
-                        setNewContactPhone(e.target.value);
-                        if (beneficiaryErrors?.phone) setBeneficiaryErrors((prev) => prev ? { ...prev, phone: '' } : null);
-                      }}
-                      className={`w-full h-[52px] pl-11 pr-4 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
-                        beneficiaryErrors?.phone
-                          ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                          : 'border border-white/10 focus:border-primary'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                {/* Separador de Sección Domicilio */}
-                <div className="pt-2 pb-1 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-[11px] uppercase tracking-wider font-bold text-primary">
-                    Dirección Domiciliaria (México / USA)
-                  </span>
-                  <span className="text-[10px] text-on-surface-variant font-medium">5 Campos Obligatorios</span>
-                </div>
-
-                {/* Grid 2 Columnas: Calle & Número Exterior */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
-                      <span>Calle</span>
-                      {beneficiaryErrors?.street && <span className="text-red-400 font-bold">*</span>}
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
-                        home
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Ej. Av. Hidalgo"
-                        autoCapitalize="words"
-                        autoCorrect="off"
-                        spellCheck={false}
-                        value={newContactStreet}
-                        onChange={(e) => {
-                          const cap = capitalizeWords(e.target.value);
-                          setNewContactStreet(cap);
-                          if (beneficiaryErrors?.street) setBeneficiaryErrors((prev) => prev ? { ...prev, street: '' } : null);
-                        }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
-                          beneficiaryErrors?.street
-                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                            : 'border border-white/10 focus:border-primary'
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
-                      <span>No. Exterior</span>
-                      {beneficiaryErrors?.houseNumber && <span className="text-red-400 font-bold">*</span>}
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
-                        tag
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Ej. 142"
-                        value={newContactHouseNumber}
-                        onChange={(e) => {
-                          setNewContactHouseNumber(e.target.value);
-                          if (beneficiaryErrors?.houseNumber) setBeneficiaryErrors((prev) => prev ? { ...prev, houseNumber: '' } : null);
-                        }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
-                          beneficiaryErrors?.houseNumber
-                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                            : 'border border-white/10 focus:border-primary'
-                        }`}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Grid 2 Columnas: Estado & Código Postal */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
-                      <span>Estado / Entidad</span>
-                      {beneficiaryErrors?.state && <span className="text-red-400 font-bold">*</span>}
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
-                        map
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Ej. Jalisco"
-                        autoCapitalize="words"
-                        autoCorrect="off"
-                        spellCheck={false}
-                        value={newContactState}
-                        onChange={(e) => {
-                          const cap = capitalizeWords(e.target.value);
-                          setNewContactState(cap);
-                          if (beneficiaryErrors?.state) setBeneficiaryErrors((prev) => prev ? { ...prev, state: '' } : null);
-                        }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all capitalize ${
-                          beneficiaryErrors?.state
-                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                            : 'border border-white/10 focus:border-primary'
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-on-surface-variant flex items-center justify-between">
-                      <span>Código Postal (C.P.)</span>
-                      {beneficiaryErrors?.zipCode && <span className="text-red-400 font-bold">*</span>}
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-3.5 text-[16px] text-on-surface-variant pointer-events-none">
-                        markunread_mailbox
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Ej. 44100"
-                        maxLength={6}
-                        value={newContactZip}
-                        onChange={(e) => {
-                          setNewContactZip(e.target.value);
-                          if (beneficiaryErrors?.zipCode) setBeneficiaryErrors((prev) => prev ? { ...prev, zipCode: '' } : null);
-                        }}
-                        className={`w-full h-[52px] pl-9 pr-3 rounded-2xl bg-[#181928] text-base text-white placeholder-on-surface-variant/50 focus:outline-none transition-all ${
-                          beneficiaryErrors?.zipCode
-                            ? 'border-2 border-red-500 bg-red-500/10 text-red-400'
-                            : 'border border-white/10 focus:border-primary'
-                        }`}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Selector de País */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-on-surface-variant flex items-center justify-between">
-                    <span>País de Residencia</span>
-                    {beneficiaryErrors?.country && <span className="text-red-400 text-[10px] font-bold">* Requerido</span>}
-                  </label>
-                  <div className={`grid grid-cols-2 gap-2 p-1 rounded-2xl transition-all ${
-                    beneficiaryErrors?.country ? 'border-2 border-red-500 bg-red-500/10' : ''
-                  }`}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNewContactCountry('Mexico');
-                        if (beneficiaryErrors?.country) setBeneficiaryErrors((prev) => prev ? { ...prev, country: '' } : null);
-                      }}
-                      className={`h-[48px] rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                        newContactCountry === 'Mexico'
-                          ? 'bg-primary text-on-primary shadow-sm border border-primary'
-                          : 'bg-[#181928] border border-white/10 text-on-surface-variant hover:text-white'
-                      }`}
-                    >
-                      <span>🇲🇽 México</span>
-                      {newContactCountry === 'Mexico' && <span className="text-xs">✓</span>}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNewContactCountry('Estados Unidos');
-                        if (beneficiaryErrors?.country) setBeneficiaryErrors((prev) => prev ? { ...prev, country: '' } : null);
-                      }}
-                      className={`h-[48px] rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                        newContactCountry === 'Estados Unidos'
-                          ? 'bg-primary text-on-primary shadow-sm border border-primary'
-                          : 'bg-[#181928] border border-white/10 text-on-surface-variant hover:text-white'
-                      }`}
-                    >
-                      <span>🇺🇸 Estados Unidos</span>
-                      {newContactCountry === 'Estados Unidos' && <span className="text-xs">✓</span>}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Guardar en libreta del teléfono */}
-                <div
-                  onClick={() => setSaveBeneficiaryToPhone((prev) => !prev)}
-                  className="p-3 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between cursor-pointer hover:border-white/15 transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[20px]">contact_page</span>
-                    <div>
-                      <p className="text-xs font-bold text-white">Guardar en la agenda de mi teléfono</p>
-                      <p className="text-[10px] text-on-surface-variant">Descarga tarjeta vCard (.vcf) de 1 toque</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={saveBeneficiaryToPhone}
-                    onChange={() => {}}
-                    className="w-4 h-4 accent-primary cursor-pointer"
-                  />
-                </div>
-
-                {/* Botón CTA Principal */}
-                <button
-                  type="button"
-                  onClick={handleAddNewContact}
-                  disabled={isSavingBeneficiary}
-                  className="w-full h-[54px] rounded-full bg-primary hover:bg-primary-container text-on-primary text-sm font-bold transition-all cursor-pointer shadow-[0_8px_24px_rgba(46,213,164,0.3)] flex items-center justify-center gap-2 active:scale-[0.98] mt-2"
-                >
-                  {isSavingBeneficiary ? (
-                    <span>Validando y Guardando...</span>
-                  ) : (
-                    <>
-                      <span>Guardar Beneficiario y Continuar</span>
-                      <span className="material-symbols-outlined text-[18px]">verified</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
 
             {/* Footer Done */}
-            {beneficiaryModalTab === 'select' && (
+            <div className="pt-2 border-t border-white/10 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setShowContactModal(false)}
-                className="w-full h-12 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer flex-shrink-0 flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                className="w-full h-12 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
               >
-                <span>Cerrar</span>
+                <span>Cerrar Agenda</span>
               </button>
-            )}
+            </div>
           </div>
         </div>
       )}
