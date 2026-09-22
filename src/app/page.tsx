@@ -727,8 +727,9 @@ export default function MobileApp() {
   const [showReceiverPicker, setShowReceiverPicker] = useState(false);
   const [isCashPickupExpanded, setIsCashPickupExpanded] = useState(false);
 
-  // Estados para Gestión Táctil de Contactos Rápidos (Action Sheet & Avatar Editor)
+  // Estados para Gestión Táctil de Contactos Rápidos (Action Sheet & Avatar Editor & iPhone Edit Mode)
   const [quickContactActionTarget, setQuickContactActionTarget] = useState<{ contact: ContactItem; index: number } | null>(null);
+  const [isContactEditMode, setIsContactEditMode] = useState(false);
   const [editingContactAvatarTarget, setEditingContactAvatarTarget] = useState<ContactItem | null>(null);
   const [editingContactPhotoInput, setEditingContactPhotoInput] = useState('');
   const [isUpdatingContactPhoto, setIsUpdatingContactPhoto] = useState(false);
@@ -968,6 +969,24 @@ export default function MobileApp() {
           if (newEntries.length > 0) {
             setSelectedAvatar(newEntries[0]);
           }
+
+          // Guardar cada contacto importado en backend y Firestore
+          newEntries.forEach((entry) => {
+            fetch('/api/contacts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId,
+                name: entry.name,
+                fullName: entry.fullName,
+                phone: entry.phone,
+                bank: entry.bank,
+                avatar: entry.avatar,
+                country: entry.country,
+              }),
+            }).catch(() => {});
+          });
+
           setContactFeedback(`¡${newEntries.length} contacto(s) sincronizado(s) desde tu teléfono!`);
           setTimeout(() => setContactFeedback(null), 3500);
           return;
@@ -977,8 +996,9 @@ export default function MobileApp() {
       console.warn('Contact picker cancelled or denied:', err);
     }
 
-    setContactFeedback('Usa el formulario arriba para agregar a tu beneficiario en México.');
-    setTimeout(() => setContactFeedback(null), 3000);
+    // Si el navegador no soporta Contact Picker API (ej. Safari Desktop o sin permiso), abrir búsqueda directa
+    setShowContactModal(true);
+    setBeneficiaryModalTab('select');
   };
 
   // Agregar contacto / beneficiario con validación estricta de dirección CNBV / Banxico (USA -> México)
@@ -2272,57 +2292,89 @@ export default function MobileApp() {
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-[18px]">family_restroom</span>
                   <h2 className="font-title-base text-title-base text-white font-bold">Quick Send to Family</h2>
+                  {isContactEditMode && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold animate-pulse">
+                      Modo Edición
+                    </span>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('send-quick')}
-                  className="font-caption-sm text-caption-sm text-primary font-bold hover:underline cursor-pointer"
-                >
-                  View All ({contactsList.length})
-                </button>
+                <div className="flex items-center gap-2">
+                  {isContactEditMode ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsContactEditMode(false)}
+                      className="px-3 py-1 rounded-full bg-primary text-on-primary font-caption-sm text-xs font-black cursor-pointer shadow-md active:scale-95 transition-all"
+                    >
+                      Listo ✓
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('send-quick')}
+                      className="font-caption-sm text-caption-sm text-primary font-bold hover:underline cursor-pointer"
+                    >
+                      View All ({contactsList.length})
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-start gap-3 overflow-x-auto pb-1 -mx-margin-mobile px-margin-mobile scrollbar-none">
-                {/* Add New Recipient */}
+                {/* Botón + : Acceso Directo a los Contactos del Celular (iPhone / Android) */}
                 <button
                   type="button"
-                  onClick={() => setShowContactModal(true)}
+                  onClick={handlePickPhoneContacts}
                   className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer"
+                  title="Acceder a tus contactos del celular"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm group-hover:bg-surface-bright transition-colors border border-white/5">
+                  <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm group-hover:bg-surface-bright group-active:scale-95 transition-all border border-white/5">
                     <span className="material-symbols-outlined text-[26px]">add</span>
                   </div>
                   <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">New Recipient</span>
                 </button>
 
-                {contactsList.length === 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowContactModal(true)}
-                    className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-surface-container-high/50 border border-dashed border-white/10 text-left flex-shrink-0 hover:border-primary/40 transition-colors cursor-pointer h-14"
-                  >
-                    <span className="material-symbols-outlined text-primary text-[20px]">person_add</span>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-white leading-tight">+ Agregar a tu familia</span>
-                      <span className="text-[10px] text-on-surface-variant leading-tight">Envía directo a México</span>
-                    </div>
-                  </button>
-                )}
-
-                {/* Authentic Contact Cards */}
+                {/* Contactos Frecuentes con Soporte de Pulsación Larga (Long Press tipo iPhone) */}
                 {contactsList.map((contact, idx) => {
                   const bankLogo = getBankLogoUrl(contact.bank);
+                  let timer: any = null;
+
+                  const handleTouchStart = () => {
+                    timer = setTimeout(() => {
+                      setIsContactEditMode(true);
+                      setQuickContactActionTarget({ contact, index: idx });
+                    }, 500); // 500ms long-press
+                  };
+
+                  const handleTouchEnd = () => {
+                    if (timer) clearTimeout(timer);
+                  };
+
                   return (
-                    <button
+                    <div
                       key={contact.id || idx}
-                      type="button"
-                      onClick={() => {
-                        setQuickContactActionTarget({ contact, index: idx });
-                      }}
-                      className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer text-left relative"
-                      title="Toca para gestionar o enviar dinero"
+                      className={`flex flex-col items-center gap-1.5 flex-shrink-0 text-left relative ${
+                        isContactEditMode ? 'animate-jiggle' : ''
+                      }`}
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={handleTouchEnd}
+                      onMouseDown={handleTouchStart}
+                      onMouseUp={handleTouchEnd}
+                      onMouseLeave={handleTouchEnd}
                     >
-                      <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-md border border-white/10 group-active:scale-95 transition-transform">
+                      {/* Botón de Acción / Selección */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isContactEditMode) {
+                            setQuickContactActionTarget({ contact, index: idx });
+                          } else {
+                            // Clic normal: abrir menú de envío rápido o acción directa
+                            setQuickContactActionTarget({ contact, index: idx });
+                          }
+                        }}
+                        className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-md border border-white/10 group cursor-pointer active:scale-95 transition-transform"
+                        title="Mantén presionado para editar avatar o eliminar"
+                      >
                         <ContactAvatar
                           photoUrl={contact.photoUrl}
                           name={contact.name}
@@ -2338,16 +2390,45 @@ export default function MobileApp() {
                             <span className="font-financial-mono text-[7px] text-[#004481] font-extrabold leading-none">SPEI</span>
                           </div>
                         )}
+                      </button>
 
-                        {/* Indicador táctil sutil de opciones */}
-                        <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/60 backdrop-blur-xs flex items-center justify-center text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="material-symbols-outlined text-[10px]">more_vert</span>
-                        </div>
-                      </div>
+                      {/* Botón flotante 'X' tipo iPhone cuando está en modo edición */}
+                      {isContactEditMode && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`¿Eliminar a ${contact.name} de tus envíos frecuentes?`)) {
+                              handleDeleteContact(contact.id);
+                            }
+                          }}
+                          className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg border border-white/40 cursor-pointer active:scale-90 transition-transform z-10"
+                          title="Eliminar contacto"
+                        >
+                          <span className="text-[11px] font-black leading-none">✕</span>
+                        </button>
+                      )}
+
+                      {/* Botón flotante de Cámara para cambiar foto en modo edición */}
+                      {isContactEditMode && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingContactAvatarTarget(contact);
+                            setEditingContactPhotoInput(contact.photoUrl || '');
+                          }}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary hover:bg-[#26BC90] text-on-primary flex items-center justify-center shadow-lg border border-white/40 cursor-pointer active:scale-90 transition-transform z-10"
+                          title="Editar foto o avatar"
+                        >
+                          <span className="material-symbols-outlined text-[12px] font-bold leading-none">photo_camera</span>
+                        </button>
+                      )}
+
                       <span className="font-caption-sm text-caption-sm text-white font-semibold text-center truncate max-w-[70px]">
                         {contact.name}
                       </span>
-                    </button>
+                    </div>
                   );
                 })}
               </div>

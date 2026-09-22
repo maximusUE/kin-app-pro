@@ -889,3 +889,16 @@ a {
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* iOS-style Icon Jiggle Animation (Modo Edición / Eliminar / Editar Avatar) */
+@keyframes ios-jiggle {
+  0% { transform: rotate(-1.2deg); }
+  50% { transform: rotate(1.4deg); }
+  100% { transform: rotate(-1.2deg); }
+}
+
+.animate-jiggle {
+  animation: ios-jiggle 0.24s infinite ease-in-out;
+  transform-origin: center center;
+}
+
+
