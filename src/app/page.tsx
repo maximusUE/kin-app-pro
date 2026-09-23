@@ -3232,10 +3232,10 @@ export default function MobileApp() {
                         setSelectedBillServiceId(serv.id);
                         setShowBillPayModal(true);
                       }}
-                      className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group"
+                      className="w-[72px] flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group active:scale-95 transition-transform"
                     >
                       <div
-                        className={`w-13 h-13 rounded-full flex items-center justify-center transition-all shadow-md ${
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-md shrink-0 relative overflow-hidden ${
                           isSelected
                             ? 'border-2 border-[#2ED5A4] bg-[#2ED5A4]/15 shadow-glow-mint scale-105 text-[#2ED5A4]'
                             : 'border border-white/10 bg-[#181928] text-white hover:border-[#2ED5A4] hover:bg-[#202236]'
@@ -3244,9 +3244,10 @@ export default function MobileApp() {
                         <Icon className="w-6 h-6" />
                       </div>
                       <span
-                        className={`text-[11px] font-semibold transition-colors text-center ${
+                        className={`text-[11px] font-semibold transition-colors text-center truncate w-full max-w-[70px] ${
                           isSelected ? 'text-[#2ED5A4]' : 'text-[#8E91A5] group-hover:text-white'
                         }`}
+                        title={serv.name}
                       >
                         {serv.name}
                       </span>

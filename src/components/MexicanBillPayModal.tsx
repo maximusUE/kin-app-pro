@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { CloseIcon, CheckCircleIcon } from './Icons';
+import { BillCameraScannerModal, ScannedBillResult } from './BillCameraScannerModal';
 
 export interface MexicanBillPayModalProps {
   isOpen?: boolean;
@@ -152,8 +153,7 @@ export function MexicanBillPayModal({
   const [servicioSeleccionado, setServicioSeleccionado] = useState<ServiceDefinition>(SERVICIOS_MEXICO[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isPaying, setIsPaying] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
+  const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ title: string; subtitle: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -173,7 +173,7 @@ export function MexicanBillPayModal({
     setToastMessage({ title, subtitle });
     setTimeout(() => {
       setToastMessage(null);
-    }, 2800);
+    }, 3200);
   };
 
   // Calculate USD amount based on selected service MXN amount and exchange rate
@@ -187,14 +187,40 @@ export function MexicanBillPayModal({
     s.empresa.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Trigger Barcode / QR Scanner
+  // Trigger Barcode / QR Scanner (Abre la cámara real del teléfono)
   const handleTriggerScanner = () => {
-    setIsScanning(true);
-    showToast('Connecting Camera Scanner...', 'Point camera at Mexican utility barcode / QR');
-    setTimeout(() => {
-      setIsScanning(false);
-      showToast('Barcode Detected & Verified! ⚡', `${servicioSeleccionado.nombre} invoice linked via Gemini OCR`);
-    }, 1500);
+    setShowCameraScanner(true);
+  };
+
+  // Callback cuando se escanea exitosamente un recibo
+  const handleScanSuccess = (scanned: ScannedBillResult) => {
+    const found = SERVICIOS_MEXICO.find(
+      (s) =>
+        s.id === scanned.serviceId ||
+        s.nombre.toLowerCase().includes((scanned.serviceName || '').toLowerCase()) ||
+        s.subtitulo.toLowerCase().includes((scanned.serviceName || '').toLowerCase())
+    );
+
+    if (found) {
+      setServicioSeleccionado({
+        ...found,
+        sampleContrato: scanned.contractNumber,
+        sampleMXN: scanned.amountMXN,
+        sampleTitular: scanned.titular || found.sampleTitular,
+      });
+    } else {
+      setServicioSeleccionado((prev) => ({
+        ...prev,
+        sampleContrato: scanned.contractNumber,
+        sampleMXN: scanned.amountMXN,
+        sampleTitular: scanned.titular || prev.sampleTitular,
+      }));
+    }
+
+    showToast(
+      '¡Recibo Escaneado con Éxito! ⚡',
+      `${scanned.serviceName || servicioSeleccionado.nombre} vinculado: ${scanned.contractNumber}`
+    );
   };
 
   // Pay Selected Bill via SPEI
@@ -317,29 +343,35 @@ export function MexicanBillPayModal({
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-3">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${
-                      isSelected
-                        ? 'bg-primary text-on-primary font-bold'
-                        : serv.id === 'electricidad' || serv.id === 'agua'
-                        ? 'bg-primary-container/20 text-primary'
-                        : serv.id === 'internet'
-                        ? 'bg-secondary-container/50 text-secondary'
-                        : 'bg-surface-bright text-on-surface'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-[20px]">{serv.icono}</span>
+                  <div className="relative">
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm shrink-0 overflow-hidden ${
+                        isSelected
+                          ? 'bg-primary text-[#002116] font-bold'
+                          : serv.id === 'electricidad' || serv.id === 'agua'
+                          ? 'bg-primary-container/20 text-primary'
+                          : serv.id === 'internet'
+                          ? 'bg-secondary-container/50 text-secondary'
+                          : 'bg-surface-bright text-on-surface'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[24px]">{serv.icono}</span>
+                    </div>
+                    {/* Badge distintivo de la compañía con su color institucional */}
+                    <div className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md ${serv.logoBg} text-white text-[8px] font-black leading-none shadow-sm border border-white/20 uppercase tracking-tighter`}>
+                      {serv.logoText}
+                    </div>
                   </div>
                   {serv.badge && (
-                    <span className={serv.badgeClass || 'px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-[10px] uppercase font-bold tracking-tight'}>
+                    <span className="px-2 py-0.5 rounded-full bg-primary-container/20 text-primary font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 max-w-[70px] truncate">
                       {serv.badge}
                     </span>
                   )}
                 </div>
-                <span className={`font-title-base text-title-base transition-colors ${isSelected ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>
+                <span className={`font-title-base text-title-base transition-colors truncate w-full font-bold ${isSelected ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>
                   {serv.nombre}
                 </span>
-                <span className="font-caption-sm text-caption-sm text-on-surface-variant line-clamp-1 mt-0.5">
+                <span className="font-caption-sm text-[11px] text-on-surface-variant truncate w-full mt-0.5">
                   {serv.subtitulo}
                 </span>
               </button>
@@ -367,9 +399,9 @@ export function MexicanBillPayModal({
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {/* Institutional Logo Capsule */}
-              <div className="w-11 h-11 rounded-xl bg-white p-1.5 flex items-center justify-center shadow-md">
-                <div className={`w-full h-full rounded-lg ${servicioSeleccionado.logoBg} flex flex-col items-center justify-center ${servicioSeleccionado.logoColor}`}>
-                  <span className="font-headline-md text-[10px] font-black leading-none tracking-tight">
+              <div className="w-12 h-12 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md shrink-0">
+                <div className={`w-full h-full rounded-xl ${servicioSeleccionado.logoBg} flex items-center justify-center ${servicioSeleccionado.logoColor} px-1 overflow-hidden`}>
+                  <span className="font-headline-md text-[10px] font-black leading-none tracking-wider text-center uppercase truncate">
                     {servicioSeleccionado.logoText}
                   </span>
                 </div>
@@ -544,6 +576,14 @@ export function MexicanBillPayModal({
           </div>
         </div>
       )}
+
+      {/* Modal de Cámara en Vivo y Escáner de Códigos de Barras */}
+      <BillCameraScannerModal
+        isOpen={showCameraScanner}
+        onClose={() => setShowCameraScanner(false)}
+        onScanSuccess={handleScanSuccess}
+        targetServiceName={servicioSeleccionado.nombre}
+      />
     </div>
   );
 

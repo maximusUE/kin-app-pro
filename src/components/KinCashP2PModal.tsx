@@ -756,10 +756,12 @@ export function KinCashP2PModal({
           ref={trackRef}
           className="relative w-full h-[58px] rounded-full bg-surface-container-high p-1.5 flex items-center shadow-2xl overflow-hidden select-none border border-white/10"
         >
-          {/* Glow trail behind thumb */}
+          {/* Glow trail behind thumb - perfectamente sincronizado a 0ms con la huella */}
           <div
-            className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-primary/30 to-primary/60 rounded-full transition-all duration-75"
-            style={{ width: `${slideX + 46}px` }}
+            className={`absolute left-0 top-0 bottom-0 bg-gradient-to-r from-primary/30 via-primary/55 to-primary/85 rounded-full ${
+              isDragging ? 'duration-0 transition-none' : 'duration-200 transition-all'
+            }`}
+            style={{ width: `${Math.max(52, slideX + 52)}px` }}
           />
 
           {/* Slide Instruction Label */}
@@ -798,8 +800,8 @@ export function KinCashP2PModal({
             onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
             onTouchEnd={handleDragEnd}
             style={{ transform: `translateX(${slideX}px)` }}
-            className={`absolute left-1.5 top-1.5 w-[46px] h-[46px] rounded-full bg-gradient-to-tr from-primary-container to-primary flex items-center justify-center text-on-primary-container cursor-grab active:cursor-grabbing shadow-[0_4px_20px_rgba(46,213,164,0.45)] z-10 transition-transform ${
-              isDragging ? 'duration-0' : 'duration-200'
+            className={`absolute left-1.5 top-1.5 w-[46px] h-[46px] rounded-full bg-gradient-to-tr from-primary-container to-primary flex items-center justify-center text-on-primary-container cursor-grab active:cursor-grabbing shadow-[0_4px_20px_rgba(46,213,164,0.45)] z-10 ${
+              isDragging ? 'duration-0 transition-none' : 'duration-200 transition-transform'
             }`}
           >
             {isDispatched ? (
