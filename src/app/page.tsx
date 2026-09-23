@@ -2701,51 +2701,70 @@ export default function MobileApp() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-1 min-w-0 flex-1">
-                        <span className="font-financial-mono text-2xl text-on-surface font-bold tracking-tight">$</span>
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1 relative">
+                        <span className="font-financial-mono text-3xl text-primary font-bold tracking-tight select-none">$</span>
                         <input
                           aria-label="Send amount in USD"
-                          className="w-full bg-transparent font-financial-mono text-2xl text-on-surface font-bold focus:outline-none placeholder:text-outline"
+                          type="text"
+                          inputMode="decimal"
+                          pattern="[0-9]*[.,]?[0-9]*"
+                          className="w-full bg-transparent font-financial-mono text-3xl text-on-surface font-bold focus:outline-none placeholder:text-outline/40 border-b border-primary/30 focus:border-primary transition-colors py-1 cursor-text"
                           id="send-amount-input"
-                          max="2999"
-                          min="10"
-                          step="10"
-                          type="number"
-                          value={amountValue}
-                          onChange={(e) => setAmountValue(e.target.value)}
+                          placeholder="0"
+                          value={amountValue === '0' || !amountValue ? '' : amountValue}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9.]/g, '');
+                            const parts = val.split('.');
+                            if (parts.length > 2) return;
+                            if (parts[1] && parts[1].length > 2) return;
+                            setAmountValue(val === '' ? '0' : val);
+                          }}
                         />
+                        {amountValue !== '0' && amountValue !== '' && (
+                          <button
+                            type="button"
+                            onClick={() => setAmountValue('0')}
+                            className="text-on-surface-variant hover:text-white text-xs px-2 py-1 rounded-full bg-surface-container-highest border border-white/10 shrink-0 cursor-pointer active:scale-95"
+                            title="Borrar a cero"
+                          >
+                            ✕
+                          </button>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container shrink-0 shadow-inner border border-white/5">
                         <span className="text-base">🇺🇸</span>
                         <span className="font-title-base text-xs text-on-surface font-bold">USD</span>
                       </div>
                     </div>
+                    <p className="text-[11px] text-[#8E91A5] font-medium pt-0.5">
+                      Toca la cantidad para escribir con el teclado de tu teléfono
+                    </p>
                     {/* Quick Amount Increment Pills */}
                     <div className="flex items-center gap-1.5 pt-1 overflow-x-auto scrollbar-none">
                       <button
                         className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
-                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 50).toFixed(2))}
+                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 50).toFixed(0))}
                         type="button"
                       >
                         +$50
                       </button>
                       <button
                         className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
-                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 100).toFixed(2))}
+                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 100).toFixed(0))}
                         type="button"
                       >
                         +$100
                       </button>
                       <button
                         className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
-                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 200).toFixed(2))}
+                        onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 200).toFixed(0))}
                         type="button"
                       >
                         +$200
                       </button>
                       <button
                         className="px-2.5 py-1 rounded-lg bg-surface-container text-primary font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright font-bold cursor-pointer border border-primary/20"
-                        onClick={() => setAmountValue('500.00')}
+                        onClick={() => setAmountValue('500')}
                         type="button"
                       >
                         $500 Max
@@ -3849,21 +3868,44 @@ export default function MobileApp() {
 
             {/* 2. Hero Amount Card (Gran Tipografía Móvil & Chips) */}
             <div className="p-5 rounded-3xl bg-[#181928] border border-white/5 space-y-4 shadow-lg text-center">
-              <span className="text-[11px] font-bold text-white uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-[#8E91A5] uppercase tracking-wider block">
                 Monto del Envío Rápido
               </span>
 
-              {/* Display Gigante del Monto */}
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-3xl font-black text-white/70">$</span>
-                <input
-                  type="number"
-                  value={sendQuickAmount}
-                  onChange={(e) => setSendQuickAmount(e.target.value)}
-                  className="text-4xl font-black text-white bg-transparent text-center focus:outline-none w-36 tracking-tight"
-                  placeholder="0"
-                />
-                <span className="text-sm font-bold text-[#2ED5A4] tracking-wide">USD</span>
+              {/* Display Gigante del Monto (Acceso directo al teclado numérico nativo del celular) */}
+              <div className="flex flex-col items-center justify-center">
+                <div className="flex items-center justify-center gap-1.5 relative">
+                  <span className="text-3xl sm:text-4xl font-black text-[#2ED5A4] select-none">$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    value={sendQuickAmount === '0' || !sendQuickAmount ? '' : sendQuickAmount}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9.]/g, '');
+                      const parts = val.split('.');
+                      if (parts.length > 2) return;
+                      if (parts[1] && parts[1].length > 2) return;
+                      setSendQuickAmount(val === '' ? '0' : val);
+                    }}
+                    className="text-4xl sm:text-5xl font-black text-white bg-transparent text-center focus:outline-none min-w-[120px] max-w-[220px] tracking-tight border-b-2 border-[#2ED5A4]/40 focus:border-[#2ED5A4] transition-all py-1 font-financial-mono cursor-text"
+                    placeholder="0"
+                  />
+                  <span className="text-sm font-bold text-[#2ED5A4] tracking-wide shrink-0">USD</span>
+                  {sendQuickAmount !== '0' && sendQuickAmount !== '' && (
+                    <button
+                      type="button"
+                      onClick={() => setSendQuickAmount('0')}
+                      className="ml-1 text-on-surface-variant hover:text-white text-xs px-2.5 py-1.5 rounded-full bg-surface-container-high border border-white/10 shrink-0 cursor-pointer active:scale-95 transition-all"
+                      title="Borrar a cero"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px] text-[#8E91A5] font-medium text-center mt-1">
+                  Toca la cantidad para escribir con el teclado de tu teléfono
+                </p>
               </div>
 
               {/* Conversión en Vivo con Tasa SPEI */}
@@ -3882,7 +3924,7 @@ export default function MobileApp() {
                     key={val}
                     type="button"
                     onClick={() => setSendQuickAmount(val)}
-                    className={`h-12 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
+                    className={`h-12 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center active:scale-95 ${
                       sendQuickAmount === val
                         ? 'bg-[#2ED5A4] text-white shadow-md shadow-[#2ED5A4]/20 scale-[1.02]'
                         : 'bg-[#202236] border border-white/5 text-white hover:bg-[#2B2C42]'
