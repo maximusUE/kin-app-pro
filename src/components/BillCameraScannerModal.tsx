@@ -65,7 +65,7 @@ export function BillCameraScannerModal({
   const startCamera = async () => {
     setErrorMessage(null);
     try {
-      if (!navigator?.mediaDevices?.getUserMedia) {
+      if (typeof window === 'undefined' || typeof navigator === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
         setHasPermission(false);
         setErrorMessage('Tu navegador no permite acceso directo a la cámara. Puedes tomar o subir una foto de tu recibo.');
         return;

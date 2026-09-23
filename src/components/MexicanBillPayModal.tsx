@@ -153,6 +153,7 @@ export function MexicanBillPayModal({
   const [servicioSeleccionado, setServicioSeleccionado] = useState<ServiceDefinition>(SERVICIOS_MEXICO[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ title: string; subtitle: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
