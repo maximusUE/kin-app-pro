@@ -87,6 +87,7 @@ import { KinLogo } from '@/components/KinLogo';
 import { BilingualAuthScreen } from '@/components/BilingualAuthScreen';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 import { ContactAvatar } from '@/components/ContactAvatar';
+import { WhatsAppContactsModal } from '@/components/WhatsAppContactsModal';
 
 // Tasa de cambio real de mercado USD/MXN
 const USD_TO_MXN_RATE = 20.45;
@@ -2323,7 +2324,7 @@ export default function MobileApp() {
                 {/* Botón + : Acceso Directo a los Contactos del Celular (iPhone / Android) */}
                 <button
                   type="button"
-                  onClick={handlePickPhoneContacts}
+                  onClick={() => setShowContactModal(true)}
                   className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer"
                   title="Acceder a tus contactos del celular"
                 >
@@ -4545,316 +4546,53 @@ export default function MobileApp() {
         }}
       />
 
-      {/* Modal: Agenda de Contactos del Teléfono & Red KIN (Acceso Directo Ergonómico) */}
-      {showContactModal && (
-        <div className="modal-backdrop animate-fade-in" onClick={() => setShowContactModal(false)}>
-          <div
-            className="modal-card space-y-3.5 max-h-[90vh] flex flex-col overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header del modal tipo Agenda Nativa iOS / Android */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-sm">
-                  <span className="material-symbols-outlined text-[24px]">contacts</span>
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white leading-tight font-title-base">
-                    Contactos del Teléfono
-                  </h3>
-                  <p className="text-[11px] text-primary font-medium">
-                    Toca a cualquier persona para enviar al instante
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowContactModal(false)}
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
-              >
-                <CloseIcon className="w-4 h-4" />
-              </button>
-            </div>
+      {/* ========================================================================= */}
+      {/* MODAL: AGENDA DE CONTACTOS DEL TELÉFONO ESTILO WHATSAPP iOS               */}
+      {/* ========================================================================= */}
+      <WhatsAppContactsModal
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
+        contacts={contactsList}
+        familyNetwork={familyNetwork}
+        userId={userId}
+        onSelectContact={(contact) => {
+          setSelectedAvatar(contact);
 
-            {/* Notification / Feedback Banner */}
-            {contactFeedback && (
-              <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30 text-primary text-xs font-semibold flex items-center gap-2 animate-fade-in flex-shrink-0">
-                <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
-                <span>{contactFeedback}</span>
-              </div>
-            )}
+          // Agregar al carrusel al frente si no estaba
+          setContactsList((prev) => {
+            const exists = prev.some(
+              (c) =>
+                c.id === contact.id ||
+                (c.phone && contact.phone && c.phone.replace(/\D/g, '') === contact.phone.replace(/\D/g, ''))
+            );
+            if (exists) return prev;
+            return [contact, ...prev];
+          });
 
-            {/* ========================================================================= */}
-            {/* DIRECTORIO DIRECTO DE CONTACTOS (ESTILO AGENDA TELEFÓNICA)                 */}
-            {/* ========================================================================= */}
-            <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-thin">
-              {/* 🔍 BARRA DE BÚSQUEDA PREDICTIVA INSTANTÁNEA */}
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-3.5 text-[20px] text-primary pointer-events-none">
-                  search
-                </span>
-                <input
-                  type="text"
-                  value={smartContactQuery}
-                  onChange={(e) => setSmartContactQuery(e.target.value)}
-                  placeholder="Escribe el nombre o teléfono de quien buscas..."
-                  className="w-full h-[50px] pl-11 pr-9 rounded-2xl bg-[#161828] text-sm text-white placeholder:text-on-surface-variant/50 border border-white/10 focus:border-primary focus:outline-none transition-all"
-                  autoFocus={true}
-                />
-                {smartContactQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSmartContactQuery('')}
-                    className="absolute right-3 top-3.5 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center text-xs cursor-pointer"
-                    title="Borrar búsqueda"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
+          // Persistir en backend / Firestore
+          fetch('/api/contacts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              name: contact.name,
+              fullName: contact.fullName,
+              phone: contact.phone,
+              bank: contact.bank,
+              avatar: contact.avatar,
+              photoUrl: contact.photoUrl,
+              country: contact.country || 'Mexico',
+            }),
+          }).catch(() => {});
 
-              {/* Botón de Sincronización Directa con Agenda Nativa del Celular */}
-              <button
-                type="button"
-                onClick={handlePickPhoneContacts}
-                className="w-full py-3 px-3.5 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/15 to-[#7047EB]/20 border border-primary/40 hover:border-primary flex items-center justify-between text-left transition-all cursor-pointer group flex-shrink-0"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xl">📲</span>
-                  <div>
-                    <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
-                      Importar desde tu Agenda de Contactos
-                    </p>
-                    <p className="text-[10px] text-on-surface-variant">
-                      Abre el selector nativo de tu teléfono (iOS / Android)
-                    </p>
-                  </div>
-                </div>
-                <div className="px-2.5 py-1 rounded-lg bg-primary text-on-primary text-[10px] font-black tracking-wide">
-                  ABRIR
-                </div>
-              </button>
+          setContactFeedback(`Destinatario ${contact.fullName || contact.name} seleccionado.`);
+          setTimeout(() => setContactFeedback(null), 3000);
 
-              {/* Red de Contactos Registrados */}
-              <div className="space-y-2">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-[11px] uppercase tracking-wider text-primary font-bold">
-                      👨‍👩‍👧‍👦 Red Familiar KIN (1 toque para enviar)
-                    </span>
-                    <span className="text-[10px] text-on-surface-variant">Ecosistema Activo</span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {(() => {
-                      const allFamily = (familyNetwork.length > 0 ? familyNetwork : KIN_FAMILY_MEMBERS).filter((f) => !f.id.includes(userId));
-                      const filteredFamily = smartContactQuery.trim()
-                        ? allFamily.filter((f) =>
-                            f.name.toLowerCase().includes(smartContactQuery.toLowerCase()) ||
-                            (f.fullName && f.fullName.toLowerCase().includes(smartContactQuery.toLowerCase())) ||
-                            (f.phone && f.phone.replace(/\D/g, '').includes(smartContactQuery.replace(/\D/g, '')))
-                          )
-                        : allFamily;
-
-                      if (filteredFamily.length === 0 && smartContactQuery.trim()) {
-                        return (
-                          <div className="p-3 text-center rounded-xl bg-white/5 border border-white/5 text-[11px] text-on-surface-variant">
-                            No se encontraron familiares que coincidan con "{smartContactQuery}"
-                          </div>
-                        );
-                      }
-
-                      return filteredFamily.map((fam) => (
-                      <div
-                        key={fam.id}
-                        onClick={() => {
-                          const completeFamilyContact: ContactItem = {
-                            ...fam,
-                            street: fam.street || 'Av. Juárez',
-                            houseNumber: fam.houseNumber || '104',
-                            state: fam.state || 'San Antonio',
-                            country: fam.country || 'Mexico',
-                            zipCode: fam.zipCode || '78201',
-                            clabe: fam.clabe || '012180001234567890',
-                          };
-                          setSelectedAvatar(completeFamilyContact);
-                          setShowContactModal(false);
-                          setContactFeedback(`Beneficiario ${fam.name} seleccionado.`);
-                          setTimeout(() => setContactFeedback(null), 3000);
-                          if (activeTab === 'send') {
-                            setShowSendReviewModal(true);
-                          }
-                        }}
-                        className="p-3 rounded-2xl bg-[#181928] border border-white/5 hover:border-primary/40 transition-all flex items-center justify-between gap-2.5 cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <ContactAvatar
-                            photoUrl={fam.photoUrl}
-                            name={fam.name}
-                            className="w-10 h-10 border border-white/10"
-                            iconSize="text-[22px]"
-                          />
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-xs font-bold text-white truncate group-hover:text-primary transition-colors">
-                                {fam.fullName}
-                              </p>
-                              <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
-                                Familia
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-primary font-mono truncate">{fam.phone}</p>
-                            <p className="text-[10px] text-on-surface-variant truncate">
-                              📍 Av. Juárez #104, San Antonio • {fam.bank}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="px-3 py-1.5 rounded-xl bg-primary/20 group-hover:bg-primary text-primary group-hover:text-on-primary text-xs font-bold flex items-center gap-1 flex-shrink-0 transition-all">
-                          <span>Elegir</span>
-                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                        </div>
-                      </div>
-                    ));
-                    })()}
-                  </div>
-                </div>
-
-                {/* Tus Contactos Guardados */}
-                <div className="space-y-2 pt-2 border-t border-white/5">
-                  <div className="flex items-center justify-between text-[11px] text-on-surface-variant font-medium px-1">
-                    <span>Tus Contactos Guardados ({contactsList.length})</span>
-                    <span className="text-[10px] text-primary">Usa ▲ ▼ para ordenar</span>
-                  </div>
-
-                  {(() => {
-                    const filteredContacts = smartContactQuery.trim()
-                      ? contactsList.filter((c) =>
-                          c.name.toLowerCase().includes(smartContactQuery.toLowerCase()) ||
-                          (c.fullName && c.fullName.toLowerCase().includes(smartContactQuery.toLowerCase())) ||
-                          (c.phone && c.phone.replace(/\D/g, '').includes(smartContactQuery.replace(/\D/g, '')))
-                        )
-                      : contactsList;
-
-                    if (filteredContacts.length === 0) {
-                      return (
-                        <div className="p-5 text-center rounded-2xl bg-[#121320] border border-dashed border-white/10 space-y-2">
-                          <p className="text-xs font-semibold text-white">
-                            {smartContactQuery.trim() ? `Sin resultados para "${smartContactQuery}"` : 'No tienes contactos guardados aún'}
-                          </p>
-                          <p className="text-[11px] text-on-surface-variant">
-                            {smartContactQuery.trim()
-                              ? 'Puedes registrarlo de inmediato tocando el botón a continuación:'
-                              : 'Selecciona a un familiar arriba o usa la pestaña "Registrar Beneficiario" para dar de alta a una persona con dirección completa.'}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (smartContactQuery.trim()) {
-                                setNewContactFirstName(capitalizeWords(smartContactQuery.trim().split(' ')[0] || ''));
-                                setNewContactLastName(capitalizeWords(smartContactQuery.trim().split(' ').slice(1).join(' ') || ''));
-                              }
-                              setBeneficiaryModalTab('register');
-                            }}
-                            className="py-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5"
-                          >
-                            <PlusIcon className="w-3.5 h-3.5" />
-                            <span>Registrar {smartContactQuery.trim() ? `a "${smartContactQuery}"` : 'Nuevo Beneficiario'}</span>
-                          </button>
-                        </div>
-                      );
-                    }
-
-                    return filteredContacts.map((c, idx) => {
-                      const isSelected = selectedAvatar?.id === c.id;
-                      return (
-                        <div
-                          key={c.id}
-                          className={`p-2.5 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
-                            isSelected
-                              ? 'bg-[#181928] border-primary shadow-sm'
-                              : 'bg-[#121320] border-white/5 hover:border-white/15'
-                          }`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedAvatar(c);
-                              setShowContactModal(false);
-                              if (activeTab === 'send') {
-                                setShowSendReviewModal(true);
-                              }
-                            }}
-                            className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer"
-                          >
-                            <ContactAvatar
-                              photoUrl={c.photoUrl}
-                              name={c.name}
-                              className="w-9 h-9 border border-white/10"
-                              iconSize="text-[20px]"
-                            />
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5">
-                                <p className="text-xs font-bold text-white truncate">{c.name}</p>
-                                {isSelected && (
-                                  <span className="text-[8px] font-bold text-primary bg-primary/20 px-1.5 py-0.2 rounded-full flex-shrink-0">
-                                    Activo
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[10px] text-on-surface-variant truncate">
-                                {c.phone || c.role} {c.street ? `• 📍 ${c.street} #${c.houseNumber}` : ''}
-                              </p>
-                            </div>
-                          </button>
-
-                          {/* Controls */}
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => handleMoveContactUp(idx)}
-                              disabled={idx === 0}
-                              title="Subir posición"
-                              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-on-surface-variant hover:text-white transition-all cursor-pointer"
-                            >
-                              <ChevronUpIcon className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleMoveContactDown(idx)}
-                              disabled={idx === contactsList.length - 1}
-                              title="Bajar posición"
-                              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 disabled:opacity-20 flex items-center justify-center text-on-surface-variant hover:text-white transition-all cursor-pointer"
-                            >
-                              <ChevronDownIcon className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteContact(c.id)}
-                              title="Eliminar de la lista"
-                              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-rose-500/20 flex items-center justify-center text-on-surface-variant hover:text-rose-400 transition-all cursor-pointer ml-0.5"
-                            >
-                              <TrashIcon className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
-
-            {/* Footer Done */}
-            <div className="pt-2 border-t border-white/10 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowContactModal(false)}
-                className="w-full h-12 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
-              >
-                <span>Cerrar Agenda</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          if (activeTab === 'send') {
+            setShowSendReviewModal(true);
+          }
+        }}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL 1: ACTION SHEET NATIVO PARA CONTACTO RÁPIDO (ENVIAR/EDITAR/MOVER/BORRAR) */}
