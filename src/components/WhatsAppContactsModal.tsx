@@ -141,10 +141,37 @@ const ALPHABET = [
   'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'
 ];
 
+function parseVCardText(vcfText: string): ContactItem[] {
+  const result: ContactItem[] = [];
+  const cards = vcfText.split(/BEGIN:VCARD/i).slice(1);
+  cards.forEach((card, idx) => {
+    const fnMatch = card.match(/FN(?:;[^:]*)?:(.*)/i);
+    const telMatch = card.match(/TEL(?:;[^:]*)?:(.*)/i);
+    const rawName = fnMatch ? fnMatch[1].trim() : '';
+    const rawPhone = telMatch ? telMatch[1].trim() : '';
+    if (rawName || rawPhone) {
+      const cleanName = capitalizeWords(rawName || 'Contacto');
+      result.push({
+        id: `vcf-${Date.now()}-${idx}`,
+        name: cleanName.split(' ')[0] || 'Contacto',
+        fullName: cleanName,
+        phone: rawPhone,
+        avatar: '',
+        role: rawPhone || 'Contacto Telefónico',
+        country: 'Mexico',
+        bank: 'Red Banxico SPEI',
+        photoUrl: '',
+      });
+    }
+  });
+  return result;
+}
+
 interface WhatsAppContactsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectContact: (contact: ContactItem) => void;
+  onImportBatch?: (contacts: ContactItem[]) => void;
   contacts: ContactItem[];
   familyNetwork?: ContactItem[];
   userId: string;
@@ -154,6 +181,7 @@ export function WhatsAppContactsModal({
   isOpen,
   onClose,
   onSelectContact,
+  onImportBatch,
   contacts = [],
   familyNetwork = [],
   userId,
@@ -162,11 +190,47 @@ export function WhatsAppContactsModal({
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isPickingFromPhone, setIsPickingFromPhone] = useState(false);
   const [showDirectPhoneInput, setShowDirectPhoneInput] = useState(false);
+  const [showIosGuideModal, setShowIosGuideModal] = useState(false);
   const [directName, setDirectName] = useState('');
   const [directPhone, setDirectPhone] = useState('');
   const [directBank, setDirectBank] = useState('BBVA Bancomer');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const vcfInputRef = useRef<HTMLInputElement>(null);
+
+  // Importar archivo de contactos (.vcf de iPhone/Android)
+  const handleVcfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        if (!text) return;
+        const parsed = parseVCardText(text);
+        if (parsed.length > 0) {
+          if (onImportBatch) {
+            onImportBatch(parsed);
+          } else {
+            parsed.forEach((c) => onSelectContact(c));
+          }
+          setFeedback(`¡${parsed.length} contacto(s) importados de tu agenda telefónica!`);
+          setTimeout(() => setFeedback(null), 4000);
+          setShowIosGuideModal(false);
+        } else {
+          setFeedback('No se encontraron contactos legibles en el archivo .vcf');
+          setTimeout(() => setFeedback(null), 3000);
+        }
+      } catch (err) {
+        console.warn('[VCF parse error]', err);
+        setFeedback('Error al procesar el archivo de contactos.');
+        setTimeout(() => setFeedback(null), 3000);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   // Unificar contactos evitando duplicados
   const allMergedContacts = useMemo(() => {
@@ -250,30 +314,39 @@ export function WhatsAppContactsModal({
     try {
       if (typeof window !== 'undefined' && 'contacts' in navigator && 'ContactsManager' in window) {
         const props = ['name', 'tel'];
-        const selected = await (navigator as any).contacts.select(props, { multiple: false });
+        const selected = await (navigator as any).contacts.select(props, { multiple: true });
         if (selected && selected.length > 0) {
-          const item = selected[0];
-          const rawName = item.name?.[0] || 'Contacto Telefónico';
-          const tel = item.tel?.[0] || '';
-          const newContact: ContactItem = {
-            id: `phone-native-${Date.now()}`,
-            name: capitalizeWords(rawName.split(' ')[0]),
-            fullName: capitalizeWords(rawName),
-            avatar: '',
-            role: tel || 'Contacto Telefónico',
-            country: 'Mexico',
-            bank: 'SPEI Banxico',
-            photoUrl: '',
-            phone: tel,
-          };
-          onSelectContact(newContact);
-          onClose();
+          const newEntries: ContactItem[] = selected.map((item: any, idx: number) => {
+            const rawName = item.name?.[0] || 'Contacto Telefónico';
+            const tel = item.tel?.[0] || '';
+            return {
+              id: `phone-native-${Date.now()}-${idx}`,
+              name: capitalizeWords(rawName.split(' ')[0]),
+              fullName: capitalizeWords(rawName),
+              avatar: '',
+              role: tel || 'Contacto Telefónico',
+              country: 'Mexico',
+              bank: 'SPEI Banxico',
+              photoUrl: '',
+              phone: tel,
+            };
+          });
+
+          if (onImportBatch) {
+            onImportBatch(newEntries);
+          }
+          if (newEntries.length === 1) {
+            onSelectContact(newEntries[0]);
+            onClose();
+          } else {
+            setFeedback(`¡${newEntries.length} contactos sincronizados desde tu teléfono!`);
+            setTimeout(() => setFeedback(null), 3500);
+          }
           return;
         }
       } else {
-        // En iOS Safari la API requiere flag o cae en este asistente rápido
-        setFeedback('Introduce el nombre o número en el buscador para ubicarlo de inmediato.');
-        setTimeout(() => setFeedback(null), 3500);
+        // En iOS Safari la API no está habilitada por defecto por restricciones de Apple
+        setShowIosGuideModal(true);
       }
     } catch (e: any) {
       console.warn('[Contact Picker Cancelled/Error]', e);
@@ -507,8 +580,41 @@ export function WhatsAppContactsModal({
                     chevron_right
                   </span>
                 </button>
+
+                {/* 4. Importar archivo de contactos de celular (.vcf) */}
+                <button
+                  type="button"
+                  onClick={() => vcfInputRef.current?.click()}
+                  className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer group active:bg-white/10"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all">
+                      <span className="material-symbols-outlined text-[20px]">file_upload</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
+                        Importar libreta (.vcf de iPhone/Android)
+                      </p>
+                      <p className="text-[10px] text-[#8E91A5]">
+                        Carga todos tus contactos en 1 toque desde archivo
+                      </p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-primary text-[18px]">
+                    upload
+                  </span>
+                </button>
               </div>
             )}
+
+            {/* Input invisible para cargar archivo .vcf */}
+            <input
+              type="file"
+              ref={vcfInputRef}
+              accept=".vcf,text/vcard"
+              onChange={handleVcfFileChange}
+              className="hidden"
+            />
 
             {/* ================================================================= */}
             {/* OPCIÓN INTERACTIVA CUANDO BUSCA Y NO ENCUENTRA EXACTO             */}
@@ -729,6 +835,84 @@ export function WhatsAppContactsModal({
             </div>
           )}
         </div>
+        {/* =================================================================== */}
+        {/* MODAL GUÍA DE SINCRONIZACIÓN NATIVA / IPHONE (.VCF / APP NATIVA)   */}
+        {/* =================================================================== */}
+        {showIosGuideModal && (
+          <div
+            className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-4 animate-fade-in"
+            onClick={() => setShowIosGuideModal(false)}
+          >
+            <div
+              className="w-full max-w-sm bg-[#161828] border border-white/10 rounded-3xl p-5 space-y-4 shadow-2xl animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-primary/20 text-primary flex items-center justify-center text-lg">
+                    📲
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white leading-tight">
+                      Contactos de tu Celular
+                    </h3>
+                    <p className="text-[10px] text-[#8E91A5]">
+                      Sincronización en iPhone y Android
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowIosGuideModal(false)}
+                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/80 hover:text-white cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs text-on-surface-variant">
+                <div className="p-3 rounded-2xl bg-[#0D0F18] border border-white/5 space-y-1.5">
+                  <p className="font-bold text-white flex items-center gap-1.5">
+                    <span className="text-primary font-black">1.</span>
+                    <span>En la App Nativa Descargada</span>
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-[#8E91A5]">
+                    Al descargar la App de KIN en tu celular, el sistema iOS/Android muestra la alerta oficial: <strong className="text-white">"Permitir a KIN acceder a tus contactos"</strong>. Al presionar "Permitir", lee tu libreta en 1 segundo.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-[#0D0F18] border border-white/5 space-y-2">
+                  <p className="font-bold text-white flex items-center gap-1.5">
+                    <span className="text-primary font-black">2.</span>
+                    <span>En el Navegador Web (Ahora Mismo)</span>
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-[#8E91A5]">
+                    Apple bloquea el acceso en segundo plano a Safari. Puedes importar tu libreta completa subiendo tu archivo <code className="text-primary">.vcf</code> de contactos:
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowIosGuideModal(false);
+                      vcfInputRef.current?.click();
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">folder_open</span>
+                    <span>Seleccionar archivo .vcf de mi teléfono</span>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowIosGuideModal(false)}
+                className="w-full py-2.5 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

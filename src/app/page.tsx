@@ -4555,6 +4555,29 @@ export default function MobileApp() {
         contacts={contactsList}
         familyNetwork={familyNetwork}
         userId={userId}
+        onImportBatch={(newBatch) => {
+          setContactsList((prev) => {
+            const existingIds = new Set(prev.map((c) => c.phone?.replace(/\D/g, '') || c.name.toLowerCase()));
+            const toAdd = newBatch.filter((c) => !existingIds.has(c.phone?.replace(/\D/g, '') || c.name.toLowerCase()));
+            return [...toAdd, ...prev];
+          });
+          newBatch.forEach((contact) => {
+            fetch('/api/contacts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId,
+                name: contact.name,
+                fullName: contact.fullName,
+                phone: contact.phone,
+                bank: contact.bank,
+                avatar: contact.avatar,
+                photoUrl: contact.photoUrl,
+                country: contact.country || 'Mexico',
+              }),
+            }).catch(() => {});
+          });
+        }}
         onSelectContact={(contact) => {
           setSelectedAvatar(contact);
 
