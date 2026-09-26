@@ -20,6 +20,8 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
+  address1?: string;
+  address2?: string;
   city: string;
   state: string;
   zip: string;
@@ -124,6 +126,8 @@ const DEFAULT_USERS: UserProfile[] = [
     name: 'César U.',
     email: 'cesar.urrutia@gmail.com',
     phone: '+1 (555) 349-2810',
+    address1: '482 Grand Concourse',
+    address2: 'Apt 4B',
     city: 'Los Ángeles',
     state: 'California',
     zip: '90210',

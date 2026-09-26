@@ -308,6 +308,8 @@ export default function MobileApp() {
   const [userCity, setUserCity] = useState('');
   const [userState, setUserState] = useState('');
   const [userZip, setUserZip] = useState('');
+  const [userAddress1, setUserAddress1] = useState('482 Grand Concourse');
+  const [userAddress2, setUserAddress2] = useState('Apt 4B');
   const [userCountry, setUserCountry] = useState('Estados Unidos 🇺🇸');
   const [userAvatar, setUserAvatar] = useState('');
   const [userClientId, setUserClientId] = useState('');
@@ -339,6 +341,8 @@ export default function MobileApp() {
     }
     if (user.email) setUserEmail(user.email);
     if (user.phone) setUserPhone(user.phone);
+    if (user.address1) setUserAddress1(user.address1);
+    if (user.address2) setUserAddress2(user.address2);
     if (user.city) setUserCity(capitalizeWords(user.city));
     if (user.state) setUserState(capitalizeWords(user.state));
     if (user.zip) setUserZip(user.zip);
@@ -652,6 +656,55 @@ export default function MobileApp() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, updates: { theme: newTheme } }),
       }).catch(() => {});
+    }
+  };
+
+  // Actualizar datos de perfil editados en tiempo real
+  const handleUpdateProfile = (updates: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    address1?: string;
+    address2?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    email?: string;
+  }) => {
+    if (updates.firstName !== undefined) {
+      const clean = capitalizeWords(updates.firstName);
+      setUserFirstName(clean);
+      setUserName(`${clean} ${userLastName ? userLastName[0] + '.' : ''}`.trim());
+    }
+    if (updates.lastName !== undefined) {
+      const clean = capitalizeWords(updates.lastName);
+      setUserLastName(clean);
+      setUserName(`${userFirstName} ${clean ? clean[0] + '.' : ''}`.trim());
+    }
+    if (updates.phone !== undefined) setUserPhone(updates.phone);
+    if (updates.address1 !== undefined) setUserAddress1(updates.address1);
+    if (updates.address2 !== undefined) setUserAddress2(updates.address2);
+    if (updates.city !== undefined) setUserCity(capitalizeWords(updates.city));
+    if (updates.state !== undefined) setUserState(capitalizeWords(updates.state));
+    if (updates.zip !== undefined) setUserZip(updates.zip);
+    if (updates.email !== undefined) setUserEmail(updates.email);
+
+    try {
+      const currentSaved = localStorage.getItem('kin_active_user');
+      const parsed = currentSaved ? JSON.parse(currentSaved) : {};
+      const updatedUser = {
+        ...parsed,
+        ...updates,
+      };
+      localStorage.setItem('kin_active_user', JSON.stringify(updatedUser));
+    } catch (_) {}
+
+    if (userId) {
+      fetch('/api/account/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, updates }),
+      }).catch((e) => console.warn('[Profile update sync error]', e));
     }
   };
 
@@ -1970,6 +2023,8 @@ export default function MobileApp() {
             userCity={userCity}
             userState={userState}
             userZip={userZip}
+            userAddress1={userAddress1}
+            userAddress2={userAddress2}
             userMemberSince={userMemberSince}
             userDailyLimit={userDailyLimit}
             userDocType={userDocType}
@@ -1986,6 +2041,7 @@ export default function MobileApp() {
             handleToggleCurrency={handleToggleCurrency}
             theme={theme}
             handleToggleTheme={handleToggleTheme}
+            onUpdateProfile={handleUpdateProfile}
             handleLogout={handleLogout}
           />
         )}
