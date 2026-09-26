@@ -38,6 +38,7 @@ interface BillsViewProps {
   transactions: BillTransaction[];
   onSelectTransaction: (tx: BillTransaction) => void;
   renderTransactionIcon: (tx: BillTransaction) => React.ReactNode;
+  language?: 'es' | 'en';
 }
 
 export function BillsView({
@@ -47,7 +48,22 @@ export function BillsView({
   transactions,
   onSelectTransaction,
   renderTransactionIcon,
+  language = 'es',
 }: BillsViewProps) {
+  const isEn = language === 'en';
+
+  const getServiceName = (id: string, isEnglish: boolean) => {
+    switch (id) {
+      case 'electricidad': return isEnglish ? 'Electricity' : 'Electricidad';
+      case 'telefono': return isEnglish ? 'Phone' : 'Teléfono';
+      case 'internet': return isEnglish ? 'Internet' : 'Internet';
+      case 'television': return isEnglish ? 'Television' : 'Televisión';
+      case 'agua': return isEnglish ? 'Water' : 'Agua';
+      case 'gas': return isEnglish ? 'Gas' : 'Gas';
+      default: return id;
+    }
+  };
+
   const paidBills = transactions.filter(
     (t) =>
       t.category.includes('Servicio') ||
@@ -66,11 +82,13 @@ export function BillsView({
           type="button"
           onClick={onBack}
           className="btn-circle"
-          title="Volver"
+          title={isEn ? "Back" : "Volver"}
         >
           <ChevronLeftIcon className="w-5 h-5 text-white" />
         </button>
-        <h1 className="text-base font-bold text-white tracking-wide">Bill Payments</h1>
+        <h1 className="text-base font-bold text-white tracking-wide">
+          {isEn ? 'Bill Payments' : 'Pago de Servicios'}
+        </h1>
         <div className="w-10" />
       </header>
 
@@ -78,10 +96,10 @@ export function BillsView({
       <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-bold text-[#8E91A5] uppercase tracking-wider">
-            Pagar Servicios
+            {isEn ? 'Pay Utilities' : 'Pagar Servicios'}
           </span>
           <span className="text-[10px] text-[#2ED5A4] font-semibold flex items-center gap-1">
-            <span>Desliza</span>
+            <span>{isEn ? 'Swipe' : 'Desliza'}</span>
             <span>← →</span>
           </span>
         </div>
@@ -91,6 +109,7 @@ export function BillsView({
           {BILL_SERVICES.map((serv) => {
             const isSelected = selectedBillServiceId === serv.id;
             const Icon = serv.Icon;
+            const displayName = getServiceName(serv.id, isEn);
             return (
               <button
                 key={serv.id}
@@ -111,9 +130,9 @@ export function BillsView({
                   className={`text-[11px] font-semibold transition-colors text-center truncate w-full max-w-[70px] ${
                     isSelected ? 'text-[#2ED5A4]' : 'text-[#8E91A5] group-hover:text-white'
                   }`}
-                  title={serv.name}
+                  title={displayName}
                 >
-                  {serv.name}
+                  {displayName}
                 </span>
               </button>
             );
@@ -124,16 +143,18 @@ export function BillsView({
       {/* Recent Bills (Historial Dinámico de Facturas & Servicios) */}
       <div>
         <h3 className="text-xs font-bold text-white mb-2 px-1">
-          Facturas & Servicios Pagados
+          {isEn ? 'Paid Bills & Utilities' : 'Facturas & Servicios Pagados'}
         </h3>
         {paidBills.length === 0 ? (
           <div className="p-5 rounded-2xl bg-[#181928] border border-white/5 text-center space-y-1.5">
             <div className="w-10 h-10 mx-auto rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white">
               <LightningIcon className="w-5 h-5 text-white" />
             </div>
-            <p className="text-xs font-bold text-white">Sin facturas pagadas</p>
+            <p className="text-xs font-bold text-white">{isEn ? 'No paid bills' : 'Sin facturas pagadas'}</p>
             <p className="text-[10px] text-[#8E91A5] max-w-[280px] mx-auto">
-              Selecciona un servicio arriba para realizar una prueba y ver aquí el registro.
+              {isEn
+                ? 'Select a utility above to make a payment and view the record here.'
+                : 'Selecciona un servicio arriba para realizar una prueba y ver aquí el registro.'}
             </p>
           </div>
         ) : (

@@ -162,6 +162,8 @@ export function SendView({
   handleClearSendDraft,
   handleStartSendReview,
 }: SendViewProps) {
+  const isEn = language === 'en';
+
   return (
     <div className="animate-fade-in space-y-4">
       {/* Header: < | Send money | Historial */}
@@ -170,13 +172,15 @@ export function SendView({
           type="button"
           onClick={onBack}
           className="btn-circle"
-          title="Volver al inicio"
+          title={isEn ? 'Back to home' : 'Volver al inicio'}
         >
           <ChevronLeftIcon className="w-5 h-5 text-white" />
         </button>
 
         <div className="text-center">
-          <h1 className="text-base font-black text-white tracking-wide">Send money</h1>
+          <h1 className="text-base font-black text-white tracking-wide">
+            {isEn ? 'Send money' : 'Enviar dinero'}
+          </h1>
           <span className="text-[10px] font-semibold text-[#2ED5A4] flex items-center justify-center gap-1">
             <span>USA</span>
             <span>⇄</span>
@@ -188,10 +192,10 @@ export function SendView({
           type="button"
           onClick={onViewHistory}
           className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-white/20 text-xs font-bold text-[#8E91A5] hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-          title="Ver historial de envíos"
+          title={isEn ? 'View send history' : 'Ver historial de envíos'}
         >
           <DockAnalyticsIcon className="w-3.5 h-3.5" />
-          <span>Historial</span>
+          <span>{isEn ? 'History' : 'Historial'}</span>
         </button>
       </header>
 
@@ -208,7 +212,9 @@ export function SendView({
                 <span className="font-title-base text-xs text-white font-bold truncate">USA ➔ México</span>
                 <span className="px-1.5 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] font-label-caps text-[9px] uppercase font-bold border border-[#2ED5A4]/30">SPEI</span>
               </div>
-              <span className="font-caption-sm text-[10px] text-on-surface-variant">Instant Direct Remittance</span>
+              <span className="font-caption-sm text-[10px] text-on-surface-variant">
+                {isEn ? 'Instant Direct Remittance' : 'Envío Directo Inmediato SPEI'}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-highest border border-white/10 shrink-0">
@@ -224,10 +230,10 @@ export function SendView({
         <div className="rounded-2xl bg-surface-container-high p-4 shadow-md flex flex-col space-y-3 border border-white/5">
           <div className="flex items-center justify-between">
             <label className="font-caption-sm text-xs uppercase text-on-surface-variant font-semibold" htmlFor="send-amount-input">
-              You Send
+              {isEn ? 'You Send' : 'Tú Envías'}
             </label>
             <span className="font-caption-sm text-xs text-primary flex items-center gap-1 font-bold">
-              <span className="material-symbols-outlined text-[13px]">check_circle</span> No markup rate
+              <span className="material-symbols-outlined text-[13px]">check_circle</span> {isEn ? 'No markup rate' : 'Sin sobreprecio'}
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
@@ -255,7 +261,7 @@ export function SendView({
                   type="button"
                   onClick={() => setAmountValue('0')}
                   className="text-on-surface-variant hover:text-white text-xs px-2 py-1 rounded-full bg-surface-container-highest border border-white/10 shrink-0 cursor-pointer active:scale-95"
-                  title="Borrar a cero"
+                  title={isEn ? 'Clear to zero' : 'Borrar a cero'}
                 >
                   ✕
                 </button>
@@ -267,7 +273,7 @@ export function SendView({
             </div>
           </div>
           <p className="text-[11px] text-[#8E91A5] font-medium pt-0.5">
-            Toca la cantidad para escribir con el teclado de tu teléfono
+            {isEn ? 'Tap the amount to type with your phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
           {/* Quick Amount Increment Pills */}
           <div className="flex items-center gap-1.5 pt-1 overflow-x-auto scrollbar-none">
@@ -297,7 +303,7 @@ export function SendView({
               onClick={() => setAmountValue('500')}
               type="button"
             >
-              $500 Max
+              {isEn ? '$500 Max' : '$500 Máx'}
             </button>
           </div>
         </div>
@@ -310,7 +316,9 @@ export function SendView({
               1 USD = <span className="text-primary font-bold">{USD_TO_MXN_RATE.toFixed(2)} MXN</span>
             </span>
             <span className="text-on-surface-variant font-caption-sm">•</span>
-            <span className="font-label-caps text-[10px] text-primary font-bold uppercase tracking-wider">$0 Fee</span>
+            <span className="font-label-caps text-[10px] text-primary font-bold uppercase tracking-wider">
+              {isEn ? '$0 Fee' : 'Sin Comisión'}
+            </span>
           </div>
         </div>
 
@@ -318,9 +326,11 @@ export function SendView({
         <div className="rounded-2xl bg-surface-container p-4 shadow-md flex flex-col space-y-2 border border-white/5">
           <div className="flex items-center justify-between">
             <span className="font-caption-sm text-xs uppercase text-on-surface-variant font-semibold">
-              Receiver Gets (Guaranteed)
+              {isEn ? 'Receiver Gets (Guaranteed)' : 'El destinatario recibe (Garantizado)'}
             </span>
-            <span className="font-caption-sm text-xs text-on-surface-variant font-medium">Instant pickup</span>
+            <span className="font-caption-sm text-xs text-on-surface-variant font-medium">
+              {isEn ? 'Instant pickup' : 'Disponibilidad inmediata'}
+            </span>
           </div>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-baseline min-w-0 flex-1 overflow-hidden">
@@ -340,7 +350,9 @@ export function SendView({
           <div className="flex items-center gap-1.5 pt-0.5">
             <span className="material-symbols-outlined text-primary text-[14px]">verified</span>
             <span className="font-caption-sm text-[11px] text-on-surface-variant">
-              Zero hidden FX spread • Complete amount delivered
+              {isEn
+                ? 'Zero hidden FX spread • Complete amount delivered'
+                : 'Sin comisiones ocultas • Monto completo entregado'}
             </span>
           </div>
         </div>
@@ -349,8 +361,12 @@ export function SendView({
       {/* DELIVERY METHOD SELECTOR */}
       <div className="flex flex-col space-y-2.5 pt-1">
         <div className="flex items-center justify-between">
-          <span className="font-title-base text-xs text-on-surface font-bold">How will your receiver get it?</span>
-          <span className="font-caption-sm text-xs text-primary font-bold">Free</span>
+          <span className="font-title-base text-xs text-on-surface font-bold">
+            {isEn ? 'How will your receiver get it?' : '¿Cómo recibirá el dinero tu destinatario?'}
+          </span>
+          <span className="font-caption-sm text-xs text-primary font-bold">
+            {isEn ? 'Free' : 'Gratis'}
+          </span>
         </div>
         <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-surface-container-lowest border border-white/5">
           <button
@@ -363,7 +379,7 @@ export function SendView({
             type="button"
           >
             <span className="material-symbols-outlined text-[18px]">payments</span>
-            <span className="truncate">Cash Pickup</span>
+            <span className="truncate">{isEn ? 'Cash Pickup' : 'Retiro en Efectivo'}</span>
           </button>
           <button
             className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
@@ -375,7 +391,7 @@ export function SendView({
             type="button"
           >
             <span className="material-symbols-outlined text-[18px]">account_balance</span>
-            <span className="truncate">Bank (SPEI)</span>
+            <span className="truncate">{isEn ? 'Bank (SPEI)' : 'Cuenta Bancaria (SPEI)'}</span>
           </button>
           <button
             className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
@@ -387,7 +403,7 @@ export function SendView({
             type="button"
           >
             <span className="material-symbols-outlined text-[18px]">smartphone</span>
-            <span className="truncate">Mobile Wallet</span>
+            <span className="truncate">{isEn ? 'Mobile Wallet' : 'Billetera Móvil'}</span>
           </button>
         </div>
       </div>
@@ -397,9 +413,11 @@ export function SendView({
         <div className="flex flex-col space-y-3 pt-1 animate-fade-in">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="font-title-base text-xs text-on-surface font-bold">Pickup Partner Network</span>
+              <span className="font-title-base text-xs text-on-surface font-bold">
+                {isEn ? 'Pickup Partner Network' : 'Red de Sucursales y Tiendas'}
+              </span>
               <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                40,000+ branch and retail locations in Mexico
+                {isEn ? '40,000+ branch and retail locations in Mexico' : 'Más de 40,000 puntos de cobro en todo México'}
               </span>
             </div>
             <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5">
@@ -447,10 +465,10 @@ export function SendView({
                 <span className="material-symbols-outlined text-primary-container text-[20px]">hub</span>
                 <div className="flex flex-col leading-tight">
                   <span className="font-title-base text-xs font-bold text-slate-900">
-                    Any Available Network Partner
+                    {isEn ? 'Any Available Network Partner' : 'Cualquier Tienda o Banco de la Red'}
                   </span>
                   <span className="text-[10px] text-slate-500 font-medium">
-                    Receiver picks up at any of 40,000+ locations
+                    {isEn ? 'Receiver picks up at any of 40,000+ locations' : 'El destinatario cobra en cualquier punto de los 40,000+'}
                   </span>
                 </div>
               </div>
@@ -469,9 +487,11 @@ export function SendView({
         <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
           <div className="flex items-center justify-between">
             <span className="font-title-base text-xs text-on-surface font-bold">
-              Persona que Retira en México
+              {isEn ? 'Recipient in Mexico' : 'Persona que Retira en México'}
             </span>
-            <span className="font-caption-sm text-[11px] text-primary font-bold">INE / Pasaporte Requerido</span>
+            <span className="font-caption-sm text-[11px] text-primary font-bold">
+              {isEn ? 'Official ID Required' : 'INE / Pasaporte Requerido'}
+            </span>
           </div>
 
           {selectedAvatar && (
@@ -482,10 +502,10 @@ export function SendView({
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-white font-semibold text-[11px] truncate">
-                    Borrador guardado automáticamente
+                    {isEn ? 'Draft saved automatically' : 'Borrador guardado automáticamente'}
                   </span>
                   <span className="text-primary text-[10px] font-medium truncate">
-                    Beneficiario: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
+                    {isEn ? 'Beneficiary' : 'Beneficiario'}: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
                   </span>
                 </div>
               </div>
@@ -496,9 +516,9 @@ export function SendView({
                   handleClearSendDraft();
                 }}
                 className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
-                title="Descartar borrador y seleccionar otro destinatario"
+                title={isEn ? 'Discard draft' : 'Descartar borrador'}
               >
-                <span>✕ Limpiar</span>
+                <span>{isEn ? '✕ Clear' : '✕ Limpiar'}</span>
               </button>
             </div>
           )}
@@ -522,7 +542,7 @@ export function SendView({
                         {selectedAvatar.fullName || selectedAvatar.name}
                       </p>
                       <p className="font-financial-mono text-[11px] text-on-surface-variant truncate">
-                        {selectedAvatar.phone ? `Tel: ${selectedAvatar.phone}` : 'Retiro con Clave KIN y Cédula/INE'}
+                        {selectedAvatar.phone ? `Tel: ${selectedAvatar.phone}` : (isEn ? 'Pickup with KIN code & ID' : 'Retiro con Clave KIN y Cédula/INE')}
                       </p>
                     </div>
                   </>
@@ -532,20 +552,24 @@ export function SendView({
                       <span className="material-symbols-outlined text-[20px]">person_add</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">Selecciona quién retira en sucursal</p>
-                      <p className="text-[11px] text-on-surface-variant truncate">Toca para elegir familiar o agregar uno nuevo</p>
+                      <p className="font-title-base text-xs font-bold text-white truncate">
+                        {isEn ? 'Select who picks up cash' : 'Selecciona quién retira en sucursal'}
+                      </p>
+                      <p className="text-[11px] text-on-surface-variant truncate">
+                        {isEn ? 'Tap to choose family member or add new' : 'Toca para elegir familiar o agregar uno nuevo'}
+                      </p>
                     </div>
                   </>
                 )}
               </div>
               {selectedAvatar ? (
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="text-[10px] text-primary font-semibold">Cambiar</span>
+                  <span className="text-[10px] text-primary font-semibold">{isEn ? 'Change' : 'Cambiar'}</span>
                   <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
                 </div>
               ) : (
                 <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold flex-shrink-0">
-                  Elegir
+                  {isEn ? 'Choose' : 'Elegir'}
                 </span>
               )}
             </div>
@@ -557,8 +581,12 @@ export function SendView({
       {deliveryMethod === 'bank' && (
         <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
           <div className="flex items-center justify-between">
-            <span className="font-title-base text-xs text-on-surface font-bold">Bank SPEI Beneficiary</span>
-            <span className="font-caption-sm text-[11px] text-primary font-bold">24/7 Instant</span>
+            <span className="font-title-base text-xs text-on-surface font-bold">
+              {isEn ? 'Bank SPEI Beneficiary' : 'Beneficiario Cuenta Bancaria SPEI'}
+            </span>
+            <span className="font-caption-sm text-[11px] text-primary font-bold">
+              {isEn ? '24/7 Instant' : 'Inmediato 24/7'}
+            </span>
           </div>
 
           {selectedAvatar && (
@@ -569,10 +597,10 @@ export function SendView({
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-white font-semibold text-[11px] truncate">
-                    Borrador guardado automáticamente
+                    {isEn ? 'Draft saved automatically' : 'Borrador guardado automáticamente'}
                   </span>
                   <span className="text-primary text-[10px] font-medium truncate">
-                    Beneficiario: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
+                    {isEn ? 'Beneficiary' : 'Beneficiario'}: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
                   </span>
                 </div>
               </div>
@@ -583,9 +611,9 @@ export function SendView({
                   handleClearSendDraft();
                 }}
                 className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
-                title="Descartar borrador y seleccionar otro destinatario"
+                title={isEn ? 'Discard draft' : 'Descartar borrador'}
               >
-                <span>✕ Limpiar</span>
+                <span>{isEn ? '✕ Clear' : '✕ Limpiar'}</span>
               </button>
             </div>
           )}
@@ -612,7 +640,7 @@ export function SendView({
                         {selectedAvatar.fullName || selectedAvatar.name}
                       </p>
                       <p className="font-financial-mono text-[11px] text-on-surface-variant truncate">
-                        CLABE: {selectedAvatar.clabe || 'SPEI Interbancario'}
+                        CLABE: {selectedAvatar.clabe || (isEn ? 'Interbank SPEI' : 'SPEI Interbancario')}
                       </p>
                     </div>
                   </>
@@ -622,20 +650,24 @@ export function SendView({
                       <span className="material-symbols-outlined text-[20px]">person_add</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">Selecciona un beneficiario</p>
-                      <p className="text-[11px] text-on-surface-variant truncate">Toca para elegir de tu lista o agregar uno</p>
+                      <p className="font-title-base text-xs font-bold text-white truncate">
+                        {isEn ? 'Select a beneficiary' : 'Selecciona un beneficiario'}
+                      </p>
+                      <p className="text-[11px] text-on-surface-variant truncate">
+                        {isEn ? 'Tap to choose from list or add one' : 'Toca para elegir de tu lista o agregar uno'}
+                      </p>
                     </div>
                   </>
                 )}
               </div>
               {selectedAvatar ? (
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="text-[10px] text-primary font-semibold">Cambiar</span>
+                  <span className="text-[10px] text-primary font-semibold">{isEn ? 'Change' : 'Cambiar'}</span>
                   <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
                 </div>
               ) : (
                 <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold flex-shrink-0">
-                  Elegir
+                  {isEn ? 'Choose' : 'Elegir'}
                 </span>
               )}
             </div>
@@ -647,8 +679,12 @@ export function SendView({
       {deliveryMethod === 'wallet' && (
         <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
           <div className="flex items-center justify-between">
-            <span className="font-title-base text-xs text-on-surface font-bold">Mobile Wallet Destination</span>
-            <span className="font-caption-sm text-[11px] text-primary font-bold">Zero Fee</span>
+            <span className="font-title-base text-xs text-on-surface font-bold">
+              {isEn ? 'Mobile Wallet Destination' : 'Billetera Móvil de Destino'}
+            </span>
+            <span className="font-caption-sm text-[11px] text-primary font-bold">
+              {isEn ? 'Zero Fee' : 'Sin Comisión'}
+            </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -657,7 +693,7 @@ export function SendView({
             >
               <span className="material-symbols-outlined text-primary text-[22px]">account_balance_wallet</span>
               <p className="font-title-base text-xs font-bold text-white mt-1">KIN Cash</p>
-              <p className="text-[10px] text-primary">Direct P2P Transit</p>
+              <p className="text-[10px] text-primary">{isEn ? 'Direct P2P Transit' : 'Transferencia P2P Directa'}</p>
             </button>
             <button
               type="button"
@@ -665,7 +701,7 @@ export function SendView({
             >
               <span className="material-symbols-outlined text-secondary text-[22px]">smartphone</span>
               <p className="font-title-base text-xs font-bold text-white mt-1">Mercado Pago</p>
-              <p className="text-[10px] text-on-surface-variant">Instant Transfer</p>
+              <p className="text-[10px] text-on-surface-variant">{isEn ? 'Instant Transfer' : 'Transferencia Instantánea'}</p>
             </button>
           </div>
         </div>
@@ -674,24 +710,34 @@ export function SendView({
       {/* TRANSPARENT FEE BREAKDOWN CARD */}
       <div className="rounded-2xl bg-surface-container p-4 shadow-md space-y-2.5 border border-white/5">
         <div className="flex items-center justify-between">
-          <span className="font-caption-sm text-xs text-on-surface-variant">Transfer Fee</span>
+          <span className="font-caption-sm text-xs text-on-surface-variant">
+            {isEn ? 'Transfer Fee' : 'Comisión por Envío'}
+          </span>
           <div className="flex items-center gap-1.5">
             <span className="font-financial-mono text-xs text-on-surface-variant line-through">$4.99</span>
-            <span className="font-financial-mono text-xs text-primary font-bold">$0.00 Free</span>
+            <span className="font-financial-mono text-xs text-primary font-bold">
+              {isEn ? '$0.00 Free' : '$0.00 Gratis'}
+            </span>
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <span className="font-caption-sm text-xs text-on-surface-variant">Exchange Rate Guaranteed</span>
+          <span className="font-caption-sm text-xs text-on-surface-variant">
+            {isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}
+          </span>
           <span className="font-financial-mono text-xs text-on-surface font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="font-caption-sm text-xs text-on-surface-variant">Estimated Delivery Time</span>
+          <span className="font-caption-sm text-xs text-on-surface-variant">
+            {isEn ? 'Estimated Delivery Time' : 'Tiempo Estimado de Entrega'}
+          </span>
           <span className="font-caption-sm text-xs text-primary font-bold flex items-center gap-1">
-            <span className="material-symbols-outlined text-[15px]">bolt</span> Within 5 minutes
+            <span className="material-symbols-outlined text-[15px]">bolt</span> {isEn ? 'Within 5 minutes' : 'En menos de 5 minutos'}
           </span>
         </div>
         <div className="pt-2 flex items-center justify-between border-t border-white/5">
-          <span className="font-title-base text-xs text-on-surface font-bold">Total to Charge</span>
+          <span className="font-title-base text-xs text-on-surface font-bold">
+            {isEn ? 'Total to Charge' : 'Total a Cobrar'}
+          </span>
           <span className="font-financial-mono text-sm text-primary font-bold">
             ${(parseFloat(amountValue) || 300).toFixed(2)} USD
           </span>
@@ -707,8 +753,8 @@ export function SendView({
         >
           <span>
             {!selectedAvatar
-              ? (language === 'en' ? 'Select Beneficiary in Mexico' : 'Seleccionar Beneficiario en México')
-              : (language === 'en'
+              ? (isEn ? 'Select Beneficiary in Mexico' : 'Seleccionar Beneficiario en México')
+              : (isEn
                   ? `Review Breakdown & Send • $${(parseFloat(amountValue) || 50).toFixed(2)} USD`
                   : `Revisar Desglose y Enviar • $${(parseFloat(amountValue) || 50).toFixed(2)} USD`)}
           </span>

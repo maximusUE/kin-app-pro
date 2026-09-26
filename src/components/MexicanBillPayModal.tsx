@@ -11,6 +11,7 @@ export interface MexicanBillPayModalProps {
   onPaymentSuccess?: (service: string, amountMXN: number) => void;
   selectedServiceId?: string;
   exchangeRate?: number;
+  language?: 'es' | 'en';
 }
 
 export interface ServiceDefinition {
@@ -149,7 +150,9 @@ export function MexicanBillPayModal({
   onPaymentSuccess,
   selectedServiceId,
   exchangeRate = 20.45,
+  language = 'es',
 }: MexicanBillPayModalProps) {
+  const isEn = language === 'en';
   const [servicioSeleccionado, setServicioSeleccionado] = useState<ServiceDefinition>(SERVICIOS_MEXICO[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -219,8 +222,8 @@ export function MexicanBillPayModal({
     }
 
     showToast(
-      '¡Recibo Escaneado con Éxito! ⚡',
-      `${scanned.serviceName || servicioSeleccionado.nombre} vinculado: ${scanned.contractNumber}`
+      isEn ? 'Receipt Scanned Successfully! ⚡' : '¡Recibo Escaneado con Éxito! ⚡',
+      `${scanned.serviceName || servicioSeleccionado.nombre} ${isEn ? 'linked:' : 'vinculado:'} ${scanned.contractNumber}`
     );
   };
 
@@ -228,7 +231,10 @@ export function MexicanBillPayModal({
   const handlePayBill = () => {
     if (isPaying) return;
     setIsPaying(true);
-    showToast('SPEI Payment Queued ⚡', `$${currentUSD} USD transferred to ${servicioSeleccionado.empresa}`);
+    showToast(
+      isEn ? 'SPEI Payment Queued ⚡' : 'Pago SPEI en Cola ⚡',
+      isEn ? `$${currentUSD} USD transferred to ${servicioSeleccionado.empresa}` : `$${currentUSD} USD transferidos a ${servicioSeleccionado.empresa}`
+    );
 
     setTimeout(() => {
       setIsPaying(false);
@@ -258,14 +264,20 @@ export function MexicanBillPayModal({
           <div className="inline-flex items-center gap-2 self-start px-2.5 py-1 rounded-full bg-surface-container-high text-primary border border-white/5 shadow-inner">
             <span className="material-symbols-outlined text-[14px]">bolt</span>
             <span className="font-label-caps text-label-caps uppercase tracking-wider font-bold">
-              Zero Fees • Instant SPEI Receipt
+              {isEn ? 'Zero Fees • Instant SPEI Receipt' : 'Sin Comisiones • Comprobante SPEI Inmediato'}
             </span>
           </div>
           <h1 className="font-headline-md text-headline-md text-on-surface tracking-tight font-bold">
-            Pay Utilities in Mexico <span className="text-primary font-bold">Direct from USA</span>
+            {isEn ? (
+              <>Pay Utilities in Mexico <span className="text-primary font-bold">Direct from USA</span></>
+            ) : (
+              <>Paga Servicios en México <span className="text-primary font-bold">Directo desde USA</span></>
+            )}
           </h1>
           <p className="font-body-medium text-body-medium text-on-surface-variant">
-            Support family back home. Direct settlement with official SAT fiscal vouchers.
+            {isEn
+              ? 'Support family back home. Direct settlement with official SAT fiscal vouchers.'
+              : 'Apoya a tu familia. Liquidación directa con comprobante fiscal oficial del SAT.'}
           </p>
         </div>
       </div>
@@ -277,7 +289,7 @@ export function MexicanBillPayModal({
           <input
             className="w-full h-12 pl-11 pr-4 bg-surface-container-low rounded-xl font-body-base text-body-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-inner transition-all border border-white/5"
             id="provider-search"
-            placeholder="Search over 120 Mexican providers..."
+            placeholder={isEn ? 'Search over 120 Mexican providers...' : 'Buscar entre más de 120 proveedores mexicanos...'}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -302,10 +314,10 @@ export function MexicanBillPayModal({
             </div>
             <div className="flex flex-col text-left">
               <span className="font-title-base text-title-base text-on-surface group-hover:text-primary transition-colors">
-                Scan Barcode / QR with Camera
+                {isEn ? 'Scan Barcode / QR with Camera' : 'Escanear Código de Barras / QR con la Cámara'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                Auto-detects account &amp; amount due
+                {isEn ? 'Auto-detects account & amount due' : 'Detecta contrato y monto a pagar automáticamente'}
               </span>
             </div>
           </div>
@@ -319,13 +331,13 @@ export function MexicanBillPayModal({
       <div className="flex flex-col space-y-2.5">
         <div className="flex items-center justify-between px-1">
           <span className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">
-            Essential Categories
+            {isEn ? 'Essential Categories' : 'Categorías Principales'}
           </span>
           <span
             onClick={() => setSearchQuery('')}
             className="font-caption-sm text-caption-sm text-primary flex items-center gap-1 cursor-pointer hover:underline"
           >
-            View all (120+) <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            {isEn ? 'View all (120+)' : 'Ver todos (120+)'} <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
           </span>
         </div>
 
@@ -370,7 +382,19 @@ export function MexicanBillPayModal({
                   )}
                 </div>
                 <span className={`font-title-base text-title-base transition-colors truncate w-full font-bold ${isSelected ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>
-                  {serv.nombre}
+                  {isEn
+                    ? serv.id === 'electricidad' ? 'Electricity'
+                      : serv.id === 'telefono' ? 'Telephony'
+                      : serv.id === 'internet' ? 'Internet'
+                      : serv.id === 'television' ? 'Pay TV'
+                      : serv.id === 'agua' ? 'Water'
+                      : 'Gas'
+                    : serv.id === 'electricidad' ? 'Electricidad (CFE)'
+                      : serv.id === 'telefono' ? 'Telefonía'
+                      : serv.id === 'internet' ? 'Internet'
+                      : serv.id === 'television' ? 'TV de Paga'
+                      : serv.id === 'agua' ? 'Agua Potable'
+                      : 'Gas Natural'}
                 </span>
                 <span className="font-caption-sm text-[11px] text-on-surface-variant truncate w-full mt-0.5">
                   {serv.subtitulo}
@@ -385,10 +409,10 @@ export function MexicanBillPayModal({
       <div className="flex flex-col space-y-2">
         <div className="flex items-center justify-between px-1">
           <span className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">
-            Pending Service Invoice
+            {isEn ? 'Pending Service Invoice' : 'Factura de Servicio Pendiente'}
           </span>
           <span className="inline-flex items-center gap-1 font-caption-sm text-caption-sm text-primary">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> Verified Link
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> {isEn ? 'Verified Link' : 'Vínculo Verificado'}
           </span>
         </div>
 
@@ -422,20 +446,20 @@ export function MexicanBillPayModal({
               </div>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-caption-sm text-caption-sm font-semibold border border-white/5">
-              {servicioSeleccionado.sampleDueDate}
+              {isEn ? servicioSeleccionado.sampleDueDate : servicioSeleccionado.sampleDueDate.replace('Due in', 'Vence en').replace('days', 'días')}
             </span>
           </div>
 
           {/* Card Middle: Key Financial Data */}
           <div className="p-3.5 rounded-2xl bg-surface-container-low flex flex-col space-y-2.5 border border-white/5">
             <div className="flex items-center justify-between">
-              <span className="font-caption-sm text-caption-sm text-on-surface-variant">Service Identifier</span>
+              <span className="font-caption-sm text-caption-sm text-on-surface-variant">{isEn ? 'Service Identifier' : 'Número de Servicio'}</span>
               <span className="font-financial-mono text-financial-mono text-on-surface font-bold">
                 {servicioSeleccionado.sampleContrato}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-caption-sm text-caption-sm text-on-surface-variant">Billing Cycle</span>
+              <span className="font-caption-sm text-caption-sm text-on-surface-variant">{isEn ? 'Billing Cycle' : 'Ciclo de Facturación'}</span>
               <span className="font-body-medium text-body-medium text-on-surface">
                 {servicioSeleccionado.billingCycle}
               </span>
@@ -444,7 +468,7 @@ export function MexicanBillPayModal({
             <div className="flex items-end justify-between pt-1">
               <div className="flex flex-col">
                 <span className="font-label-caps text-label-caps text-on-surface-variant uppercase font-bold">
-                  Amount Due (MXN)
+                  {isEn ? 'Amount Due (MXN)' : 'Monto a Pagar (MXN)'}
                 </span>
                 <span className="font-headline-md text-headline-md text-on-surface font-bold">
                   ${currentMXN.toLocaleString('en-US', { minimumFractionDigits: 2 })} MXN
@@ -452,7 +476,7 @@ export function MexicanBillPayModal({
               </div>
               <div className="flex flex-col items-end">
                 <span className="font-label-caps text-label-caps text-primary uppercase font-bold">
-                  USD Debit (KIN Rate)
+                  {isEn ? 'USD Debit (KIN Rate)' : 'Cargo USD (Tasa KIN)'}
                 </span>
                 <span className="font-financial-mono text-[18px] text-primary font-bold">
                   ${currentUSD.toFixed(2)} USD
@@ -466,14 +490,14 @@ export function MexicanBillPayModal({
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                Official SAT CFDI tax receipt guaranteed
+                {isEn ? 'Official SAT CFDI tax receipt guaranteed' : 'Comprobante fiscal SAT CFDI garantizado'}
               </span>
             </div>
             <button
               type="button"
-              onClick={() => showToast('SAT CFDI Preview', 'CFDI 4.0 XML & PDF stored in ClientVault')}
+              onClick={() => showToast(isEn ? 'SAT CFDI Preview' : 'Vista Previa CFDI SAT', isEn ? 'CFDI 4.0 XML & PDF stored in ClientVault' : 'CFDI 4.0 XML y PDF almacenado en ClientVault')}
               className="material-symbols-outlined text-outline text-[18px] cursor-pointer hover:text-on-surface"
-              title="Ver CFDI SAT"
+              title={isEn ? 'View SAT CFDI' : 'Ver CFDI SAT'}
             >
               receipt_long
             </button>
@@ -493,11 +517,11 @@ export function MexicanBillPayModal({
           {isPaying ? (
             <>
               <span className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
-              <span>Processing via SPEI...</span>
+              <span>{isEn ? 'Processing via SPEI...' : 'Procesando vía SPEI...'}</span>
             </>
           ) : (
             <>
-              <span>Pay Selected Bill (${currentUSD.toFixed(2)} USD)</span>
+              <span>{isEn ? `Pay Selected Bill ($${currentUSD.toFixed(2)} USD)` : `Pagar Servicio ($${currentUSD.toFixed(2)} USD)`}</span>
               <span className="material-symbols-outlined text-[20px] font-bold">arrow_forward</span>
             </>
           )}
@@ -505,7 +529,7 @@ export function MexicanBillPayModal({
         <div className="flex items-center justify-center gap-1.5 text-center">
           <span className="material-symbols-outlined text-[14px] text-outline">lock</span>
           <span className="font-label-caps text-[10px] text-outline uppercase tracking-wider">
-            Secured with KIN Zero-Knowledge SPEI Node • Protected by Banxico
+            {isEn ? 'Secured with KIN Zero-Knowledge SPEI Node • Protected by Banxico' : 'Asegurado con Nodo SPEI Zero-Knowledge KIN • Protegido por Banxico'}
           </span>
         </div>
       </div>
@@ -538,32 +562,34 @@ export function MexicanBillPayModal({
               <span className="material-symbols-outlined text-[36px] font-bold">check_circle</span>
             </div>
             <h3 className="font-headline-md text-xl font-bold text-white tracking-tight">
-              ¡Factura Liquidada!
+              {isEn ? 'Bill Paid Successfully!' : '¡Factura Liquidada!'}
             </h3>
             <p className="font-caption-sm text-on-surface-variant">
-              Pago enviado vía SPEI Banxico a {servicioSeleccionado.empresa}.
+              {isEn
+                ? `Payment sent via SPEI Banxico to ${servicioSeleccionado.empresa}.`
+                : `Pago enviado vía SPEI Banxico a ${servicioSeleccionado.empresa}.`}
             </p>
 
             <div className="p-3.5 rounded-2xl bg-surface-container-low border border-white/5 text-left space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Servicio:</span>
+                <span className="text-on-surface-variant">{isEn ? 'Service:' : 'Servicio:'}</span>
                 <span className="font-bold text-white">{servicioSeleccionado.nombre}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Referencia:</span>
+                <span className="text-on-surface-variant">{isEn ? 'Reference:' : 'Referencia:'}</span>
                 <span className="font-financial-mono font-bold text-white">{servicioSeleccionado.sampleContrato}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Monto Liquidado:</span>
+                <span className="text-on-surface-variant">{isEn ? 'Amount Settled:' : 'Monto Liquidado:'}</span>
                 <span className="font-bold text-primary">${currentMXN.toFixed(2)} MXN (${currentUSD.toFixed(2)} USD)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Folio Fiscal SAT:</span>
+                <span className="text-on-surface-variant">{isEn ? 'SAT Fiscal ID:' : 'Folio Fiscal SAT:'}</span>
                 <span className="font-financial-mono text-white/90">SAT-CFDI-{Math.floor(100000 + Math.random() * 900000)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Estatus SPEI:</span>
-                <span className="font-bold text-primary">Liquidado en Tiempo Real ✓</span>
+                <span className="text-on-surface-variant">{isEn ? 'SPEI Status:' : 'Estatus SPEI:'}</span>
+                <span className="font-bold text-primary">{isEn ? 'Settled in Real Time ✓' : 'Liquidado en Tiempo Real ✓'}</span>
               </div>
             </div>
 
@@ -572,7 +598,7 @@ export function MexicanBillPayModal({
               onClick={handleReset}
               className="w-full h-12 rounded-full bg-primary text-on-primary font-bold text-sm hover:bg-primary-container transition-all shadow-md cursor-pointer active:scale-95"
             >
-              Listo / Volver a Facturas
+              {isEn ? 'Done / Back to Bills' : 'Listo / Volver a Facturas'}
             </button>
           </div>
         </div>

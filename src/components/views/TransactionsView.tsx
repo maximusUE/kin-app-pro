@@ -37,6 +37,15 @@ export function TransactionsView({
   onSelectTransaction,
   renderTransactionIcon,
 }: TransactionsViewProps) {
+  const isEn = language === 'en';
+
+  const GROUP_LABELS: Record<string, { es: string; en: string }> = {
+    Hoy: { es: 'Hoy', en: 'Today' },
+    Ayer: { es: 'Ayer', en: 'Yesterday' },
+    'Esta semana': { es: 'Esta semana', en: 'This week' },
+    Anteriores: { es: 'Anteriores', en: 'Earlier' },
+  };
+
   return (
     <div className="animate-fade-in space-y-4">
       {/* Header: < | Transactions | Total Movimientos Badge */}
@@ -45,20 +54,20 @@ export function TransactionsView({
           type="button"
           onClick={onBack}
           className="btn-circle"
-          title="Volver al Home"
+          title={isEn ? "Back to Home" : "Volver al Home"}
         >
           <ChevronLeftIcon className="w-5 h-5 text-white" />
         </button>
         <div className="text-center">
-          <h1 className="text-base font-bold text-white tracking-wide">Transactions</h1>
+          <h1 className="text-base font-bold text-white tracking-wide">{isEn ? 'Transactions' : 'Movimientos'}</h1>
           <p className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1 mt-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
-            Movimientos en tiempo real
+            {isEn ? 'Real-time movements' : 'Movimientos en tiempo real'}
           </p>
         </div>
         <div
           className="w-10 h-10 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-xs font-bold text-[#8E91A5] shadow-sm"
-          title={`${transactions.length} transacciones registradas`}
+          title={isEn ? `${transactions.length} recorded transactions` : `${transactions.length} transacciones registradas`}
         >
           {transactions.length}
         </div>
@@ -72,9 +81,11 @@ export function TransactionsView({
             <div className="w-14 h-14 mx-auto rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white">
               <CardOutlineIcon className="w-7 h-7 text-[#2ED5A4]" />
             </div>
-            <p className="text-sm font-bold text-white">Sin movimientos registrados</p>
+            <p className="text-sm font-bold text-white">{isEn ? 'No transactions recorded' : 'Sin movimientos registrados'}</p>
             <p className="text-xs text-[#8E91A5] max-w-[260px] mx-auto leading-relaxed">
-              Las transacciones que realices se organizarán de forma cronológica aquí.
+              {isEn
+                ? 'Your transactions will be organized chronologically here.'
+                : 'Las transacciones que realices se organizarán de forma cronológica aquí.'}
             </p>
           </div>
         ) : (
@@ -88,10 +99,10 @@ export function TransactionsView({
                 {/* Cabecera de grupo temporal */}
                 <div className="flex items-center justify-between px-1">
                   <span className="text-[11px] font-black uppercase tracking-wider text-[#8E91A5]">
-                    {groupKey}
+                    {GROUP_LABELS[groupKey]?.[language] || groupKey}
                   </span>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-[#8E91A5] border border-white/5">
-                    {itemsInGroup.length} {itemsInGroup.length === 1 ? 'movimiento' : 'movimientos'}
+                    {itemsInGroup.length} {isEn ? (itemsInGroup.length === 1 ? 'transaction' : 'transactions') : (itemsInGroup.length === 1 ? 'movimiento' : 'movimientos')}
                   </span>
                 </div>
 

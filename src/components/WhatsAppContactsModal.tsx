@@ -175,6 +175,7 @@ interface WhatsAppContactsModalProps {
   contacts: ContactItem[];
   familyNetwork?: ContactItem[];
   userId: string;
+  language?: 'es' | 'en';
 }
 
 export function WhatsAppContactsModal({
@@ -185,7 +186,9 @@ export function WhatsAppContactsModal({
   contacts = [],
   familyNetwork = [],
   userId,
+  language = 'es',
 }: WhatsAppContactsModalProps) {
+  const isEn = language === 'en';
   const [searchQuery, setSearchQuery] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isPickingFromPhone, setIsPickingFromPhone] = useState(false);
@@ -215,16 +218,16 @@ export function WhatsAppContactsModal({
           } else {
             parsed.forEach((c) => onSelectContact(c));
           }
-          setFeedback(`¡${parsed.length} contacto(s) importados de tu agenda telefónica!`);
+          setFeedback(isEn ? `¡${parsed.length} contact(s) imported from your phone directory!` : `¡${parsed.length} contacto(s) importados de tu agenda telefónica!`);
           setTimeout(() => setFeedback(null), 4000);
           setShowIosGuideModal(false);
         } else {
-          setFeedback('No se encontraron contactos legibles en el archivo .vcf');
+          setFeedback(isEn ? 'No readable contacts found in the .vcf file' : 'No se encontraron contactos legibles en el archivo .vcf');
           setTimeout(() => setFeedback(null), 3000);
         }
       } catch (err) {
         console.warn('[VCF parse error]', err);
-        setFeedback('Error al procesar el archivo de contactos.');
+        setFeedback(isEn ? 'Error processing contact file.' : 'Error al procesar el archivo de contactos.');
         setTimeout(() => setFeedback(null), 3000);
       }
     };
@@ -339,7 +342,7 @@ export function WhatsAppContactsModal({
             onSelectContact(newEntries[0]);
             onClose();
           } else {
-            setFeedback(`¡${newEntries.length} contactos sincronizados desde tu teléfono!`);
+            setFeedback(isEn ? `¡${newEntries.length} contacts synced from your phone!` : `¡${newEntries.length} contactos sincronizados desde tu teléfono!`);
             setTimeout(() => setFeedback(null), 3500);
           }
           return;
@@ -359,7 +362,7 @@ export function WhatsAppContactsModal({
   const handleDirectPhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!directName.trim()) {
-      setFeedback('Ingresa el nombre del destinatario');
+      setFeedback(isEn ? 'Enter the recipient name' : 'Ingresa el nombre del destinatario');
       setTimeout(() => setFeedback(null), 2500);
       return;
     }
@@ -370,7 +373,7 @@ export function WhatsAppContactsModal({
       name: cleanName.split(' ')[0],
       fullName: cleanName,
       avatar: '',
-      role: directPhone || 'Directo',
+      role: directPhone || (isEn ? 'Direct' : 'Directo'),
       country: 'Mexico',
       bank: directBank,
       photoUrl: '',
@@ -400,17 +403,17 @@ export function WhatsAppContactsModal({
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center text-white/90 hover:text-white transition-all cursor-pointer active:scale-90"
-            title="Cerrar"
+            title={isEn ? 'Close' : 'Cerrar'}
           >
             <CloseIcon className="w-4 h-4" />
           </button>
 
           <div className="text-center">
             <h2 className="text-base font-bold text-white leading-tight font-title-base">
-              Nuevo Envío
+              {isEn ? 'New Transfer' : 'Nuevo Envío'}
             </h2>
             <p className="text-[11px] text-[#8E91A5] font-medium">
-              {filteredContacts.length} contactos disponibles
+              {isEn ? `${filteredContacts.length} contacts available` : `${filteredContacts.length} contactos disponibles`}
             </p>
           </div>
 
@@ -435,7 +438,7 @@ export function WhatsAppContactsModal({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por nombre, número o @usuario..."
+              placeholder={isEn ? 'Search by name, phone or @handle...' : 'Buscar por nombre, número o @usuario...'}
               className="w-full bg-transparent text-sm text-white placeholder-[#8E91A5]/60 focus:outline-none"
               autoFocus
             />
@@ -444,7 +447,7 @@ export function WhatsAppContactsModal({
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center text-[10px] cursor-pointer ml-1"
-                title="Limpiar"
+                title={isEn ? 'Clear' : 'Limpiar'}
               >
                 ✕
               </button>
@@ -470,7 +473,7 @@ export function WhatsAppContactsModal({
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-primary text-[18px]">add_call</span>
-                    <span>Enviar a Nuevo Destinatario</span>
+                    <span>{isEn ? 'Send to New Recipient' : 'Enviar a Nuevo Destinatario'}</span>
                   </h4>
                   <button
                     type="button"
@@ -482,7 +485,7 @@ export function WhatsAppContactsModal({
                 </div>
                 <input
                   type="text"
-                  placeholder="Nombre y Apellido (ej. Roberto Pérez)"
+                  placeholder={isEn ? 'Full Name (e.g. Robert Perez)' : 'Nombre y Apellido (ej. Roberto Pérez)'}
                   value={directName}
                   onChange={(e) => setDirectName(e.target.value)}
                   className="w-full h-11 px-3 rounded-xl bg-[#0D0F18] border border-white/10 text-white text-xs focus:border-primary focus:outline-none"
@@ -490,7 +493,7 @@ export function WhatsAppContactsModal({
                 />
                 <input
                   type="tel"
-                  placeholder="Teléfono móvil o CLABE (10-18 dígitos)"
+                  placeholder={isEn ? 'Mobile phone or CLABE (10-18 digits)' : 'Teléfono móvil o CLABE (10-18 dígitos)'}
                   value={directPhone}
                   onChange={(e) => setDirectPhone(e.target.value)}
                   className="w-full h-11 px-3 rounded-xl bg-[#0D0F18] border border-white/10 text-white text-xs font-mono focus:border-primary focus:outline-none"
@@ -499,7 +502,7 @@ export function WhatsAppContactsModal({
                   type="submit"
                   className="w-full h-11 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all"
                 >
-                  <span>Continuar y Enviar</span>
+                  <span>{isEn ? 'Continue and Send' : 'Continuar y Enviar'}</span>
                   <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                 </button>
               </form>
@@ -521,15 +524,15 @@ export function WhatsAppContactsModal({
                     </div>
                     <div>
                       <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
-                        Acceder a contactos del teléfono
+                        {isEn ? 'Access phone contacts' : 'Acceder a contactos del teléfono'}
                       </p>
                       <p className="text-[10px] text-[#8E91A5]">
-                        Abre la libreta de contactos de tu celular
+                        {isEn ? 'Open contacts directory from your mobile' : 'Abre la libreta de contactos de tu celular'}
                       </p>
                     </div>
                   </div>
                   <span className="text-xs font-bold text-primary px-2 py-0.5 rounded-md bg-primary/10">
-                    Abrir
+                    {isEn ? 'Open' : 'Abrir'}
                   </span>
                 </button>
 
@@ -545,10 +548,10 @@ export function WhatsAppContactsModal({
                     </div>
                     <div>
                       <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
-                        Enviar por número o CLABE
+                        {isEn ? 'Send via phone or CLABE' : 'Enviar por número o CLABE'}
                       </p>
                       <p className="text-[10px] text-[#8E91A5]">
-                        Escribe el teléfono o cuenta SPEI directamente
+                        {isEn ? 'Enter phone number or SPEI account directly' : 'Escribe el teléfono o cuenta SPEI directamente'}
                       </p>
                     </div>
                   </div>
@@ -569,10 +572,10 @@ export function WhatsAppContactsModal({
                     </div>
                     <div>
                       <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
-                        Nuevo contacto
+                        {isEn ? 'New contact' : 'Nuevo contacto'}
                       </p>
                       <p className="text-[10px] text-[#8E91A5]">
-                        Registrar un nuevo beneficiario
+                        {isEn ? 'Register a new beneficiary' : 'Registrar un nuevo beneficiario'}
                       </p>
                     </div>
                   </div>
@@ -593,10 +596,10 @@ export function WhatsAppContactsModal({
                     </div>
                     <div>
                       <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
-                        Importar libreta (.vcf de iPhone/Android)
+                        {isEn ? 'Import directory (.vcf iPhone/Android)' : 'Importar libreta (.vcf de iPhone/Android)'}
                       </p>
                       <p className="text-[10px] text-[#8E91A5]">
-                        Carga todos tus contactos en 1 toque desde archivo
+                        {isEn ? 'Load all contacts in 1 tap from file' : 'Carga todos tus contactos en 1 toque desde archivo'}
                       </p>
                     </div>
                   </div>
@@ -629,7 +632,7 @@ export function WhatsAppContactsModal({
                     name: capitalizeWords(query.split(' ')[0]),
                     fullName: capitalizeWords(query),
                     avatar: '',
-                    role: isNum ? query : 'Contacto Rápido',
+                    role: isNum ? query : (isEn ? 'Quick Contact' : 'Contacto Rápido'),
                     country: 'Mexico',
                     bank: 'Red Banxico SPEI',
                     photoUrl: '',
@@ -646,10 +649,10 @@ export function WhatsAppContactsModal({
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
-                      Enviar a "{searchQuery}"
+                      {isEn ? `Send to "${searchQuery}"` : `Enviar a "${searchQuery}"`}
                     </p>
                     <p className="text-[10px] text-[#8E91A5]">
-                      Toca para seleccionar y enviar directamente
+                      {isEn ? 'Tap to select and send directly' : 'Toca para seleccionar y enviar directamente'}
                     </p>
                   </div>
                 </div>
@@ -665,7 +668,7 @@ export function WhatsAppContactsModal({
             {!searchQuery && recentContacts.length > 0 && (
               <div className="space-y-1">
                 <p className="text-[11px] font-bold text-[#8E91A5] uppercase tracking-wider px-1">
-                  Contactados Recientemente
+                  {isEn ? 'Recently Contacted' : 'Contactados Recientemente'}
                 </p>
                 <div className="rounded-2xl bg-[#141624] border border-white/5 divide-y divide-white/5 overflow-hidden">
                   {recentContacts.map((contact) => (
@@ -707,15 +710,15 @@ export function WhatsAppContactsModal({
               // Vista plana de resultados de búsqueda
               <div className="space-y-1">
                 <p className="text-[11px] font-bold text-[#8E91A5] uppercase tracking-wider px-1">
-                  Resultados ({filteredContacts.length})
+                  {isEn ? `Results (${filteredContacts.length})` : `Resultados (${filteredContacts.length})`}
                 </p>
                 {filteredContacts.length === 0 ? (
                   <div className="p-6 text-center rounded-2xl bg-[#141624] border border-dashed border-white/10 space-y-1">
                     <p className="text-xs font-bold text-white">
-                      No hay contactos que coincidan con "{searchQuery}"
+                      {isEn ? `No contacts matching "${searchQuery}"` : `No hay contactos que coincidan con "${searchQuery}"`}
                     </p>
                     <p className="text-[10px] text-[#8E91A5]">
-                      Usa el botón superior para agregar a esta persona al instante.
+                      {isEn ? 'Use the button above to add this recipient instantly.' : 'Usa el botón superior para agregar a esta persona al instante.'}
                     </p>
                   </div>
                 ) : (
@@ -854,10 +857,10 @@ export function WhatsAppContactsModal({
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-white leading-tight">
-                      Contactos de tu Celular
+                      {isEn ? 'Mobile Contacts' : 'Contactos de tu Celular'}
                     </h3>
                     <p className="text-[10px] text-[#8E91A5]">
-                      Sincronización en iPhone y Android
+                      {isEn ? 'Sync on iPhone and Android' : 'Sincronización en iPhone y Android'}
                     </p>
                   </div>
                 </div>
@@ -874,20 +877,36 @@ export function WhatsAppContactsModal({
                 <div className="p-3 rounded-2xl bg-[#0D0F18] border border-white/5 space-y-1.5">
                   <p className="font-bold text-white flex items-center gap-1.5">
                     <span className="text-primary font-black">1.</span>
-                    <span>En la App Nativa Descargada</span>
+                    <span>{isEn ? 'In the Downloaded Native App' : 'En la App Nativa Descargada'}</span>
                   </p>
                   <p className="text-[11px] leading-relaxed text-[#8E91A5]">
-                    Al descargar la App de KIN en tu celular, el sistema iOS/Android muestra la alerta oficial: <strong className="text-white">"Permitir a KIN acceder a tus contactos"</strong>. Al presionar "Permitir", lee tu libreta en 1 segundo.
+                    {isEn ? (
+                      <>
+                        When opening the KIN App on your mobile device, the system prompts: <strong className="text-white">"Allow KIN to access your contacts"</strong>. Tapping "Allow" syncs your contacts in 1 second.
+                      </>
+                    ) : (
+                      <>
+                        Al descargar la App de KIN en tu celular, el sistema iOS/Android muestra la alerta oficial: <strong className="text-white">"Permitir a KIN acceder a tus contactos"</strong>. Al presionar "Permitir", lee tu libreta en 1 segundo.
+                      </>
+                    )}
                   </p>
                 </div>
 
                 <div className="p-3 rounded-2xl bg-[#0D0F18] border border-white/5 space-y-2">
                   <p className="font-bold text-white flex items-center gap-1.5">
                     <span className="text-primary font-black">2.</span>
-                    <span>En el Navegador Web (Ahora Mismo)</span>
+                    <span>{isEn ? 'In Web Browser (Right Now)' : 'En el Navegador Web (Ahora Mismo)'}</span>
                   </p>
                   <p className="text-[11px] leading-relaxed text-[#8E91A5]">
-                    Apple bloquea el acceso en segundo plano a Safari. Puedes importar tu libreta completa subiendo tu archivo <code className="text-primary">.vcf</code> de contactos:
+                    {isEn ? (
+                      <>
+                        Apple restricts direct contact access in Safari. You can import your complete directory by uploading your contacts <code className="text-primary">.vcf</code> file:
+                      </>
+                    ) : (
+                      <>
+                        Apple bloquea el acceso en segundo plano a Safari. Puedes importar tu libreta completa subiendo tu archivo <code className="text-primary">.vcf</code> de contactos:
+                      </>
+                    )}
                   </p>
                   <button
                     type="button"
@@ -898,7 +917,7 @@ export function WhatsAppContactsModal({
                     className="w-full py-2.5 px-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all"
                   >
                     <span className="material-symbols-outlined text-[16px]">folder_open</span>
-                    <span>Seleccionar archivo .vcf de mi teléfono</span>
+                    <span>{isEn ? 'Select .vcf file from my phone' : 'Seleccionar archivo .vcf de mi teléfono'}</span>
                   </button>
                 </div>
               </div>
@@ -908,7 +927,7 @@ export function WhatsAppContactsModal({
                 onClick={() => setShowIosGuideModal(false)}
                 className="w-full py-2.5 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer"
               >
-                Entendido
+                {isEn ? 'Got it' : 'Entendido'}
               </button>
             </div>
           </div>

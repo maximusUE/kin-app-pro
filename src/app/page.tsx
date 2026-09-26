@@ -1793,6 +1793,7 @@ export default function MobileApp() {
           <ReceiptView
             data={sendSuccessData}
             exchangeRate={USD_TO_MXN_RATE}
+            language={language}
             onDone={() => {
               setSendSuccessData(null);
               setActiveTab('home');
@@ -1840,6 +1841,7 @@ export default function MobileApp() {
             <KinCashP2PModal
               isScreen={true}
               userId={userId}
+              language={language}
               onContactCreated={(c) => setContactsList((prev) => [c, ...prev])}
               onP2PSuccess={handleP2PSuccess}
               contacts={contactsList}
@@ -1866,6 +1868,7 @@ export default function MobileApp() {
             <MexicanBillPayModal
               isScreen={true}
               isOpen={true}
+              language={language}
               onPaymentSuccess={handleBillPaymentSuccess}
               selectedServiceId={selectedBillServiceId}
               exchangeRate={USD_TO_MXN_RATE}
@@ -1890,12 +1893,7 @@ export default function MobileApp() {
             setSelectedStore={setSelectedStore}
             selectedAvatar={selectedAvatar}
             onSelectAvatarClick={() => {
-              if (deliveryMethod === 'cash') {
-                setShowContactModal(true);
-              } else {
-                setPendingSendTarget(null);
-                setShowRecipientSelector(true);
-              }
+              setShowContactModal(true);
             }}
             handleClearSendDraft={handleClearSendDraft}
             handleStartSendReview={handleStartSendReview}
@@ -1909,6 +1907,7 @@ export default function MobileApp() {
           <BillsView
             onBack={() => setActiveTab('home')}
             selectedBillServiceId={selectedBillServiceId}
+            language={language}
             onSelectService={(serviceId) => {
               setSelectedBillServiceId(serviceId);
               setShowBillPayModal(true);
@@ -2053,10 +2052,12 @@ export default function MobileApp() {
                     ? 'text-primary font-bold scale-105'
                     : 'text-on-surface-variant hover:text-white'
                 }`}
-                title="Home"
+                title={language === 'en' ? 'Home' : 'Inicio'}
               >
                 <span className="material-symbols-outlined text-[24px]">home</span>
-                <span className="font-label-caps text-[10px] tracking-tight">Home</span>
+                <span className="font-label-caps text-[10px] tracking-tight">
+                  {language === 'en' ? 'Home' : 'Inicio'}
+                </span>
               </button>
 
               {/* 2. Send */}
@@ -2073,10 +2074,12 @@ export default function MobileApp() {
                     ? 'text-primary font-bold scale-105'
                     : 'text-on-surface-variant hover:text-white'
                 }`}
-                title="Send"
+                title={language === 'en' ? 'Send' : 'Enviar'}
               >
                 <span className="material-symbols-outlined text-[24px]">send</span>
-                <span className="font-label-caps text-[10px] tracking-tight">Send</span>
+                <span className="font-label-caps text-[10px] tracking-tight">
+                  {language === 'en' ? 'Send' : 'Enviar'}
+                </span>
               </button>
 
               {/* 3. Kin Cash */}
@@ -2113,10 +2116,12 @@ export default function MobileApp() {
                     ? 'text-primary font-bold scale-105'
                     : 'text-on-surface-variant hover:text-white'
                 }`}
-                title="Bill Pay"
+                title={language === 'en' ? 'Bill Pay' : 'Servicios'}
               >
                 <span className="material-symbols-outlined text-[24px]">receipt_long</span>
-                <span className="font-label-caps text-[10px] tracking-tight">Bill Pay</span>
+                <span className="font-label-caps text-[10px] tracking-tight">
+                  {language === 'en' ? 'Bill Pay' : 'Servicios'}
+                </span>
               </button>
 
               {/* 5. Profile */}
@@ -2133,10 +2138,12 @@ export default function MobileApp() {
                     ? 'text-primary font-bold scale-105'
                     : 'text-on-surface-variant hover:text-white'
                 }`}
-                title="Profile"
+                title={language === 'en' ? 'Profile' : 'Perfil'}
               >
                 <span className="material-symbols-outlined text-[24px]">person</span>
-                <span className="font-label-caps text-[10px] tracking-tight">Profile</span>
+                <span className="font-label-caps text-[10px] tracking-tight">
+                  {language === 'en' ? 'Profile' : 'Perfil'}
+                </span>
               </button>
             </div>
           </nav>
@@ -2147,6 +2154,7 @@ export default function MobileApp() {
       {/* Modals con aislamiento total de capas */}
       <MexicanBillPayModal
         isOpen={showBillPayModal}
+        language={language}
         onClose={() => setShowBillPayModal(false)}
         onPaymentSuccess={handleBillPaymentSuccess}
         selectedServiceId={selectedBillServiceId}
@@ -2154,6 +2162,7 @@ export default function MobileApp() {
       <KinCashP2PModal
         isOpen={showKinCashModal}
         userId={userId}
+        language={language}
         onContactCreated={(c) => setContactsList((prev) => [c, ...prev])}
         onClose={() => setShowKinCashModal(false)}
         onP2PSuccess={handleP2PSuccess}
@@ -2214,6 +2223,7 @@ export default function MobileApp() {
         contacts={contactsList}
         familyNetwork={familyNetwork}
         userId={userId}
+        language={language}
         onImportBatch={(newBatch) => {
           setContactsList((prev) => {
             const existingIds = new Set(prev.map((c) => c.phone?.replace(/\D/g, '') || c.name.toLowerCase()));
@@ -2343,7 +2353,7 @@ export default function MobileApp() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[22px]">send_money</span>
-                  <span>Enviar Dinero Ahora (SPEI / Efectivo)</span>
+                  <span>{language === 'en' ? 'Send Money Now (SPEI / Cash)' : 'Enviar Dinero Ahora (SPEI / Efectivo)'}</span>
                 </div>
                 <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </button>
@@ -2360,7 +2370,7 @@ export default function MobileApp() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-secondary text-[22px]">bolt</span>
-                  <span>Transferir con KIN CASH Instantáneo</span>
+                  <span>{language === 'en' ? 'Transfer with Instant KIN CASH' : 'Transferir con KIN CASH Instantáneo'}</span>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-[10px] font-black">
                   $0 FEE
@@ -2380,7 +2390,7 @@ export default function MobileApp() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-primary text-[22px]">add_a_photo</span>
-                  <span>Editar Foto / Avatar del Contacto</span>
+                  <span>{language === 'en' ? 'Edit Contact Photo / Avatar' : 'Editar Foto / Avatar del Contacto'}</span>
                 </div>
                 <span className="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
               </button>
@@ -2390,10 +2400,10 @@ export default function MobileApp() {
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-semibold text-on-surface-variant flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-primary">swap_horiz</span>
-                    <span>Mover posición en el carrusel</span>
+                    <span>{language === 'en' ? 'Move position in carousel' : 'Mover posición en el carrusel'}</span>
                   </span>
                   <span className="text-[10px] text-primary font-bold">
-                    Posición #{quickContactActionTarget.index + 1} de {contactsList.length}
+                    {language === 'en' ? `Position #${quickContactActionTarget.index + 1} of ${contactsList.length}` : `Posición #${quickContactActionTarget.index + 1} de ${contactsList.length}`}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -2409,7 +2419,7 @@ export default function MobileApp() {
                     className="h-11 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-25 text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/5 disabled:cursor-not-allowed"
                   >
                     <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                    <span>Mover Izquierda</span>
+                    <span>{language === 'en' ? 'Move Left' : 'Mover Izquierda'}</span>
                   </button>
                   <button
                     type="button"
@@ -2422,7 +2432,7 @@ export default function MobileApp() {
                     }}
                     className="h-11 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-25 text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/5 disabled:cursor-not-allowed"
                   >
-                    <span>Mover Derecha</span>
+                    <span>{language === 'en' ? 'Move Right' : 'Mover Derecha'}</span>
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                   </button>
                 </div>
@@ -2432,10 +2442,10 @@ export default function MobileApp() {
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm(`¿Estás seguro de que deseas eliminar a ${quickContactActionTarget.contact.name} de tus envíos rápidos?`)) {
+                  if (confirm(language === 'en' ? `Are you sure you want to remove ${quickContactActionTarget.contact.name} from your quick sends?` : `¿Estás seguro de que deseas eliminar a ${quickContactActionTarget.contact.name} de tus envíos rápidos?`)) {
                     handleDeleteContact(quickContactActionTarget.contact.id);
                     setQuickContactActionTarget(null);
-                    setContactFeedback(`Contacto ${quickContactActionTarget.contact.name} eliminado de la lista.`);
+                    setContactFeedback(language === 'en' ? `Contact ${quickContactActionTarget.contact.name} removed from list.` : `Contacto ${quickContactActionTarget.contact.name} eliminado de la lista.`);
                     setTimeout(() => setContactFeedback(null), 3000);
                   }
                 }}
@@ -2443,10 +2453,10 @@ export default function MobileApp() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[22px] text-rose-400">delete</span>
-                  <span>Eliminar de Envíos Rápidos</span>
+                  <span>{language === 'en' ? 'Remove from Quick Send' : 'Eliminar de Envíos Rápidos'}</span>
                 </div>
                 <span className="text-[10px] uppercase font-bold text-rose-400/80 bg-rose-500/20 px-2 py-0.5 rounded-full">
-                  Quitar
+                  {language === 'en' ? 'Remove' : 'Quitar'}
                 </span>
               </button>
             </div>
@@ -2476,10 +2486,10 @@ export default function MobileApp() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white font-title-base">
-                    Foto de {editingContactAvatarTarget.name}
+                    {language === 'en' ? `Photo of ${editingContactAvatarTarget.name}` : `Foto de ${editingContactAvatarTarget.name}`}
                   </h3>
                   <p className="text-[10px] text-on-surface-variant">
-                    Personaliza la imagen o mantén una silueta limpia
+                    {language === 'en' ? 'Customize the picture or keep a clean silhouette' : 'Personaliza la imagen o mantén una silueta limpia'}
                   </p>
                 </div>
               </div>
@@ -2503,7 +2513,9 @@ export default function MobileApp() {
                 />
               </div>
               <span className="text-[11px] text-on-surface-variant font-medium">
-                {editingContactPhotoInput ? 'Vista previa de la foto' : 'Silueta de usuario limpia activa'}
+                {editingContactPhotoInput
+                  ? (language === 'en' ? 'Photo preview' : 'Vista previa de la foto')
+                  : (language === 'en' ? 'Clean silhouette active' : 'Silueta de usuario limpia activa')}
               </span>
             </div>
 
@@ -2511,11 +2523,11 @@ export default function MobileApp() {
             <div className="space-y-2">
               <label className="text-xs font-bold text-white flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-primary text-[18px]">photo_camera</span>
-                <span>Subir foto desde tu dispositivo</span>
+                <span>{language === 'en' ? 'Upload photo from device' : 'Subir foto desde tu dispositivo'}</span>
               </label>
               <label className="w-full h-[52px] rounded-2xl bg-surface-container hover:bg-surface-container-high border border-dashed border-primary/50 flex items-center justify-center gap-2 text-primary font-bold text-xs cursor-pointer transition-all active:scale-[0.98]">
                 <span className="material-symbols-outlined text-[20px]">upload</span>
-                <span>Elegir archivo (Cámara / Galería)</span>
+                <span>{language === 'en' ? 'Choose file (Camera / Gallery)' : 'Elegir archivo (Cámara / Galería)'}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -2539,7 +2551,7 @@ export default function MobileApp() {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-white flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-primary text-[18px]">link</span>
-                <span>O pegar URL de imagen</span>
+                <span>{language === 'en' ? 'Or paste image URL' : 'O pegar URL de imagen'}</span>
               </label>
               <input
                 type="url"
@@ -2558,7 +2570,7 @@ export default function MobileApp() {
                 className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-on-surface-variant hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">no_accounts</span>
-                <span>Quitar foto y usar Silueta Limpia</span>
+                <span>{language === 'en' ? 'Remove photo and use Clean Silhouette' : 'Quitar foto y usar Silueta Limpia'}</span>
               </button>
             )}
 
@@ -2570,7 +2582,7 @@ export default function MobileApp() {
                 disabled={isUpdatingContactPhoto}
                 className="h-[48px] rounded-full bg-white/10 hover:bg-white/15 text-white font-bold text-xs transition-all cursor-pointer"
               >
-                Cancelar
+                {language === 'en' ? 'Cancel' : 'Cancelar'}
               </button>
               <button
                 type="button"
@@ -2582,7 +2594,7 @@ export default function MobileApp() {
                   <span className="animate-spin text-sm">⏳</span>
                 ) : (
                   <>
-                    <span>Guardar Foto</span>
+                    <span>{language === 'en' ? 'Save Photo' : 'Guardar Foto'}</span>
                     <span className="material-symbols-outlined text-[16px]">check</span>
                   </>
                 )}
@@ -2641,7 +2653,7 @@ export default function MobileApp() {
                   </div>
                 </div>
                 <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] border border-[#2ED5A4]/30">
-                  {draftUserLanguage === 'en' ? '🇺🇸 EN Active' : '🇲🇽 ES Activo'}
+                  {draftUserLanguage === 'en' ? 'EN Active' : 'ES Activo'}
                 </span>
               </div>
 
@@ -2656,7 +2668,7 @@ export default function MobileApp() {
                       : 'bg-[#1E2033] text-[#8E91A5] border-white/5 hover:border-white/20 hover:text-white font-semibold'
                   }`}
                 >
-                  <span className="text-base">🇲🇽</span>
+                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
                   <span>Español</span>
                   {draftUserLanguage === 'es' && (
                     <span className="text-sm font-black">✓</span>
@@ -2672,7 +2684,7 @@ export default function MobileApp() {
                       : 'bg-[#1E2033] text-[#8E91A5] border-white/5 hover:border-white/20 hover:text-white font-semibold'
                   }`}
                 >
-                  <span className="text-base">🇺🇸</span>
+                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
                   <span>English</span>
                   {draftUserLanguage === 'en' && (
                     <span className="text-sm font-black">✓</span>
@@ -3020,19 +3032,19 @@ export default function MobileApp() {
                   onClick={() => setShowSendReviewModal(false)}
                   disabled={isExecutingPayment}
                   className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white cursor-pointer transition-all disabled:opacity-40"
-                  title="Volver"
+                  title={language === 'en' ? 'Back' : 'Volver'}
                 >
                   <ChevronLeftIcon className="w-4 h-4 text-white" />
                 </button>
                 <div>
                   <h3 className="text-sm font-bold text-white leading-tight font-title-base flex items-center gap-1.5">
-                    <span>Desglose de Envío</span>
+                    <span>{language === 'en' ? 'Transfer Breakdown' : 'Desglose de Envío'}</span>
                     <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
-                      100% Transparente
+                      {language === 'en' ? '100% Transparent' : '100% Transparente'}
                     </span>
                   </h3>
                   <p className="text-[10px] text-on-surface-variant">
-                    Revisa todos los datos antes de autorizar el débito
+                    {language === 'en' ? 'Review all details before authorizing debit' : 'Revisa todos los datos antes de autorizar el débito'}
                   </p>
                 </div>
               </div>
@@ -3051,17 +3063,17 @@ export default function MobileApp() {
               {/* Tarjeta 1: Hero de Conversión (Monto Recibido en México) */}
               <div className="p-4 rounded-2xl bg-gradient-to-br from-[#1c242c] via-[#12161b] to-[#0d1014] border border-[#2ED5A4]/30 shadow-[0_4px_20px_rgba(46,213,164,0.12)] space-y-2 text-center">
                 <span className="text-[11px] font-medium text-on-surface-variant uppercase tracking-wider block">
-                  El beneficiario recibe en México
+                  {language === 'en' ? 'Recipient receives in Mexico' : 'El beneficiario recibe en México'}
                 </span>
                 <div className="text-3xl sm:text-4xl font-black font-financial-mono text-[#2ED5A4] tracking-tight">
                   ${((parseFloat(amountValue) || 50) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm font-bold text-white">MXN</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-[#2ED5A4]/20 text-[11px] text-[#2ED5A4] font-semibold">
                   <span className="material-symbols-outlined text-[14px]">verified</span>
-                  <span>1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN • Tasa Garantizada</span>
+                  <span>1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN • {language === 'en' ? 'Guaranteed Rate' : 'Tasa Garantizada'}</span>
                 </div>
                 <p className="text-[11px] text-[#8E91A5] pt-0.5">
-                  Tú envías: <strong className="text-white font-mono">${(parseFloat(amountValue) || 50).toFixed(2)} USD</strong>
+                  {language === 'en' ? 'You send:' : 'Tú envías:'} <strong className="text-white font-mono">${(parseFloat(amountValue) || 50).toFixed(2)} USD</strong>
                 </p>
               </div>
 
@@ -3070,19 +3082,21 @@ export default function MobileApp() {
                 <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-primary">receipt_long</span>
-                    Transparencia de Costos
+                    {language === 'en' ? 'Cost Transparency' : 'Transparencia de Costos'}
                   </span>
-                  <span className="text-[10px] text-[#2ED5A4] font-extrabold uppercase">Sin Tarifas Ocultas</span>
+                  <span className="text-[10px] text-[#2ED5A4] font-extrabold uppercase">
+                    {language === 'en' ? 'No Hidden Fees' : 'Sin Tarifas Ocultas'}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Monto a transferir (Base)</span>
+                  <span>{language === 'en' ? 'Amount to transfer (Base)' : 'Monto a transferir (Base)'}</span>
                   <span className="text-white font-mono font-bold">${(parseFloat(amountValue) || 50).toFixed(2)} USD</span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
                   <span className="flex items-center gap-1">
-                    Tarifa por transferencia KIN
+                    {language === 'en' ? 'KIN transfer fee' : 'Tarifa por transferencia KIN'}
                     <span className="px-1.5 py-0.2 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4] text-[9px] font-bold">
                       PROMO
                     </span>
@@ -3092,14 +3106,14 @@ export default function MobileApp() {
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
                   <span>
-                    Comisión método de pago (
+                    {language === 'en' ? 'Payment method fee (' : 'Comisión método de pago ('}
                     {paymentMethod === 'credit'
-                      ? 'Tarjeta de Crédito'
+                      ? (language === 'en' ? 'Credit Card' : 'Tarjeta de Crédito')
                       : paymentMethod === 'debit'
-                      ? 'Tarjeta de Débito'
+                      ? (language === 'en' ? 'Debit Card' : 'Tarjeta de Débito')
                       : paymentMethod === 'apple'
                       ? 'Apple Pay'
-                      : 'Cuenta Bancaria'}
+                      : (language === 'en' ? 'Bank Account' : 'Cuenta Bancaria')}
                     )
                   </span>
                   {paymentMethod === 'credit' ? (
@@ -3110,21 +3124,23 @@ export default function MobileApp() {
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Comisión por entrega / retiro en sucursal</span>
+                  <span>{language === 'en' ? 'Delivery / store pickup fee' : 'Comisión por entrega / retiro en sucursal'}</span>
                   <span className="text-[#2ED5A4] font-bold">$0.00 USD</span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Impuestos y retenciones transfronterizas</span>
+                  <span>{language === 'en' ? 'Cross-border taxes & withholdings' : 'Impuestos y retenciones transfronterizas'}</span>
                   <span className="text-white font-mono font-bold">$0.00 USD</span>
                 </div>
 
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                   <div>
                     <span className="font-title-base text-xs text-white font-bold block">
-                      Total exacto a pagar
+                      {language === 'en' ? 'Exact total to pay' : 'Total exacto a pagar'}
                     </span>
-                    <span className="text-[10px] text-on-surface-variant">Se debitará de tu método seleccionado</span>
+                    <span className="text-[10px] text-on-surface-variant">
+                      {language === 'en' ? 'Debited from your selected method' : 'Se debitará de tu método seleccionado'}
+                    </span>
                   </div>
                   <span className="text-lg font-black font-financial-mono text-white">
                     ${((parseFloat(amountValue) || 50) + paymentFee).toFixed(2)} <span className="text-xs text-[#8E91A5]">USD</span>
@@ -3137,10 +3153,10 @@ export default function MobileApp() {
                 <div className="flex items-center justify-between pb-1 border-b border-white/5">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-primary">person</span>
-                    Beneficiario en México
+                    {language === 'en' ? 'Recipient in Mexico' : 'Beneficiario en México'}
                   </span>
                   <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
-                    Verificado
+                    {language === 'en' ? 'Verified' : 'Verificado'}
                   </span>
                 </div>
 
@@ -3157,7 +3173,7 @@ export default function MobileApp() {
                     </p>
                     <p className="text-[11px] text-primary font-mono">{selectedAvatar.phone}</p>
                     <p className="text-[10px] text-on-surface-variant truncate">
-                      📍 {capitalizeWords(selectedAvatar.street || 'Dirección registrada')} {selectedAvatar.houseNumber || ''}, {capitalizeWords(selectedAvatar.state || '')}, {capitalizeWords(selectedAvatar.country || 'México')} {selectedAvatar.zipCode ? `• C.P. ${selectedAvatar.zipCode}` : ''}
+                      📍 {capitalizeWords(selectedAvatar.street || (language === 'en' ? 'Registered address' : 'Dirección registrada'))} {selectedAvatar.houseNumber || ''}, {capitalizeWords(selectedAvatar.state || '')}, {capitalizeWords(selectedAvatar.country || 'México')} {selectedAvatar.zipCode ? `• C.P. ${selectedAvatar.zipCode}` : ''}
                     </p>
                   </div>
                 </div>
@@ -3168,9 +3184,11 @@ export default function MobileApp() {
                 <div className="flex items-center justify-between pb-1 border-b border-white/5">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-primary">local_shipping</span>
-                    Método de Entrega
+                    {language === 'en' ? 'Delivery Method' : 'Método de Entrega'}
                   </span>
-                  <span className="text-[10px] text-on-surface-variant">En menos de 5 minutos</span>
+                  <span className="text-[10px] text-on-surface-variant">
+                    {language === 'en' ? 'In under 5 minutes' : 'En menos de 5 minutos'}
+                  </span>
                 </div>
 
                 {deliveryMethod === 'cash' ? (
@@ -3186,26 +3204,30 @@ export default function MobileApp() {
                         </div>
                         <div>
                           <p className="text-xs font-bold text-white">
-                            Retiro en Efectivo • {(() => {
+                            {language === 'en' ? 'Cash Pickup' : 'Retiro en Efectivo'} • {(() => {
                               const storeObj = CASH_PICKUP_STORES.find((s) => s.id === selectedStore);
                               return storeObj?.name || 'OXXO';
                             })()}
                           </p>
                           <p className="text-[10px] text-on-surface-variant">
-                            Red de ventanillas autorizadas en México
+                            {language === 'en' ? 'Authorized pickup network in Mexico' : 'Red de ventanillas autorizadas en México'}
                           </p>
                         </div>
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4] text-[10px] font-bold">
-                        Efectivo Inmediato
+                        {language === 'en' ? 'Instant Cash' : 'Efectivo Inmediato'}
                       </span>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 flex items-start gap-2 text-[11px] text-[#A6A9BC]">
                       <span className="text-primary text-base">🔑</span>
                       <div>
-                        <strong className="text-white block">Generación de Clave de Retiro Oficial</strong>
-                        Al dar clic en pagar, el sistema creará inmediatamente una Clave de Retiro (PIN de 8 dígitos) que podrás copiar o enviar por WhatsApp para que tu familiar cobre en caja presentando su INE.
+                        <strong className="text-white block">
+                          {language === 'en' ? 'Official Cash Withdrawal Code Generation' : 'Generación de Clave de Retiro Oficial'}
+                        </strong>
+                        {language === 'en'
+                          ? 'Upon payment confirmation, the system will immediately generate a Cash Withdrawal Code (8-digit PIN) that you can copy or send via WhatsApp for your recipient to collect at the counter presenting their official ID.'
+                          : 'Al dar clic en pagar, el sistema creará inmediatamente una Clave de Retiro (PIN de 8 dígitos) que podrás copiar o enviar por WhatsApp para que tu familiar cobre en caja presentando su INE.'}
                       </div>
                     </div>
                   </div>
@@ -3217,7 +3239,9 @@ export default function MobileApp() {
                           <span className="material-symbols-outlined text-[20px]">account_balance</span>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-white">Depósito a Cuenta Bancaria (SPEI)</p>
+                          <p className="text-xs font-bold text-white">
+                            {language === 'en' ? 'Deposit to Bank Account (SPEI)' : 'Depósito a Cuenta Bancaria (SPEI)'}
+                          </p>
                           <p className="text-[10px] text-on-surface-variant font-mono">
                             CLABE: {selectedAvatar.clabe ? `•••• ${selectedAvatar.clabe.slice(-4)}` : '012180••••••••1234'}
                           </p>
@@ -3228,7 +3252,9 @@ export default function MobileApp() {
                       </span>
                     </div>
                     <p className="text-[10px] text-[#8E91A5]">
-                      Transferencia directa auditada por el Banco de México con generación de Clave de Rastreo (CEP).
+                      {language === 'en'
+                        ? 'Direct transfer audited by Banco de México with Tracking Code (CEP).'
+                        : 'Transferencia directa auditada por el Banco de México con generación de Clave de Rastreo (CEP).'}
                     </p>
                   </div>
                 )}
@@ -3238,7 +3264,9 @@ export default function MobileApp() {
               <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-[10px] text-[#8E91A5]">
                 <ShieldCheckIcon className="w-4 h-4 text-[#2ED5A4] flex-shrink-0" />
                 <span>
-                  Transacción protegida por cifrado militar AES-GCM-256 y en cumplimiento estricto con CNBV, Banxico y FinCEN.
+                  {language === 'en'
+                    ? 'Transaction secured by military-grade AES-GCM-256 encryption and in full compliance with CNBV, Banxico, and FinCEN.'
+                    : 'Transacción protegida por cifrado militar AES-GCM-256 y en cumplimiento estricto con CNBV, Banxico y FinCEN.'}
                 </span>
               </div>
             </div>
@@ -3254,11 +3282,13 @@ export default function MobileApp() {
                 {isExecutingPayment ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Procesando pago seguro...</span>
+                    <span>{language === 'en' ? 'Processing secure payment...' : 'Procesando pago seguro...'}</span>
                   </>
                 ) : (
                   <>
-                    <span>Pagar y Confirmar Envío • ${((parseFloat(amountValue) || 50) + paymentFee).toFixed(2)} USD</span>
+                    <span>
+                      {language === 'en' ? 'Pay & Confirm Send' : 'Pagar y Confirmar Envío'} • ${((parseFloat(amountValue) || 50) + paymentFee).toFixed(2)} USD
+                    </span>
                     <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                   </>
                 )}
@@ -3270,7 +3300,7 @@ export default function MobileApp() {
                 disabled={isExecutingPayment}
                 className="w-full h-10 rounded-full bg-transparent hover:bg-white/5 text-[#8E91A5] hover:text-white text-xs font-semibold transition-all cursor-pointer flex items-center justify-center disabled:opacity-40"
               >
-                Modificar datos de envío
+                {language === 'en' ? 'Edit transfer details' : 'Modificar datos de envío'}
               </button>
             </div>
           </div>
@@ -3296,19 +3326,19 @@ export default function MobileApp() {
                   type="button"
                   onClick={() => setSelectedTransactionDetail(null)}
                   className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white cursor-pointer transition-all"
-                  title="Volver"
+                  title={language === 'en' ? 'Back' : 'Volver'}
                 >
                   <ChevronLeftIcon className="w-4 h-4 text-white" />
                 </button>
                 <div>
                   <h3 className="text-sm font-bold text-white leading-tight font-title-base flex items-center gap-1.5">
-                    <span>Detalle de Transacción</span>
+                    <span>{language === 'en' ? 'Transaction Detail' : 'Detalle de Transacción'}</span>
                     <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
-                      Oficial
+                      {language === 'en' ? 'Official' : 'Oficial'}
                     </span>
                   </h3>
                   <p className="text-[10px] text-on-surface-variant">
-                    Comprobante Electrónico KIN • Banxico
+                    {language === 'en' ? 'KIN Electronic Receipt • Banxico' : 'Comprobante Electrónico KIN • Banxico'}
                   </p>
                 </div>
               </div>
@@ -3328,7 +3358,9 @@ export default function MobileApp() {
                 {/* Badge de Estatus */}
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[11px] font-bold text-[#2ED5A4]">
                   <span className="w-2 h-2 rounded-full bg-[#2ED5A4] animate-pulse" />
-                  <span>{selectedTransactionDetail.status || 'Completado'} • Fondos Entregados</span>
+                  <span>
+                    {(selectedTransactionDetail.status || (language === 'en' ? 'Completed' : 'Completado')) + ' • ' + (language === 'en' ? 'Funds Delivered' : 'Fondos Entregados')}
+                  </span>
                 </div>
 
                 {/* Importe en USD */}
@@ -3365,28 +3397,30 @@ export default function MobileApp() {
                       </div>
                       <div>
                         <span className="text-[10px] font-black tracking-wider uppercase text-[#2ED5A4] block">
-                          Clave Oficial de Retiro en Efectivo
+                          {language === 'en' ? 'Official Cash Withdrawal PIN' : 'Clave Oficial de Retiro en Efectivo'}
                         </span>
                         <p className="text-xs font-bold text-white">
-                          Cobro en ventanilla: {selectedTransactionDetail.pickupStore || 'OXXO'}
+                          {language === 'en'
+                            ? `Window pickup: ${selectedTransactionDetail.pickupStore || 'OXXO'}`
+                            : `Cobro en ventanilla: ${selectedTransactionDetail.pickupStore || 'OXXO'}`}
                         </p>
                       </div>
                     </div>
                     <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 border border-[#2ED5A4]/40 text-[10px] font-black text-[#2ED5A4] tracking-wider uppercase">
-                      LISTA EN CAJA
+                      {language === 'en' ? 'READY AT COUNTER' : 'LISTA EN CAJA'}
                     </span>
                   </div>
 
                   {/* Clave de Retiro PIN */}
                   <div className="py-2.5 px-3 bg-black/60 rounded-2xl border border-[#2ED5A4]/40 text-center">
                     <div className="text-[10px] text-[#8E91A5] font-semibold mb-0.5 tracking-wider uppercase">
-                      Código de Retiro Único (PIN)
+                      {language === 'en' ? 'Unique Withdrawal Code (PIN)' : 'Código de Retiro Único (PIN)'}
                     </div>
                     <div className="text-3xl font-black font-financial-mono text-[#2ED5A4] tracking-widest select-all">
                       {selectedTransactionDetail.claveRetiroEfectivo}
                     </div>
                     <div className="text-[10px] text-on-surface-variant mt-0.5 font-medium">
-                      Vigencia: 30 días • Sin costo adicional para el beneficiario
+                      {language === 'en' ? 'Valid for 30 days • No additional fee for recipient' : 'Vigencia: 30 días • Sin costo adicional para el beneficiario'}
                     </div>
                   </div>
 
@@ -3406,22 +3440,27 @@ export default function MobileApp() {
                       {copiedDetailPin ? (
                         <>
                           <CheckCircleIcon className="w-4 h-4 text-[#2ED5A4]" />
-                          <span className="text-[#2ED5A4]">¡Clave Copiada!</span>
+                          <span className="text-[#2ED5A4]">{language === 'en' ? 'PIN Copied!' : '¡Clave Copiada!'}</span>
                         </>
                       ) : (
                         <>
                           <CopyIcon className="w-4 h-4 text-white" />
-                          <span>Copiar Clave</span>
+                          <span>{language === 'en' ? 'Copy PIN' : 'Copiar Clave'}</span>
                         </>
                       )}
                     </button>
 
                     <a
                       href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                        `¡Hola ${selectedTransactionDetail.nombreBeneficiario || 'familiar'}! 💵 Te comparto los datos de tu cobro por KIN de $${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN.\n\n` +
-                        `📍 Retiro en ventanilla en cualquier sucursal ${selectedTransactionDetail.pickupStore || 'OXXO'} de México.\n\n` +
-                        `🔑 CLAVE DE RETIRO: ${selectedTransactionDetail.claveRetiroEfectivo}\n\n` +
-                        `Solo acude a caja, menciona cobro de remesa KIN y presenta tu identificación oficial vigente (INE o Pasaporte). ¡Listo!`
+                        language === 'en'
+                          ? `Hello ${selectedTransactionDetail.nombreBeneficiario || 'family member'}! 💵 Here are the details for your KIN cash pickup of $${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN.\n\n` +
+                            `📍 Counter pickup at any ${selectedTransactionDetail.pickupStore || 'OXXO'} in Mexico.\n\n` +
+                            `🔑 WITHDRAWAL PIN: ${selectedTransactionDetail.claveRetiroEfectivo}\n\n` +
+                            `Just visit the cash counter, mention KIN remittance pickup, and show your valid official ID (INE or Passport). Done!`
+                          : `¡Hola ${selectedTransactionDetail.nombreBeneficiario || 'familiar'}! 💵 Te comparto los datos de tu cobro por KIN de $${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN.\n\n` +
+                            `📍 Retiro en ventanilla en cualquier sucursal ${selectedTransactionDetail.pickupStore || 'OXXO'} de México.\n\n` +
+                            `🔑 CLAVE DE RETIRO: ${selectedTransactionDetail.claveRetiroEfectivo}\n\n` +
+                            `Solo acude a caja, menciona cobro de remesa KIN y presenta tu identificación oficial vigente (INE o Pasaporte). ¡Listo!`
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -3436,12 +3475,12 @@ export default function MobileApp() {
                   <div className="bg-black/30 rounded-2xl p-2.5 border border-white/5 space-y-1 text-[10.5px] text-[#A6A9BC]">
                     <div className="font-bold text-white text-[10.5px] flex items-center gap-1">
                       <span className="material-symbols-outlined text-[13px] text-[#2ED5A4]">storefront</span>
-                      Pasos para cobrar en ventanilla:
+                      {language === 'en' ? 'Steps to collect at counter:' : 'Pasos para cobrar en ventanilla:'}
                     </div>
                     <ol className="list-decimal list-inside space-y-0.5 pl-0.5">
-                      <li>Acudir a cualquier sucursal <strong>{selectedTransactionDetail.pickupStore || 'OXXO'}</strong> en México.</li>
-                      <li>Solicitar en caja el <strong>cobro de remesa KIN</strong>.</li>
-                      <li>Presentar <strong>INE vigente</strong> y la Clave: <strong className="text-[#2ED5A4] font-mono">{selectedTransactionDetail.claveRetiroEfectivo}</strong>.</li>
+                      <li>{language === 'en' ? <>Go to any <strong>{selectedTransactionDetail.pickupStore || 'OXXO'}</strong> location in Mexico.</> : <>Acudir a cualquier sucursal <strong>{selectedTransactionDetail.pickupStore || 'OXXO'}</strong> en México.</>}</li>
+                      <li>{language === 'en' ? <>Ask at the counter for <strong>KIN remittance collection</strong>.</> : <>Solicitar en caja el <strong>cobro de remesa KIN</strong>.</>}</li>
+                      <li>{language === 'en' ? <>Present <strong>valid ID</strong> and PIN: <strong className="text-[#2ED5A4] font-mono">{selectedTransactionDetail.claveRetiroEfectivo}</strong>.</> : <>Presentar <strong>INE vigente</strong> y la Clave: <strong className="text-[#2ED5A4] font-mono">{selectedTransactionDetail.claveRetiroEfectivo}</strong>.</>}</li>
                     </ol>
                   </div>
                 </div>
@@ -3453,7 +3492,7 @@ export default function MobileApp() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[#8E91A5] font-medium flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[15px] text-[#2ED5A4]">verified_user</span>
-                      Clave de Rastreo Banxico (CEP)
+                      {language === 'en' ? 'Banxico Tracking Code (CEP)' : 'Clave de Rastreo Banxico (CEP)'}
                     </span>
                     <button
                       type="button"
@@ -3466,7 +3505,7 @@ export default function MobileApp() {
                       }}
                       className="flex items-center gap-1 text-xs text-[#2ED5A4] hover:underline font-semibold cursor-pointer"
                     >
-                      <span>{copiedDetailTracking ? '¡Copiado!' : 'Copiar CEP'}</span>
+                      <span>{copiedDetailTracking ? (language === 'en' ? 'Copied!' : '¡Copiado!') : (language === 'en' ? 'Copy CEP' : 'Copiar CEP')}</span>
                       <CopyIcon className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -3474,7 +3513,9 @@ export default function MobileApp() {
                     {selectedTransactionDetail.claveRastreoBanxico}
                   </div>
                   <p className="text-[10px] text-[#8E91A5]">
-                    Transferencia SPEI interbancaria verificable en el portal de Banco de México.
+                    {language === 'en'
+                      ? 'SPEI interbank transfer verifiable on the Banco de México portal.'
+                      : 'Transferencia SPEI interbancaria verificable en el portal de Banco de México.'}
                   </p>
                 </div>
               )}
@@ -3484,37 +3525,39 @@ export default function MobileApp() {
                 <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-primary">receipt_long</span>
-                    Desglose de la Transacción
+                    {language === 'en' ? 'Transaction Breakdown' : 'Desglose de la Transacción'}
                   </span>
-                  <span className="text-[10px] text-[#2ED5A4] font-extrabold uppercase">Transparencia Total</span>
+                  <span className="text-[10px] text-[#2ED5A4] font-extrabold uppercase">
+                    {language === 'en' ? 'Total Transparency' : 'Transparencia Total'}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Monto de la Operación</span>
+                  <span>{language === 'en' ? 'Operation Amount' : 'Monto de la Operación'}</span>
                   <span className="text-white font-mono font-bold">
                     ${(Math.abs(selectedTransactionDetail.amount) - (selectedTransactionDetail.feeUSD || 0)).toFixed(2)} USD
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Tipo de cambio aplicado</span>
+                  <span>{language === 'en' ? 'Applied exchange rate' : 'Tipo de cambio aplicado'}</span>
                   <span className="text-white font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Monto recibido en México</span>
+                  <span>{language === 'en' ? 'Amount received in Mexico' : 'Monto recibido en México'}</span>
                   <span className="text-[#2ED5A4] font-extrabold font-financial-mono">
                     ${(selectedTransactionDetail.amountMXN || (Math.abs(selectedTransactionDetail.amount) * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Tarifa por transferencia KIN</span>
-                  <span className="text-[#2ED5A4] font-bold">GRATIS ($0.00 USD)</span>
+                  <span>{language === 'en' ? 'KIN transfer fee' : 'Tarifa por transferencia KIN'}</span>
+                  <span className="text-[#2ED5A4] font-bold">{language === 'en' ? 'FREE ($0.00 USD)' : 'GRATIS ($0.00 USD)'}</span>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Comisión método de pago</span>
+                  <span>{language === 'en' ? 'Payment method fee' : 'Comisión método de pago'}</span>
                   {selectedTransactionDetail.feeUSD && selectedTransactionDetail.feeUSD > 0 ? (
                     <span className="text-amber-400 font-mono font-semibold">+${selectedTransactionDetail.feeUSD.toFixed(2)} USD</span>
                   ) : (
@@ -3523,13 +3566,13 @@ export default function MobileApp() {
                 </div>
 
                 <div className="flex items-center justify-between text-[#A6A9BC]">
-                  <span>Comisión por retiro en sucursal</span>
+                  <span>{language === 'en' ? 'Store pickup fee' : 'Comisión por retiro en sucursal'}</span>
                   <span className="text-[#2ED5A4] font-bold">$0.00 USD</span>
                 </div>
 
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                   <span className="font-title-base text-xs text-white font-bold">
-                    Total debitado
+                    {language === 'en' ? 'Total debited' : 'Total debitado'}
                   </span>
                   <span className="text-base font-black font-financial-mono text-white">
                     ${Math.abs(selectedTransactionDetail.amount).toFixed(2)} <span className="text-xs text-[#8E91A5]">USD</span>
@@ -3542,44 +3585,44 @@ export default function MobileApp() {
                 <div className="flex items-center justify-between pb-1 border-b border-white/5">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-primary">person</span>
-                    Información del Destinatario
+                    {language === 'en' ? 'Recipient Information' : 'Información del Destinatario'}
                   </span>
                   <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
-                    Verificado
+                    {language === 'en' ? 'Verified' : 'Verificado'}
                   </span>
                 </div>
 
                 <div className="space-y-1.5 pt-0.5 text-[#A6A9BC]">
                   <div className="flex items-center justify-between">
-                    <span>Nombre:</span>
+                    <span>{language === 'en' ? 'Name:' : 'Nombre:'}</span>
                     <span className="text-white font-bold">
                       {capitalizeWords(selectedTransactionDetail.nombreBeneficiario || selectedTransactionDetail.title)}
                     </span>
                   </div>
                   {selectedTransactionDetail.recipientPhone && (
                     <div className="flex items-center justify-between">
-                      <span>Teléfono:</span>
+                      <span>{language === 'en' ? 'Phone:' : 'Teléfono:'}</span>
                       <span className="text-primary font-mono">{selectedTransactionDetail.recipientPhone}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between">
-                    <span>Destino:</span>
+                    <span>{language === 'en' ? 'Destination:' : 'Destino:'}</span>
                     <span className="text-white font-medium">
                       {selectedTransactionDetail.pickupStore
-                        ? `Retiro en Efectivo (${selectedTransactionDetail.pickupStore})`
+                        ? (language === 'en' ? `Cash Pickup (${selectedTransactionDetail.pickupStore})` : `Retiro en Efectivo (${selectedTransactionDetail.pickupStore})`)
                         : selectedTransactionDetail.bancoDestino || selectedTransactionDetail.category}
                     </span>
                   </div>
                   {selectedTransactionDetail.cuentaBeneficiario && (
                     <div className="flex items-center justify-between">
-                      <span>Cuenta / CLABE:</span>
+                      <span>{language === 'en' ? 'Account / CLABE:' : 'Cuenta / CLABE:'}</span>
                       <span className="text-white font-mono">•••• {selectedTransactionDetail.cuentaBeneficiario.slice(-4)}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between">
-                    <span>Método de Pago:</span>
+                    <span>{language === 'en' ? 'Payment Method:' : 'Método de Pago:'}</span>
                     <span className="text-white font-medium">
-                      {selectedTransactionDetail.paymentMethod || 'Balance KIN / Débito'}
+                      {selectedTransactionDetail.paymentMethod || (language === 'en' ? 'KIN Balance / Debit' : 'Balance KIN / Débito')}
                     </span>
                   </div>
                 </div>
@@ -3588,7 +3631,9 @@ export default function MobileApp() {
               {/* Tarjeta: Folio y Auditoría Criptográfica */}
               <div className="p-3 rounded-2xl bg-[#181928] border border-white/10 flex items-center justify-between text-xs">
                 <div>
-                  <span className="text-[10px] text-[#8E91A5] block">Folio de Rastreo KIN</span>
+                  <span className="text-[10px] text-[#8E91A5] block">
+                    {language === 'en' ? 'KIN Tracking ID' : 'Folio de Rastreo KIN'}
+                  </span>
                   <span className="font-mono font-bold text-white text-xs">
                     {selectedTransactionDetail.refNumber || selectedTransactionDetail.id}
                   </span>
@@ -3603,7 +3648,7 @@ export default function MobileApp() {
                   }}
                   className="flex items-center gap-1 text-xs text-[#2ED5A4] hover:underline font-semibold cursor-pointer"
                 >
-                  <span>{copiedDetailRef ? '¡Copiado!' : 'Copiar Folio'}</span>
+                  <span>{copiedDetailRef ? (language === 'en' ? 'Copied!' : '¡Copiado!') : (language === 'en' ? 'Copy ID' : 'Copiar Folio')}</span>
                   <CopyIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -3612,7 +3657,7 @@ export default function MobileApp() {
               <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/10 space-y-2 text-xs">
                 <span className="font-bold text-white flex items-center gap-1.5 pb-1 border-b border-white/5">
                   <span className="material-symbols-outlined text-[16px] text-primary">timeline</span>
-                  Trazabilidad de la Operación
+                  {language === 'en' ? 'Transaction Traceability' : 'Trazabilidad de la Operación'}
                 </span>
 
                 <div className="space-y-2.5 pt-1 pl-1">
@@ -3621,7 +3666,9 @@ export default function MobileApp() {
                       ✓
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">Solicitud creada y autorizada</p>
+                      <p className="text-xs font-bold text-white">
+                        {language === 'en' ? 'Request created & authorized' : 'Solicitud creada y autorizada'}
+                      </p>
                       <p className="text-[10px] text-[#8E91A5]">{selectedTransactionDetail.time}</p>
                     </div>
                   </div>
@@ -3631,8 +3678,12 @@ export default function MobileApp() {
                       ✓
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">Validación regulatoria y fondos asegurados</p>
-                      <p className="text-[10px] text-[#8E91A5]">Filtros AML/PLD CNBV y FinCEN aprobados</p>
+                      <p className="text-xs font-bold text-white">
+                        {language === 'en' ? 'Regulatory validation & funds secured' : 'Validación regulatoria y fondos asegurados'}
+                      </p>
+                      <p className="text-[10px] text-[#8E91A5]">
+                        {language === 'en' ? 'AML/CTF CNBV and FinCEN checks approved' : 'Filtros AML/PLD CNBV y FinCEN aprobados'}
+                      </p>
                     </div>
                   </div>
 
@@ -3643,13 +3694,13 @@ export default function MobileApp() {
                     <div>
                       <p className="text-xs font-bold text-white">
                         {selectedTransactionDetail.claveRetiroEfectivo
-                          ? 'Clave de retiro generada para ventanilla'
-                          : 'Riel Banxico SPEI conectado'}
+                          ? (language === 'en' ? 'Cash withdrawal code generated for counter' : 'Clave de retiro generada para ventanilla')
+                          : (language === 'en' ? 'Banxico SPEI rail connected' : 'Riel Banxico SPEI conectado')}
                       </p>
                       <p className="text-[10px] text-[#8E91A5]">
                         {selectedTransactionDetail.claveRetiroEfectivo
-                          ? `PIN emitido para cobro en ${selectedTransactionDetail.pickupStore || 'sucursal'}`
-                          : 'Comprobante Electrónico CEP registrado'}
+                          ? (language === 'en' ? `PIN issued for pickup at ${selectedTransactionDetail.pickupStore || 'branch'}` : `PIN emitido para cobro en ${selectedTransactionDetail.pickupStore || 'sucursal'}`)
+                          : (language === 'en' ? 'Electronic CEP receipt recorded' : 'Comprobante Electrónico CEP registrado')}
                       </p>
                     </div>
                   </div>
@@ -3659,8 +3710,12 @@ export default function MobileApp() {
                       ✓
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-[#2ED5A4]">Fondos entregados / disponibles</p>
-                      <p className="text-[10px] text-on-surface-variant">Listo para retiro o acreditado en cuenta</p>
+                      <p className="text-xs font-bold text-[#2ED5A4]">
+                        {language === 'en' ? 'Funds delivered / available' : 'Fondos entregados / disponibles'}
+                      </p>
+                      <p className="text-[10px] text-on-surface-variant">
+                        {language === 'en' ? 'Ready for pickup or credited to account' : 'Listo para retiro o acreditado en cuenta'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -3670,7 +3725,9 @@ export default function MobileApp() {
               <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-[10px] text-[#8E91A5]">
                 <ShieldCheckIcon className="w-4 h-4 text-[#2ED5A4] flex-shrink-0" />
                 <span>
-                  Comprobante digital verificado con firma criptográfica KIN. Auditado bajo normativas CNBV, Banxico y SAT.
+                  {language === 'en'
+                    ? 'Digital receipt cryptographically verified with KIN signature. Audited under CNBV, Banxico, and SAT regulations.'
+                    : 'Comprobante digital verificado con firma criptográfica KIN. Auditado bajo normativas CNBV, Banxico y SAT.'}
                 </span>
               </div>
             </div>
@@ -3680,11 +3737,11 @@ export default function MobileApp() {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => alert(`Descargando comprobante PDF encriptado del movimiento ${selectedTransactionDetail.refNumber || selectedTransactionDetail.id}...`)}
+                  onClick={() => alert(language === 'en' ? `Downloading encrypted PDF receipt for transaction ${selectedTransactionDetail.refNumber || selectedTransactionDetail.id}...` : `Descargando comprobante PDF encriptado del movimiento ${selectedTransactionDetail.refNumber || selectedTransactionDetail.id}...`)}
                   className="h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.98]"
                 >
                   <DownloadIcon className="w-4 h-4 text-[#2ED5A4]" />
-                  <span>Descargar PDF</span>
+                  <span>{language === 'en' ? 'Download PDF' : 'Descargar PDF'}</span>
                 </button>
 
                 <button
@@ -3695,13 +3752,13 @@ export default function MobileApp() {
                       navigator.share({ title: 'Comprobante KIN', text }).catch(() => {});
                     } else {
                       navigator.clipboard?.writeText(text);
-                      alert('Resumen del comprobante copiado al portapapeles');
+                      alert(language === 'en' ? 'Receipt summary copied to clipboard' : 'Resumen del comprobante copiado al portapapeles');
                     }
                   }}
                   className="h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.98]"
                 >
                   <ShareReceiptIcon className="w-4 h-4 text-[#2ED5A4]" />
-                  <span>Compartir</span>
+                  <span>{language === 'en' ? 'Share' : 'Compartir'}</span>
                 </button>
               </div>
 
@@ -3710,7 +3767,7 @@ export default function MobileApp() {
                 onClick={() => setSelectedTransactionDetail(null)}
                 className="w-full h-11 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center active:scale-[0.98]"
               >
-                Cerrar Detalle
+                {language === 'en' ? 'Close Details' : 'Cerrar Detalle'}
               </button>
             </div>
           </div>

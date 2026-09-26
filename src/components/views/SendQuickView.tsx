@@ -44,6 +44,8 @@ export function SendQuickView({
   language,
   currencyPref,
 }: SendQuickViewProps) {
+  const isEn = language === 'en';
+
   return (
     <div className="animate-fade-in space-y-4 pb-28">
       {/* Native Mobile Header: < | Send Quick | Info */}
@@ -52,30 +54,34 @@ export function SendQuickView({
           type="button"
           onClick={onBack}
           className="btn-circle"
-          title="Volver a Home"
+          title={isEn ? 'Back to home' : 'Volver a Home'}
         >
           <ChevronLeftIcon className="w-5 h-5 text-white" />
         </button>
         <div className="text-center">
           <div className="flex items-center justify-center gap-1.5">
-            <span className="text-sm font-bold text-white tracking-wide">Send Quick</span>
+            <span className="text-sm font-bold text-white tracking-wide">
+              {isEn ? 'Send Quick' : 'Envío Rápido'}
+            </span>
             <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] text-[10px] font-black tracking-wider">
               ⚡ 1-TAP
             </span>
           </div>
           <span className="text-[10px] text-[#8E91A5] block">
-            Envío SPEI ultrarrápido sin pasos innecesarios
+            {isEn ? 'Ultra-fast SPEI transfer with zero unnecessary steps' : 'Envío SPEI ultrarrápido sin pasos innecesarios'}
           </span>
         </div>
         <button
           type="button"
           onClick={() =>
             alert(
-              'Send Quick te permite enviar dinero a tus destinatarios frecuentes con 1 solo toque, con acreditación instantánea en México vía SPEI Banxico.'
+              isEn
+                ? 'Send Quick lets you send money to your frequent recipients in 1 tap, with instant settlement in Mexico via SPEI Banxico.'
+                : 'Send Quick te permite enviar dinero a tus destinatarios frecuentes con 1 solo toque, con acreditación instantánea en México vía SPEI Banxico.'
             )
           }
           className="btn-circle"
-          title="Información"
+          title={isEn ? 'Information' : 'Información'}
         >
           <span className="text-xs font-bold text-white">ℹ️</span>
         </button>
@@ -85,11 +91,11 @@ export function SendQuickView({
       <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-bold text-[#8E91A5] uppercase tracking-wider">
-            Destinatario Frecuente
+            {isEn ? 'Frequent Recipient' : 'Destinatario Frecuente'}
           </span>
           <span className="text-[10px] text-[#2ED5A4] font-semibold flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
-            SPEI Activo
+            {isEn ? 'SPEI Active' : 'SPEI Activo'}
           </span>
         </div>
 
@@ -103,11 +109,15 @@ export function SendQuickView({
               <span className="material-symbols-outlined text-[24px]">person_add</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">Sin contactos registrados</p>
-              <p className="text-xs text-[#8E91A5] truncate">Toca aquí para agregar a tu familia en México</p>
+              <p className="text-sm font-bold text-white truncate">
+                {isEn ? 'No contacts saved' : 'Sin contactos registrados'}
+              </p>
+              <p className="text-xs text-[#8E91A5] truncate">
+                {isEn ? 'Tap here to add your family in Mexico' : 'Toca aquí para agregar a tu familia en México'}
+              </p>
             </div>
             <span className="px-3 py-1.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] text-xs font-bold border border-[#2ED5A4]/20 flex-shrink-0">
-              + Agregar
+              {isEn ? '+ Add' : '+ Agregar'}
             </span>
           </div>
         ) : (
@@ -158,7 +168,7 @@ export function SendQuickView({
                 <div className="w-10 h-10 rounded-full bg-[#202236] flex items-center justify-center text-[#2ED5A4]">
                   <span className="material-symbols-outlined text-[20px]">add</span>
                 </div>
-                <span className="text-[10px] font-bold">Nuevo</span>
+                <span className="text-[10px] font-bold">{isEn ? 'New' : 'Nuevo'}</span>
               </button>
             </div>
 
@@ -185,13 +195,13 @@ export function SendQuickView({
                           </div>
                         )}
                         <p className="text-[10px] text-white/90 truncate">
-                          {currentRecipient.bank || 'Cuenta Bancaria SPEI'} • CLABE verificada
+                          {currentRecipient.bank || (isEn ? 'SPEI Bank Account' : 'Cuenta Bancaria SPEI')} • {isEn ? 'Verified CLABE' : 'CLABE verificada'}
                         </p>
                       </div>
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] text-[10px] font-bold border border-[#2ED5A4]/20 flex-shrink-0">
-                    ✓ Listo
+                    {isEn ? '✓ Ready' : '✓ Listo'}
                   </span>
                 </div>
               );
@@ -203,7 +213,7 @@ export function SendQuickView({
       {/* 2. Hero Amount Card (Gran Tipografía Móvil & Chips) */}
       <div className="p-5 rounded-3xl bg-[#181928] border border-white/5 space-y-4 shadow-lg text-center">
         <span className="text-[11px] font-bold text-[#8E91A5] uppercase tracking-wider block">
-          Monto del Envío Rápido
+          {isEn ? 'Quick Send Amount' : 'Monto del Envío Rápido'}
         </span>
 
         {/* Display Gigante del Monto (Acceso directo al teclado numérico nativo del celular) */}
@@ -231,14 +241,14 @@ export function SendQuickView({
                 type="button"
                 onClick={() => setSendQuickAmount('0')}
                 className="ml-1 text-on-surface-variant hover:text-white text-xs px-2.5 py-1.5 rounded-full bg-surface-container-high border border-white/10 shrink-0 cursor-pointer active:scale-95 transition-all"
-                title="Borrar a cero"
+                title={isEn ? 'Clear to zero' : 'Borrar a cero'}
               >
                 ✕
               </button>
             )}
           </div>
           <p className="text-[11px] text-[#8E91A5] font-medium text-center mt-1">
-            Toca la cantidad para escribir con el teclado de tu teléfono
+            {isEn ? 'Tap the amount to type with your phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
         </div>
 
@@ -252,7 +262,7 @@ export function SendQuickView({
             MXN
           </span>
           <span className="text-[10px] text-white/60">|</span>
-          <span className="text-[10px] text-[#2ED5A4] font-semibold">1 USD = $20.45 MXN</span>
+          <span className="text-[10px] text-[#2ED5A4] font-semibold">1 USD = ${USD_TO_MXN_RATE.toFixed(2)} MXN</span>
         </div>
 
         {/* 4 Chips de Monto Ergonómicos (Touch Targets de 52px) */}
@@ -277,18 +287,18 @@ export function SendQuickView({
       {/* 3. Beneficios SPEI / Fuente de Fondos */}
       <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-2.5 text-xs">
         <div className="flex items-center justify-between text-[#8E91A5]">
-          <span>Origen de fondos:</span>
+          <span>{isEn ? 'Funding source:' : 'Origen de fondos:'}</span>
           <span className="font-bold text-white flex items-center gap-1">
             <span>🟢</span> KIN Digital Wallet (${netBalance.toFixed(2)} USD)
           </span>
         </div>
         <div className="flex items-center justify-between text-[#8E91A5]">
-          <span>Comisión de transferencia:</span>
-          <span className="font-bold text-[#2ED5A4]">GRATIS ($0.00 USD)</span>
+          <span>{isEn ? 'Transfer fee:' : 'Comisión de transferencia:'}</span>
+          <span className="font-bold text-[#2ED5A4]">{isEn ? 'FREE ($0.00 USD)' : 'GRATIS ($0.00 USD)'}</span>
         </div>
         <div className="flex items-center justify-between text-[#8E91A5]">
-          <span>Tiempo de acreditación:</span>
-          <span className="font-bold text-white">⚡ Menos de 30 segundos</span>
+          <span>{isEn ? 'Estimated delivery time:' : 'Tiempo de acreditación:'}</span>
+          <span className="font-bold text-white">{isEn ? '⚡ Less than 30 seconds' : '⚡ Menos de 30 segundos'}</span>
         </div>
       </div>
 
@@ -303,8 +313,8 @@ export function SendQuickView({
             <span className="material-symbols-outlined text-[18px]">bolt</span>
             <span>
               {contactsList.length > 0
-                ? `${language === 'en' ? 'Send to' : 'Enviar a'} ${(contactsList[sendQuickSelectedRecipient] || contactsList[0]).name.split(' ')[0]}`
-                : language === 'en'
+                ? `${isEn ? 'Send to' : 'Enviar a'} ${(contactsList[sendQuickSelectedRecipient] || contactsList[0]).name.split(' ')[0]}`
+                : isEn
                   ? 'Add Recipient'
                   : 'Agregar Destinatario'}
             </span>

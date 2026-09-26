@@ -463,16 +463,16 @@ export function ProfileView({
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-title-base text-title-base text-white truncate">
-                Idioma / Language
+                {isEn ? 'Language' : 'Idioma'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
-                {isEn ? 'English (US) • 🇺🇸 Active' : 'Español (México) • 🇲🇽 Seleccionado'}
+                {isEn ? 'English (US) • Active' : 'Español (México) • Activo'}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-on-surface-variant">
             <span className="font-caption-sm text-[12px] text-white font-bold">
-              {isEn ? '🇺🇸 EN' : '🇲🇽 ES'}
+              {isEn ? 'EN' : 'ES'}
             </span>
             <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-on-surface-variant">
               chevron_right

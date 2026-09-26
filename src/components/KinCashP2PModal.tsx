@@ -137,6 +137,7 @@ export interface KinCashP2PModalProps {
   draftNote?: string;
   onDraftNoteChange?: (note: string) => void;
   onClearDraft?: () => void;
+  language?: 'es' | 'en';
 }
 
 export function KinCashP2PModal({
@@ -158,7 +159,9 @@ export function KinCashP2PModal({
   draftNote,
   onDraftNoteChange,
   onClearDraft,
+  language = 'es',
 }: KinCashP2PModalProps) {
+  const isEn = language === 'en';
   // Inicialización resiliente con persistencia en localStorage y props controladas
   const [currentAmount, setCurrentAmount] = useState<string>(() => {
     if (draftAmount !== undefined && draftAmount !== '') return draftAmount;
@@ -503,11 +506,13 @@ export function KinCashP2PModal({
             <div className="flex items-center gap-1.5">
               <span className="font-title-base text-title-base text-white">KIN Cash Express</span>
               <span className="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-caps text-[10px] tracking-wider uppercase font-bold">
-                Zero-Fee
+                {isEn ? 'Zero-Fee' : 'Sin Comisión'}
               </span>
             </div>
             <p className="font-caption-sm text-caption-sm text-on-surface-variant mt-0.5 leading-snug">
-              Instant Zero-Fee P2P Transits across USA &amp; Mexico via KIN Phone or Handle ($kinhandle)
+              {isEn
+                ? 'Instant Zero-Fee P2P Transits across USA & Mexico via KIN Phone or Handle ($kinhandle)'
+                : 'Envíos P2P inmediatos y sin comisiones entre USA y México con teléfono o usuario ($kinhandle)'}
             </p>
           </div>
         </div>
@@ -524,10 +529,12 @@ export function KinCashP2PModal({
               </span>
               <div className="flex flex-col min-w-0">
                 <span className="text-white font-semibold text-[11px] truncate">
-                  Borrador guardado automáticamente
+                  {isEn ? 'Draft saved automatically' : 'Borrador guardado automáticamente'}
                 </span>
                 <span className="text-primary text-[10px] font-medium truncate">
-                  {selectedContact ? `Envío para ${selectedContact.name || selectedContact.fullName}` : 'Destinatario pendiente'} {numAmount > 0 ? `• $${numAmount} USD` : ''}
+                  {selectedContact
+                    ? (isEn ? `Transfer for ${selectedContact.name || selectedContact.fullName}` : `Envío para ${selectedContact.name || selectedContact.fullName}`)
+                    : (isEn ? 'Pending recipient' : 'Destinatario pendiente')} {numAmount > 0 ? `• $${numAmount} USD` : ''}
                 </span>
               </div>
             </div>
@@ -535,16 +542,16 @@ export function KinCashP2PModal({
               type="button"
               onClick={handleClearDraft}
               className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
-              title="Descartar borrador y empezar de nuevo"
+              title={isEn ? 'Discard draft and start over' : 'Descartar borrador y empezar de nuevo'}
             >
-              <span>✕ Limpiar</span>
+              <span>{isEn ? '✕ Clear' : '✕ Limpiar'}</span>
             </button>
           </div>
         )}
 
         <div className="flex items-center justify-between">
           <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
-            Recipient
+            {isEn ? 'Recipient' : 'Destinatario'}
           </span>
           <button
             type="button"
@@ -552,7 +559,7 @@ export function KinCashP2PModal({
             className="flex items-center gap-1 text-primary font-caption-sm text-caption-sm active:opacity-75 transition-opacity cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">contacts</span>
-            <span>Recent ({contacts.length})</span>
+            <span>{isEn ? `Recent (${contacts.length})` : `Recientes (${contacts.length})`}</span>
           </button>
         </div>
 
@@ -567,7 +574,7 @@ export function KinCashP2PModal({
           <input
             className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-lowest text-white font-body-base text-body-medium placeholder:text-outline focus:outline-none focus:bg-surface-container-high transition-all border border-white/5 cursor-pointer"
             id="recipientSearch"
-            placeholder="Buscar por nombre o teléfono en tu agenda..."
+            placeholder={isEn ? 'Search by name or phone in contacts...' : 'Buscar por nombre o teléfono en tu agenda...'}
             type="text"
             readOnly
             value={selectedContact ? (selectedContact.fullName || selectedContact.name) : searchQuery}
@@ -579,7 +586,7 @@ export function KinCashP2PModal({
               setShowContactPicker(true);
             }}
             className="material-symbols-outlined absolute right-3 text-primary text-[20px] hover:scale-110 transition-transform cursor-pointer"
-            title="Abrir agenda de contactos"
+            title={isEn ? 'Open contacts address book' : 'Abrir agenda de contactos'}
           >
             contacts
           </button>
@@ -622,7 +629,7 @@ export function KinCashP2PModal({
                 </span>
                 {!selectedContact.phone && (
                   <span className="text-[10px] text-red-400 font-bold bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-full mt-0.5 w-fit flex items-center gap-1">
-                    <span>⚠️ Falta teléfono para KIN Cash</span>
+                    <span>{isEn ? '⚠️ Phone number missing for KIN Cash' : '⚠️ Falta teléfono para KIN Cash'}</span>
                   </span>
                 )}
                 <div className="flex items-center gap-1.5 mt-0.5">
@@ -640,10 +647,12 @@ export function KinCashP2PModal({
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="font-title-base text-title-base text-white font-semibold">
-                  {searchQuery.trim() ? searchQuery.trim() : 'Seleccionar destinatario'}
+                  {searchQuery.trim() ? searchQuery.trim() : (isEn ? 'Select recipient' : 'Seleccionar destinatario')}
                 </span>
                 <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {searchQuery.trim() ? 'Destinatario directo KIN Cash' : 'Toca para elegir de tus contactos o escribe arriba'}
+                  {searchQuery.trim()
+                    ? (isEn ? 'Direct KIN Cash recipient' : 'Destinatario directo KIN Cash')
+                    : (isEn ? 'Tap to choose from contacts or type above' : 'Toca para elegir de tus contactos o escribe arriba')}
                 </span>
               </div>
             </div>
@@ -661,7 +670,7 @@ export function KinCashP2PModal({
       <div className="flex flex-col items-center justify-center pt-2 pb-1 relative">
         <div className="flex items-center gap-2 mb-1">
           <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-caption-sm text-caption-sm font-medium">
-            USD Transit Balance: ${Number(userBalanceUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {isEn ? 'USD Transit Balance:' : 'Saldo de Tránsito USD:'} ${Number(userBalanceUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
 
@@ -689,14 +698,14 @@ export function KinCashP2PModal({
                 type="button"
                 onClick={clearAmount}
                 className="ml-1 text-on-surface-variant hover:text-white text-xs px-2.5 py-1.5 rounded-full bg-surface-container-high border border-white/10 cursor-pointer active:scale-90 transition-all"
-                title="Borrar monto a cero"
+                title={isEn ? 'Clear amount to zero' : 'Borrar monto a cero'}
               >
-                Borrar
+                {isEn ? 'Clear' : 'Borrar'}
               </button>
             )}
           </div>
           <p className="text-[11px] text-[#8E91A5] font-medium text-center mt-1">
-            Toca la cantidad para escribir con el teclado de tu teléfono
+            {isEn ? 'Tap amount to type with phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
         </div>
 
@@ -707,7 +716,9 @@ export function KinCashP2PModal({
             ≈ ${Number(mxnEquivalent).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
           </span>
           <span className="text-outline text-[12px]">•</span>
-          <span className="font-caption-sm text-caption-sm text-white font-medium">Zero Fees</span>
+          <span className="font-caption-sm text-caption-sm text-white font-medium">
+            {isEn ? 'Zero Fees' : 'Sin Comisión'}
+          </span>
         </div>
 
         {/* Transfer Concept Note Chip (Editable) */}
@@ -715,7 +726,7 @@ export function KinCashP2PModal({
           <span className="text-[14px]">🛒</span>
           <input
             className="bg-transparent border-none text-white font-caption-sm text-caption-sm focus:outline-none w-56 text-center truncate"
-            placeholder="Concepto de pago..."
+            placeholder={isEn ? 'Payment note...' : 'Concepto de pago...'}
             type="text"
             value={conceptNote}
             onChange={(e) => setConceptNote(e.target.value)}
@@ -743,7 +754,7 @@ export function KinCashP2PModal({
             type="button"
             onClick={clearAmount}
             className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-on-surface-variant hover:text-white bg-white/5 border border-white/10 cursor-pointer active:scale-95"
-            title="Borrar a cero"
+            title={isEn ? 'Clear to zero' : 'Borrar a cero'}
           >
             C
           </button>
@@ -774,10 +785,14 @@ export function KinCashP2PModal({
             }}
           >
             {numAmount <= 0 ? (
-              <span className="text-white/60 text-xs font-semibold">Teclea un monto para enviar</span>
+              <span className="text-white/60 text-xs font-semibold">
+                {isEn ? 'Type an amount to send' : 'Teclea un monto para enviar'}
+              </span>
             ) : (
               <>
-                <span className="text-white font-semibold">Desliza para enviar</span>
+                <span className="text-white font-semibold">
+                  {isEn ? 'Slide to send' : 'Desliza para enviar'}
+                </span>
                 <span className="text-primary font-financial-mono font-bold">
                   ${Number(numAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
@@ -821,7 +836,9 @@ export function KinCashP2PModal({
       <div className="flex items-center justify-center gap-2 py-1 px-3">
         <span className="material-symbols-outlined text-[16px] text-primary">verified_user</span>
         <p className="font-caption-sm text-[11px] text-on-surface-variant text-center font-medium">
-          Secured by Banxico SPEI • Direct Settlement • FDIC-insured partner bank
+          {isEn
+            ? 'Secured by Banxico SPEI • Direct Settlement • FDIC-insured partner bank'
+            : 'Protegido por Banxico SPEI • Liquidación Directa • Banco asegurado por FDIC'}
         </p>
       </div>
 
@@ -832,6 +849,7 @@ export function KinCashP2PModal({
         contacts={contacts}
         familyNetwork={familyNetwork}
         userId={userId}
+        language={language}
         onSelectContact={(contact) => {
           setSelectedContact(contact);
           setShowContactPicker(false);

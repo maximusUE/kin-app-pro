@@ -72,6 +72,7 @@ export function HomeView({
   filteredDashboardTransactions,
   setSelectedTransactionDetail,
 }: HomeViewProps) {
+  const isEn = language === 'en';
   // Estado para el efecto de pila (STACK) estilo notificaciones de Apple
   const [isStackExpanded, setIsStackExpanded] = useState<boolean>(false);
 
@@ -90,10 +91,12 @@ export function HomeView({
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
-              Executive Overview
+              {isEn ? 'Executive Overview' : 'Resumen Ejecutivo'}
             </span>
             <h1 className="font-headline-md text-headline-md text-white flex items-center gap-1.5 mt-0.5">
-              Hola, {userFirstName || (userName ? userName.split(' ')[0] : 'Bienvenido')}
+              {isEn
+                ? `Hello, ${userFirstName || (userName ? userName.split(' ')[0] : 'Welcome')}`
+                : `Hola, ${userFirstName || (userName ? userName.split(' ')[0] : 'Bienvenido')}`}
             </h1>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-md border border-white/5">
@@ -101,11 +104,11 @@ export function HomeView({
             <span className="font-caption-sm text-caption-sm text-[#2ED5A4] font-semibold">
               {userKycTier
                 ? userKycTier.includes('Tier 1')
-                  ? 'Tier-1 Básico'
+                  ? (isEn ? 'Tier-1 Basic' : 'Tier-1 Básico')
                   : userKycTier.includes('Tier 2')
-                  ? 'Tier-2 Verificado'
-                  : 'Tier-3 Avanzado'
-                : 'Tier-2 Verificado'}
+                  ? (isEn ? 'Tier-2 Verified' : 'Tier-2 Verificado')
+                  : (isEn ? 'Tier-3 Advanced' : 'Tier-3 Avanzado')
+                : (isEn ? 'Tier-2 Verified' : 'Tier-2 Verificado')}
             </span>
           </div>
         </div>
@@ -122,7 +125,7 @@ export function HomeView({
               <span className="material-symbols-outlined text-[28px] font-bold">send</span>
             </div>
             <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">
-              SEND
+              {isEn ? 'SEND' : 'ENVIAR'}
             </span>
           </button>
 
@@ -150,7 +153,7 @@ export function HomeView({
               <span className="material-symbols-outlined text-[26px]">touch_app</span>
             </div>
             <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">
-              QUICK SEND
+              {isEn ? 'QUICK SEND' : 'ENVÍO RÁPIDO'}
             </span>
           </button>
 
@@ -164,7 +167,7 @@ export function HomeView({
               <span className="material-symbols-outlined text-[26px]">receipt_long</span>
             </div>
             <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">
-              BILL PAY
+              {isEn ? 'BILL PAY' : 'PAGO SERVICIOS'}
             </span>
           </button>
         </div>
@@ -180,7 +183,9 @@ export function HomeView({
         {/* Cabecera de Recent Activity con selector de visualización / toggle Stack */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="font-title-base text-title-base text-white font-bold">Recent Activity</h2>
+            <h2 className="font-title-base text-title-base text-white font-bold">
+              {isEn ? 'Recent Activity' : 'Actividad Reciente'}
+            </h2>
             <span className="px-2 py-0.5 rounded-full bg-[#1A1C2C] border border-white/10 text-[10px] font-bold text-[#8E91A5] flex items-center gap-1">
               <span className="material-symbols-outlined text-[13px] text-[#2ED5A4]">layers</span>
               <span>{visibleTransactions.length}</span>
@@ -193,9 +198,9 @@ export function HomeView({
               type="button"
               onClick={() => setIsStackExpanded(!isStackExpanded)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-xs font-bold text-primary transition-all border border-white/10 active:scale-95 cursor-pointer shadow-sm"
-              title={isStackExpanded ? 'Agrupar en pila (Stack)' : 'Expandir lista completa'}
+              title={isEn ? (isStackExpanded ? 'Group in stack' : 'Expand full list') : (isStackExpanded ? 'Agrupar en pila (Stack)' : 'Expandir lista completa')}
             >
-              <span>{isStackExpanded ? 'Pila (Stack)' : 'Ver Lista'}</span>
+              <span>{isEn ? (isStackExpanded ? 'Stack' : 'View List') : (isStackExpanded ? 'Pila (Stack)' : 'Ver Lista')}</span>
               <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: isStackExpanded ? 'rotate(180deg)' : 'none' }}>
                 expand_more
               </span>
@@ -210,9 +215,11 @@ export function HomeView({
               <span className="material-symbols-outlined text-[22px]">receipt_long</span>
             </div>
             <div>
-              <p className="text-xs font-bold text-white">Sin movimientos aún</p>
+              <p className="text-xs font-bold text-white">
+                {isEn ? 'No activity yet' : 'Sin movimientos aún'}
+              </p>
               <p className="text-[11px] text-on-surface-variant">
-                Tus envíos SPEI o pagos aparecerán aquí en pila.
+                {isEn ? 'Your SPEI transfers and bill payments will appear here in stack.' : 'Tus envíos SPEI o pagos aparecerán aquí en pila.'}
               </p>
             </div>
           </div>
@@ -234,7 +241,7 @@ export function HomeView({
                       : 'bg-surface-container-high text-[#8E91A5] hover:text-white'
                   }`}
                 >
-                  {filter === 'all' ? 'All' : filter === 'sent' ? 'Sent' : 'Bills'}
+                  {filter === 'all' ? (isEn ? 'All' : 'Todos') : filter === 'sent' ? (isEn ? 'Sent' : 'Enviados') : (isEn ? 'Bills' : 'Servicios')}
                 </button>
               ))}
             </div>
@@ -248,7 +255,7 @@ export function HomeView({
           <div
             onClick={() => setIsStackExpanded(true)}
             className="relative cursor-pointer group pb-3 pt-1 select-none"
-            title="Toca para desplegar las notificaciones agrupadas en pila"
+            title={isEn ? 'Tap to expand stacked notifications' : 'Toca para desplegar las notificaciones agrupadas en pila'}
           >
             {/* Tarjeta de Nivel 3 (Fondo profundo de la pila - más pequeña y tenue) */}
             {tertiaryTx && (
@@ -304,7 +311,7 @@ export function HomeView({
                           {primaryTx.title}
                         </span>
                         <span className="px-1.5 py-0.2 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4] text-[9px] font-black tracking-wider uppercase">
-                          Nuevo
+                          {isEn ? 'NEW' : 'Nuevo'}
                         </span>
                       </div>
                       <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
@@ -338,11 +345,11 @@ export function HomeView({
                   <span className="flex items-center gap-1 text-[#2ED5A4] font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4]" />
                     {visibleTransactions.length > 1
-                      ? `+${visibleTransactions.length - 1} movimientos apilados debajo`
-                      : 'Último movimiento registrado'}
+                      ? (isEn ? `+${visibleTransactions.length - 1} movements stacked below` : `+${visibleTransactions.length - 1} movimientos apilados debajo`)
+                      : (isEn ? 'Latest recorded transaction' : 'Último movimiento registrado')}
                   </span>
                   <span className="text-[10px] text-primary font-bold flex items-center gap-0.5">
-                    <span>Toca para expandir</span>
+                    <span>{isEn ? 'Tap to expand' : 'Toca para expandir'}</span>
                     <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
                   </span>
                 </div>
