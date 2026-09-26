@@ -901,4 +901,219 @@ a {
   transform-origin: center center;
 }
 
+/* ========================================================================= */
+/* KIN UNIVERSAL LIGHT MODE DESIGN SYSTEM TOKENS & OVERRIDES                */
+/* ========================================================================= */
+html.light {
+  --bg-kin: #F8F9FC;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F1F3F8;
+  --bg-pill: #ECEFF5;
+  --bg-pill-active: #DFE3EC;
+  --mint-kin: #059669;
+  --violet-kin: #6D28D9;
+  --text-muted: #525866;
+  --text-sub: #717786;
+  --border-kin: rgba(0, 0, 0, 0.08);
+}
+
+html.light,
+html.light body {
+  background-color: #ECEEF4 !important;
+  color: #0B0E14 !important;
+}
+
+html.light .phone-viewport {
+  background-color: #F8F9FC !important;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+  color: #0B0E14 !important;
+}
+
+/* Atmospheric Glow in Light Mode (Soft Pastel Gradient) */
+html.light .bicolor-atmosphere-glow {
+  background: radial-gradient(circle at 18% 0%, rgba(46, 213, 164, 0.18) 0%, rgba(46, 213, 164, 0.03) 45%, transparent 70%),
+              radial-gradient(circle at 82% 10%, rgba(112, 71, 235, 0.16) 0%, rgba(112, 71, 235, 0.03) 50%, transparent 75%),
+              radial-gradient(circle at 50% -20%, rgba(20, 184, 166, 0.12) 0%, transparent 60%) !important;
+}
+
+/* Universal Background Colors in Light Mode */
+html.light .bg-\[\#06070B\],
+html.light .bg-\[\#06070B\]\/95,
+html.light .bg-\[\#06070B\]\/90,
+html.light .bg-\[\#06070B\]\/80,
+html.light .bg-\[\#0E0F1A\],
+html.light .bg-surface,
+html.light .bg-surface-dim,
+html.light .bg-surface-container-lowest {
+  background-color: #F8F9FC !important;
+}
+
+html.light .bg-\[\#181928\],
+html.light .bg-\[\#121320\],
+html.light .bg-\[\#131422\],
+html.light .bg-\[\#141524\],
+html.light .bg-\[\#141525\],
+html.light .bg-\[\#1E2033\],
+html.light .bg-\[\#1F2133\],
+html.light .bg-surface-container,
+html.light .bg-surface-container-low,
+html.light .modal-card {
+  background-color: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .bg-\[\#202236\],
+html.light .bg-\[\#202236\]\/60,
+html.light .bg-\[\#202236\]\/70,
+html.light .bg-\[\#202236\]\/90,
+html.light .bg-\[\#1D1E30\],
+html.light .bg-\[\#222338\],
+html.light .bg-\[\#262939\],
+html.light .bg-\[\#2B2C42\],
+html.light .bg-\[\#343552\],
+html.light .bg-\[\#1A1C2C\],
+html.light .bg-surface-container-high,
+html.light .bg-surface-container-highest {
+  background-color: #F0F2F6 !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Gradients in Hero Cards in Light Mode */
+html.light .from-\[\#181928\]\/95 {
+  --tw-gradient-from: rgba(255, 255, 255, 0.98) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.light .to-\[\#121320\]\/95 {
+  --tw-gradient-to: rgba(248, 249, 252, 0.98) var(--tw-gradient-to-position) !important;
+}
+
+/* Modal Overlay & Card in Light Mode */
+html.light .modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+}
+
+/* Bottom Navigation Dock in Light Mode */
+html.light .stitch-bottom-dock {
+  background-color: #FFFFFF !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .dock-bar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Circular Buttons & Quick Cards */
+html.light .btn-circle {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #0B0E14 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .btn-circle:hover {
+  background-color: #F0F2F6 !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light .btn-circle svg {
+  color: #0B0E14 !important;
+}
+
+html.light .quick-action-card {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.07) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .quick-action-card:hover {
+  background-color: #F8F9FC !important;
+}
+
+/* Text & Typography in Light Mode */
+html.light .text-white {
+  color: #0B0E14 !important;
+}
+
+html.light .text-\[\#8E91A5\],
+html.light .text-on-surface-variant {
+  color: #525866 !important;
+}
+
+html.light .text-on-surface {
+  color: #0B0E14 !important;
+}
+
+/* High-Contrast Rules for Colored Accents */
+html.light .bg-\[\#2ED5A4\],
+html.light .bg-\[\#2ED5A4\] .text-white,
+html.light .bg-\[\#2ED5A4\] * {
+  color: #06070B !important;
+}
+
+html.light .bg-\[\#7047EB\],
+html.light .bg-\[\#7047EB\] .text-white,
+html.light .bg-\[\#7047EB\] * {
+  color: #FFFFFF !important;
+}
+
+html.light .bg-\[\#FF5555\],
+html.light .bg-\[\#FF5555\] .text-white,
+html.light .bg-\[\#FF5555\] * {
+  color: #FFFFFF !important;
+}
+
+html.light .send-floating-btn {
+  background-color: #0B0E14 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.light .send-floating-btn span {
+  color: #FFFFFF !important;
+}
+
+/* Border Overrides in Light Mode */
+html.light .border-white\/5,
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20,
+html.light .border-white\/25 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Inputs & Form Controls in Light Mode */
+html.light input,
+html.light select,
+html.light textarea {
+  color: #0B0E14 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+html.light .auth-input-group {
+  background-color: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+html.light .auth-input-field {
+  color: #0B0E14 !important;
+}
+
+html.light input:-webkit-autofill,
+html.light input:-webkit-autofill:hover, 
+html.light input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #0B0E14 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #FFFFFF inset !important;
+}
+
+
 

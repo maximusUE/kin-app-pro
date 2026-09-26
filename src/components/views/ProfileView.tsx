@@ -50,6 +50,8 @@ export interface ProfileViewProps {
   userId: string | null;
   currencyPref: 'USD' | 'MXN';
   handleToggleCurrency: (curr: 'USD' | 'MXN') => void;
+  theme: 'dark' | 'light';
+  handleToggleTheme: (theme: 'dark' | 'light') => void;
   handleLogout: () => void;
 }
 
@@ -84,6 +86,8 @@ export function ProfileView({
   userId,
   currencyPref,
   handleToggleCurrency,
+  theme,
+  handleToggleTheme,
   handleLogout,
 }: ProfileViewProps) {
   const isEn = language === 'en';
@@ -582,6 +586,48 @@ export function ProfileView({
               }`}
             >
               🇲🇽 MXN
+            </button>
+          </div>
+        </div>
+
+        {/* Selector de Modo de Pantalla (Claro / Oscuro) */}
+        <div className="flex items-center justify-between py-1.5 border-t border-white/5">
+          <div>
+            <span className="text-xs font-bold text-white block">
+              {isEn ? 'Appearance & Theme' : 'Tema de la Aplicación'}
+            </span>
+            <span className="text-[10px] text-[#8E91A5]">
+              {isEn
+                ? 'Switch between Light and Dark mode'
+                : 'Cambiar entre Modo Claro y Oscuro'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 bg-[#202236] p-1 rounded-xl border border-white/5">
+            <button
+              type="button"
+              onClick={() => handleToggleTheme('light')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                theme === 'light'
+                  ? 'bg-[#2ED5A4] text-[#06070B] shadow-sm font-black'
+                  : 'text-[#8E91A5] hover:text-white'
+              }`}
+              title={isEn ? 'Light Mode' : 'Modo Claro'}
+            >
+              <span className="material-symbols-outlined text-[15px]">light_mode</span>
+              <span>{isEn ? 'Light' : 'Claro'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleToggleTheme('dark')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                theme === 'dark'
+                  ? 'bg-[#2ED5A4] text-[#06070B] shadow-sm font-black'
+                  : 'text-[#8E91A5] hover:text-white'
+              }`}
+              title={isEn ? 'Dark Mode' : 'Modo Oscuro'}
+            >
+              <span className="material-symbols-outlined text-[15px]">dark_mode</span>
+              <span>{isEn ? 'Dark' : 'Oscuro'}</span>
             </button>
           </div>
         </div>

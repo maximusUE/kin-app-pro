@@ -320,6 +320,7 @@ export default function MobileApp() {
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
   const [currencyPref, setCurrencyPref] = useState<'USD' | 'MXN'>('USD');
   const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [copiedClientId, setCopiedClientId] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
@@ -364,6 +365,16 @@ export default function MobileApp() {
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem('kin_currency_pref', user.currencyPref);
+        } catch (_) {}
+      }
+    }
+    if (user.theme === 'dark' || user.theme === 'light') {
+      setTheme(user.theme);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('kin_theme', user.theme);
+          document.documentElement.classList.remove('dark', 'light');
+          document.documentElement.classList.add(user.theme);
         } catch (_) {}
       }
     }
@@ -418,7 +429,7 @@ export default function MobileApp() {
       setIsAuthenticated(true);
     }
 
-    // 0. Recuperar idioma y moneda guardados en localStorage
+    // 0. Recuperar idioma, moneda y tema guardados en localStorage
     const savedLang = localStorage.getItem('kin_language');
     if (savedLang === 'es' || savedLang === 'en') {
       setLanguage(savedLang);
@@ -426,6 +437,12 @@ export default function MobileApp() {
     const savedCurr = localStorage.getItem('kin_currency_pref');
     if (savedCurr === 'USD' || savedCurr === 'MXN') {
       setCurrencyPref(savedCurr);
+    }
+    const savedTheme = localStorage.getItem('kin_theme') as 'dark' | 'light' | null;
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      setTheme(savedTheme);
+      document.documentElement.classList.remove('dark', 'light');
+      document.documentElement.classList.add(savedTheme);
     }
 
     // 1. Recuperar usuario guardado en localStorage (sesión activa tras login/registro)
@@ -611,6 +628,29 @@ export default function MobileApp() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, updates: { currencyPref: newCurr } }),
+      }).catch(() => {});
+    }
+  };
+
+  // Conmutador universal de Modo Claro / Modo Oscuro
+  const handleToggleTheme = (newTheme: 'dark' | 'light') => {
+    setTheme(newTheme);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_theme', newTheme);
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(newTheme);
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', newTheme === 'light' ? '#F8F9FC' : '#121622');
+        }
+      } catch (_) {}
+    }
+    if (userId) {
+      fetch('/api/account/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, updates: { theme: newTheme } }),
       }).catch(() => {});
     }
   };
@@ -1944,6 +1984,8 @@ export default function MobileApp() {
             userId={userId}
             currencyPref={currencyPref}
             handleToggleCurrency={handleToggleCurrency}
+            theme={theme}
+            handleToggleTheme={handleToggleTheme}
             handleLogout={handleLogout}
           />
         )}
@@ -1957,7 +1999,7 @@ export default function MobileApp() {
         {!sendSuccessData && activeTab !== 'send-quick' && (
           <nav
             className="stitch-bottom-dock"
-            style={{ backgroundColor: '#000000', opacity: 1 }}
+            style={{ backgroundColor: theme === 'light' ? '#FFFFFF' : '#000000', opacity: 1 }}
             data-active-classes="text-primary font-bold scale-105"
           >
             <div className="h-16 w-full flex items-center justify-around px-2">

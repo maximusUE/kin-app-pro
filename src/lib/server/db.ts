@@ -39,6 +39,7 @@ export interface UserProfile {
   pushNotificationsEnabled: boolean;
   language?: 'es' | 'en';
   currencyPref?: 'USD' | 'MXN';
+  theme?: 'light' | 'dark';
   draftP2P?: {
     contactId?: string;
     contactName?: string;
@@ -142,6 +143,7 @@ const DEFAULT_USERS: UserProfile[] = [
     pushNotificationsEnabled: true,
     language: 'es',
     currencyPref: 'USD',
+    theme: 'dark',
   },
 ];
 
