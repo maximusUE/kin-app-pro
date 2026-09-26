@@ -1766,19 +1766,32 @@ export default function MobileApp() {
           {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay' || activeTab === 'profile') && !sendSuccessData && (
             <header className="flex items-center justify-between gap-2 mb-1 px-0.5">
               <div className="flex items-center gap-2">
-                <KinLogo size={34} />
+                {activeTab === 'profile' ? (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('home')}
+                    className="w-9 h-9 rounded-xl bg-surface-container-high border border-white/10 flex items-center justify-center text-[#2ED5A4] hover:bg-surface-container cursor-pointer transition-colors shadow-sm"
+                    title="Volver a Inicio"
+                  >
+                    <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                  </button>
+                ) : (
+                  <KinLogo size={34} />
+                )}
                 <div className="flex flex-col leading-none">
                   <span className="font-headline-md text-[17px] font-bold tracking-tight text-white">KIN</span>
                   <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>
                 </div>
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/80 text-[#2ED5A4] shadow-inner border border-white/5">
-                <span className="font-financial-mono text-caption-sm font-semibold tracking-tight text-white">
-                  1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN
-                </span>
-                <span className="material-symbols-outlined text-[13px] text-[#2ED5A4] animate-pulse">bolt</span>
-              </div>
+              {activeTab !== 'profile' && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/80 text-[#2ED5A4] shadow-inner border border-white/5">
+                  <span className="font-financial-mono text-caption-sm font-semibold tracking-tight text-white">
+                    1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN
+                  </span>
+                  <span className="material-symbols-outlined text-[13px] text-[#2ED5A4] animate-pulse">bolt</span>
+                </div>
+              )}
 
               <div className="flex items-center gap-1.5">
                 <button
@@ -1791,29 +1804,27 @@ export default function MobileApp() {
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#2ED5A4] shadow-[0_0_8px_#2ED5A4]" />
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('profile')}
-                  className={`relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border transition-colors ${
-                    activeTab === 'profile'
-                      ? 'border-[#2ED5A4] ring-1 ring-[#2ED5A4]'
-                      : 'border-white/10 hover:border-[#2ED5A4]/40'
-                  }`}
-                  title="Mi Perfil"
-                >
-                  {userAvatar ? (
-                    <img alt={userName || 'Perfil'} className="w-full h-full rounded-full object-cover" src={userAvatar} />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-[#202236] flex items-center justify-center text-[#8E91A5] border border-dashed border-white/25">
-                      <span className="material-symbols-outlined text-[15px] text-[#8E91A5]">person</span>
-                    </div>
-                  )}
-                  {userAvatar && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center shadow-sm">
-                      <span className="material-symbols-outlined text-[9px] text-[#003828] font-bold">check</span>
-                    </div>
-                  )}
-                </button>
+                {activeTab !== 'profile' && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('profile')}
+                    className="relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border border-white/10 hover:border-[#2ED5A4]/40 transition-colors"
+                    title="Mi Perfil"
+                  >
+                    {userAvatar ? (
+                      <img alt={userName || 'Perfil'} className="w-full h-full rounded-full object-cover" src={userAvatar} />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-[#202236] flex items-center justify-center text-[#8E91A5] border border-dashed border-white/25">
+                        <span className="material-symbols-outlined text-[15px] text-[#8E91A5]">person</span>
+                      </div>
+                    )}
+                    {userAvatar && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2ED5A4] flex items-center justify-center shadow-sm">
+                        <span className="material-symbols-outlined text-[9px] text-[#003828] font-bold">check</span>
+                      </div>
+                    )}
+                  </button>
+                )}
               </div>
             </header>
           )}
@@ -2046,6 +2057,14 @@ export default function MobileApp() {
             theme={theme}
             handleToggleTheme={handleToggleTheme}
             onUpdateProfile={handleUpdateProfile}
+            onUpdateAvatar={(newAvatar: string) => {
+              setUserAvatar(newAvatar);
+              if (typeof window !== 'undefined') {
+                try {
+                  localStorage.setItem('kin_avatar', newAvatar);
+                } catch (_) {}
+              }
+            }}
             handleLogout={handleLogout}
           />
         )}

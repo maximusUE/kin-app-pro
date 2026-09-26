@@ -49,6 +49,7 @@ export interface ProfileViewProps {
     zip?: string;
     email?: string;
   }) => void;
+  onUpdateAvatar?: (newAvatar: string) => void;
   handleLogout: () => void;
 }
 
@@ -90,9 +91,43 @@ export function ProfileView({
   theme,
   handleToggleTheme,
   onUpdateProfile,
+  onUpdateAvatar,
   handleLogout,
 }: ProfileViewProps) {
   const isEn = language === 'en';
+
+  // Acceso nativo a fotos y cámara del dispositivo
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [currentAvatar, setCurrentAvatar] = useState<string | null>(userAvatar);
+
+  useEffect(() => {
+    if (userAvatar) setCurrentAvatar(userAvatar);
+  }, [userAvatar]);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        setCurrentAvatar(dataUrl);
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('kin_avatar', dataUrl);
+          } catch (_) {}
+        }
+        if (onUpdateAvatar) {
+          onUpdateAvatar(dataUrl);
+        }
+        notifyToast(
+          isEn ? 'Profile photo updated successfully!' : '¡Foto de perfil actualizada con éxito!',
+          'photo_camera'
+        );
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   // 6 Core Modals State (Exact mapping to stitch_kin_mobile_CLIENTE)
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
@@ -277,7 +312,7 @@ export function ProfileView({
   const defaultStitchAvatar =
     'https://lh3.googleusercontent.com/aida/AEtjO1XgfG4wJ22AeyGZa6zxTOh6Jyo20b27o3fM67TfAmBcD2zke2Fk2YO19J9j1d1vfNAB74v-fD8hligRjbEFIVm3iq9fy8yBO3oLJHvGUIay7BRQTN9iRekVzBNrFPzPyKvDNF6s9xjkCWj_SXvlkelM_YGOwkvZ_WOxhKe-DyaVKApVN9NtjREGVxp_9dorOv0eH-vwJVbAuWSjtjv8HOoYl9lVcWIQ0LJXWPH0aLGzV51M6lfcmRnHAyM';
 
-  const displayAvatar = userAvatar || defaultStitchAvatar;
+  const displayAvatar = currentAvatar || userAvatar || defaultStitchAvatar;
   const displayName = `${draftFirstName} ${draftLastName}`.trim() || 'Mateo Morales';
   const displayEmail = userEmail || 'mateo.morales@gmail.com';
   const displayPhone = draftPhone || '+1 (555) 349-2910';
@@ -290,48 +325,27 @@ export function ProfileView({
         <div className="absolute top-28 -right-10 w-44 h-44 bg-[#7047EB]/20 rounded-full blur-3xl pointer-events-none" />
 
         {/* ========================================================================= */}
-        {/* SECTION 1: USER PROFILE HEADER HERO (STITCH EXACT ARCHITECTURE)           */}
+        {/* SECTION 1: USER PROFILE HEADER HERO                                       */}
         {/* ========================================================================= */}
         <div className="anim-stagger-1 relative w-full rounded-2xl bg-surface-container-low p-5 mb-4 shadow-xl border border-white/5 overflow-hidden">
-          {/* Top Tier & Quick Edit Pill */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-[#2ED5A4] shadow-sm">
-              <span
-                className="material-symbols-outlined text-[13px] text-[#2ED5A4]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                verified
-              </span>
-              <span className="font-label-caps text-[10px] tracking-wider text-[#2ED5A4] font-bold">
-                TIER 3 VERIFICADO
-              </span>
-            </div>
-
-            <button
-              type="button"
-              aria-label={isEn ? 'Edit Profile' : 'Editar Perfil'}
-              onClick={() => setEditProfileModalOpen(true)}
-              className="touch-press inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-highest text-on-surface hover:text-white transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[13px] text-[#2ED5A4]">edit</span>
-              <span className="font-caption-sm text-[12px] font-semibold">{isEn ? 'Edit' : 'Editar'}</span>
-            </button>
-          </div>
+          {/* Input oculto para acceso directo a cámara y fotos del dispositivo */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageFileChange}
+          />
 
           {/* Center Avatar + Name Architecture */}
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center text-center pt-2">
             <div
               className="relative mb-3 group cursor-pointer"
-              onClick={() => {
-                handleOpenAvatarPicker();
-                notifyToast(
-                  isEn ? 'Camera enabled to update biometric avatar' : 'Cámara activada para actualizar avatar biométrico',
-                  'photo_camera'
-                );
-              }}
+              onClick={() => fileInputRef.current?.click()}
+              title={isEn ? 'Tap to choose photo or take picture' : 'Toca para elegir foto o abrir la cámara'}
             >
               {/* Glowing Avatar Frame */}
-              <div className="relative w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-[#2ED5A4] via-[#2ED5A4]/80 to-[#7047EB] shadow-[0_0_24px_rgba(46,213,164,0.35)]">
+              <div className="relative w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-[#2ED5A4] via-[#2ED5A4]/80 to-[#7047EB] shadow-[0_0_24px_rgba(46,213,164,0.35)] group-hover:scale-105 active:scale-95 transition-transform">
                 <img
                   alt={`Avatar de ${displayName}`}
                   className="w-full h-full rounded-full object-cover bg-surface-container-lowest"
@@ -339,8 +353,8 @@ export function ProfileView({
                 />
               </div>
 
-              {/* Edit Badge on Avatar */}
-              <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#2ED5A4] text-[#003828] flex items-center justify-center shadow-lg transition-transform active:scale-90 border-2 border-[#171b2a]">
+              {/* Edit Badge on Avatar - Acceso directo a Cámara / Fotos */}
+              <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#2ED5A4] text-[#003828] flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 active:scale-90 border-2 border-[#171b2a]">
                 <span className="material-symbols-outlined text-[16px] font-bold text-[#003828]">photo_camera</span>
               </div>
             </div>
@@ -364,25 +378,6 @@ export function ProfileView({
             <p className="font-financial-mono text-[12px] text-on-surface-variant/80 tracking-tight mt-0.5">
               {displayPhone}
             </p>
-
-            {/* Client ID Folio Pill with Copy */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleCopyClientId}
-                className="touch-press inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high border border-white/5 text-xs text-white hover:border-[#2ED5A4]/40 active:scale-95 transition-all cursor-pointer shadow-sm"
-                title={isEn ? 'Copy Client Folio' : 'Copiar Folio de Cliente'}
-              >
-                <span className="text-on-surface-variant text-[11px]">ID:</span>
-                <span className="font-financial-mono text-[11px] text-[#2ED5A4] font-semibold">
-                  {userClientId || 'KIN-US-892401'}
-                </span>
-                <span className="material-symbols-outlined text-[14px] text-on-surface-variant">content_copy</span>
-                {copiedClientId && (
-                  <span className="text-[10px] text-[#2ED5A4] font-bold">✓</span>
-                )}
-              </button>
-            </div>
           </div>
         </div>
 
@@ -1072,65 +1067,59 @@ export function ProfileView({
               </button>
             </div>
 
-            <div className="space-y-2 mb-5">
+            <div className="space-y-3 mb-5">
               {/* Spanish Option */}
               <div
-                className={`touch-press p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
+                className={`touch-press p-4 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
                   language === 'es' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-80'
                 }`}
                 onClick={() => handleSelectLanguage('es')}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🇲🇽</span>
-                  <div>
-                    <span className="font-title-base text-[15px] text-white font-bold block">Español</span>
-                    <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      México y Latinoamérica • Notificaciones SPEI
-                    </span>
+                <div className="flex flex-col pr-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-title-base text-[16px] text-white font-bold">Español</span>
+                    {language === 'es' && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4]">
+                        {isEn ? 'Active' : 'Activo'}
+                      </span>
+                    )}
                   </div>
+                  <span className="font-caption-sm text-caption-sm text-on-surface-variant mt-0.5">
+                    {isEn ? 'Spanish interface & notifications' : 'Interfaz y notificaciones en español'}
+                  </span>
                 </div>
-                {language === 'es' ? (
-                  <span
-                    className="material-symbols-outlined text-[#2ED5A4] text-[22px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    check_circle
-                  </span>
-                ) : (
-                  <span className="material-symbols-outlined text-on-surface-variant text-[22px]">
-                    radio_button_unchecked
-                  </span>
-                )}
+                <ToggleSwitch
+                  enabled={language === 'es'}
+                  onToggle={() => handleSelectLanguage('es')}
+                  title="Español"
+                />
               </div>
 
               {/* English Option */}
               <div
-                className={`touch-press p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
+                className={`touch-press p-4 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
                   language === 'en' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-80'
                 }`}
                 onClick={() => handleSelectLanguage('en')}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🇺🇸</span>
-                  <div>
-                    <span className="font-title-base text-[15px] text-white font-bold block">English</span>
-                    <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      United States • USD wire & ACH status
-                    </span>
+                <div className="flex flex-col pr-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-title-base text-[16px] text-white font-bold">English</span>
+                    {language === 'en' && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4]">
+                        {isEn ? 'Active' : 'Activo'}
+                      </span>
+                    )}
                   </div>
+                  <span className="font-caption-sm text-caption-sm text-on-surface-variant mt-0.5">
+                    {isEn ? 'English interface & notifications' : 'Interfaz y notificaciones en inglés'}
+                  </span>
                 </div>
-                {language === 'en' ? (
-                  <span
-                    className="material-symbols-outlined text-[#2ED5A4] text-[22px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    check_circle
-                  </span>
-                ) : (
-                  <span className="material-symbols-outlined text-on-surface-variant text-[22px]">
-                    radio_button_unchecked
-                  </span>
-                )}
+                <ToggleSwitch
+                  enabled={language === 'en'}
+                  onToggle={() => handleSelectLanguage('en')}
+                  title="English"
+                />
               </div>
             </div>
 

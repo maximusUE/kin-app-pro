@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ContactAvatar } from '@/components/ContactAvatar';
 import { getBankLogoUrl } from '@/components/Icons';
 
 export interface HomeContact {
@@ -94,8 +93,7 @@ export function HomeView({
               Executive Overview
             </span>
             <h1 className="font-headline-md text-headline-md text-white flex items-center gap-1.5 mt-0.5">
-              Hola, {userFirstName || (userName ? userName.split(' ')[0] : 'Bienvenido')}{' '}
-              <span className="inline-block animate-bounce text-xl">👋</span>
+              Hola, {userFirstName || (userName ? userName.split(' ')[0] : 'Bienvenido')}
             </h1>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-md border border-white/5">
@@ -112,37 +110,37 @@ export function HomeView({
           </div>
         </div>
 
-        {/* 4 BOTONES PRINCIPALES INMEDIATAMENTE DEBAJO DE LA CABECERA (RECUADRO AZUL 1) */}
+        {/* 4 BOTONES PRINCIPALES: 1 SEND, 2 KINCASH, 3 QUICK SEND, 4 BILL PAY */}
         <div className="grid grid-cols-4 gap-2.5">
-          {/* 1. KIN CASH */}
-          <button
-            type="button"
-            onClick={() => onNavigateTab('kin-cash')}
-            className="group flex flex-col items-center gap-1.5 cursor-pointer"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-[#2ED5A4] flex items-center justify-center text-[#06070B] shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
-              <span className="material-symbols-outlined text-[28px] font-bold">bolt</span>
-            </div>
-            <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">
-              KIN CASH
-            </span>
-          </button>
-
-          {/* 2. Retiro SPEI */}
+          {/* 1. SEND */}
           <button
             type="button"
             onClick={() => onNavigateTab('send')}
             className="group flex flex-col items-center gap-1.5 cursor-pointer"
           >
-            <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
-              <span className="material-symbols-outlined text-[26px]">account_balance</span>
+            <div className="w-14 h-14 rounded-2xl bg-[#2ED5A4] flex items-center justify-center text-[#06070B] shadow-[0_8px_20px_-4px_rgba(46,213,164,0.45)] transition-transform group-hover:scale-105 active:scale-95">
+              <span className="material-symbols-outlined text-[28px] font-bold">send</span>
             </div>
             <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">
-              Retiro SPEI
+              SEND
             </span>
           </button>
 
-          {/* 3. 1-Tap Send */}
+          {/* 2. KINCASH */}
+          <button
+            type="button"
+            onClick={() => onNavigateTab('kin-cash')}
+            className="group flex flex-col items-center gap-1.5 cursor-pointer"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+              <span className="material-symbols-outlined text-[26px]">bolt</span>
+            </div>
+            <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">
+              KINCASH
+            </span>
+          </button>
+
+          {/* 3. QUICK SEND */}
           <button
             type="button"
             onClick={() => onNavigateTab('send-quick')}
@@ -152,11 +150,11 @@ export function HomeView({
               <span className="material-symbols-outlined text-[26px]">touch_app</span>
             </div>
             <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">
-              1-Tap Send
+              QUICK SEND
             </span>
           </button>
 
-          {/* 4. Servicios */}
+          {/* 4. BILL PAY */}
           <button
             type="button"
             onClick={() => onNavigateTab('bill-pay')}
@@ -166,134 +164,9 @@ export function HomeView({
               <span className="material-symbols-outlined text-[26px]">receipt_long</span>
             </div>
             <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">
-              Servicios
+              BILL PAY
             </span>
           </button>
-        </div>
-
-        {/* QUICK SEND INMEDIATAMENTE DEBAJO DE LOS 4 PRINCIPALES (RECUADRO AZUL 2: "TO FAMILY" ELIMINADO) */}
-        <div className="flex flex-col space-y-3 pt-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[20px]">bolt</span>
-              <h2 className="font-title-base text-title-base text-white font-bold">Quick Send</h2>
-              {isContactEditMode && (
-                <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold animate-pulse">
-                  Modo Edición
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              {isContactEditMode ? (
-                <button
-                  type="button"
-                  onClick={() => setIsContactEditMode(false)}
-                  className="px-3 py-1 rounded-full bg-primary text-on-primary font-caption-sm text-xs font-black cursor-pointer shadow-md active:scale-95 transition-all"
-                >
-                  Listo ✓
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onNavigateTab('send-quick')}
-                  className="font-caption-sm text-caption-sm text-primary font-bold hover:underline cursor-pointer"
-                >
-                  View All ({contactsList.length})
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 overflow-x-auto pb-1 -mx-margin-mobile px-margin-mobile scrollbar-none">
-            {/* Botón + : New Recipient (Acceso a contactos) */}
-            <button
-              type="button"
-              onClick={() => setShowContactModal(true)}
-              className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer"
-              title="Acceder a tus contactos del celular"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm group-hover:bg-surface-bright group-active:scale-95 transition-all border border-white/5">
-                <span className="material-symbols-outlined text-[26px]">add</span>
-              </div>
-              <span className="font-caption-sm text-caption-sm text-on-surface-variant font-medium">New Recipient</span>
-            </button>
-
-            {/* Contactos Frecuentes con Long Press & Soporte de Edición */}
-            {contactsList.map((contact, idx) => {
-              const bankLogo = getBankLogoUrl(contact.bank);
-              let timer: any = null;
-
-              const handleTouchStart = () => {
-                timer = setTimeout(() => {
-                  setIsContactEditMode(true);
-                  setQuickContactActionTarget({ contact, index: idx });
-                }, 500);
-              };
-
-              const handleTouchEnd = () => {
-                if (timer) clearTimeout(timer);
-              };
-
-              return (
-                <div
-                  key={contact.id || idx}
-                  className={`flex flex-col items-center gap-1.5 flex-shrink-0 text-left relative ${
-                    isContactEditMode ? 'animate-jiggle' : ''
-                  }`}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                  onMouseDown={handleTouchStart}
-                  onMouseUp={handleTouchEnd}
-                  onMouseLeave={handleTouchEnd}
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (isContactEditMode) {
-                        setQuickContactActionTarget({ contact, index: idx });
-                      } else {
-                        onNavigateTab('send');
-                      }
-                    }}
-                    className="relative w-14 h-14 rounded-2xl cursor-pointer group active:scale-95 transition-transform"
-                    title={isContactEditMode ? 'Gestionar contacto' : `Enviar dinero a ${contact.name}`}
-                  >
-                    <ContactAvatar
-                      photoUrl={contact.photoUrl}
-                      name={contact.name}
-                      className="w-full h-full rounded-2xl shadow-sm"
-                      iconSize="text-[26px]"
-                    />
-
-                    {bankLogo && (
-                      <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-white p-0.5 flex items-center justify-center shadow-md">
-                        <img src={bankLogo} alt="Bank" className="w-full h-full object-contain" />
-                      </div>
-                    )}
-                  </button>
-
-                  {isContactEditMode && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingContactAvatarTarget(contact);
-                        setEditingContactPhotoInput(contact.photoUrl || '');
-                      }}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary hover:bg-[#26BC90] text-on-primary flex items-center justify-center shadow-lg border border-white/40 cursor-pointer active:scale-90 transition-transform z-10"
-                      title="Editar foto o avatar"
-                    >
-                      <span className="material-symbols-outlined text-[12px] font-bold leading-none">photo_camera</span>
-                    </button>
-                  )}
-
-                  <span className="font-caption-sm text-caption-sm text-white font-semibold text-center truncate max-w-[70px]">
-                    {contact.name}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </div>
 
