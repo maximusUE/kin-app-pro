@@ -1700,9 +1700,9 @@ export default function MobileApp() {
 
                 <button
                   type="button"
-                  onClick={handleOpenAvatarPicker}
+                  onClick={() => setActiveTab('profile')}
                   className="relative w-8 h-8 rounded-full p-0.5 bg-surface-container-high flex items-center justify-center cursor-pointer border border-white/10 hover:border-[#2ED5A4]/40 transition-colors"
-                  title={userAvatar ? "Ajustes de Perfil" : "Agregar Foto de Perfil"}
+                  title="Mi Perfil"
                 >
                   {userAvatar ? (
                     <img alt={userName || 'Perfil'} className="w-full h-full rounded-full object-cover" src={userAvatar} />

@@ -15,6 +15,7 @@ import {
   CardOutlineIcon,
   LockIcon,
   BankBuildingIcon,
+  ChevronRightIcon,
 } from '@/components/Icons';
 import { ToggleSwitch } from '@/components/AppSettingsModal';
 
@@ -85,160 +86,233 @@ export function ProfileView({
   handleToggleCurrency,
   handleLogout,
 }: ProfileViewProps) {
+  const isEn = language === 'en';
+
+  const handleOpenWhatsApp = () => {
+    const message = encodeURIComponent(
+      isEn
+        ? `Hello KIN Concierge, I need assistance with my account ID ${userClientId || 'KIN-US-892401'}`
+        : `Hola Concierge KIN, necesito asistencia con mi cuenta ID ${userClientId || 'KIN-US-892401'}`
+    );
+    window.open(`https://wa.me/15550192834?text=${message}`, '_blank');
+  };
+
   return (
-    <div className="animate-fade-in space-y-4 pb-4">
-      {/* Header: < | My Profile | SettingsGearIcon */}
-      <header className="flex items-center justify-between py-1">
+    <div className="animate-fade-in space-y-4 pb-8 relative">
+      {/* Glow Difuminado Ambiental Bicolor (Dribbble Signature Glow) */}
+      <div className="bicolor-atmosphere-glow" />
+
+      {/* ========================================================================= */}
+      {/* 1. TOP NAVIGATION HEADER                                                 */}
+      {/* ========================================================================= */}
+      <header className="relative z-10 flex items-center justify-between py-1">
         <button
           type="button"
           onClick={onBack}
           className="btn-circle"
-          title="Volver al Home"
+          title={isEn ? 'Back to Home' : 'Volver al Inicio'}
         >
           <ChevronLeftIcon className="w-5 h-5 text-white" />
         </button>
+
         <div className="text-center">
-          <h1 className="text-base font-bold text-white tracking-wide">My Profile</h1>
-          <p className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1 mt-0.5">
+          <h1 className="text-base font-bold text-white tracking-wide">
+            {isEn ? 'My Profile' : 'Mi Perfil'}
+          </h1>
+          <p className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1.5 mt-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
-            {userKycTier ? userKycTier.split(' (')[0] : 'Tier 1'} • Cuenta Activa
+            {userKycTier ? userKycTier.split(' (')[0] : 'Tier 2'} • {isEn ? 'Active Account' : 'Cuenta Verificada'}
           </p>
         </div>
+
         <button
           type="button"
           onClick={onOpenSettings}
           className="btn-circle"
-          title="Configuración & Ajustes"
+          title={isEn ? 'Settings' : 'Configuración'}
         >
           <SettingsGearIcon className="w-5 h-5 text-white" />
         </button>
       </header>
 
-      {/* 1. Hero Card: Avatar Proporcional Estándar Móvil (56px), Nombre, Email, Folio & Badge */}
-      <div className="p-4 rounded-3xl bg-[#181928] border border-white/10 text-center relative overflow-hidden shadow-xl space-y-2.5">
-        {/* Brillo ambiental sutil en cabecera */}
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-36 h-36 bg-[#2ED5A4]/10 rounded-full blur-2xl pointer-events-none" />
+      {/* ========================================================================= */}
+      {/* 2. HERO IDENTITY & METRIC KPI CARD (DRIBBLE MASTER FUSION)                */}
+      {/* ========================================================================= */}
+      <div className="relative z-10 p-5 rounded-3xl bg-gradient-to-b from-[#181928]/95 to-[#121320]/95 border border-white/10 text-center shadow-2xl backdrop-blur-xl space-y-3.5 overflow-hidden">
+        {/* Radial highlight interno */}
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-gradient-to-br from-[#2ED5A4]/20 to-[#7047EB]/20 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Avatar Estándar Móvil (56px) con micro-badge de cámara ergonómico */}
+        {/* Avatar 76px con borde gradiente y micro-badge de cámara */}
         <div className="relative inline-block mx-auto">
-          <div className="w-14 h-14 rounded-full p-0.5 border-2 border-[#2ED5A4]/40 shadow-md shadow-[#2ED5A4]/15 overflow-hidden bg-[#202236] flex items-center justify-center">
-            {userAvatar ? (
-              <img
-                src={userAvatar}
-                alt={userName || 'Perfil'}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full rounded-full flex flex-col items-center justify-center bg-white/5 text-[#8E91A5]">
-                <span className="material-symbols-outlined text-[28px] text-[#8E91A5]">person</span>
-              </div>
-            )}
+          <div className="w-[76px] h-[76px] rounded-full p-[2.5px] bg-gradient-to-br from-[#2ED5A4] via-[#2ED5A4]/70 to-[#7047EB] shadow-[0_0_24px_rgba(46,213,164,0.3)] flex items-center justify-center">
+            <div className="w-full h-full rounded-full overflow-hidden bg-[#181928] flex items-center justify-center">
+              {userAvatar ? (
+                <img
+                  src={userAvatar}
+                  alt={userName || 'Perfil'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-[#202236] text-[#8E91A5]">
+                  <span className="material-symbols-outlined text-[36px] text-[#8E91A5]">person</span>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Micro-badge de cámara interactivo */}
           <button
             type="button"
             onClick={handleOpenAvatarPicker}
-            className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-[#202236] border border-white/20 flex items-center justify-center text-[#2ED5A4] shadow-md hover:scale-110 active:scale-95 transition-all cursor-pointer"
-            title={userAvatar ? 'Cambiar foto de perfil' : 'Agregar foto de perfil'}
+            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#181928] border-2 border-[#2ED5A4] flex items-center justify-center text-[#2ED5A4] shadow-lg hover:scale-110 active:scale-95 transition-all cursor-pointer"
+            title={isEn ? 'Change profile photo' : 'Cambiar foto de perfil'}
           >
-            <CameraIcon className="w-3 h-3" />
+            <CameraIcon className="w-3.5 h-3.5 text-[#2ED5A4]" />
           </button>
-          {userAvatar && (
-            <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-[#2ED5A4] border-2 border-[#181928]" />
-          )}
         </div>
 
-        {/* Nombre y Correo en Escala Proporcional Estándar */}
+        {/* Nombre y Correo */}
         <div>
-          <h2 className="text-base font-bold text-white tracking-tight">
-            {userFirstName} {userLastName}
+          <h2 className="text-lg font-black text-white tracking-tight flex items-center justify-center gap-1.5">
+            <span>{userFirstName || 'César'} {userLastName || 'Uceda'}</span>
+            <span className="material-symbols-outlined text-[19px] text-[#2ED5A4]">verified</span>
           </h2>
-          <p className="text-[11px] text-[#8E91A5] font-medium mt-0.5">{userEmail}</p>
+          <p className="text-xs text-[#8E91A5] font-medium mt-0.5">{userEmail || 'cesar@kin.app'}</p>
         </div>
 
-        {/* Badges de Estatus & Folio de Cliente con función de copiado */}
-        <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+        {/* Badges de Folio ID de Cliente & KYC */}
+        <div className="flex items-center justify-center gap-2 pt-0.5 flex-wrap">
           <button
             type="button"
             onClick={handleCopyClientId}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#202236] border border-white/10 text-xs font-bold text-white hover:border-[#2ED5A4] transition-all cursor-pointer shadow-sm active:scale-95"
-            title="Copiar Folio de Cliente"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#202236]/90 border border-white/10 text-xs font-bold text-white hover:border-[#2ED5A4]/60 active:scale-95 transition-all cursor-pointer shadow-sm"
+            title={isEn ? 'Click to copy Client ID' : 'Copiar Folio de Cliente'}
           >
-            <span className="text-[#8E91A5] font-normal">ID:</span>
-            <span className="font-mono text-[11px] text-[#2ED5A4]">{userClientId}</span>
+            <span className="text-[#8E91A5] font-medium text-[11px]">ID:</span>
+            <span className="font-mono text-[11px] text-[#2ED5A4] font-semibold">{userClientId || 'KIN-US-892401'}</span>
             <CopyIcon className="w-3 h-3 text-[#8E91A5]" />
             {copiedClientId && (
-              <span className="text-[10px] text-[#2ED5A4] font-semibold animate-fade-in">✓</span>
+              <span className="text-[10px] text-[#2ED5A4] font-bold animate-fade-in">✓</span>
             )}
           </button>
 
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[10px] font-bold text-[#2ED5A4]">
-            <span>✓</span>
-            <span>KYC Verificado</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-xs font-bold text-[#2ED5A4]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4]" />
+            <span>{isEn ? 'KYC Tier 2' : 'KYC Tier 2'}</span>
+          </div>
+        </div>
+
+        {/* 3 Metric KPI Cards (Dribbble Master Inspiration) */}
+        <div className="grid grid-cols-3 gap-2.5 pt-3 border-t border-white/10">
+          {/* Card 1: Envíos SPEI */}
+          <div className="p-2.5 rounded-2xl bg-[#202236]/70 border border-white/5 flex flex-col items-center justify-center transition-transform hover:scale-[1.02]">
+            <div className="flex items-center gap-1 text-[#2ED5A4]">
+              <span className="material-symbols-outlined text-[15px]">send_money</span>
+              <span className="text-base font-black text-white tracking-tight">128</span>
+            </div>
+            <span className="text-[10px] font-semibold text-[#8E91A5] uppercase tracking-wider mt-0.5">
+              {isEn ? 'SPEI Sent' : 'Envíos SPEI'}
+            </span>
+          </div>
+
+          {/* Card 2: Beneficiarios */}
+          <div className="p-2.5 rounded-2xl bg-[#202236]/70 border border-white/5 flex flex-col items-center justify-center transition-transform hover:scale-[1.02]">
+            <div className="flex items-center gap-1 text-[#7047EB]">
+              <span className="material-symbols-outlined text-[15px]">group</span>
+              <span className="text-base font-black text-white tracking-tight">45</span>
+            </div>
+            <span className="text-[10px] font-semibold text-[#8E91A5] uppercase tracking-wider mt-0.5">
+              {isEn ? 'Contacts' : 'Contactos MX'}
+            </span>
+          </div>
+
+          {/* Card 3: Límite Diario */}
+          <div className="p-2.5 rounded-2xl bg-[#202236]/70 border border-white/5 flex flex-col items-center justify-center transition-transform hover:scale-[1.02]">
+            <div className="flex items-center gap-1 text-[#2ED5A4]">
+              <span className="material-symbols-outlined text-[15px]">verified_user</span>
+              <span className="text-base font-black text-[#2ED5A4] tracking-tight">
+                {userDailyLimit ? userDailyLimit.replace('/día', '').replace('/day', '').trim() : '$3,000'}
+              </span>
+            </div>
+            <span className="text-[10px] font-semibold text-[#8E91A5] uppercase tracking-wider mt-0.5">
+              {isEn ? 'Daily Limit' : 'Límite Diario'}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* 2. Sección: Datos Personales & Contacto de Registro */}
+      {/* ========================================================================= */}
+      {/* 3. GRUPO: DATOS PERSONALES & CONTACTO                                    */}
+      {/* ========================================================================= */}
       <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 shadow-md">
         <div className="flex items-center justify-between pb-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5]">
-            Datos de Registro & Contacto
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px] text-[#2ED5A4]">badge</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5]">
+              {isEn ? 'Account & Personal Details' : 'Mi Cuenta & Registro Legal'}
+            </span>
+          </div>
           <button
             type="button"
             onClick={handleOpenAvatarPicker}
             className="text-xs font-bold text-[#2ED5A4] hover:underline cursor-pointer flex items-center gap-1"
           >
-            <span>Editar</span>
+            <span>{isEn ? 'Edit' : 'Editar'}</span>
             <span>✎</span>
           </button>
         </div>
 
-        {/* Fila 1: Nombre Legal */}
+        {/* Nombre Legal */}
         <div className="flex items-center justify-between py-1.5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#8E91A5]">
               <UserIcon className="w-4 h-4 text-[#8E91A5]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Nombre Legal</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Legal Name' : 'Nombre Legal'}
+              </span>
               <span className="text-xs font-bold text-white">
                 {userFirstName} {userLastName}
               </span>
             </div>
           </div>
           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/5 text-[#8E91A5]">
-            Titular
+            {isEn ? 'Account Owner' : 'Titular'}
           </span>
         </div>
 
-        {/* Fila 2: Correo Registrado */}
+        {/* Correo Electrónico */}
         <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#8E91A5]">
               <MailIcon className="w-4 h-4 text-[#8E91A5]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Correo Electrónico</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Email Address' : 'Correo Electrónico'}
+              </span>
               <span className="text-xs font-bold text-white truncate max-w-[190px] block">
                 {userEmail}
               </span>
             </div>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] border border-[#2ED5A4]/20">
-            Verificado
+            {isEn ? 'Verified ✓' : 'Verificado ✓'}
           </span>
         </div>
 
-        {/* Fila 3: Teléfono Móvil con 2FA */}
+        {/* Teléfono Móvil */}
         <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#8E91A5]">
               <PhoneIcon className="w-4 h-4 text-[#8E91A5]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Teléfono Móvil</span>
-              <span className="text-xs font-bold text-white">{userPhone}</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Mobile Phone' : 'Teléfono Móvil'}
+              </span>
+              <span className="text-xs font-bold text-white">{userPhone || '+1 (555) 234-5678'}</span>
             </div>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] border border-[#2ED5A4]/20">
@@ -246,42 +320,53 @@ export function ProfileView({
           </span>
         </div>
 
-        {/* Fila 4: Domicilio / Residencia en USA */}
+        {/* Residencia USA */}
         <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#8E91A5]">
               <HouseRentIcon className="w-4 h-4 text-[#8E91A5]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Residencia Oficial</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Official Residence' : 'Residencia Oficial'}
+              </span>
               <span className="text-xs font-bold text-white">
-                {userCity}, {userState} ({userZip})
+                {userCity || 'Austin'}, {userState || 'TX'} ({userZip || '78701'})
               </span>
             </div>
           </div>
           <span className="text-[10px] font-semibold text-[#8E91A5]">USA 🇺🇸</span>
         </div>
 
-        {/* Fila 5: Fecha de Alta */}
+        {/* Fecha de Registro */}
         <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#8E91A5]">
               <RosetteBadgeCheckIcon className="w-4 h-4 text-[#8E91A5]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Fecha de Registro</span>
-              <span className="text-xs font-bold text-white">{userMemberSince}</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Member Since' : 'Fecha de Registro'}
+              </span>
+              <span className="text-xs font-bold text-white">{userMemberSince || 'Septiembre 2024'}</span>
             </div>
           </div>
-          <span className="text-[10px] font-semibold text-[#2ED5A4]">Cuenta Activa</span>
+          <span className="text-[10px] font-semibold text-[#2ED5A4]">
+            {isEn ? 'Active' : 'Activo'}
+          </span>
         </div>
       </div>
 
-      {/* 3. Sección: Cumplimiento Regulatorio, KYC & Bóveda */}
+      {/* ========================================================================= */}
+      {/* 4. GRUPO: SEGURIDAD, CUMPLIMIENTO & BÓVEDA CLIENTVAULT                    */}
+      {/* ========================================================================= */}
       <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 shadow-md">
-        <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5] block pb-1">
-          Cumplimiento Regulatorio (Fintech KYC/AML)
-        </span>
+        <div className="flex items-center gap-2 pb-1">
+          <span className="material-symbols-outlined text-[16px] text-[#7047EB]">security</span>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5]">
+            {isEn ? 'Security, Compliance & Vault' : 'Seguridad, Cumplimiento & Bóveda'}
+          </span>
+        </div>
 
         {/* Nivel de Cuenta & Límite Transaccional */}
         <div className="flex items-center justify-between py-1.5">
@@ -290,11 +375,13 @@ export function ProfileView({
               <ShieldCheckIcon className="w-4 h-4 text-[#2ED5A4]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Nivel de Cuenta</span>
-              <span className="text-xs font-bold text-white">{userKycTier}</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'KYC Tier Level' : 'Nivel de Cuenta KYC'}
+              </span>
+              <span className="text-xs font-bold text-white">{userKycTier || 'Tier 2 (Identidad Oficial + Residencia)'}</span>
             </div>
           </div>
-          <span className="text-xs font-black text-[#2ED5A4]">{userDailyLimit}</span>
+          <span className="text-xs font-black text-[#2ED5A4]">{userDailyLimit || '$3,000/día'}</span>
         </div>
 
         {/* Documento Oficial Validado */}
@@ -304,122 +391,108 @@ export function ProfileView({
               <CardOutlineIcon className="w-4 h-4 text-[#8E91A5]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Documento Validado</span>
-              <span className="text-xs font-bold text-white">{userDocType}</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Validated Identity Document' : 'Documento Oficial Validado'}
+              </span>
+              <span className="text-xs font-bold text-white">{userDocType || 'Pasaporte / INE'}</span>
               <span className="text-[9px] text-[#8E91A5] block">
-                Folio {userDocNumber} • OCR Forense Gemini
+                Folio {userDocNumber || 'MEX98765432'} • OCR Forense Gemini
               </span>
             </div>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] border border-[#2ED5A4]/20">
-            Verificado ✓
+            {isEn ? 'Verified ✓' : 'Verificado ✓'}
           </span>
         </div>
 
         {/* ClientVault Bóveda Cero Conocimiento */}
         <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#8E91A5]">
-              <LockIcon className="w-4 h-4 text-[#8E91A5]" />
+            <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#2ED5A4]">
+              <LockIcon className="w-4 h-4 text-[#2ED5A4]" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Bóveda Cero Conocimiento</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Zero-Knowledge Security' : 'Bóveda Cero Conocimiento'}
+              </span>
               <span className="text-xs font-bold text-white">ClientVault AES-GCM-256</span>
             </div>
           </div>
           <button
             type="button"
             onClick={onOpenVault}
-            className="text-xs font-bold text-[#2ED5A4] hover:underline cursor-pointer flex items-center gap-1"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#202236] border border-[#2ED5A4]/30 text-xs font-bold text-[#2ED5A4] hover:bg-[#2B2C42] active:scale-95 transition-all cursor-pointer shadow-sm"
           >
-            <span>Abrir Bóveda</span>
-            <span>→</span>
+            <span>{isEn ? 'Open Vault' : 'Abrir Bóveda'}</span>
+            <ChevronRightIcon className="w-3.5 h-3.5 text-[#2ED5A4]" />
           </button>
         </div>
-      </div>
 
-      {/* 4. Sección: Métodos de Pago Vinculados */}
-      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 shadow-md">
-        <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5] block pb-1">
-          Métodos de Pago Registrados
-        </span>
-
-        {/* Tarjeta de Débito Visa */}
-        <div className="flex items-center justify-between py-1.5">
+        {/* Tarjeta de Débito Visa KIN */}
+        <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-white">
               <CardOutlineIcon className="w-4 h-4 text-white" />
             </div>
             <div>
-              <span className="text-[10px] text-[#8E91A5] block">Tarjeta de Débito Principal</span>
+              <span className="text-[10px] text-[#8E91A5] block">
+                {isEn ? 'Primary Debit Card' : 'Tarjeta de Débito KIN'}
+              </span>
               <span className="text-xs font-bold text-white">Visa KIN •••• 4242</span>
             </div>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-white border border-white/10">
-            Predeterminada
+            {isEn ? 'Default' : 'Predeterminada'}
           </span>
         </div>
-
-        {/* Cuenta Bancaria ACH Chase */}
-        <div className="flex items-center justify-between py-1.5 border-t border-white/5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-white">
-              <BankBuildingIcon className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <span className="text-[10px] text-[#8E91A5] block">Cuenta Bancaria USA (ACH)</span>
-              <span className="text-xs font-bold text-white">Chase Bank •••• 8910</span>
-            </div>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] border border-[#2ED5A4]/20">
-            Conectada
-          </span>
-        </div>
-      </div>
-
-      {/* 5. Sección: Seguridad & Preferencias Táctiles */}
-      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 shadow-md">
-        <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5] block pb-1">
-          Seguridad & Preferencias
-        </span>
 
         {/* Switch Biometría FaceID */}
-        <div className="flex items-center justify-between py-1.5">
+        <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div>
             <span className="text-xs font-bold text-white block">
-              {language === 'en'
-                ? 'Biometric Authentication (Face ID)'
-                : 'Autenticación Biométrica (Face ID)'}
+              {isEn ? 'Biometric Authentication (Face ID)' : 'Autenticación Biométrica (Face ID)'}
             </span>
             <span className="text-[10px] text-[#8E91A5]">
-              {language === 'en'
-                ? 'Quick access & SPEI authorizations'
-                : 'Acceso rápido y confirmación de envíos SPEI'}
+              {isEn
+                ? 'Instant login & SPEI transfer approvals'
+                : 'Acceso seguro y confirmación de envíos SPEI'}
             </span>
           </div>
           <ToggleSwitch
             enabled={biometricsEnabled}
             onToggle={() => setBiometricsEnabled(!biometricsEnabled)}
-            title={language === 'en' ? 'Face ID' : 'Biometría'}
+            title={isEn ? 'Face ID' : 'Biometría'}
           />
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 5. GRUPO: PREFERENCIAS & REGIONALIZACIÓN                                 */}
+      {/* ========================================================================= */}
+      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 shadow-md">
+        <div className="flex items-center gap-2 pb-1">
+          <span className="material-symbols-outlined text-[16px] text-[#2ED5A4]">tune</span>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5]">
+            {isEn ? 'Preferences & Regional Settings' : 'Preferencias & Regionalización'}
+          </span>
         </div>
 
         {/* Switch Notificaciones de Envíos */}
-        <div className="flex items-center justify-between py-1.5 border-t border-white/5">
+        <div className="flex items-center justify-between py-1.5">
           <div>
             <span className="text-xs font-bold text-white block">
-              {language === 'en' ? 'Real-Time Notifications' : 'Notificaciones en Tiempo Real'}
+              {isEn ? 'Push Notifications' : 'Notificaciones en Tiempo Real'}
             </span>
             <span className="text-[10px] text-[#8E91A5]">
-              {language === 'en'
-                ? 'Delivery confirmations & FX quotes'
-                : 'Confirmaciones de entrega y cotizaciones FX'}
+              {isEn
+                ? 'Delivery alerts & FX quotes'
+                : 'Alertas de entrega SPEI y cotizaciones FX'}
             </span>
           </div>
           <ToggleSwitch
             enabled={pushNotificationsEnabled}
             onToggle={() => setPushNotificationsEnabled(!pushNotificationsEnabled)}
-            title={language === 'en' ? 'Notifications' : 'Notificaciones'}
+            title={isEn ? 'Notifications' : 'Notificaciones'}
           />
         </div>
 
@@ -427,10 +500,10 @@ export function ProfileView({
         <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div>
             <span className="text-xs font-bold text-white block">
-              {language === 'en' ? 'App Language' : 'Idioma de la Aplicación'}
+              {isEn ? 'App Language' : 'Idioma de la Aplicación'}
             </span>
             <span className="text-[10px] text-[#8E91A5]">
-              {language === 'en' ? 'Active language preference' : 'Preferencia de idioma activa'}
+              {isEn ? 'Active language preference' : 'Preferencia de idioma activa'}
             </span>
           </div>
           <div className="flex items-center gap-1 bg-[#202236] p-1 rounded-xl border border-white/5">
@@ -481,10 +554,10 @@ export function ProfileView({
         <div className="flex items-center justify-between py-1.5 border-t border-white/5">
           <div>
             <span className="text-xs font-bold text-white block">
-              {language === 'en' ? 'Base Currency / Region' : 'Moneda Base / Región'}
+              {isEn ? 'Base Currency / Region' : 'Moneda Base / Saldo Principal'}
             </span>
             <span className="text-[10px] text-[#8E91A5]">
-              {language === 'en' ? 'Primary account balance mode' : 'Modo de saldo principal'}
+              {isEn ? 'Primary account balance mode' : 'Modo de saldo predeterminado'}
             </span>
           </div>
           <div className="flex items-center gap-1 bg-[#202236] p-1 rounded-xl border border-white/5">
@@ -514,27 +587,74 @@ export function ProfileView({
         </div>
       </div>
 
-      {/* 6. Botones de Acción: Editar Perfil & Cerrar Sesión */}
-      <div className="space-y-2.5 pt-1">
+      {/* ========================================================================= */}
+      {/* 6. GRUPO: ASISTENCIA 24/7 & CUMPLIMIENTO LEGAL                           */}
+      {/* ========================================================================= */}
+      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 shadow-md">
+        <div className="flex items-center gap-2 pb-1">
+          <span className="material-symbols-outlined text-[16px] text-[#2ED5A4]">support_agent</span>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#8E91A5]">
+            {isEn ? 'Support & Regulatory Framework' : 'Asistencia & Marco Legal'}
+          </span>
+        </div>
+
+        {/* Soporte WhatsApp Directo */}
         <button
           type="button"
-          onClick={handleOpenAvatarPicker}
-          className="w-full h-13 rounded-2xl bg-[#202236] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-black text-white hover:bg-[#2B2C42] transition-all cursor-pointer shadow-md"
+          onClick={handleOpenWhatsApp}
+          className="w-full flex items-center justify-between py-1.5 text-left cursor-pointer group"
         >
-          <span>✎</span>
-          <span>
-            {language === 'en'
-              ? 'Edit Profile, Language & Currency'
-              : 'Editar Información, Idioma y Moneda'}
-          </span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/25 flex items-center justify-center text-[#2ED5A4] group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">chat</span>
+            </div>
+            <div>
+              <span className="text-xs font-bold text-white block">
+                {isEn ? 'KIN WhatsApp Concierge 24/7' : 'Concierge KIN WhatsApp 24/7'}
+              </span>
+              <span className="text-[10px] text-[#8E91A5]">
+                {isEn ? 'Bilingual dedicated human support' : 'Atención humana bilingüe inmediata'}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4]">
+              {isEn ? 'Online' : 'En línea'}
+            </span>
+            <ChevronRightIcon className="w-4 h-4 text-[#8E91A5] group-hover:text-white transition-colors" />
+          </div>
         </button>
 
+        {/* Marco Regulatorio */}
+        <div className="flex items-center justify-between py-1.5 border-t border-white/5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#202236] border border-white/5 flex items-center justify-center text-[#8E91A5]">
+              <BankBuildingIcon className="w-4 h-4 text-[#8E91A5]" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-white block">
+                FinCEN MSB & SPEI Banxico
+              </span>
+              <span className="text-[10px] text-[#8E91A5]">
+                Regulación bancaria USA-MX con cifrado grado militar
+              </span>
+            </div>
+          </div>
+          <span className="text-[10px] font-semibold text-[#8E91A5]">Compliant</span>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 7. DANGER ZONE / CERRAR SESIÓN SEGURA                                    */}
+      {/* ========================================================================= */}
+      <div className="pt-2">
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full h-12 rounded-2xl bg-[#181928] border border-[#FF5555]/20 hover:border-[#FF5555]/50 hover:bg-[#FF5555]/10 flex items-center justify-center gap-2 text-xs font-bold text-[#FF5555] transition-all cursor-pointer shadow-sm"
+          className="w-full h-13 rounded-2xl bg-[#181928] border border-[#FF5555]/30 hover:border-[#FF5555]/60 hover:bg-[#FF5555]/10 flex items-center justify-center gap-2 text-xs font-bold text-[#FF5555] active:scale-95 transition-all cursor-pointer shadow-lg"
         >
-          <span>{language === 'en' ? 'Secure Log Out' : 'Cerrar Sesión Segura'}</span>
+          <span className="material-symbols-outlined text-[18px] text-[#FF5555]">logout</span>
+          <span>{isEn ? 'Secure Log Out' : 'Cerrar Sesión Segura'}</span>
         </button>
       </div>
     </div>
