@@ -743,8 +743,8 @@ export function KinCashP2PModal({
               onClick={() => setCurrentAmount(amt)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border active:scale-95 ${
                 currentAmount === amt
-                  ? 'bg-primary text-[#002116] border-primary shadow-sm scale-105'
-                  : 'bg-surface-container text-white/80 border-white/10 hover:border-primary/40'
+                  ? 'bg-primary text-on-primary border-primary shadow-sm scale-105'
+                  : 'bg-surface-container text-on-surface border-outline/20 hover:border-primary/40'
               }`}
             >
               ${amt}
@@ -753,7 +753,7 @@ export function KinCashP2PModal({
           <button
             type="button"
             onClick={clearAmount}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-on-surface-variant hover:text-white bg-white/5 border border-white/10 cursor-pointer active:scale-95"
+            className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline/20 cursor-pointer active:scale-95"
             title={isEn ? 'Clear to zero' : 'Borrar a cero'}
           >
             C

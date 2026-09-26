@@ -499,10 +499,10 @@ export function ProfileView({
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
                 {themeVariant === 'light'
-                  ? (isEn ? 'Light Mode (Modern Fintech)' : 'Modo Claro (Fintech Luminoso)')
+                  ? (isEn ? 'Antigravity Light (Catppuccin)' : 'Modo Claro Antigravity (Catppuccin)')
                   : themeVariant === 'slate'
-                  ? (isEn ? 'Slate Night (Institutional Blue)' : 'Slate Night (Activado)')
-                  : (isEn ? 'OLED Obsidian Black (Active)' : 'OLED Obsidian Black (Activado)')}
+                  ? (isEn ? 'Catppuccin Macchiato' : 'Catppuccin Macchiato (Activado)')
+                  : (isEn ? 'Catppuccin Mocha (OLED Deep)' : 'Catppuccin Mocha (Activado)')}
               </span>
             </div>
           </div>
@@ -1167,7 +1167,7 @@ export function ProfileView({
             </div>
 
             <div className="space-y-3 mb-5">
-              {/* Option 1: OLED Obsidian */}
+              {/* Option 1: Catppuccin Mocha (OLED Deep) */}
               <div
                 className={`p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
                   themeVariant === 'obsidian' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-70'
@@ -1175,15 +1175,15 @@ export function ProfileView({
                 onClick={() => handleApplyThemeVariant('obsidian')}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#06070B] flex items-center justify-center text-[#2ED5A4] shadow-inner border border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-[#11111B] flex items-center justify-center text-[#2ED5A4] shadow-inner border border-white/10">
                     <span className="material-symbols-outlined text-[22px]">nights_stay</span>
                   </div>
                   <div>
                     <span className="font-title-base text-[15px] text-white font-bold block">
-                      Obsidian Deep (OLED)
+                      Catppuccin Mocha (OLED Deep)
                     </span>
                     <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      {isEn ? 'Pure black #06070B with mint accents' : 'Negro puro #06070B con toques esmeralda'}
+                      {isEn ? 'Velvety #11111B with soft #CDD6F4 text & mint accents' : 'Terciopelo oscuro #11111B con texto #CDD6F4 y toques menta'}
                     </span>
                   </div>
                 </div>
@@ -1201,7 +1201,7 @@ export function ProfileView({
                 )}
               </div>
 
-              {/* Option 2: Slate Night */}
+              {/* Option 2: Catppuccin Macchiato */}
               <div
                 className={`p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
                   themeVariant === 'slate' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-70'
@@ -1209,13 +1209,15 @@ export function ProfileView({
                 onClick={() => handleApplyThemeVariant('slate')}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#171b2a] flex items-center justify-center text-[#ccbdff] shadow-inner border border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-[#181825] flex items-center justify-center text-[#CBA6F7] shadow-inner border border-white/10">
                     <span className="material-symbols-outlined text-[22px]">dark_mode</span>
                   </div>
                   <div>
-                    <span className="font-title-base text-[15px] text-white font-bold block">Slate Night</span>
+                    <span className="font-title-base text-[15px] text-white font-bold block">
+                      Catppuccin Macchiato
+                    </span>
                     <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      {isEn ? 'Institutional blue slate #171B2A' : 'Gris azulado institucional #171B2A'}
+                      {isEn ? 'Modern deep slate #181825 with mauve accents' : 'Gris azulado #181825 con toques malva y lavanda'}
                     </span>
                   </div>
                 </div>
@@ -1233,29 +1235,29 @@ export function ProfileView({
                 )}
               </div>
 
-              {/* Option 3: Light Mode */}
+              {/* Option 3: Antigravity Light Theme (Catppuccin Latte) */}
               <div
                 className={`p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
-                  themeVariant === 'light' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-70'
+                  themeVariant === 'light' ? 'border-[#059669]/50 bg-surface-container' : 'border-white/5 opacity-70'
                 }`}
                 onClick={() => handleApplyThemeVariant('light')}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#06070B] shadow-inner border border-black/10">
+                  <div className="w-10 h-10 rounded-xl bg-[#EAECF0] flex items-center justify-center text-[#8839EF] shadow-inner border border-[#DCE0E8]">
                     <span className="material-symbols-outlined text-[22px]">light_mode</span>
                   </div>
                   <div>
                     <span className="font-title-base text-[15px] text-white font-bold block">
-                      {isEn ? 'Modern Light Mode' : 'Modo Claro Fintech'}
+                      {isEn ? 'Antigravity Light (Catppuccin)' : 'Modo Claro Antigravity (Catppuccin)'}
                     </span>
                     <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      {isEn ? 'High daylight readability' : 'Claridad diurna de alto contraste'}
+                      {isEn ? 'Soft warm #EAECF0 with #4C4F69 text & #8839EF accent' : 'Blanco cálido #EAECF0 con texto #4C4F69 y acento #8839EF'}
                     </span>
                   </div>
                 </div>
                 {themeVariant === 'light' ? (
                   <span
-                    className="material-symbols-outlined text-[#2ED5A4] text-[22px]"
+                    className="material-symbols-outlined text-[#059669] text-[22px]"
                     style={{ fontVariationSettings: "'FILL' 1" }}
                   >
                     check_circle

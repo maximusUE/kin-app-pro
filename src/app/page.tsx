@@ -646,7 +646,7 @@ export default function MobileApp() {
         document.documentElement.classList.add(newTheme);
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
-          metaThemeColor.setAttribute('content', newTheme === 'light' ? '#F8F9FC' : '#121622');
+          metaThemeColor.setAttribute('content', newTheme === 'light' ? '#EAECF0' : '#11111B');
         }
       } catch (_) {}
     }
@@ -2034,7 +2034,7 @@ export default function MobileApp() {
         {!sendSuccessData && activeTab !== 'send-quick' && (
           <nav
             className="stitch-bottom-dock"
-            style={{ backgroundColor: theme === 'light' ? '#FFFFFF' : '#000000', opacity: 1 }}
+            style={{ backgroundColor: theme === 'light' ? '#FFFFFF' : '#181825', opacity: 1 }}
             data-active-classes="text-primary font-bold scale-105"
           >
             <div className="h-16 w-full flex items-center justify-around px-2">

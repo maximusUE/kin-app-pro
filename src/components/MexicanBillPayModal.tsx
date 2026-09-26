@@ -256,8 +256,8 @@ export function MexicanBillPayModal({
     <div className="flex flex-col w-full space-y-5 animate-fade-in relative">
       {/* Dynamic Atmospheric Glow */}
       <div className="relative w-full">
-        <div className="absolute -top-6 -left-10 w-44 h-44 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -top-4 -right-10 w-48 h-48 bg-secondary-container/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-6 -left-10 w-44 h-44 bg-primary/10 rounded-full blur-3xl pointer-events-none opacity-30 dark:opacity-100" />
+        <div className="absolute -top-4 -right-10 w-48 h-48 bg-secondary-container/20 rounded-full blur-3xl pointer-events-none opacity-20 dark:opacity-100" />
 
         {/* Context Header */}
         <div className="relative flex flex-col space-y-1 z-10">
