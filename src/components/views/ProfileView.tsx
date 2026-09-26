@@ -669,8 +669,14 @@ export function ProfileView({
       {/* MODAL 1: INFORMACIÓN PERSONAL (EDIT PROFILE MODAL)                        */}
       {/* ========================================================================= */}
       {editProfileModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col justify-end animate-fade-in">
-          <div className="w-full max-w-[400px] mx-auto bg-surface-container rounded-t-3xl p-5 pb-safe max-h-[85vh] overflow-y-auto shadow-2xl flex flex-col border-t border-white/10">
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
+          onClick={() => setEditProfileModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-[390px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.9)] p-5 relative my-auto animate-scale-in flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -843,8 +849,14 @@ export function ProfileView({
       {/* MODAL 2: MÉTODOS DE PAGO & TARJETAS                                       */}
       {/* ========================================================================= */}
       {paymentCardsModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col justify-end animate-fade-in">
-          <div className="w-full max-w-[400px] mx-auto bg-surface-container rounded-t-3xl p-5 pb-safe max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col border-t border-white/10">
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
+          onClick={() => setPaymentCardsModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-[390px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.9)] p-5 relative my-auto animate-scale-in flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-3">
               <div>
@@ -1034,8 +1046,14 @@ export function ProfileView({
       {/* MODAL 3: IDIOMA / LANGUAGE SELECTOR                                       */}
       {/* ========================================================================= */}
       {languageModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col justify-end animate-fade-in">
-          <div className="w-full max-w-[400px] mx-auto bg-surface-container rounded-t-3xl p-5 pb-safe shadow-2xl flex flex-col border-t border-white/10">
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
+          onClick={() => setLanguageModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-[390px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.9)] p-5 relative my-auto animate-scale-in flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -1131,8 +1149,14 @@ export function ProfileView({
       {/* MODAL 4: APARIENCIA / TEMA (OLED OBSIDIAN & HIGH CONTRAST)                */}
       {/* ========================================================================= */}
       {appearanceModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col justify-end animate-fade-in">
-          <div className="w-full max-w-[400px] mx-auto bg-surface-container rounded-t-3xl p-5 pb-safe shadow-2xl flex flex-col border-t border-white/10">
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
+          onClick={() => setAppearanceModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-[390px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.9)] p-5 relative my-auto animate-scale-in flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -1270,8 +1294,14 @@ export function ProfileView({
       {/* MODAL 5: PRIVACIDAD & SEGURIDAD DETAIL DRAWER                             */}
       {/* ========================================================================= */}
       {securityModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col justify-end animate-fade-in">
-          <div className="w-full max-w-[400px] mx-auto bg-surface-container rounded-t-3xl p-5 pb-safe max-h-[85vh] overflow-y-auto shadow-2xl flex flex-col border-t border-white/10">
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
+          onClick={() => setSecurityModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-[390px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.9)] p-5 relative my-auto animate-scale-in flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -1399,8 +1429,14 @@ export function ProfileView({
       {/* MODAL 6: AYUDA & SOPORTE 24/7 (CENTRO DE AYUDA KIN)                       */}
       {/* ========================================================================= */}
       {supportModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col justify-end animate-fade-in">
-          <div className="w-full max-w-[400px] mx-auto bg-surface-container rounded-t-3xl p-5 pb-safe shadow-2xl flex flex-col border-t border-white/10">
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
+          onClick={() => setSupportModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-[390px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.9)] p-5 relative my-auto animate-scale-in flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-4">
               <div>
