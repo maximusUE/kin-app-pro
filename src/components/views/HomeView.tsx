@@ -56,6 +56,7 @@ export function HomeView({
   userName,
   userKycTier,
   currencyPref = 'USD',
+  handleToggleCurrency,
   USD_TO_MXN_RATE,
   language,
   onNavigateTab,
@@ -99,18 +100,60 @@ export function HomeView({
                 : `Hola, ${userFirstName || (userName ? userName.split(' ')[0] : 'Bienvenido')}`}
             </h1>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-md border border-white/5">
-            <span className="w-2 h-2 rounded-full bg-[#2ED5A4] animate-pulse shadow-[0_0_8px_#2ED5A4]" />
-            <span className="font-caption-sm text-caption-sm text-[#2ED5A4] font-semibold">
-              {userKycTier
-                ? userKycTier.includes('Tier 1')
-                  ? (isEn ? 'Tier-1 Basic' : 'Tier-1 Básico')
-                  : userKycTier.includes('Tier 2')
-                  ? (isEn ? 'Tier-2 Verified' : 'Tier-2 Verificado')
-                  : (isEn ? 'Tier-3 Advanced' : 'Tier-3 Avanzado')
-                : (isEn ? 'Tier-2 Verified' : 'Tier-2 Verificado')}
+
+          {/* ========================================================================= */}
+          {/* CONMUTADOR DE UBICACIÓN / DIVISA EU / MX (DISEÑO SCREENSHOT 2)           */}
+          {/* ========================================================================= */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={currencyPref === 'MXN'}
+            aria-label={isEn ? 'Currency mode: US Dollar or Mexican Peso' : 'Modo de divisa: Dólar EU o Peso MX'}
+            onClick={() => handleToggleCurrency?.(currencyPref === 'USD' ? 'MXN' : 'USD')}
+            className="touch-press flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high hover:bg-surface-container-highest border border-white/10 shadow-md cursor-pointer transition-all select-none group"
+            title={
+              currencyPref === 'USD'
+                ? (isEn ? 'Switch to Mexican Pesos (MX)' : 'Cambiar a Pesos Mexicanos (MX)')
+                : (isEn ? 'Switch to US Dollars (EU)' : 'Cambiar a Dólares (EU)')
+            }
+          >
+            {/* Etiqueta EU (Estados Unidos / USD) */}
+            <span
+              className={`font-financial-mono text-[11px] font-black tracking-tight transition-all duration-200 ${
+                currencyPref === 'USD'
+                  ? 'text-[#2ED5A4] drop-shadow-[0_0_6px_rgba(46,213,164,0.4)] scale-105'
+                  : 'text-on-surface-variant opacity-50 group-hover:opacity-75'
+              }`}
+            >
+              EU
             </span>
-          </div>
+
+            {/* Toggle Switch iOS (Exacto a Screenshot 2) */}
+            <div
+              className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 flex items-center flex-shrink-0 ${
+                currencyPref === 'MXN'
+                  ? 'bg-[#2ED5A4]'
+                  : 'bg-slate-300 dark:bg-[#313244] border border-slate-300/80 dark:border-white/10'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-out ${
+                  currencyPref === 'MXN' ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </div>
+
+            {/* Etiqueta MX (México / MXN) */}
+            <span
+              className={`font-financial-mono text-[11px] font-black tracking-tight transition-all duration-200 ${
+                currencyPref === 'MXN'
+                  ? 'text-[#2ED5A4] drop-shadow-[0_0_6px_rgba(46,213,164,0.4)] scale-105'
+                  : 'text-on-surface-variant opacity-50 group-hover:opacity-75'
+              }`}
+            >
+              MX
+            </span>
+          </button>
         </div>
 
         {/* 4 BOTONES PRINCIPALES: 1 SEND, 2 KINCASH, 3 QUICK SEND, 4 BILL PAY */}
@@ -246,7 +289,7 @@ export function HomeView({
               ))}
             </div>
 
-            {visibleTransactions.map((tx) => renderTransactionRow(tx, setSelectedTransactionDetail, USD_TO_MXN_RATE))}
+            {visibleTransactions.map((tx) => renderTransactionRow(tx, setSelectedTransactionDetail, USD_TO_MXN_RATE, currencyPref))}
           </div>
         ) : (
           /* ========================================================================= */
@@ -322,17 +365,32 @@ export function HomeView({
 
                   <div className="flex items-center gap-2 flex-shrink-0 pl-2">
                     <div className="flex flex-col items-end">
-                      <span className="font-financial-mono text-financial-mono font-bold text-white">
-                        {primaryTx.type === 'income'
-                          ? `+$${Math.abs(primaryTx.amount).toFixed(2)}`
-                          : `-$${Math.abs(primaryTx.amount).toFixed(2)}`}
-                      </span>
-                      <span className="font-caption-sm text-caption-sm font-semibold text-primary">
-                        ${(primaryTx.amountMXN || Math.abs(primaryTx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', {
-                          minimumFractionDigits: 2,
-                        })}{' '}
-                        MXN ✓
-                      </span>
+                      {currencyPref === 'MXN' ? (
+                        <>
+                          <span className="font-financial-mono text-financial-mono font-bold text-white">
+                            {primaryTx.type === 'income'
+                              ? `+$${(primaryTx.amountMXN || Math.abs(primaryTx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`
+                              : `-$${(primaryTx.amountMXN || Math.abs(primaryTx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`}
+                          </span>
+                          <span className="font-caption-sm text-caption-sm font-semibold text-primary">
+                            ≈ ${Math.abs(primaryTx.amount).toFixed(2)} USD
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-financial-mono text-financial-mono font-bold text-white">
+                            {primaryTx.type === 'income'
+                              ? `+$${Math.abs(primaryTx.amount).toFixed(2)}`
+                              : `-$${Math.abs(primaryTx.amount).toFixed(2)}`}
+                          </span>
+                          <span className="font-caption-sm text-caption-sm font-semibold text-primary">
+                            ${(primaryTx.amountMXN || Math.abs(primaryTx.amount) * USD_TO_MXN_RATE).toLocaleString('es-MX', {
+                              minimumFractionDigits: 2,
+                            })}{' '}
+                            MXN ✓
+                          </span>
+                        </>
+                      )}
                     </div>
                     <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
                       layers
@@ -368,7 +426,8 @@ export function HomeView({
 function renderTransactionRow(
   tx: HomeTransaction,
   onSelect: (tx: HomeTransaction) => void,
-  rate: number
+  rate: number,
+  currencyPref: 'USD' | 'MXN' = 'USD'
 ) {
   const isIncome = tx.type === 'income';
   const bankLogo = getBankLogoUrl(tx.title) || getBankLogoUrl(tx.category);
@@ -426,16 +485,35 @@ function renderTransactionRow(
       </div>
       <div className="flex items-center gap-2 flex-shrink-0 pl-2">
         <div className="flex flex-col items-end">
-          <span
-            className={`font-financial-mono text-financial-mono font-bold ${
-              isIncome ? 'text-primary' : 'text-white'
-            }`}
-          >
-            {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
-          </span>
-          <span className="font-caption-sm text-caption-sm font-semibold text-primary">
-            ${(tx.amountMXN || Math.abs(tx.amount) * rate).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
-          </span>
+          {currencyPref === 'MXN' ? (
+            <>
+              <span
+                className={`font-financial-mono text-financial-mono font-bold ${
+                  isIncome ? 'text-primary' : 'text-white'
+                }`}
+              >
+                {isIncome
+                  ? `+$${(tx.amountMXN || Math.abs(tx.amount) * rate).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`
+                  : `-$${(tx.amountMXN || Math.abs(tx.amount) * rate).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`}
+              </span>
+              <span className="font-caption-sm text-caption-sm font-semibold text-primary">
+                ≈ ${Math.abs(tx.amount).toFixed(2)} USD
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                className={`font-financial-mono text-financial-mono font-bold ${
+                  isIncome ? 'text-primary' : 'text-white'
+                }`}
+              >
+                {isIncome ? `+$${Math.abs(tx.amount).toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+              </span>
+              <span className="font-caption-sm text-caption-sm font-semibold text-primary">
+                ${(tx.amountMXN || Math.abs(tx.amount) * rate).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN ✓
+              </span>
+            </>
+          )}
         </div>
         <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">
           chevron_right
