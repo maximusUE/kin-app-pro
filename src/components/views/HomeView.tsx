@@ -135,7 +135,7 @@ export function HomeView({
             onClick={() => onNavigateTab('kin-cash')}
             className="group flex flex-col items-center gap-1.5 cursor-pointer"
           >
-            <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-surface-container-high flex items-center justify-center text-emerald-600 dark:text-primary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-emerald-100 dark:border-white/5">
               <span className="material-symbols-outlined text-[26px]">bolt</span>
             </div>
             <span className="font-label-caps text-label-caps text-white font-bold tracking-tight">
@@ -149,7 +149,7 @@ export function HomeView({
             onClick={() => onNavigateTab('send-quick')}
             className="group flex flex-col items-center gap-1.5 cursor-pointer"
           >
-            <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+            <div className="w-14 h-14 rounded-2xl bg-purple-50 dark:bg-surface-container-high flex items-center justify-center text-purple-600 dark:text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-purple-100 dark:border-white/5">
               <span className="material-symbols-outlined text-[26px]">touch_app</span>
             </div>
             <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">
@@ -163,7 +163,7 @@ export function HomeView({
             onClick={() => onNavigateTab('bill-pay')}
             className="group flex flex-col items-center gap-1.5 cursor-pointer"
           >
-            <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-white/5">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-surface-container-high flex items-center justify-center text-indigo-600 dark:text-secondary transition-transform group-hover:scale-105 active:scale-95 shadow-md border border-indigo-100 dark:border-white/5">
               <span className="material-symbols-outlined text-[26px]">receipt_long</span>
             </div>
             <span className="font-label-caps text-label-caps text-on-surface font-semibold tracking-tight">
@@ -186,7 +186,7 @@ export function HomeView({
             <h2 className="font-title-base text-title-base text-white font-bold">
               {isEn ? 'Recent Activity' : 'Actividad Reciente'}
             </h2>
-            <span className="px-2 py-0.5 rounded-full bg-[#1A1C2C] border border-white/10 text-[10px] font-bold text-[#8E91A5] flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#1A1C2C] border border-slate-200/80 dark:border-white/10 text-[10px] font-bold text-slate-700 dark:text-[#8E91A5] flex items-center gap-1">
               <span className="material-symbols-outlined text-[13px] text-[#2ED5A4]">layers</span>
               <span>{visibleTransactions.length}</span>
             </span>
@@ -260,7 +260,7 @@ export function HomeView({
             {/* Tarjeta de Nivel 3 (Fondo profundo de la pila - más pequeña y tenue) */}
             {tertiaryTx && (
               <div
-                className="absolute inset-x-6 top-5 h-14 rounded-2xl bg-[#0E0F1A] border border-white/5 opacity-40 shadow-sm pointer-events-none transition-all duration-300 group-hover:top-6"
+                className="absolute inset-x-6 top-5 h-14 rounded-2xl bg-slate-200/50 dark:bg-[#0E0F1A] border border-slate-200/60 dark:border-white/5 opacity-40 shadow-sm pointer-events-none transition-all duration-300 group-hover:top-6"
                 style={{ transform: 'scale(0.92)' }}
               />
             )}
@@ -268,25 +268,25 @@ export function HomeView({
             {/* Tarjeta de Nivel 2 (Fondo medio de la pila - ligeramente escalada) */}
             {secondaryTx && (
               <div
-                className="absolute inset-x-3 top-2.5 h-16 rounded-2xl bg-[#141525] border border-white/10 opacity-70 shadow-md pointer-events-none transition-all duration-300 group-hover:top-3.5"
+                className="absolute inset-x-3 top-2.5 h-16 rounded-2xl bg-slate-100 dark:bg-[#141525] border border-slate-200/80 dark:border-white/10 opacity-70 shadow-md pointer-events-none transition-all duration-300 group-hover:top-3.5"
                 style={{ transform: 'scale(0.96)' }}
               />
             )}
 
             {/* Tarjeta Principal Frontal (Most Recent Activity - Nivel 1) */}
             {primaryTx && (
-              <div className="relative z-10 rounded-2xl bg-[#181928] border border-white/15 p-3.5 shadow-xl transition-all duration-300 group-hover:border-primary/40 group-active:scale-[0.99]">
+              <div className="relative z-10 rounded-2xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/15 p-3.5 shadow-xl transition-all duration-300 group-hover:border-primary/40 group-active:scale-[0.99]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner ${
+                      className={`relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm shrink-0 ${
                         primaryTx.iconType === 'bank'
-                          ? 'bg-secondary-container/20 text-secondary'
+                          ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20'
                           : primaryTx.iconType === 'wallet'
-                          ? 'bg-primary/10 text-primary'
+                          ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-primary border border-emerald-100 dark:border-emerald-500/20'
                           : primaryTx.iconType === 'luz'
-                          ? 'bg-surface-container-high text-secondary'
-                          : 'bg-surface-container-high text-primary'
+                          ? 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20'
+                          : 'bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-secondary border border-purple-100 dark:border-purple-500/20'
                       }`}
                     >
                       {primaryTx.iconType === 'luz' ? (
@@ -378,18 +378,18 @@ function renderTransactionRow(
       key={tx.id}
       type="button"
       onClick={() => onSelect(tx)}
-      className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-[#181928] hover:bg-surface-container transition-all shadow-md border border-white/5 hover:border-primary/40 cursor-pointer text-left group active:scale-[0.99]"
+      className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-[#181928] hover:bg-slate-50 dark:hover:bg-surface-container transition-all shadow-md border border-slate-200/80 dark:border-white/5 hover:border-primary/40 cursor-pointer text-left group active:scale-[0.99]"
     >
       <div className="flex items-center gap-3 min-w-0">
         <div
-          className={`relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner ${
+          className={`relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm shrink-0 ${
             tx.iconType === 'bank'
-              ? 'bg-secondary-container/20 text-secondary'
+              ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20'
               : tx.iconType === 'wallet'
-              ? 'bg-primary/10 text-primary'
+              ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-primary border border-emerald-100 dark:border-emerald-500/20'
               : tx.iconType === 'luz'
-              ? 'bg-surface-container-high text-secondary'
-              : 'bg-surface-container-high text-primary'
+              ? 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20'
+              : 'bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-secondary border border-purple-100 dark:border-purple-500/20'
           }`}
         >
           {tx.iconType === 'luz' ? (

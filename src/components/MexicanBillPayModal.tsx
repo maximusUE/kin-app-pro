@@ -34,6 +34,28 @@ export interface ServiceDefinition {
   billingCycle: string;
 }
 
+export const getCategoryIconTheme = (id: string, isSelected: boolean) => {
+  if (isSelected) {
+    return 'bg-emerald-500 text-white font-bold shadow-md shadow-emerald-500/25';
+  }
+  switch (id) {
+    case 'electricidad':
+      return 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20';
+    case 'telefono':
+      return 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20';
+    case 'internet':
+      return 'bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-100 dark:border-purple-500/20';
+    case 'television':
+      return 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20';
+    case 'agua':
+      return 'bg-cyan-50 dark:bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-100 dark:border-cyan-500/20';
+    case 'gas':
+      return 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20';
+    default:
+      return 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-white/10';
+  }
+};
+
 export const SERVICIOS_MEXICO: ServiceDefinition[] = [
   {
     id: 'electricidad',
@@ -41,7 +63,7 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     subtitulo: 'CFE (Comisión Federal)',
     icono: 'bolt',
     badge: 'Popular',
-    badgeClass: 'bg-primary-container text-on-primary-container font-label-caps text-[10px] uppercase font-bold tracking-tight',
+    badgeClass: 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-label-caps text-[9px] uppercase font-bold border border-emerald-200/60 dark:border-emerald-500/30',
     empresa: 'CFE Suministrador Básico',
     placeholder: 'Número de servicio (30 dígitos)',
     sampleTitular: 'Casa Mamá',
@@ -49,7 +71,7 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: '0182 9384 7162',
     sampleMXN: 842.00,
     sampleDueDate: 'Due in 5 days',
-    logoBg: 'bg-emerald-700',
+    logoBg: 'bg-emerald-600',
     logoText: 'CFE',
     logoColor: 'text-white',
     billingCycle: 'Oct 01 • Oct 28',
@@ -60,7 +82,7 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     subtitulo: 'Telmex • Telcel • AT&T',
     icono: 'phone_iphone',
     badge: 'SPEI 10s',
-    badgeClass: 'bg-surface-container-lowest text-on-surface-variant font-label-caps text-[9px] uppercase',
+    badgeClass: 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-label-caps text-[9px] uppercase font-bold border border-blue-200/60 dark:border-blue-500/30',
     empresa: 'Telmex Telecomunicaciones',
     placeholder: 'Teléfono a 10 dígitos o Referencia',
     sampleTitular: 'Rosa Elena Morales',
@@ -85,7 +107,7 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: 'TP-8841920',
     sampleMXN: 629.00,
     sampleDueDate: 'Due in 12 days',
-    logoBg: 'bg-[#5018cb]',
+    logoBg: 'bg-purple-600',
     logoText: 'TOTAL',
     logoColor: 'text-white',
     billingCycle: 'Oct 10 • Nov 10',
@@ -102,7 +124,7 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: 'SKY-40912-MX',
     sampleMXN: 450.00,
     sampleDueDate: 'Due in 14 days',
-    logoBg: 'bg-sky-600',
+    logoBg: 'bg-indigo-600',
     logoText: 'SKY',
     logoColor: 'text-white',
     billingCycle: 'Oct 12 • Nov 12',
@@ -305,11 +327,11 @@ export function MexicanBillPayModal({
         >
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/5 pointer-events-none" />
           <div className="flex items-center gap-3 relative z-10">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-lg bg-surface-container-lowest text-primary shadow-[0_0_16px_rgba(87,242,191,0.25)] border border-primary/20">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[22px]">qr_code_scanner</span>
               <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
               </span>
             </div>
             <div className="flex flex-col text-left">
@@ -358,15 +380,10 @@ export function MexicanBillPayModal({
                 <div className="flex items-center justify-between w-full mb-3">
                   <div className="relative">
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm shrink-0 overflow-hidden ${
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm shrink-0 overflow-hidden ${getCategoryIconTheme(
+                        serv.id,
                         isSelected
-                          ? 'bg-primary text-[#002116] font-bold'
-                          : serv.id === 'electricidad' || serv.id === 'agua'
-                          ? 'bg-primary-container/20 text-primary'
-                          : serv.id === 'internet'
-                          ? 'bg-secondary-container/50 text-secondary'
-                          : 'bg-surface-bright text-on-surface'
-                      }`}
+                      )}`}
                     >
                       <span className="material-symbols-outlined text-[24px]">{serv.icono}</span>
                     </div>
@@ -376,7 +393,7 @@ export function MexicanBillPayModal({
                     </div>
                   </div>
                   {serv.badge && (
-                    <span className="px-2 py-0.5 rounded-full bg-primary-container/20 text-primary font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 max-w-[70px] truncate">
+                    <span className={`px-2 py-0.5 rounded-full font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 max-w-[70px] truncate ${serv.badgeClass || 'bg-primary-container/20 text-primary'}`}>
                       {serv.badge}
                     </span>
                   )}
@@ -424,8 +441,8 @@ export function MexicanBillPayModal({
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {/* Institutional Logo Capsule */}
-              <div className="w-12 h-12 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md shrink-0">
-                <div className={`w-full h-full rounded-xl ${servicioSeleccionado.logoBg} flex items-center justify-center ${servicioSeleccionado.logoColor} px-1 overflow-hidden`}>
+              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/10 p-1 flex items-center justify-center shadow-sm shrink-0 border border-slate-200/60 dark:border-white/10">
+                <div className={`w-full h-full rounded-xl ${servicioSeleccionado.logoBg} flex items-center justify-center ${servicioSeleccionado.logoColor} px-1 overflow-hidden shadow-sm`}>
                   <span className="font-headline-md text-[10px] font-black leading-none tracking-wider text-center uppercase truncate">
                     {servicioSeleccionado.logoText}
                   </span>
@@ -436,7 +453,7 @@ export function MexicanBillPayModal({
                   <span className="font-title-base text-title-base text-on-surface font-semibold">
                     {servicioSeleccionado.sampleTitular}
                   </span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-caps text-[9px]">
+                  <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-surface-container-high text-slate-700 dark:text-on-surface-variant font-label-caps text-[9px] border border-slate-200/60 dark:border-transparent">
                     {servicioSeleccionado.sampleLocation}
                   </span>
                 </div>
@@ -445,7 +462,7 @@ export function MexicanBillPayModal({
                 </span>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-caption-sm text-caption-sm font-semibold border border-white/5">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-surface-container-high text-emerald-700 dark:text-primary font-caption-sm text-caption-sm font-semibold border border-emerald-200/50 dark:border-white/5">
               {isEn ? servicioSeleccionado.sampleDueDate : servicioSeleccionado.sampleDueDate.replace('Due in', 'Vence en').replace('days', 'días')}
             </span>
           </div>

@@ -129,18 +129,12 @@ export function ProfileView({
     reader.readAsDataURL(file);
   };
 
-  // 6 Core Modals State (Exact mapping to stitch_kin_mobile_CLIENTE)
+  // 5 Core Modals State (Exact mapping to stitch_kin_mobile_CLIENTE)
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
   const [paymentCardsModalOpen, setPaymentCardsModalOpen] = useState(false);
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
-  const [appearanceModalOpen, setAppearanceModalOpen] = useState(false);
   const [securityModalOpen, setSecurityModalOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
-
-  // Subtheme variant state: 'obsidian' | 'slate' | 'light'
-  const [themeVariant, setThemeVariant] = useState<'obsidian' | 'slate' | 'light'>(
-    theme === 'light' ? 'light' : 'obsidian'
-  );
 
   // Floating Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -281,22 +275,7 @@ export function ProfileView({
     );
   };
 
-  const handleApplyThemeVariant = (variant: 'obsidian' | 'slate' | 'light') => {
-    setThemeVariant(variant);
-    if (variant === 'light') {
-      handleToggleTheme('light');
-      notifyToast(isEn ? 'Light Mode theme applied' : 'Modo Claro activado', 'light_mode');
-    } else {
-      handleToggleTheme('dark');
-      notifyToast(
-        variant === 'slate'
-          ? (isEn ? 'Slate Night theme applied' : 'Tema Slate Night activado')
-          : (isEn ? 'OLED Obsidian Black theme applied' : 'Tema OLED Obsidian Black activado'),
-        'nights_stay'
-      );
-    }
-    setAppearanceModalOpen(false);
-  };
+
 
   const handleConfirmLogout = () => {
     notifyToast(
@@ -401,11 +380,11 @@ export function ProfileView({
           onClick={() => setEditProfileModalOpen(true)}
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4] group-hover:scale-105 transition-transform shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[24px]">person</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-title-base text-title-base text-white truncate">
+              <span className="font-title-base text-title-base text-white truncate font-bold">
                 {isEn ? 'Personal Information' : 'Información Personal'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
@@ -428,11 +407,11 @@ export function ProfileView({
           onClick={() => setPaymentCardsModalOpen(true)}
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4] group-hover:scale-105 transition-transform shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[24px]">credit_card</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-title-base text-title-base text-white truncate">
+              <span className="font-title-base text-title-base text-white truncate font-bold">
                 {isEn ? 'Payment Methods & Cards' : 'Métodos de Pago & Tarjetas'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
@@ -441,7 +420,7 @@ export function ProfileView({
             </div>
           </div>
           <div className="flex items-center gap-1 text-on-surface-variant">
-            <span className="font-financial-mono text-[11px] px-2 py-0.5 rounded-md bg-surface-container-highest text-[#2ED5A4] font-bold">
+            <span className="font-financial-mono text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-surface-container-highest text-emerald-700 dark:text-[#2ED5A4] font-bold border border-emerald-200/50 dark:border-transparent">
               {savedCards.length} {isEn ? 'active' : 'activas'}
             </span>
             <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-on-surface-variant">
@@ -458,11 +437,11 @@ export function ProfileView({
           onClick={() => setLanguageModalOpen(true)}
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center text-[#ccbdff] group-hover:scale-105 transition-transform shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[24px]">translate</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-title-base text-title-base text-white truncate">
+              <span className="font-title-base text-title-base text-white truncate font-bold">
                 {isEn ? 'Language' : 'Idioma'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
@@ -480,41 +459,42 @@ export function ProfileView({
           </div>
         </button>
 
-        {/* Menu Row 4: Apariencia / Tema */}
-        <button
-          type="button"
-          aria-label={isEn ? 'Appearance and Theme' : 'Modo Oscuro y Apariencia'}
-          className="anim-stagger-4 touch-press w-full p-4 mb-2.5 rounded-2xl bg-surface-container-low hover:bg-surface-container text-left transition-colors flex items-center justify-between group shadow-md cursor-pointer border border-white/5"
-          onClick={() => setAppearanceModalOpen(true)}
+        {/* Menu Row 4: Conmutador Directo Modo Oscuro / Dark Mode (Screenshot 2 & 4) */}
+        <div
+          className="anim-stagger-4 w-full p-4 mb-2.5 rounded-2xl bg-surface-container-low text-left transition-colors flex items-center justify-between shadow-md border border-white/5"
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center text-[#3edfad] group-hover:scale-105 transition-transform shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[24px]">
-                {themeVariant === 'light' ? 'light_mode' : 'dark_mode'}
+                {theme === 'dark' ? 'dark_mode' : 'light_mode'}
               </span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-title-base text-title-base text-white truncate">
-                {isEn ? 'Appearance / Theme' : 'Apariencia / Tema'}
+              <span className="font-title-base text-title-base text-white truncate font-bold">
+                {isEn ? 'Dark mode' : 'Modo oscuro'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
-                {themeVariant === 'light'
-                  ? (isEn ? 'Antigravity Light (Catppuccin)' : 'Modo Claro Antigravity (Catppuccin)')
-                  : themeVariant === 'slate'
-                  ? (isEn ? 'Catppuccin Macchiato' : 'Catppuccin Macchiato (Activado)')
-                  : (isEn ? 'Catppuccin Mocha (OLED Deep)' : 'Catppuccin Mocha (Activado)')}
+                {theme === 'dark'
+                  ? (isEn ? 'Catppuccin Mocha • Active' : 'Catppuccin Mocha • Activo')
+                  : (isEn ? 'Antigravity Light • Active' : 'Modo claro Antigravity • Activo')}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-on-surface-variant">
-            <span className="material-symbols-outlined text-[#2ED5A4] text-[18px]">
-              {themeVariant === 'light' ? 'light_mode' : 'nights_stay'}
-            </span>
-            <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-on-surface-variant">
-              chevron_right
-            </span>
-          </div>
-        </button>
+          <ToggleSwitch
+            enabled={theme === 'dark'}
+            onToggle={() => {
+              const next = theme === 'dark' ? 'light' : 'dark';
+              handleToggleTheme(next);
+              notifyToast(
+                next === 'dark'
+                  ? (isEn ? 'Dark mode activated' : 'Modo oscuro activado')
+                  : (isEn ? 'Light mode activated' : 'Modo claro activado'),
+                next === 'dark' ? 'dark_mode' : 'light_mode'
+              );
+            }}
+            title={isEn ? 'Dark mode' : 'Modo oscuro'}
+          />
+        </div>
 
         {/* ========================================================================= */}
         {/* SECTION 3: SEGURIDAD Y RESPALDO                                           */}
@@ -536,11 +516,11 @@ export function ProfileView({
           onClick={() => setSecurityModalOpen(true)}
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4] group-hover:scale-105 transition-transform shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[24px]">shield</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-title-base text-title-base text-white truncate">
+              <span className="font-title-base text-title-base text-white truncate font-bold">
                 {isEn ? 'Privacy & Security' : 'Privacidad & Seguridad'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
@@ -564,11 +544,11 @@ export function ProfileView({
           onClick={() => setSupportModalOpen(true)}
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center text-[#ccbdff] group-hover:scale-105 transition-transform shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-100 dark:border-cyan-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[24px]">support_agent</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-title-base text-title-base text-white truncate">
+              <span className="font-title-base text-title-base text-white truncate font-bold">
                 {isEn ? 'Help & Support KIN' : 'Ayuda & Soporte KIN'}
               </span>
               <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
@@ -577,7 +557,7 @@ export function ProfileView({
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-on-surface-variant">
-            <span className="font-caption-sm text-[11px] px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] font-bold">
+            <span className="font-caption-sm text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-[#2ED5A4]/15 text-emerald-700 dark:text-[#2ED5A4] font-bold border border-emerald-200/50 dark:border-transparent">
               {isEn ? 'Online' : 'En línea'}
             </span>
             <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-on-surface-variant">
@@ -589,11 +569,11 @@ export function ProfileView({
         {/* Biometric Transfer Quick Toggle Card */}
         <div className="anim-stagger-6 p-4 rounded-2xl bg-surface-container-low mb-5 flex items-center justify-between shadow-md border border-white/5">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-[#2ED5A4]">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
               <span className="material-symbols-outlined text-[22px]">fingerprint</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-body-medium text-body-medium text-white truncate">
+              <span className="font-body-medium text-body-medium text-white truncate font-bold">
                 {isEn ? 'Fast Biometric Authorization' : 'Autorización Biometría Rápida'}
               </span>
               <span className="font-caption-sm text-[12px] text-on-surface-variant">
@@ -1134,152 +1114,7 @@ export function ProfileView({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 4: APARIENCIA / TEMA (OLED OBSIDIAN & HIGH CONTRAST)                */}
-      {/* ========================================================================= */}
-      {appearanceModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-8 sm:pt-12 pb-24 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
-          onClick={() => setAppearanceModalOpen(false)}
-        >
-          <div
-            className="w-full max-w-[390px] max-h-[80vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-2 sm:mt-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="font-headline-md text-headline-md text-white">
-                  {isEn ? 'Appearance' : 'Apariencia'}
-                </h2>
-                <p className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {isEn ? 'Obsidian palette engineered for OLED efficiency' : 'Paleta Obsidian diseñada para ahorro OLED'}
-                </p>
-              </div>
-              <button
-                type="button"
-                aria-label="Cerrar modal"
-                className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
-                onClick={() => setAppearanceModalOpen(false)}
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
 
-            <div className="space-y-3 mb-5">
-              {/* Option 1: Catppuccin Mocha (OLED Deep) */}
-              <div
-                className={`p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
-                  themeVariant === 'obsidian' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-70'
-                }`}
-                onClick={() => handleApplyThemeVariant('obsidian')}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#11111B] flex items-center justify-center text-[#2ED5A4] shadow-inner border border-white/10">
-                    <span className="material-symbols-outlined text-[22px]">nights_stay</span>
-                  </div>
-                  <div>
-                    <span className="font-title-base text-[15px] text-white font-bold block">
-                      Catppuccin Mocha (OLED Deep)
-                    </span>
-                    <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      {isEn ? 'Velvety #11111B with soft #CDD6F4 text & mint accents' : 'Terciopelo oscuro #11111B con texto #CDD6F4 y toques menta'}
-                    </span>
-                  </div>
-                </div>
-                {themeVariant === 'obsidian' ? (
-                  <span
-                    className="material-symbols-outlined text-[#2ED5A4] text-[22px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    check_circle
-                  </span>
-                ) : (
-                  <span className="material-symbols-outlined text-on-surface-variant text-[22px]">
-                    radio_button_unchecked
-                  </span>
-                )}
-              </div>
-
-              {/* Option 2: Catppuccin Macchiato */}
-              <div
-                className={`p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
-                  themeVariant === 'slate' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-70'
-                }`}
-                onClick={() => handleApplyThemeVariant('slate')}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#181825] flex items-center justify-center text-[#CBA6F7] shadow-inner border border-white/10">
-                    <span className="material-symbols-outlined text-[22px]">dark_mode</span>
-                  </div>
-                  <div>
-                    <span className="font-title-base text-[15px] text-white font-bold block">
-                      Catppuccin Macchiato
-                    </span>
-                    <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      {isEn ? 'Modern deep slate #181825 with mauve accents' : 'Gris azulado #181825 con toques malva y lavanda'}
-                    </span>
-                  </div>
-                </div>
-                {themeVariant === 'slate' ? (
-                  <span
-                    className="material-symbols-outlined text-[#2ED5A4] text-[22px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    check_circle
-                  </span>
-                ) : (
-                  <span className="material-symbols-outlined text-on-surface-variant text-[22px]">
-                    radio_button_unchecked
-                  </span>
-                )}
-              </div>
-
-              {/* Option 3: Antigravity Light Theme (Catppuccin Latte) */}
-              <div
-                className={`p-3.5 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
-                  themeVariant === 'light' ? 'border-[#059669]/50 bg-surface-container' : 'border-white/5 opacity-70'
-                }`}
-                onClick={() => handleApplyThemeVariant('light')}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#EAECF0] flex items-center justify-center text-[#8839EF] shadow-inner border border-[#DCE0E8]">
-                    <span className="material-symbols-outlined text-[22px]">light_mode</span>
-                  </div>
-                  <div>
-                    <span className="font-title-base text-[15px] text-white font-bold block">
-                      {isEn ? 'Antigravity Light (Catppuccin)' : 'Modo Claro Antigravity (Catppuccin)'}
-                    </span>
-                    <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                      {isEn ? 'Soft warm #EAECF0 with #4C4F69 text & #8839EF accent' : 'Blanco cálido #EAECF0 con texto #4C4F69 y acento #8839EF'}
-                    </span>
-                  </div>
-                </div>
-                {themeVariant === 'light' ? (
-                  <span
-                    className="material-symbols-outlined text-[#059669] text-[22px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    check_circle
-                  </span>
-                ) : (
-                  <span className="material-symbols-outlined text-on-surface-variant text-[22px]">
-                    radio_button_unchecked
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="touch-press w-full h-12 rounded-full bg-[#2ED5A4] text-[#003828] font-title-base text-[14px] font-bold shadow-md cursor-pointer"
-              onClick={() => setAppearanceModalOpen(false)}
-            >
-              {isEn ? 'Apply Theme' : 'Aplicar Tema'}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* MODAL 5: PRIVACIDAD & SEGURIDAD DETAIL DRAWER                             */}

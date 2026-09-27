@@ -51,7 +51,7 @@ export function ToggleSwitch({
       onClick={onToggle}
       title={title}
       className={`w-12 h-6 rounded-full p-0.5 transition-colors duration-200 cursor-pointer flex items-center flex-shrink-0 ${
-        enabled ? 'bg-[#2ED5A4]' : 'bg-[#202236] border border-white/15'
+        enabled ? 'bg-[#2ED5A4]' : 'bg-slate-300 dark:bg-[#313244] border border-slate-300/80 dark:border-white/10'
       }`}
     >
       <span
