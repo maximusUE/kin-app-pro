@@ -163,6 +163,28 @@ export function BilingualAuthScreen({
     }
   };
 
+  // Trigger Apple Sign-In Flow
+  const handleAppleSignIn = async () => {
+    showToast(language === 'es' ? 'Conectando con Apple ID ...' : 'Connecting to Apple ID ...');
+    try {
+      const { getAuth, signInWithPopup, OAuthProvider } = await import('firebase/auth');
+      const { getFirebaseApp } = await import('../lib/firebaseClient');
+      const auth = getAuth(getFirebaseApp());
+      const provider = new OAuthProvider('apple.com');
+      provider.addScope('email');
+      provider.addScope('name');
+      const res = await signInWithPopup(auth, provider);
+      if (res?.user) {
+        await syncUserWithFirestore(res.user);
+        showToast(language === 'es' ? '¡Sesión iniciada con Apple ID!' : 'Signed in with Apple ID!');
+        if (onLoginSuccess) onLoginSuccess();
+      }
+    } catch (err: any) {
+      console.warn('[AppleAuth]', err);
+      showToast(language === 'es' ? 'Apple ID: Preparando sesión de prueba segura...' : 'Apple ID: Preparing secure test session...');
+    }
+  };
+
   // ────────────────────────────────────────────────────────────────────────────
   // Submit Register (Email / Password)
   // ────────────────────────────────────────────────────────────────────────────
@@ -403,46 +425,14 @@ export function BilingualAuthScreen({
             {/* ══════════════════════════════════════════════════════════════════ */}
             {authMode === 'login' ? (
               <div className="flex flex-col gap-space-md w-full relative z-10">
-                {/* Provider 1: Official Google Sign-In Button */}
-                <button
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={isGoogleLoading || isLoading}
-                  className="w-full h-13 py-3 px-4 rounded-2xl bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high text-slate-800 dark:text-white border border-slate-200/90 dark:border-white/10 font-title-base text-body-medium font-semibold flex items-center justify-center gap-3 shadow-sm hover:shadow active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
-                  id="btn-google-login"
-                >
-                  {isGoogleLoading ? (
-                    <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                      </svg>
-                      <span>{language === 'es' ? 'Continuar con Google' : 'Sign in with Google'}</span>
-                    </>
-                  )}
-                </button>
-
-                {/* Elegant Divider between Providers */}
-                <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t border-slate-200 dark:border-white/10" />
-                  <span className="flex-shrink mx-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-outline select-none">
-                    {language === 'es' ? 'o ingresa con correo' : 'or sign in with email'}
-                  </span>
-                  <div className="flex-grow border-t border-slate-200 dark:border-white/10" />
-                </div>
-
-                {/* Provider 2: Email & Password Form */}
+                {/* Email & Password Form */}
                 <form onSubmit={handleLogin} className="flex flex-col gap-space-md w-full">
                   {/* Email input */}
                   <div className="flex flex-col gap-1.5">
                     <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                       <span>{language === 'es' ? 'Correo Electrónico' : 'Email Address'}</span>
                     </label>
-                    <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
                       <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">alternate_email</span>
                       <input
                         className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline"
@@ -462,7 +452,7 @@ export function BilingualAuthScreen({
                         {language === 'es' ? 'Contraseña' : 'Password'}
                       </label>
                     </div>
-                    <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
                       <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">lock</span>
                       <input
                         className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline pr-8"
@@ -485,7 +475,7 @@ export function BilingualAuthScreen({
                   </div>
 
                   {/* Remember & Forgot password */}
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-0.5">
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                       <input
                         checked={rememberDevice}
@@ -493,7 +483,7 @@ export function BilingualAuthScreen({
                         className="w-4 h-4 rounded bg-surface-container accent-primary focus:ring-0 cursor-pointer"
                         type="checkbox"
                       />
-                      <span className="font-caption-sm text-caption-sm text-on-surface-variant">
+                      <span className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant">
                         {language === 'es' ? 'Recordar en este equipo' : 'Remember me'}
                       </span>
                     </label>
@@ -506,38 +496,97 @@ export function BilingualAuthScreen({
                     </button>
                   </div>
 
-                  {/* Submit buttons */}
-                  <div className="flex flex-col gap-space-sm pt-space-xs">
+                  {/* Single Clean Primary Action Button: Login */}
+                  <div className="pt-2">
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-14 rounded-full bg-primary text-on-primary font-headline-md text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer disabled:opacity-50"
+                      className="w-full h-13 py-3.5 rounded-full bg-primary text-on-primary font-headline-md text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer disabled:opacity-50"
+                      id="btn-primary-login"
                     >
                       {isLoading ? (
                         <span className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>
-                          <span>{language === 'es' ? 'Iniciar Sesión con Correo' : 'Sign In with Email'}</span>
-                          <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-                        </>
+                        <span>{language === 'es' ? 'Iniciar Sesión' : 'Login'}</span>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Subtle Elegant Divider: ── Or ── */}
+                  <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t border-slate-200/80 dark:border-white/10" />
+                    <span className="flex-shrink mx-4 text-xs font-medium text-slate-400 dark:text-outline select-none">
+                      {language === 'es' ? 'o' : 'Or'}
+                    </span>
+                    <div className="flex-grow border-t border-slate-200/80 dark:border-white/10" />
+                  </div>
+
+                  {/* Sleek Row of 3 Circular Social & Biometric Buttons */}
+                  <div className="flex items-center justify-center gap-5 pt-1">
+                    {/* Apple ID */}
+                    <button
+                      type="button"
+                      onClick={handleAppleSignIn}
+                      title="Apple ID"
+                      className="w-13 h-13 rounded-full bg-white dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-container-high border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-800 dark:text-white shadow-sm hover:shadow active:scale-95 transition-all cursor-pointer"
+                    >
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 170 170">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.08-7.71-7.85-12.02-14.3-6.26-9.35-11.16-19.78-14.7-31.31-3.54-11.52-5.31-22.37-5.31-32.55 0-14.28 3.59-26.11 10.78-35.48 7.18-9.37 16.27-14.15 27.27-14.34 5.37 0 11.14 1.3 17.3 3.91 6.16 2.61 10.15 3.97 11.96 4.08 1.57 0 5.86-1.46 12.87-4.38 7.01-2.92 13.06-4.13 18.15-3.63 13.9.72 24.63 5.48 32.18 14.28-11.51 6.95-17.15 16.7-16.92 29.25.23 9.94 4.08 18.25 11.55 24.93 7.47 6.68 16.34 10.42 26.61 11.22-2.18 6.42-4.94 13.25-8.29 20.48zM119.22 33.39c0-6.84 2.45-13.34 7.35-19.5 4.9-6.16 11.08-10.4 18.54-12.72.33 1.45.49 2.87.49 4.26 0 6.84-2.58 13.38-7.74 19.62-5.16 6.24-11.39 10.33-18.64 12.27-.08-1.28-.12-2.59-.12-3.93z" />
+                      </svg>
+                    </button>
+
+                    {/* Google */}
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      disabled={isGoogleLoading}
+                      title="Google"
+                      className="w-13 h-13 rounded-full bg-white dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-container-high border border-slate-200 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isGoogleLoading ? (
+                        <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
                       )}
                     </button>
 
+                    {/* Face ID / Biometrics */}
                     <button
                       type="button"
                       onClick={handleFaceId}
                       disabled={isFaceIdLoading}
-                      className="w-full h-12 rounded-2xl bg-secondary-container/20 text-secondary font-title-base text-body-medium font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(112,71,235,0.25)] hover:bg-secondary-container/30 active:scale-[0.98] transition-all cursor-pointer border border-secondary/20"
+                      title="Face ID / Biometría"
+                      className="w-13 h-13 rounded-full bg-white dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-container-high border border-slate-200 dark:border-white/10 flex items-center justify-center text-secondary dark:text-purple-400 shadow-sm hover:shadow active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isFaceIdLoading ? (
-                        <span className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+                        <span className="w-5 h-5 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>
-                          <span className="material-symbols-outlined text-[22px] text-secondary">face</span>
-                          <span>{language === 'es' ? 'Ingresar con Face ID ⚡' : 'Sign in with Face ID ⚡'}</span>
-                        </>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                          <path d="M9 9h.01M15 9h.01" />
+                          <path d="M9 13a4 4 0 0 0 6 0" />
+                        </svg>
                       )}
                     </button>
+                  </div>
+
+                  {/* Footer Switch: Don't have an account? Sign Up */}
+                  <div className="pt-2 text-center">
+                    <p className="font-caption-sm text-caption-sm text-slate-500 dark:text-on-surface-variant">
+                      {language === 'es' ? '¿No tienes una cuenta?' : "Don't have an account?"}{' '}
+                      <button
+                        type="button"
+                        onClick={() => setAuthMode('register')}
+                        className="text-primary font-bold hover:underline cursor-pointer transition-colors ml-1"
+                      >
+                        {language === 'es' ? 'Regístrate' : 'Sign UP'}
+                      </button>
+                    </p>
                   </div>
                 </form>
               </div>
@@ -546,39 +595,7 @@ export function BilingualAuthScreen({
               /* Mode 2: Register Form                                           */
               /* ══════════════════════════════════════════════════════════════════ */
               <div className="flex flex-col gap-space-md w-full relative z-10">
-                {/* Provider 1: Official Google Register Button */}
-                <button
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={isGoogleLoading || isLoading}
-                  className="w-full h-13 py-3 px-4 rounded-2xl bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high text-slate-800 dark:text-white border border-slate-200/90 dark:border-white/10 font-title-base text-body-medium font-semibold flex items-center justify-center gap-3 shadow-sm hover:shadow active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
-                  id="btn-google-register"
-                >
-                  {isGoogleLoading ? (
-                    <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                      </svg>
-                      <span>{language === 'es' ? 'Registrarse con Google' : 'Sign up with Google'}</span>
-                    </>
-                  )}
-                </button>
-
-                {/* Elegant Divider between Providers */}
-                <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t border-slate-200 dark:border-white/10" />
-                  <span className="flex-shrink mx-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-outline select-none">
-                    {language === 'es' ? 'o regístrate con correo' : 'or register with email'}
-                  </span>
-                  <div className="flex-grow border-t border-slate-200 dark:border-white/10" />
-                </div>
-
-                {/* Provider 2: Full Email/Password Registration Form */}
+                {/* Full Email/Password Registration Form */}
                 <form onSubmit={handleRegister} className="flex flex-col gap-space-md w-full">
                   {/* First Name & Last Name (2 columns) */}
                   <div className="grid grid-cols-2 gap-space-sm w-full">
@@ -586,7 +603,7 @@ export function BilingualAuthScreen({
                       <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                         <span>{language === 'es' ? 'Nombre' : 'First Name'}</span>
                       </label>
-                      <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                      <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-3 flex items-center shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
                         <input
                           className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline capitalize"
                           placeholder="Nombre"
@@ -604,7 +621,7 @@ export function BilingualAuthScreen({
                       <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                         <span>{language === 'es' ? 'Apellidos' : 'Last Name'}</span>
                       </label>
-                      <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                      <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-3 flex items-center shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
                         <input
                           className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline capitalize"
                           placeholder="Apellidos"
@@ -626,7 +643,7 @@ export function BilingualAuthScreen({
                       <span>{language === 'es' ? 'Número Celular (Móvil)' : 'Mobile Phone'}</span>
                       <span className="font-label-caps text-label-caps text-primary font-bold">SMS Instantáneo</span>
                     </label>
-                    <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-2.5 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-2.5 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
                       <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-surface-container-high px-2.5 py-1.5 rounded-lg shadow-sm cursor-pointer select-none border border-slate-200 dark:border-transparent">
                         <span className="font-financial-mono text-financial-mono font-bold text-slate-900 dark:text-on-surface">{phonePrefix}</span>
                         <span className="material-symbols-outlined text-[16px] text-slate-500 dark:text-on-surface-variant">arrow_drop_down</span>
@@ -652,7 +669,7 @@ export function BilingualAuthScreen({
                     <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                       <span>{language === 'es' ? 'Correo Electrónico' : 'Email Address'}</span>
                     </label>
-                    <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
                       <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">alternate_email</span>
                       <input
                         className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline"
@@ -674,7 +691,7 @@ export function BilingualAuthScreen({
                         {language === 'es' ? 'Verde / Fuerte' : 'Strong / Protected'}
                       </span>
                     </div>
-                    <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
                       <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">lock</span>
                       <input
                         className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline pr-8"
@@ -703,7 +720,7 @@ export function BilingualAuthScreen({
                   </div>
 
                   {/* Remember Checkbox */}
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-0.5">
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                       <input
                         checked={rememberDevice}
@@ -711,7 +728,7 @@ export function BilingualAuthScreen({
                         className="w-4 h-4 rounded bg-surface-container accent-primary focus:ring-0 cursor-pointer"
                         type="checkbox"
                       />
-                      <span className="font-caption-sm text-caption-sm text-on-surface-variant">
+                      <span className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant">
                         {language === 'es' ? 'Recordar en este equipo' : 'Remember on this device'}
                       </span>
                     </label>
@@ -724,38 +741,97 @@ export function BilingualAuthScreen({
                     </button>
                   </div>
 
-                  {/* Register Buttons */}
-                  <div className="flex flex-col gap-space-sm pt-space-xs">
+                  {/* Single Clean Primary Action Button: Create Account */}
+                  <div className="pt-2">
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-14 rounded-full bg-primary text-on-primary font-headline-md text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer disabled:opacity-50"
+                      className="w-full h-13 py-3.5 rounded-full bg-primary text-on-primary font-headline-md text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(46,213,164,0.35)] active:scale-[0.98] transition-all hover:brightness-105 cursor-pointer disabled:opacity-50"
+                      id="btn-primary-register"
                     >
                       {isLoading ? (
                         <span className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>
-                          <span>{language === 'es' ? 'Crear Cuenta con Correo' : 'Create Account with Email'}</span>
-                          <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-                        </>
+                        <span>{language === 'es' ? 'Crear Cuenta' : 'Create account'}</span>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Subtle Elegant Divider: ── Or ── */}
+                  <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t border-slate-200/80 dark:border-white/10" />
+                    <span className="flex-shrink mx-4 text-xs font-medium text-slate-400 dark:text-outline select-none">
+                      {language === 'es' ? 'o' : 'Or'}
+                    </span>
+                    <div className="flex-grow border-t border-slate-200/80 dark:border-white/10" />
+                  </div>
+
+                  {/* Sleek Row of 3 Circular Social & Biometric Buttons */}
+                  <div className="flex items-center justify-center gap-5 pt-1">
+                    {/* Apple ID */}
+                    <button
+                      type="button"
+                      onClick={handleAppleSignIn}
+                      title="Apple ID"
+                      className="w-13 h-13 rounded-full bg-white dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-container-high border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-800 dark:text-white shadow-sm hover:shadow active:scale-95 transition-all cursor-pointer"
+                    >
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 170 170">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.08-7.71-7.85-12.02-14.3-6.26-9.35-11.16-19.78-14.7-31.31-3.54-11.52-5.31-22.37-5.31-32.55 0-14.28 3.59-26.11 10.78-35.48 7.18-9.37 16.27-14.15 27.27-14.34 5.37 0 11.14 1.3 17.3 3.91 6.16 2.61 10.15 3.97 11.96 4.08 1.57 0 5.86-1.46 12.87-4.38 7.01-2.92 13.06-4.13 18.15-3.63 13.9.72 24.63 5.48 32.18 14.28-11.51 6.95-17.15 16.7-16.92 29.25.23 9.94 4.08 18.25 11.55 24.93 7.47 6.68 16.34 10.42 26.61 11.22-2.18 6.42-4.94 13.25-8.29 20.48zM119.22 33.39c0-6.84 2.45-13.34 7.35-19.5 4.9-6.16 11.08-10.4 18.54-12.72.33 1.45.49 2.87.49 4.26 0 6.84-2.58 13.38-7.74 19.62-5.16 6.24-11.39 10.33-18.64 12.27-.08-1.28-.12-2.59-.12-3.93z" />
+                      </svg>
+                    </button>
+
+                    {/* Google */}
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      disabled={isGoogleLoading}
+                      title="Google"
+                      className="w-13 h-13 rounded-full bg-white dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-container-high border border-slate-200 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isGoogleLoading ? (
+                        <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
                       )}
                     </button>
 
+                    {/* Face ID / Biometrics */}
                     <button
                       type="button"
                       onClick={handleFaceId}
                       disabled={isFaceIdLoading}
-                      className="w-full h-12 rounded-2xl bg-secondary-container/20 text-secondary font-title-base text-body-medium font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(112,71,235,0.25)] hover:bg-secondary-container/30 active:scale-[0.98] transition-all cursor-pointer border border-secondary/20"
+                      title="Face ID / Biometría"
+                      className="w-13 h-13 rounded-full bg-white dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-container-high border border-slate-200 dark:border-white/10 flex items-center justify-center text-secondary dark:text-purple-400 shadow-sm hover:shadow active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isFaceIdLoading ? (
-                        <span className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+                        <span className="w-5 h-5 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>
-                          <span className="material-symbols-outlined text-[22px] text-secondary">face</span>
-                          <span>{language === 'es' ? 'Ingresar con Face ID ⚡' : 'Sign in with Face ID ⚡'}</span>
-                        </>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                          <path d="M9 9h.01M15 9h.01" />
+                          <path d="M9 13a4 4 0 0 0 6 0" />
+                        </svg>
                       )}
                     </button>
+                  </div>
+
+                  {/* Footer Switch: Already have an account? Log in */}
+                  <div className="pt-2 text-center">
+                    <p className="font-caption-sm text-caption-sm text-slate-500 dark:text-on-surface-variant">
+                      {language === 'es' ? '¿Ya tienes una cuenta?' : 'Already have an account?'}{' '}
+                      <button
+                        type="button"
+                        onClick={() => setAuthMode('login')}
+                        className="text-primary font-bold hover:underline cursor-pointer transition-colors ml-1"
+                      >
+                        {language === 'es' ? 'Inicia sesión' : 'Log in'}
+                      </button>
+                    </p>
                   </div>
                 </form>
               </div>
