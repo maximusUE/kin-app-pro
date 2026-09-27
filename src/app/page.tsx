@@ -349,13 +349,22 @@ export default function MobileApp() {
     if (user.country) setUserCountry(capitalizeWords(user.country));
     // Asignar el avatar explícito (si está vacío o es foto de stock ficticia, deja recuadro vacío sin foto)
     setUserAvatar(user.avatar && !user.avatar.includes('images.unsplash.com') ? user.avatar : '');
-    if (user.clientId) setUserClientId(user.clientId);
+    if (user.email === 'airygc7@gmail.com' || user.role === 'MASTER_ADMIN' || user.isMasterAdmin) {
+      setUserClientId(user.clientId || 'KIN-MASTER-001');
+      setUserDocType('Credencial Maestro de Operador KIN');
+      setUserDocNumber('KIN-CEO-0001');
+      setUserKycTier('Tier 3 — Propietario / Master Admin');
+      setUserDailyLimit('$100,000.00 USD / día');
+      setBaseBalanceUSD(typeof user.balanceUSD === 'number' ? user.balanceUSD : 10000);
+    } else {
+      if (user.clientId) setUserClientId(user.clientId);
+      if (user.docType) setUserDocType(user.docType);
+      if (user.docNumber) setUserDocNumber(user.docNumber);
+      if (user.kycTier) setUserKycTier(user.kycTier);
+      if (user.dailyLimit) setUserDailyLimit(user.dailyLimit);
+      if (typeof user.balanceUSD === 'number') setBaseBalanceUSD(user.balanceUSD);
+    }
     if (user.memberSince) setUserMemberSince(user.memberSince);
-    if (user.docType) setUserDocType(user.docType);
-    if (user.docNumber) setUserDocNumber(user.docNumber);
-    if (user.kycTier) setUserKycTier(user.kycTier);
-    if (user.dailyLimit) setUserDailyLimit(user.dailyLimit);
-    if (typeof user.balanceUSD === 'number') setBaseBalanceUSD(user.balanceUSD);
     if (user.language === 'es' || user.language === 'en') {
       setLanguage(user.language);
       if (typeof window !== 'undefined') {

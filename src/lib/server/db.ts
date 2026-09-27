@@ -42,6 +42,9 @@ export interface UserProfile {
   language?: 'es' | 'en';
   currencyPref?: 'USD' | 'MXN';
   theme?: 'light' | 'dark';
+  role?: 'MASTER_ADMIN' | 'ADMIN' | 'USER';
+  isMasterAdmin?: boolean;
+  firebaseUid?: string;
   draftP2P?: {
     contactId?: string;
     contactName?: string;
@@ -120,34 +123,68 @@ const DEFAULT_CONTACTS: ContactRecord[] = [];
 
 const DEFAULT_USERS: UserProfile[] = [
   {
-    id: 'user-001',
-    firstName: 'César',
-    lastName: 'Urrutia',
-    name: 'César U.',
-    email: 'cesar.urrutia@gmail.com',
-    phone: '+1 (555) 349-2810',
-    address1: '482 Grand Concourse',
-    address2: 'Apt 4B',
-    city: 'Los Ángeles',
-    state: 'California',
-    zip: '90210',
+    id: 'user_cesar_ugalde',
+    firstName: 'Cesar',
+    lastName: 'Ugalde',
+    name: 'Cesar Ugalde',
+    email: 'airygc7@gmail.com',
+    phone: '+1 (347) 248-3668',
+    address1: 'San Antonio, Texas',
+    city: 'San Antonio',
+    state: 'Texas',
+    zip: '78201',
     country: 'Estados Unidos 🇺🇸',
     avatar: '',
-    clientId: 'KIN-US-892401',
-    memberSince: '19 Sep 2026',
-    docType: 'Pasaporte Oficial USA',
-    docNumber: '••••••••8492',
-    kycTier: 'Tier 2 (Identidad Oficial Verificada)',
-    dailyLimit: '$3,000.00 USD / día',
-    dailyLimitUSD: 3000,
-    monthlyLimitUSD: 5000,
-    balanceUSD: 1000.00,
-    passwordHash: 'KinVault2025$Secure',
+    clientId: 'KIN-MASTER-001',
+    memberSince: '27 Sep 2026',
+    docType: 'Credencial Maestro de Operador KIN',
+    docNumber: 'KIN-CEO-0001',
+    kycTier: 'Tier 3 — Propietario / Master Admin',
+    dailyLimit: '$100,000.00 USD / día',
+    dailyLimitUSD: 100000,
+    monthlyLimitUSD: 500000,
+    balanceUSD: 10000.00,
+    passwordHash: 'Azul0108@',
     biometricsEnabled: true,
     pushNotificationsEnabled: true,
     language: 'es',
     currencyPref: 'USD',
     theme: 'dark',
+    role: 'MASTER_ADMIN',
+    isMasterAdmin: true,
+    firebaseUid: 'rkasmP2Ld1dq0m2mqd6JHuS5WG53',
+  },
+  {
+    id: 'user-001',
+    firstName: 'Cesar',
+    lastName: 'Ugalde',
+    name: 'Cesar Ugalde',
+    email: 'airygc7@gmail.com',
+    phone: '+1 (347) 248-3668',
+    address1: 'San Antonio, Texas',
+    city: 'San Antonio',
+    state: 'Texas',
+    zip: '78201',
+    country: 'Estados Unidos 🇺🇸',
+    avatar: '',
+    clientId: 'KIN-MASTER-001',
+    memberSince: '27 Sep 2026',
+    docType: 'Credencial Maestro de Operador KIN',
+    docNumber: 'KIN-CEO-0001',
+    kycTier: 'Tier 3 — Propietario / Master Admin',
+    dailyLimit: '$100,000.00 USD / día',
+    dailyLimitUSD: 100000,
+    monthlyLimitUSD: 500000,
+    balanceUSD: 10000.00,
+    passwordHash: 'Azul0108@',
+    biometricsEnabled: true,
+    pushNotificationsEnabled: true,
+    language: 'es',
+    currencyPref: 'USD',
+    theme: 'dark',
+    role: 'MASTER_ADMIN',
+    isMasterAdmin: true,
+    firebaseUid: 'rkasmP2Ld1dq0m2mqd6JHuS5WG53',
   },
 ];
 
@@ -216,6 +253,7 @@ export const LEGACY_ID_MAP: Record<string, string> = {
   'user-1789925173232': 'user_maricela_fernandez',
   'user-1789928316890': 'user_jaime_gutierrez',
   'user-1789928551412': 'user_manuel_gomez',
+  'user-001': 'user_cesar_ugalde',
 };
 export const USER_FALLBACK_MAP = LEGACY_ID_MAP;
 

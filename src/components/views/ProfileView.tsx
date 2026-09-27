@@ -383,6 +383,16 @@ export function ProfileView({
             <p className="font-financial-mono text-[12px] text-on-surface-variant/80 tracking-tight mt-0.5">
               {displayPhone}
             </p>
+
+            {/* Master Admin / Propietario Badge */}
+            {(userEmail === 'airygc7@gmail.com' || userKycTier?.includes('Propietario') || userKycTier?.includes('Master Admin')) && (
+              <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-primary/20 border border-amber-400/40 shadow-sm animate-pulse">
+                <span className="material-symbols-outlined text-amber-400 text-[15px]">verified_user</span>
+                <span className="font-label-caps text-[11px] font-extrabold text-amber-300 uppercase tracking-wider">
+                  {isEn ? 'Master Admin & Owner' : 'Dueño & Master Admin'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
