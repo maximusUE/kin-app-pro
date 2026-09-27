@@ -24,6 +24,17 @@ tsconfig.tsbuildinfo
 scratch/
 .DS_Store
 
-# Logs
+# Logs y Archivos Temporales
 *.log
+*.tsbuildinfo
+*.DS_Store
+.DS_Store
+
+# Archivos multimedia y documentos no esenciales
+*.mp3
+*.mp4
+*.wav
+*.pdf
+leads/
+lead-magnet/
 
