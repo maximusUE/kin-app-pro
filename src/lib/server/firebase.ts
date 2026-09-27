@@ -443,3 +443,174 @@ export async function saveAuditLogToFirestore(audit: FirestoreAuditRecord): Prom
   }
 }
 
+const FIREBASE_API_KEY =
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+  'AIzaSyDRAqLSpHnL0cbOdl7E9IzuQF_WnN27WyA';
+
+export interface FirebaseAuthResult {
+  success: boolean;
+  localId?: string;
+  email?: string;
+  idToken?: string;
+  refreshToken?: string;
+  displayName?: string;
+  photoUrl?: string;
+  error?: string;
+}
+
+/**
+ * Registra un usuario en Firebase Authentication (Email/Password)
+ */
+export async function firebaseAuthSignUp(
+  email: string,
+  password: string,
+  displayName?: string
+): Promise<FirebaseAuthResult> {
+  try {
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          returnSecureToken: true,
+        }),
+      }
+    );
+
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      const errMsg = data.error?.message || 'Error al crear usuario en Firebase';
+      return { success: false, error: errMsg };
+    }
+
+    if (displayName && data.idToken) {
+      await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${FIREBASE_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            idToken: data.idToken,
+            displayName,
+            returnSecureToken: true,
+          }),
+        }
+      ).catch(() => {});
+    }
+
+    return {
+      success: true,
+      localId: data.localId,
+      email: data.email,
+      idToken: data.idToken,
+      refreshToken: data.refreshToken,
+      displayName,
+    };
+  } catch (err: any) {
+    console.error('❌ [Firebase Auth SignUp Error]:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Autentica un usuario en Firebase Authentication (Email/Password)
+ */
+export async function firebaseAuthSignIn(
+  email: string,
+  password: string
+): Promise<FirebaseAuthResult> {
+  try {
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          returnSecureToken: true,
+        }),
+      }
+    );
+
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      return { success: false, error: data.error?.message || 'Credenciales inválidas en Firebase' };
+    }
+
+    return {
+      success: true,
+      localId: data.localId,
+      email: data.email,
+      idToken: data.idToken,
+      refreshToken: data.refreshToken,
+      displayName: data.displayName,
+    };
+  } catch (err: any) {
+    console.error('❌ [Firebase Auth SignIn Error]:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Verifica un token de Google OAuth o ID Token
+ */
+export async function firebaseVerifyGoogleToken(
+  googleIdToken: string
+): Promise<{
+  valid: boolean;
+  email?: string;
+  name?: string;
+  picture?: string;
+  sub?: string;
+  error?: string;
+}> {
+  try {
+    const tokenInfoRes = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${googleIdToken}`
+    );
+    if (tokenInfoRes.ok) {
+      const data = await tokenInfoRes.json();
+      return {
+        valid: true,
+        email: data.email,
+        name: data.name,
+        picture: data.picture,
+        sub: data.sub,
+      };
+    }
+
+    const fbRes = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postBody: `id_token=${googleIdToken}&providerId=google.com`,
+          requestUri: 'https://kin-app-prod-b97c0.firebaseapp.com',
+          returnSecureToken: true,
+        }),
+      }
+    );
+
+    if (fbRes.ok) {
+      const fbData = await fbRes.json();
+      return {
+        valid: true,
+        email: fbData.email,
+        name: fbData.displayName,
+        picture: fbData.photoUrl,
+        sub: fbData.localId,
+      };
+    }
+
+    return { valid: false, error: 'Token de Google inválido' };
+  } catch (err: any) {
+    console.error('❌ [Firebase Verify Google Token Error]:', err);
+    return { valid: false, error: err.message };
+  }
+}
+

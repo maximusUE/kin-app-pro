@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { registerNewUser, findUserByEmailOrPhone, updateUserProfile } from '@/lib/server/db';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { firebaseAuthSignUp, saveUserToFirestore } from '@/lib/server/firebase';
 
 export async function POST(request: Request) {
   try {
@@ -16,19 +17,30 @@ export async function POST(request: Request) {
 
     const cleanFirstName = capitalizeWords(firstName.trim());
     const cleanLastName = capitalizeWords((lastName || '').trim());
+    const cleanEmail = email.trim().toLowerCase();
 
-    const existing = findUserByEmailOrPhone(email);
+    // 1) Sincronizar / crear en Firebase Authentication (Email/Password)
+    const firebaseResult = await firebaseAuthSignUp(
+      cleanEmail,
+      password || 'KinVault2025$Secure',
+      `${cleanFirstName} ${cleanLastName}`.trim()
+    );
+
+    const existing = findUserByEmailOrPhone(cleanEmail);
     if (existing) {
-      // Garantizar ley de mayúsculas en usuarios recuperados
       const updatedExisting = updateUserProfile(existing.id, {
         firstName: cleanFirstName || existing.firstName,
         lastName: cleanLastName || existing.lastName,
+        ...(firebaseResult.localId && { firebaseUid: firebaseResult.localId }),
       }) || existing;
+
+      saveUserToFirestore(updatedExisting).catch((e) => console.warn('[Firestore Sync Existing]', e));
 
       return NextResponse.json({
         success: true,
-        message: 'Usuario existente recuperado con éxito',
+        message: 'Usuario existente recuperado con éxito en Firebase y KIN',
         user: updatedExisting,
+        firebaseUid: firebaseResult.localId,
         token: `kin-jwt-${existing.id}-${Date.now()}`,
       });
     }
@@ -36,15 +48,23 @@ export async function POST(request: Request) {
     const newUser = registerNewUser({
       firstName: cleanFirstName,
       lastName: cleanLastName,
-      email,
+      email: cleanEmail,
       phone: phone || '+1 (555) 000-0000',
       password: password || 'KinVault2025$Secure',
     });
 
+    if (firebaseResult.localId) {
+      (newUser as any).firebaseUid = firebaseResult.localId;
+      updateUserProfile(newUser.id, { firebaseUid: firebaseResult.localId } as any);
+    }
+
+    saveUserToFirestore(newUser).catch((e) => console.warn('[Firestore Sync New User]', e));
+
     return NextResponse.json({
       success: true,
-      message: 'Cuenta KIN creada con éxito',
+      message: 'Cuenta KIN creada con éxito y sincronizada con Firebase',
       user: newUser,
+      firebaseUid: firebaseResult.localId,
       token: `kin-jwt-${newUser.id}-${Date.now()}`,
     });
   } catch (error: any) {

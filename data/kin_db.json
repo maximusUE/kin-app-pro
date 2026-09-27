@@ -170,6 +170,32 @@
         "note": "Groceries & medicine for the week",
         "updatedAt": "2026-09-21T18:55:18.669Z"
       }
+    },
+    {
+      "id": "user_valeria_mendoza",
+      "firstName": "Valeria",
+      "lastName": "Mendoza",
+      "name": "Valeria M.",
+      "email": "valeria.mendoza.2026@kin-app.com",
+      "phone": "+1 (555) 888-9999",
+      "city": "San Antonio",
+      "state": "Texas",
+      "zip": "78201",
+      "country": "Estados Unidos 🇺🇸",
+      "avatar": "",
+      "clientId": "KIN-US-405193",
+      "memberSince": "27 sep 2026",
+      "docType": "INE / Pasaporte en Trámite",
+      "docNumber": "••••••••0000",
+      "kycTier": "Tier 1 (Básico - Onboarding)",
+      "dailyLimit": "$300.00 USD / día",
+      "dailyLimitUSD": 300,
+      "monthlyLimitUSD": 750,
+      "balanceUSD": 1000,
+      "passwordHash": "KinVault2026$Valeria",
+      "biometricsEnabled": true,
+      "pushNotificationsEnabled": true,
+      "firebaseUid": "9jj1WpANYJgAbtek0hIb3RG47eu1"
     }
   ],
   "transactions": [

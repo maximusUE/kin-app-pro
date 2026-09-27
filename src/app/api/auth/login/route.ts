@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { findUserByEmailOrPhone, findUserById } from '@/lib/server/db';
+import { findUserByEmailOrPhone, findUserById, registerNewUser } from '@/lib/server/db';
+import { firebaseAuthSignIn, saveUserToFirestore } from '@/lib/server/firebase';
+import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     if (isBiometric) {
-      // Biometric Face ID authentication (authenticated against enrolled device)
+      // Biometric Face ID authentication
       const user = emailOrPhone ? findUserByEmailOrPhone(emailOrPhone) : findUserById('user-001');
       if (user) {
         return NextResponse.json({
@@ -37,27 +39,58 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = findUserByEmailOrPhone(emailOrPhone);
+    const cleanIdentifier = emailOrPhone.trim();
+    let user = findUserByEmailOrPhone(cleanIdentifier);
+
+    // 1) Si no existe localmente pero es un correo, verificar con Firebase Authentication (kin-app-prod-b97c0)
+    let firebaseUid: string | undefined = undefined;
+    if (cleanIdentifier.includes('@') && password) {
+      const fbAuth = await firebaseAuthSignIn(cleanIdentifier.toLowerCase(), password);
+      if (fbAuth.success && fbAuth.localId) {
+        firebaseUid = fbAuth.localId;
+        if (!user) {
+          // Si el usuario existe en Firebase Auth, crearlo en la red KIN
+          const namePart = (fbAuth.displayName || cleanIdentifier.split('@')[0]).trim();
+          const parts = namePart.split(/\s+/);
+          const firstName = capitalizeWords(parts[0]);
+          const lastName = parts.length > 1 ? capitalizeWords(parts.slice(1).join(' ')) : '';
+
+          user = registerNewUser({
+            firstName,
+            lastName,
+            email: cleanIdentifier.toLowerCase(),
+            phone: '+1 (555) 000-0000',
+            password,
+          });
+          (user as any).firebaseUid = firebaseUid;
+          saveUserToFirestore(user).catch((e) => console.warn('[Firestore Sync New FB User]', e));
+        }
+      }
+    }
+
     if (!user) {
-      // For effortless testing, if it's a new email during login test, we can dynamically return or register
       return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado. Por favor regístrate como nuevo cliente.' },
+        { success: false, error: 'Usuario no encontrado en KIN ni en Firebase. Por favor regístrate como nuevo cliente.' },
         { status: 404 }
       );
     }
 
-    // Password validation (with safe fallback for demo)
-    if (password && user.passwordHash && user.passwordHash !== password) {
+    // Validación de contraseña local (o validado por Firebase arriba)
+    if (password && user.passwordHash && user.passwordHash !== password && !firebaseUid) {
       return NextResponse.json(
         { success: false, error: 'Contraseña incorrecta' },
         { status: 401 }
       );
     }
 
+    // Sincronización en segundo plano con Firestore
+    saveUserToFirestore(user).catch((e) => console.warn('[Firestore Sync Login User]', e));
+
     return NextResponse.json({
       success: true,
       message: 'Inicio de sesión exitoso',
       user,
+      firebaseUid,
       token: `kin-jwt-${user.id}-${Date.now()}`,
     });
   } catch (error: any) {
