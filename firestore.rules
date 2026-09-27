@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función: Determina si el usuario autenticado es el Propietario / Master Admin General (Cesar Ugalde)
+    function isMasterAdmin() {
+      return request.auth != null && (
+        request.auth.uid == 'rkasmP2Ld1dq0m2mqd6JHuS5WG53' ||
+        request.auth.token.email == 'airygc7@gmail.com' ||
+        request.auth.token.admin == true
+      );
+    }
+
+    // Función: Determina si el usuario autenticado es dueño exclusivo de su propio expediente
+    function isOwner(userId) {
+      return request.auth != null && (
+        request.auth.uid == userId ||
+        request.auth.token.email == resource.data.email
+      );
+    }
+
+    // Colección de Usuarios (/users/{userId}):
+    // - El Master Admin (Cesar Ugalde) tiene acceso total (lectura, listado, actualización y borrado).
+    // - Cada cliente ÚNICAMENTE puede leer y actualizar su propia información personal.
+    // - ESTRICTAMENTE PROHIBIDO que un cliente consulte o filtre datos de otros clientes.
+    match /users/{userId} {
+      allow read: if isMasterAdmin() || isOwner(userId);
+      allow create: if request.auth != null;
+      allow update: if isMasterAdmin() || isOwner(userId);
+      allow delete: if isMasterAdmin();
+
+      // Subcolección de contactos personales del cliente
+      match /contacts/{contactId} {
+        allow read, write: if isMasterAdmin() || isOwner(userId);
+      }
+
+      // Subcolección de transacciones personales del cliente
+      match /transactions/{txId} {
+        allow read, write: if isMasterAdmin() || isOwner(userId);
+      }
+    }
+
+    // Colección de Transferencias y Envíos SPEI (/transfers/{transferId}):
+    // - El Master Admin puede auditar y gestionar todas las operaciones globales.
+    // - El cliente regular solo puede ver las transferencias donde él es el remitente.
+    match /transfers/{transferId} {
+      allow read: if isMasterAdmin() || (
+        request.auth != null && (
+          resource.data.senderId == request.auth.uid ||
+          resource.data.senderEmail == request.auth.token.email
+        )
+      );
+      allow write: if isMasterAdmin() || request.auth != null;
+    }
+
+    // Bitácoras de Auditoría Forense (/audit_logs/{logId}):
+    // - Solo el Master Admin tiene permiso de lectura e inspección regulatoria.
+    match /audit_logs/{logId} {
+      allow read: if isMasterAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if isMasterAdmin();
+    }
+
+    // Regla de salvaguarda: cualquier otro documento en la base de datos requiere ser Master Admin
+    match /{document=**} {
+      allow read, write: if isMasterAdmin();
+    }
+  }
+}
