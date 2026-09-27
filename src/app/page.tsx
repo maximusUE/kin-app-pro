@@ -427,10 +427,15 @@ export default function MobileApp() {
     const auth = params.get('auth');
     const queryUserId = params.get('userId');
 
+    const hasActiveSession = !!localStorage.getItem('kin_active_user') || !!sessionStorage.getItem('kin_auth');
+
     if (view === 'login' || auth === 'login') {
       setIsAuthenticated(false);
     } else if (view === 'dashboard' || auth === 'skip' || auth === 'dashboard') {
       setIsAuthenticated(true);
+    } else if (!hasActiveSession) {
+      // Experiencia de primer uso: nuevo cliente abriendo la app por primera vez
+      setIsAuthenticated(false);
     }
 
     // 0. Recuperar idioma, moneda y tema guardados en localStorage
