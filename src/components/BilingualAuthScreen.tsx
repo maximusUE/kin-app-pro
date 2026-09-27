@@ -181,9 +181,9 @@ export function BilingualAuthScreen({
   };
 
   return (
-    <div className="bg-[#06070B] text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary-container selection:text-on-primary-container">
+    <div className="bg-[#FAFBFD] dark:bg-[#06070B] text-slate-900 dark:text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary-container selection:text-on-primary-container transition-colors duration-300">
       <div className="w-full max-w-[400px] flex flex-col relative min-h-screen pt-safe pb-safe">
-        <main className="flex flex-col relative w-full px-margin-mobile bg-[#06070B] flex-1">
+        <main className="flex flex-col relative w-full px-margin-mobile bg-[#FAFBFD] dark:bg-[#06070B] flex-1 transition-colors duration-300">
           <div className="flex flex-col w-full pb-12 relative overflow-hidden">
             {/* Dynamic Atmospheric Glows */}
             <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -191,39 +191,37 @@ export function BilingualAuthScreen({
 
             {/* Top Status Header */}
             <header className="flex items-center justify-between w-full py-space-sm relative z-10">
-              <div className="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low shadow-sm border border-white/5">
+              <div className="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-slate-200/60 dark:bg-surface-container-low shadow-sm border border-slate-300/60 dark:border-white/5">
                 <span className="inline-block w-2 h-2 rounded-full bg-primary-container animate-pulse" />
-                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+                <span className="font-label-caps text-label-caps text-slate-600 dark:text-on-surface-variant uppercase tracking-wider font-bold">
                   SPEI v4.2 En Vivo
                 </span>
               </div>
 
-              {/* Language Switcher (ES / EN) */}
-              <div className="flex items-center bg-surface-container-low p-1 rounded-full shadow-inner border border-white/5" id="lang-switch-container">
+              {/* Language Switcher (ES / EN - Sin banderas) */}
+              <div className="flex items-center bg-slate-200/60 dark:bg-surface-container-low p-1 rounded-full shadow-inner border border-slate-300/60 dark:border-white/5" id="lang-switch-container">
                 <button
                   type="button"
                   onClick={() => handleLanguageChange('es')}
-                  className={`px-3 py-1 rounded-full font-caption-sm text-caption-sm transition-all duration-200 shadow-sm flex items-center gap-1 cursor-pointer ${
+                  className={`px-3 py-1 rounded-full font-caption-sm text-caption-sm transition-all duration-200 shadow-sm flex items-center justify-center cursor-pointer ${
                     language === 'es'
-                      ? 'bg-surface-container-high text-primary font-bold shadow-md'
-                      : 'text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-white dark:bg-surface-container-high text-primary font-bold shadow-md'
+                      : 'text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface'
                   }`}
                   id="btn-lang-es"
                 >
-                  <span>🇲🇽</span>
                   <span>ES</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleLanguageChange('en')}
-                  className={`px-3 py-1 rounded-full font-caption-sm text-caption-sm transition-all duration-200 flex items-center gap-1 hover:text-on-surface cursor-pointer ${
+                  className={`px-3 py-1 rounded-full font-caption-sm text-caption-sm transition-all duration-200 flex items-center justify-center hover:text-slate-900 dark:hover:text-on-surface cursor-pointer ${
                     language === 'en'
-                      ? 'bg-surface-container-high text-primary font-bold shadow-md'
-                      : 'text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-white dark:bg-surface-container-high text-primary font-bold shadow-md'
+                      : 'text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface'
                   }`}
                   id="btn-lang-en"
                 >
-                  <span>🇺🇸</span>
                   <span>EN</span>
                 </button>
               </div>
@@ -256,14 +254,14 @@ export function BilingualAuthScreen({
             </div>
 
             {/* Tab Bar: Iniciar Sesión / Registrarse */}
-            <div className="w-full bg-surface-container-low p-1 rounded-full shadow-inner flex items-center mb-space-lg relative z-10 border border-white/5" id="auth-tab-bar">
+            <div className="w-full bg-slate-200/60 dark:bg-surface-container-low p-1 rounded-full shadow-inner flex items-center mb-space-lg relative z-10 border border-slate-300/60 dark:border-white/5" id="auth-tab-bar">
               <button
                 type="button"
                 onClick={() => setAuthMode('login')}
                 className={`flex-1 py-2.5 rounded-full font-title-base text-body-medium transition-all duration-200 cursor-pointer ${
                   authMode === 'login'
-                    ? 'bg-surface-container-high text-primary font-bold shadow-md'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    ? 'bg-white dark:bg-surface-container-high text-primary font-bold shadow-md'
+                    : 'text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface'
                 }`}
                 id="tab-login"
               >
@@ -274,8 +272,8 @@ export function BilingualAuthScreen({
                 onClick={() => setAuthMode('register')}
                 className={`flex-1 py-2.5 rounded-full font-title-base text-body-medium transition-all duration-200 cursor-pointer ${
                   authMode === 'register'
-                    ? 'bg-surface-container-high text-primary font-bold shadow-md'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    ? 'bg-white dark:bg-surface-container-high text-primary font-bold shadow-md'
+                    : 'text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface'
                 }`}
                 id="tab-register"
               >
@@ -288,13 +286,13 @@ export function BilingualAuthScreen({
               <form onSubmit={handleLogin} className="flex flex-col gap-space-md w-full relative z-10">
                 {/* Email input */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-caption-sm text-caption-sm text-on-surface-variant flex items-center justify-between">
+                  <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                     <span>{language === 'es' ? 'Correo Electrónico' : 'Email Address'}</span>
                   </label>
-                  <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
-                    <span className="material-symbols-outlined text-outline text-[20px]">alternate_email</span>
+                  <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">alternate_email</span>
                     <input
-                      className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline"
+                      className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline"
                       type="email"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
@@ -307,14 +305,14 @@ export function BilingualAuthScreen({
                 {/* Password input */}
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="font-caption-sm text-caption-sm text-on-surface-variant">
+                    <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant">
                       {language === 'es' ? 'Contraseña' : 'Password'}
                     </label>
                   </div>
-                  <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
-                    <span className="material-symbols-outlined text-outline text-[20px]">lock</span>
+                  <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">lock</span>
                     <input
-                      className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline pr-8"
+                      className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline pr-8"
                       id="pwd-input-login"
                       type={showLoginPassword ? 'text' : 'password'}
                       value={loginPassword}
@@ -395,12 +393,12 @@ export function BilingualAuthScreen({
                 {/* First Name & Last Name (2 columns) */}
                 <div className="grid grid-cols-2 gap-space-sm w-full">
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-caption-sm text-caption-sm text-on-surface-variant flex items-center justify-between">
+                    <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                       <span>{language === 'es' ? 'Nombre' : 'First Name'}</span>
                     </label>
-                    <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
+                    <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
                       <input
-                        className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline capitalize"
+                        className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline capitalize"
                         placeholder="Nombre"
                         type="text"
                         autoCapitalize="words"
@@ -413,12 +411,12 @@ export function BilingualAuthScreen({
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-caption-sm text-caption-sm text-on-surface-variant flex items-center justify-between">
+                    <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                       <span>{language === 'es' ? 'Apellidos' : 'Last Name'}</span>
                     </label>
-                    <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
+                    <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
                       <input
-                        className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline capitalize"
+                        className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline capitalize"
                         placeholder="Apellidos"
                         type="text"
                         autoCapitalize="words"
@@ -434,18 +432,17 @@ export function BilingualAuthScreen({
 
                 {/* Mobile Phone */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-caption-sm text-caption-sm text-on-surface-variant flex items-center justify-between">
+                  <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                     <span>{language === 'es' ? 'Número Celular (Móvil)' : 'Mobile Phone'}</span>
-                    <span className="font-label-caps text-label-caps text-primary">SMS Instantáneo</span>
+                    <span className="font-label-caps text-label-caps text-primary font-bold">SMS Instantáneo</span>
                   </label>
-                  <div className="relative rounded-xl bg-surface-container px-3 py-2.5 flex items-center gap-2 shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
-                    <div className="flex items-center gap-1.5 bg-surface-container-high px-2.5 py-1.5 rounded-lg shadow-sm cursor-pointer select-none">
-                      <span className="text-base leading-none">🇺🇸</span>
-                      <span className="font-financial-mono text-financial-mono text-on-surface">{phonePrefix}</span>
-                      <span className="material-symbols-outlined text-[16px] text-on-surface-variant">arrow_drop_down</span>
+                  <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-2.5 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-surface-container-high px-2.5 py-1.5 rounded-lg shadow-sm cursor-pointer select-none border border-slate-200 dark:border-transparent">
+                      <span className="font-financial-mono text-financial-mono font-bold text-slate-900 dark:text-on-surface">{phonePrefix}</span>
+                      <span className="material-symbols-outlined text-[16px] text-slate-500 dark:text-on-surface-variant">arrow_drop_down</span>
                     </div>
                     <input
-                      className="w-full bg-transparent font-financial-mono text-financial-mono text-on-surface focus:outline-none placeholder:text-outline"
+                      className="w-full bg-transparent font-financial-mono text-financial-mono text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline"
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -462,13 +459,13 @@ export function BilingualAuthScreen({
 
                 {/* Email */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-caption-sm text-caption-sm text-on-surface-variant flex items-center justify-between">
+                  <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant flex items-center justify-between">
                     <span>{language === 'es' ? 'Correo Electrónico' : 'Email Address'}</span>
                   </label>
-                  <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
-                    <span className="material-symbols-outlined text-outline text-[20px]">alternate_email</span>
+                  <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">alternate_email</span>
                     <input
-                      className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline"
+                      className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -480,17 +477,17 @@ export function BilingualAuthScreen({
                 {/* Password with Strength Indicators */}
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="font-caption-sm text-caption-sm text-on-surface-variant">
+                    <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant">
                       {language === 'es' ? 'Contraseña Segura' : 'Secure Password'}
                     </label>
                     <span className="font-label-caps text-label-caps text-primary-fixed uppercase tracking-wider font-bold">
                       {language === 'es' ? 'Verde / Fuerte' : 'Strong / Protected'}
                     </span>
                   </div>
-                  <div className="relative rounded-xl bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-surface-container-high border border-white/5 transition-colors">
-                    <span className="material-symbols-outlined text-outline text-[20px]">lock</span>
+                  <div className="relative rounded-xl bg-white dark:bg-surface-container px-3 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200 dark:border-white/5 transition-colors">
+                    <span className="material-symbols-outlined text-slate-400 dark:text-outline text-[20px]">lock</span>
                     <input
-                      className="w-full bg-transparent font-body-base text-body-base text-on-surface focus:outline-none placeholder:text-outline pr-8"
+                      className="w-full bg-transparent font-body-base text-body-base text-slate-900 dark:text-on-surface focus:outline-none placeholder:text-slate-400 dark:placeholder:text-outline pr-8"
                       id="pwd-input-register"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
