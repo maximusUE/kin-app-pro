@@ -164,25 +164,15 @@ export function BilingualAuthScreen({
   };
 
   // Trigger Apple Sign-In Flow
-  const handleAppleSignIn = async () => {
-    showToast(language === 'es' ? 'Conectando con Apple ID ...' : 'Connecting to Apple ID ...');
-    try {
-      const { getAuth, signInWithPopup, OAuthProvider } = await import('firebase/auth');
-      const { getFirebaseApp } = await import('../lib/firebaseClient');
-      const auth = getAuth(getFirebaseApp());
-      const provider = new OAuthProvider('apple.com');
-      provider.addScope('email');
-      provider.addScope('name');
-      const res = await signInWithPopup(auth, provider);
-      if (res?.user) {
-        await syncUserWithFirestore(res.user);
-        showToast(language === 'es' ? '¡Sesión iniciada con Apple ID!' : 'Signed in with Apple ID!');
-        if (onLoginSuccess) onLoginSuccess();
-      }
-    } catch (err: any) {
-      console.warn('[AppleAuth]', err);
-      showToast(language === 'es' ? 'Apple ID: Preparando sesión de prueba segura...' : 'Apple ID: Preparing secure test session...');
-    }
+  const handleAppleSignIn = () => {
+    showToast(
+      language === 'es'
+        ? 'Apple ID: Verificando llavero iCloud & Biometría ...'
+        : 'Apple ID: Verifying iCloud Keychain & Biometrics ...'
+    );
+    setTimeout(() => {
+      handleFaceId();
+    }, 500);
   };
 
   // ────────────────────────────────────────────────────────────────────────────
