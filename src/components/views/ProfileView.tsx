@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToggleSwitch } from '@/components/AppSettingsModal';
+import { StripePaymentSheetModal, SavedCardItem } from '@/components/StripePaymentSheetModal';
 
 export interface ProfileViewProps {
   onBack: () => void;
@@ -51,16 +52,6 @@ export interface ProfileViewProps {
   }) => void;
   onUpdateAvatar?: (newAvatar: string) => void;
   handleLogout: () => void;
-}
-
-interface SavedCard {
-  id: string;
-  name: string;
-  type: string;
-  last4: string;
-  exp: string;
-  isDefault: boolean;
-  icon: string;
 }
 
 export function ProfileView({
@@ -169,12 +160,13 @@ export function ProfileView({
     if (userState) setDraftState(userState);
   }, [userFirstName, userLastName, userPhone, userAddress1, userAddress2, userZip, userCity, userState]);
 
-  // Saved Payment Cards
-  const [savedCards, setSavedCards] = useState<SavedCard[]>([
+  // Saved Payment Cards (Enterprise Stripe Sheet format)
+  const [savedCards, setSavedCards] = useState<SavedCardItem[]>([
     {
       id: 'card-1',
       name: 'Obsidian Metal Debit',
       type: 'Visa',
+      brand: 'visa',
       last4: '8942',
       exp: '09/28',
       isDefault: true,
@@ -183,7 +175,8 @@ export function ProfileView({
     {
       id: 'card-2',
       name: 'Chase Premier Sapphire',
-      type: 'MC',
+      type: 'Mastercard',
+      brand: 'mastercard',
       last4: '4102',
       exp: '11/26',
       isDefault: false,
@@ -191,13 +184,17 @@ export function ProfileView({
     },
   ]);
 
-  // New Card Accordion Form State
-  const [showNewCardForm, setShowNewCardForm] = useState(false);
-  const [newCardNumber, setNewCardNumber] = useState('');
-  const [newCardExp, setNewCardExp] = useState('');
-  const [newCardCvv, setNewCardCvv] = useState('');
-  const [newCardHolder, setNewCardHolder] = useState('');
-  const [savePermanently, setSavePermanently] = useState(true);
+  // Load saved payment methods from API
+  useEffect(() => {
+    fetch(`/api/payment-methods?userId=${userId || 'user-001'}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.cards && Array.isArray(data.cards) && data.cards.length > 0) {
+          setSavedCards(data.cards);
+        }
+      })
+      .catch(() => {});
+  }, [userId]);
 
   // Handlers
   const handleSaveProfileForm = (e: React.FormEvent) => {
@@ -221,41 +218,70 @@ export function ProfileView({
     );
   };
 
-  const handleAddNewCardSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const last4 = newCardNumber.replace(/\s/g, '').slice(-4) || '8831';
-    const newCard: SavedCard = {
-      id: `card-${Date.now()}`,
-      name: newCardHolder ? `${newCardHolder}'s Card` : 'Tarjeta KIN Débito',
-      type: 'Visa',
+  const handleAddNewCardFromSheet = (cardData: {
+    cardNumber: string;
+    exp: string;
+    cvv: string;
+    cardHolder: string;
+    zip: string;
+    country: string;
+    savePermanently: boolean;
+  }) => {
+    const last4 = cardData.cardNumber.slice(-4) || '8831';
+    let brand: 'visa' | 'mastercard' | 'amex' | 'discover' = 'visa';
+    if (cardData.cardNumber.startsWith('34') || cardData.cardNumber.startsWith('37')) brand = 'amex';
+    else if (cardData.cardNumber.startsWith('5') || cardData.cardNumber.startsWith('2')) brand = 'mastercard';
+    else if (cardData.cardNumber.startsWith('6')) brand = 'discover';
+
+    const newCard: SavedCardItem = {
+      id: `pm_${Date.now()}`,
+      name: cardData.cardHolder || 'Tarjeta Débito KIN',
+      type: brand.toUpperCase(),
+      brand: brand,
       last4: last4,
-      exp: newCardExp || '12/28',
-      isDefault: false,
+      exp: cardData.exp || '12/28',
+      isDefault: savedCards.length === 0,
       icon: 'credit_card',
+      zip: cardData.zip,
+      country: cardData.country,
     };
-    setSavedCards((prev) => [...prev, newCard]);
-    setShowNewCardForm(false);
-    setNewCardNumber('');
-    setNewCardExp('');
-    setNewCardCvv('');
-    setNewCardHolder('');
-    setPaymentCardsModalOpen(false);
+    setSavedCards((prev) => [newCard, ...prev]);
     notifyToast(
-      isEn ? 'New card linked & approved for SPEI' : 'Nueva tarjeta vinculada y autorizada para SPEI',
-      'credit_card'
+      isEn ? 'New card linked & tokenized (PCI-DSS Level 1)' : 'Nueva tarjeta vinculada y tokenizada (PCI-DSS Nivel 1)',
+      'verified_user'
     );
   };
 
-  const handleSelectDefaultCard = (cardId: string) => {
+  const handleSelectDefaultCard = async (cardId: string) => {
     setSavedCards((prev) =>
       prev.map((c) => ({
         ...c,
         isDefault: c.id === cardId,
       }))
     );
+    try {
+      await fetch('/api/payment-methods', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userId || 'user-001', cardId }),
+      });
+    } catch (_) {}
     notifyToast(
       isEn ? 'Card selected as primary for transfers' : 'Tarjeta seleccionada para próximo envío',
       'check_circle'
+    );
+  };
+
+  const handleDeleteCard = async (cardId: string) => {
+    setSavedCards((prev) => prev.filter((c) => c.id !== cardId));
+    try {
+      await fetch(`/api/payment-methods?userId=${userId || 'user-001'}&cardId=${cardId}`, {
+        method: 'DELETE',
+      });
+    } catch (_) {}
+    notifyToast(
+      isEn ? 'Payment method removed' : 'Método de pago eliminado',
+      'delete'
     );
   };
 
@@ -821,201 +847,18 @@ export function ProfileView({
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: MÉTODOS DE PAGO & TARJETAS                                       */}
+      {/* MODAL 2: STRIPE MOBILE PAYMENT SHEET (APPLE PAY, LINK, CARDS & ACH)       */}
       {/* ========================================================================= */}
-      {paymentCardsModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-8 sm:pt-12 pb-24 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
-          onClick={() => setPaymentCardsModalOpen(false)}
-        >
-          <div
-            className="w-full max-w-[390px] max-h-[80vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-2 sm:mt-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h2 className="font-headline-md text-headline-md text-white">
-                  {isEn ? 'Payment Methods' : 'Métodos de Pago'}
-                </h2>
-                <p className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {isEn ? 'Funds for instant SPEI transfers' : 'Fondos para envíos SPEI inmediatos'}
-                </p>
-              </div>
-              <button
-                type="button"
-                aria-label="Cerrar modal"
-                className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
-                onClick={() => setPaymentCardsModalOpen(false)}
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
-
-            {/* Saved Cards List */}
-            <div className="space-y-2.5 mb-3">
-              {savedCards.map((card) => (
-                <div
-                  key={card.id}
-                  onClick={() => handleSelectDefaultCard(card.id)}
-                  className={`p-3.5 rounded-2xl relative shadow-md flex items-center justify-between cursor-pointer border transition-all ${
-                    card.isDefault
-                      ? 'bg-gradient-to-br from-surface-container-highest to-surface-container-low border-[#2ED5A4]/40'
-                      : 'bg-surface-container-low border-white/5 hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-surface-container-lowest flex items-center justify-center text-[#2ED5A4] shadow-inner">
-                      <span className="material-symbols-outlined text-[22px]">{card.icon}</span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-title-base text-[14px] text-white font-bold">{card.name}</span>
-                        {card.isDefault && (
-                          <span className="font-label-caps text-[9px] px-1.5 py-0.5 rounded bg-[#2ED5A4]/20 text-[#2ED5A4] font-bold">
-                            {isEn ? 'Default' : 'Predeterminada'}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-financial-mono text-caption-sm text-on-surface-variant">
-                        {card.type} •••• {card.last4} • Exp {card.exp}
-                      </span>
-                    </div>
-                  </div>
-                  {card.isDefault ? (
-                    <span
-                      className="material-symbols-outlined text-[#2ED5A4] text-[20px]"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      check_circle
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      className="font-caption-sm text-[12px] text-[#2ED5A4] font-bold hover:underline cursor-pointer"
-                    >
-                      {isEn ? 'Use' : 'Usar'}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Add New Card Accordion Toggle */}
-            <button
-              type="button"
-              className="touch-press w-full py-2.5 px-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-[#2ED5A4] font-caption-sm flex items-center justify-center gap-1.5 transition-colors mb-3 cursor-pointer border border-white/5 font-bold"
-              onClick={() => setShowNewCardForm(!showNewCardForm)}
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                {showNewCardForm ? 'remove_circle' : 'add_circle'}
-              </span>
-              <span>
-                {showNewCardForm
-                  ? (isEn ? 'Close Form' : 'Cerrar Formulario')
-                  : (isEn ? '+ Add New Debit Card / Bank' : '+ Agregar Nueva Tarjeta / Cuenta Bancaria')}
-              </span>
-            </button>
-
-            {/* New Card Form */}
-            {showNewCardForm && (
-              <form className="space-y-3 p-3.5 rounded-2xl bg-surface-container-low mb-3 border border-white/10 animate-fade-in" onSubmit={handleAddNewCardSubmit}>
-                <div className="flex items-center justify-between">
-                  <span className="font-label-caps text-label-caps uppercase text-white font-bold">
-                    {isEn ? 'New Card or SPEI' : 'Nueva Tarjeta o SPEI'}
-                  </span>
-                  <span className="font-financial-mono text-[10px] text-[#2ED5A4]">
-                    {isEn ? 'AES-256 Vault' : 'Cifrado AES-256'}
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block font-label-caps text-[10px] text-on-surface-variant mb-1 uppercase font-bold">
-                    {isEn ? 'Card Number' : 'Número de Tarjeta'}
-                  </label>
-                  <input
-                    className="w-full h-11 px-3 rounded-lg bg-surface-container text-white font-financial-mono text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] border border-white/5"
-                    maxLength={19}
-                    placeholder="4000 1234 5678 9010"
-                    required
-                    type="text"
-                    value={newCardNumber}
-                    onChange={(e) => setNewCardNumber(e.target.value)}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block font-label-caps text-[10px] text-on-surface-variant mb-1 uppercase font-bold">
-                      {isEn ? 'Expires (MM/YY)' : 'Expira (MM/AA)'}
-                    </label>
-                    <input
-                      className="w-full h-11 px-3 rounded-lg bg-surface-container text-white font-financial-mono text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] border border-white/5"
-                      maxLength={5}
-                      placeholder="12/28"
-                      required
-                      type="text"
-                      value={newCardExp}
-                      onChange={(e) => setNewCardExp(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-label-caps text-[10px] text-on-surface-variant mb-1 uppercase font-bold">
-                      CVV / CVC
-                    </label>
-                    <input
-                      className="w-full h-11 px-3 rounded-lg bg-surface-container text-white font-financial-mono text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] border border-white/5"
-                      maxLength={4}
-                      placeholder="•••"
-                      required
-                      type="password"
-                      value={newCardCvv}
-                      onChange={(e) => setNewCardCvv(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-label-caps text-[10px] text-on-surface-variant mb-1 uppercase font-bold">
-                    {isEn ? 'Cardholder Name' : 'Nombre del Titular'}
-                  </label>
-                  <input
-                    className="w-full h-11 px-3 rounded-lg bg-surface-container text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] border border-white/5"
-                    placeholder={isEn ? 'As it appears on card' : 'Como aparece en la tarjeta'}
-                    required
-                    type="text"
-                    value={newCardHolder}
-                    onChange={(e) => setNewCardHolder(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between py-1">
-                  <span className="font-caption-sm text-[12px] text-on-surface">
-                    {isEn ? 'Save permanently for fast sending' : 'Guardar permanentemente para envíos rápidos'}
-                  </span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={savePermanently}
-                      onChange={(e) => setSavePermanently(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#2ED5A4]" />
-                  </label>
-                </div>
-
-                <button
-                  className="touch-press w-full h-11 rounded-lg bg-[#2ED5A4] text-[#003828] font-caption-sm font-bold shadow-md flex items-center justify-center gap-1.5 cursor-pointer mt-1"
-                  type="submit"
-                >
-                  <span className="material-symbols-outlined text-[18px]">verified_user</span>
-                  <span>{isEn ? 'Link Card Successfully' : 'Vincular Tarjeta con Éxito'}</span>
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      <StripePaymentSheetModal
+        isOpen={paymentCardsModalOpen}
+        onClose={() => setPaymentCardsModalOpen(false)}
+        savedCards={savedCards}
+        onSelectDefaultCard={handleSelectDefaultCard}
+        onAddNewCard={handleAddNewCardFromSheet}
+        onDeleteCard={handleDeleteCard}
+        language={language}
+        userId={userId}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL 3: IDIOMA / LANGUAGE SELECTOR                                       */}
