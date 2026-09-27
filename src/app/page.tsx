@@ -308,8 +308,8 @@ export default function MobileApp() {
   const [userCity, setUserCity] = useState('');
   const [userState, setUserState] = useState('');
   const [userZip, setUserZip] = useState('');
-  const [userAddress1, setUserAddress1] = useState('482 Grand Concourse');
-  const [userAddress2, setUserAddress2] = useState('Apt 4B');
+  const [userAddress1, setUserAddress1] = useState('');
+  const [userAddress2, setUserAddress2] = useState('');
   const [userCountry, setUserCountry] = useState('Estados Unidos 🇺🇸');
   const [userAvatar, setUserAvatar] = useState('');
   const [userClientId, setUserClientId] = useState('');
@@ -341,11 +341,11 @@ export default function MobileApp() {
     }
     if (user.email) setUserEmail(user.email);
     if (user.phone) setUserPhone(user.phone);
-    if (user.address1) setUserAddress1(user.address1);
-    if (user.address2) setUserAddress2(user.address2);
-    if (user.city) setUserCity(capitalizeWords(user.city));
-    if (user.state) setUserState(capitalizeWords(user.state));
-    if (user.zip) setUserZip(user.zip);
+    setUserAddress1(user.address1 ?? '');
+    setUserAddress2(user.address2 ?? '');
+    setUserCity(user.city ? capitalizeWords(user.city) : '');
+    setUserState(user.state ? capitalizeWords(user.state) : '');
+    setUserZip(user.zip ?? '');
     if (user.country) setUserCountry(capitalizeWords(user.country));
     // Asignar el avatar explícito (si está vacío o es foto de stock ficticia, deja recuadro vacío sin foto)
     setUserAvatar(user.avatar && !user.avatar.includes('images.unsplash.com') ? user.avatar : '');
@@ -536,7 +536,28 @@ export default function MobileApp() {
       .then((data) => {
         if (isCancelled) return;
         if (data.success && data.user) {
-          loadUserData(data.user);
+          // Mantener persistencia estricta: Si el cliente editó y guardó sus datos localmente, darles prioridad
+          let clientSaved: any = {};
+          try {
+            const raw = localStorage.getItem('kin_active_user');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed.id === data.user.id || parsed.email === data.user.email) {
+                clientSaved = parsed;
+              }
+            }
+          } catch (_) {}
+
+          const effectiveUser = {
+            ...data.user,
+            ...clientSaved,
+            address1: clientSaved.address1 !== undefined ? clientSaved.address1 : (data.user.address1 || ''),
+            address2: clientSaved.address2 !== undefined ? clientSaved.address2 : (data.user.address2 || ''),
+            city: clientSaved.city !== undefined ? clientSaved.city : (data.user.city || ''),
+            state: clientSaved.state !== undefined ? clientSaved.state : (data.user.state || ''),
+            zip: clientSaved.zip !== undefined ? clientSaved.zip : (data.user.zip || ''),
+          };
+          loadUserData(effectiveUser);
           if (Array.isArray(data.transactions)) {
             setTransactions(data.transactions);
           }

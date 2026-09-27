@@ -68,11 +68,11 @@ export function ProfileView({
   userClientId,
   copiedClientId,
   userPhone,
-  userAddress1 = '482 Grand Concourse',
-  userAddress2 = 'Apt 4B',
-  userCity,
-  userState,
-  userZip,
+  userAddress1 = '',
+  userAddress2 = '',
+  userCity = '',
+  userState = '',
+  userZip = '',
   onOpenVault,
   biometricsEnabled,
   setBiometricsEnabled,
@@ -139,25 +139,25 @@ export function ProfileView({
     }, 2800);
   };
 
-  // Draft profile fields
-  const [draftFirstName, setDraftFirstName] = useState(userFirstName || 'Mateo');
-  const [draftLastName, setDraftLastName] = useState(userLastName || 'Morales');
-  const [draftPhone, setDraftPhone] = useState(userPhone || '+1 (555) 349-2910');
-  const [draftAddress1, setDraftAddress1] = useState(userAddress1 || '482 Grand Concourse');
-  const [draftAddress2, setDraftAddress2] = useState(userAddress2 || 'Apt 4B');
-  const [draftZip, setDraftZip] = useState(userZip || '10451');
-  const [draftCity, setDraftCity] = useState(userCity || 'Bronx');
-  const [draftState, setDraftState] = useState(userState || 'New York');
+  // Draft profile fields - Limpios por defecto sin datos ficticios
+  const [draftFirstName, setDraftFirstName] = useState(userFirstName || '');
+  const [draftLastName, setDraftLastName] = useState(userLastName || '');
+  const [draftPhone, setDraftPhone] = useState(userPhone || '');
+  const [draftAddress1, setDraftAddress1] = useState(userAddress1 || '');
+  const [draftAddress2, setDraftAddress2] = useState(userAddress2 || '');
+  const [draftZip, setDraftZip] = useState(userZip || '');
+  const [draftCity, setDraftCity] = useState(userCity || '');
+  const [draftState, setDraftState] = useState(userState || '');
 
   useEffect(() => {
-    if (userFirstName) setDraftFirstName(userFirstName);
-    if (userLastName) setDraftLastName(userLastName);
-    if (userPhone) setDraftPhone(userPhone);
-    if (userAddress1) setDraftAddress1(userAddress1);
-    if (userAddress2) setDraftAddress2(userAddress2);
-    if (userZip) setDraftZip(userZip);
-    if (userCity) setDraftCity(userCity);
-    if (userState) setDraftState(userState);
+    setDraftFirstName(userFirstName || '');
+    setDraftLastName(userLastName || '');
+    setDraftPhone(userPhone || '');
+    setDraftAddress1(userAddress1 || '');
+    setDraftAddress2(userAddress2 || '');
+    setDraftZip(userZip || '');
+    setDraftCity(userCity || '');
+    setDraftState(userState || '');
   }, [userFirstName, userLastName, userPhone, userAddress1, userAddress2, userZip, userCity, userState]);
 
   // Saved Payment Cards (Enterprise Stripe Sheet format)
@@ -318,9 +318,9 @@ export function ProfileView({
     'https://lh3.googleusercontent.com/aida/AEtjO1XgfG4wJ22AeyGZa6zxTOh6Jyo20b27o3fM67TfAmBcD2zke2Fk2YO19J9j1d1vfNAB74v-fD8hligRjbEFIVm3iq9fy8yBO3oLJHvGUIay7BRQTN9iRekVzBNrFPzPyKvDNF6s9xjkCWj_SXvlkelM_YGOwkvZ_WOxhKe-DyaVKApVN9NtjREGVxp_9dorOv0eH-vwJVbAuWSjtjv8HOoYl9lVcWIQ0LJXWPH0aLGzV51M6lfcmRnHAyM';
 
   const displayAvatar = currentAvatar || userAvatar || defaultStitchAvatar;
-  const displayName = `${draftFirstName} ${draftLastName}`.trim() || 'Mateo Morales';
-  const displayEmail = userEmail || 'mateo.morales@gmail.com';
-  const displayPhone = draftPhone || '+1 (555) 349-2910';
+  const displayName = `${draftFirstName} ${draftLastName}`.trim() || userName || 'Usuario KIN';
+  const displayEmail = userEmail || '';
+  const displayPhone = draftPhone || userPhone || '';
 
   return (
     <div className="flex flex-col w-full pb-8 select-none relative animate-fade-in">
@@ -681,11 +681,11 @@ export function ProfileView({
       {/* ========================================================================= */}
       {editProfileModalOpen && (
         <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-8 sm:pt-12 pb-24 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
           onClick={() => setEditProfileModalOpen(false)}
         >
           <div
-            className="w-full max-w-[390px] max-h-[80vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-2 sm:mt-4"
+            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
@@ -755,7 +755,6 @@ export function ProfileView({
                   <input
                     className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-financial-mono text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
                     type="tel"
-                    required
                     value={draftPhone}
                     onChange={(e) => setDraftPhone(e.target.value)}
                   />
@@ -773,7 +772,7 @@ export function ProfileView({
                   <input
                     className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
                     type="text"
-                    required
+                    placeholder={isEn ? 'Optional street address' : 'Dirección (calle y número)'}
                     value={draftAddress1}
                     onChange={(e) => setDraftAddress1(e.target.value)}
                   />
@@ -791,6 +790,7 @@ export function ProfileView({
                   <input
                     className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
                     type="text"
+                    placeholder={isEn ? 'Apt, Suite, Unit (optional)' : 'Apto, Suite, Edificio (opcional)'}
                     value={draftAddress2}
                     onChange={(e) => setDraftAddress2(e.target.value)}
                   />
@@ -805,7 +805,7 @@ export function ProfileView({
                   <input
                     className="w-full h-11 px-3.5 rounded-xl bg-surface-container-low text-white font-financial-mono text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
                     type="text"
-                    required
+                    placeholder={isEn ? 'ZIP code' : 'Código Postal'}
                     value={draftZip}
                     onChange={(e) => setDraftZip(e.target.value)}
                   />
@@ -817,7 +817,7 @@ export function ProfileView({
                   <input
                     className="w-full h-11 px-3.5 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
                     type="text"
-                    required
+                    placeholder={isEn ? 'City' : 'Ciudad'}
                     value={draftCity}
                     onChange={(e) => setDraftCity(e.target.value)}
                   />
@@ -835,19 +835,18 @@ export function ProfileView({
                   <input
                     className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
                     type="text"
-                    required
+                    placeholder={isEn ? 'State or province' : 'Estado o provincia'}
                     value={draftState}
                     onChange={(e) => setDraftState(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="pt-2 flex gap-2">
+              <div className="pt-3 flex gap-2">
                 <button
-                  className="touch-press w-full h-12 rounded-full bg-[#2ED5A4] text-[#003828] font-title-base text-title-base font-bold shadow-[0_8px_24px_rgba(46,213,164,0.35)] flex items-center justify-center gap-2 cursor-pointer"
+                  className="touch-press w-full h-13 rounded-full bg-[#2ED5A4] text-[#003828] font-title-base text-title-base font-bold shadow-[0_8px_24px_rgba(46,213,164,0.35)] flex items-center justify-center cursor-pointer hover:brightness-105 active:scale-[0.98] transition-all"
                   type="submit"
                 >
-                  <span className="material-symbols-outlined text-[20px]">save</span>
                   <span>{isEn ? 'Save Changes' : 'Guardar Cambios'}</span>
                 </button>
               </div>
