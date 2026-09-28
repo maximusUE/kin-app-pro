@@ -402,7 +402,7 @@ export function KinCashP2PModal({
 
   const handleDragMove = (clientX: number) => {
     if (!isDragging || isDispatched || !trackRef.current) return;
-    const maxDist = trackRef.current.clientWidth - 46 - 12;
+    const maxDist = Math.max(0, trackRef.current.clientWidth - 54);
     let delta = clientX - startXRef.current;
     if (delta < 0) delta = 0;
     if (delta > maxDist) delta = maxDist;
@@ -412,7 +412,7 @@ export function KinCashP2PModal({
   const handleDragEnd = () => {
     if (!isDragging || isDispatched || !trackRef.current) return;
     setIsDragging(false);
-    const maxDist = trackRef.current.clientWidth - 46 - 12;
+    const maxDist = Math.max(0, trackRef.current.clientWidth - 54);
 
     if (slideX >= maxDist * 0.82) {
       // 1. Validar monto mayor a 0
@@ -765,22 +765,22 @@ export function KinCashP2PModal({
       <div className="flex flex-col gap-2 mt-1">
         <div
           ref={trackRef}
-          className="relative w-full h-[58px] rounded-full bg-surface-container-high p-1.5 flex items-center shadow-2xl overflow-hidden select-none border border-white/10"
+          className="relative w-full h-[56px] rounded-full bg-[#131522] border border-white/10 shadow-inner flex items-center overflow-hidden select-none"
         >
-          {/* Glow trail behind thumb - perfectamente sincronizado a 0ms con la huella */}
+          {/* Symmetrical illuminated glow trail - active only when sliding */}
           <div
-            className={`absolute left-0 top-0 bottom-0 bg-gradient-to-r from-primary/30 via-primary/55 to-primary/85 rounded-full ${
-              isDragging ? 'duration-0 transition-none' : 'duration-200 transition-all'
+            className={`absolute left-[5px] top-[5px] bottom-[5px] bg-gradient-to-r from-primary/30 via-primary/50 to-primary/80 rounded-full transition-opacity pointer-events-none ${
+              slideX > 2 ? 'opacity-100' : 'opacity-0'
             }`}
-            style={{ width: `${Math.max(52, slideX + 52)}px` }}
+            style={{ width: `${Math.max(0, slideX + 44)}px` }}
           />
 
           {/* Slide Instruction Label */}
           <div
-            className="w-full flex items-center justify-center gap-1.5 text-on-surface-variant font-title-base text-body-medium pl-10 pr-4 pointer-events-none transition-opacity"
+            className="w-full flex items-center justify-center gap-1.5 text-on-surface-variant font-title-base text-body-medium pl-12 pr-4 pointer-events-none transition-opacity select-none"
             style={{
               opacity: trackRef.current
-                ? Math.max(0, 1 - (slideX / ((trackRef.current.clientWidth - 58) || 1)) * 1.5)
+                ? Math.max(0, 1 - (slideX / ((trackRef.current.clientWidth - 54) || 1)) * 1.5)
                 : 1,
             }}
           >
@@ -808,24 +808,24 @@ export function KinCashP2PModal({
             </div>
           )}
 
-          {/* Interactive Slider Thumb Knob */}
+          {/* Interactive Slider Thumb Knob - Geométricamente concéntrico y simétrico */}
           <div
             onMouseDown={(e) => handleDragStart(e.clientX)}
             onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
             onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
             onTouchEnd={handleDragEnd}
             style={{ transform: `translateX(${slideX}px)` }}
-            className={`absolute left-1.5 top-1.5 w-[46px] h-[46px] rounded-full bg-gradient-to-tr from-primary-container to-primary flex items-center justify-center text-on-primary-container cursor-grab active:cursor-grabbing shadow-[0_4px_20px_rgba(46,213,164,0.45)] z-10 ${
+            className={`absolute left-[5px] top-[5px] w-[44px] h-[44px] rounded-full bg-gradient-to-tr from-[#2ED5A4] to-[#1CD39B] flex items-center justify-center text-[#002116] cursor-grab active:cursor-grabbing shadow-[0_4px_16px_rgba(46,213,164,0.4)] z-10 select-none ${
               isDragging ? 'duration-0 transition-none' : 'duration-200 transition-transform'
             }`}
           >
             {isDispatched ? (
-              <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold animate-scale-in">
+              <span className="material-symbols-outlined text-[22px] text-[#002116] font-bold animate-scale-in">
                 task_alt
               </span>
             ) : (
-              <span className="material-symbols-outlined text-[24px] text-[#002116] font-bold">
-                {slideX > 150 ? 'check' : 'fingerprint'}
+              <span className="material-symbols-outlined text-[22px] text-[#002116] font-bold select-none">
+                {slideX > 120 ? 'arrow_forward' : 'fingerprint'}
               </span>
             )}
           </div>

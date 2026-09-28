@@ -554,7 +554,7 @@ export function MexicanBillPayModal({
       {/* Toast Feedback Simulation Container */}
       {toastMessage && (
         <div
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] p-3 rounded-2xl bg-surface-container-highest shadow-2xl flex items-center gap-3 transition-opacity duration-300 z-50 border border-white/10 animate-fade-in"
+          className="fixed bottom-24 inset-x-0 mx-auto w-[90%] max-w-[360px] p-3 rounded-2xl bg-surface-container-highest shadow-2xl flex items-center gap-3 transition-opacity duration-300 z-50 border border-white/10 animate-fade-in"
           id="toast"
         >
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary flex-shrink-0">
