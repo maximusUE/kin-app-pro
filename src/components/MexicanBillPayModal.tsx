@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { CloseIcon, CheckCircleIcon } from './Icons';
 import { BillCameraScannerModal, ScannedBillResult } from './BillCameraScannerModal';
 
@@ -180,7 +181,6 @@ export function MexicanBillPayModal({
   const [isSuccess, setIsSuccess] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [showCameraScanner, setShowCameraScanner] = useState(false);
-  const [toastMessage, setToastMessage] = useState<{ title: string; subtitle: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync selected service if changed via props
@@ -196,10 +196,9 @@ export function MexicanBillPayModal({
   if (!isOpen && !isScreen) return null;
 
   const showToast = (title: string, subtitle: string) => {
-    setToastMessage({ title, subtitle });
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3200);
+    toast.success(title, {
+      description: subtitle,
+    });
   };
 
   // Calculate USD amount based on selected service MXN amount and exchange rate
@@ -550,26 +549,6 @@ export function MexicanBillPayModal({
           </span>
         </div>
       </div>
-
-      {/* Toast Feedback Simulation Container */}
-      {toastMessage && (
-        <div
-          className="fixed bottom-24 inset-x-0 mx-auto w-[90%] max-w-[360px] p-3 rounded-2xl bg-surface-container-highest shadow-2xl flex items-center gap-3 transition-opacity duration-300 z-50 border border-white/10 animate-fade-in"
-          id="toast"
-        >
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary flex-shrink-0">
-            <span className="material-symbols-outlined text-[18px]">check</span>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-title-base text-[13px] text-white truncate font-bold">
-              {toastMessage.title}
-            </span>
-            <span className="font-caption-sm text-[11px] text-on-surface-variant truncate">
-              {toastMessage.subtitle}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Success Modal Dialogue */}
       {isSuccess && (

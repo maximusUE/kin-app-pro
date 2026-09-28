@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export interface BilingualAuthScreenProps {
@@ -61,7 +62,6 @@ export function BilingualAuthScreen({
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isFaceIdLoading, setIsFaceIdLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Google Account Selector Modal (Fallback for dev / popup blockers)
   const [showGoogleModal, setShowGoogleModal] = useState(false);
@@ -77,8 +77,13 @@ export function BilingualAuthScreen({
         type = 'success';
       }
     }
-    setToast({ message: msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === 'error') {
+      toast.error(msg);
+    } else if (type === 'success') {
+      toast.success(msg);
+    } else {
+      toast.info(msg);
+    }
   };
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -976,35 +981,7 @@ export function BilingualAuthScreen({
           </div>
         )}
 
-        {/* Dynamic Toast Feedback - Centrado simétricamente con inset-x-0 mx-auto */}
-        {toast && (
-          <div
-            className={`fixed bottom-10 inset-x-0 mx-auto w-[90%] max-w-[360px] p-3 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 z-50 backdrop-blur-md animate-fade-in ${
-              toast.type === 'error'
-                ? 'bg-[#1E1B24]/95 border border-rose-500/40 text-rose-200 shadow-[0_10px_30px_rgba(244,63,94,0.2)]'
-                : toast.type === 'success'
-                ? 'bg-[#12221D]/95 border border-emerald-500/40 text-emerald-100 shadow-[0_10px_30px_rgba(46,213,164,0.2)]'
-                : 'bg-surface-container-highest/95 border border-white/10 text-white shadow-2xl'
-            }`}
-          >
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                toast.type === 'error'
-                  ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                  : toast.type === 'success'
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                  : 'bg-primary/20 text-primary border border-primary/30'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                {toast.type === 'error' ? 'error' : toast.type === 'success' ? 'check_circle' : 'info'}
-              </span>
-            </div>
-            <span className="font-title-base text-xs font-bold truncate">
-              {toast.message}
-            </span>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

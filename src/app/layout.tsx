@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
+import { KinToaster } from '@/components/KinToaster';
 
 export const metadata: Metadata = {
   title: 'KIN — Envíos de Dinero USA a México y Pagos de Servicios',
@@ -67,6 +68,7 @@ export default function RootLayout({
       </head>
       <body className="bg-[#06070B] text-white min-h-[100dvh] antialiased selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4]">
         {children}
+        <KinToaster />
       </body>
     </html>
   );
