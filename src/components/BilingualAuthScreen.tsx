@@ -980,8 +980,6 @@ export function BilingualAuthScreen({
             </div>
           </div>
         )}
-
-        </div>
       </div>
     </div>
   );
