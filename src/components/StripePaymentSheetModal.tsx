@@ -54,9 +54,9 @@ export function StripePaymentSheetModal({
   const [cardNumber, setCardNumber] = useState('');
   const [cardExp, setCardExp] = useState('');
   const [cardCvv, setCardCvv] = useState('');
-  const [cardHolder, setCardHolder] = useState('Mateo Morales');
+  const [cardHolder, setCardHolder] = useState('');
   const [billingCountry, setBillingCountry] = useState<'US' | 'MX'>('US');
-  const [billingZip, setBillingZip] = useState('10451');
+  const [billingZip, setBillingZip] = useState('');
   const [saveForFuture, setSaveForFuture] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -199,7 +199,7 @@ export function StripePaymentSheetModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-6 pb-20 px-3 sm:px-4 overflow-y-auto animate-fade-in"
       onClick={onClose}
     >
       {/* Hidden camera input for card scan */}
@@ -214,7 +214,7 @@ export function StripePaymentSheetModal({
 
       {/* Main Payment Sheet Card */}
       <div
-        className="w-full max-w-[430px] rounded-t-[32px] sm:rounded-3xl bg-white dark:bg-[#181825] border-t sm:border border-slate-200 dark:border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.35)] sm:shadow-[0_24px_60px_rgba(0,0,0,0.7)] p-5 sm:p-6 relative animate-scale-in text-slate-800 dark:text-slate-100 max-h-[92vh] overflow-y-auto scrollbar-none"
+        className="w-full max-w-[430px] rounded-3xl bg-white dark:bg-[#181825] border border-slate-200 dark:border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.7)] p-5 sm:p-6 relative animate-scale-in text-slate-800 dark:text-slate-100 max-h-[88vh] overflow-y-auto scrollbar-none mt-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top iOS Pull Handle */}

@@ -874,11 +874,11 @@ export function ProfileView({
       {/* ========================================================================= */}
       {languageModalOpen && (
         <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-8 sm:pt-12 pb-24 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
           onClick={() => setLanguageModalOpen(false)}
         >
           <div
-            className="w-full max-w-[390px] max-h-[80vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-2 sm:mt-4"
+            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
@@ -973,11 +973,11 @@ export function ProfileView({
       {/* ========================================================================= */}
       {securityModalOpen && (
         <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-8 sm:pt-12 pb-24 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
           onClick={() => setSecurityModalOpen(false)}
         >
           <div
-            className="w-full max-w-[390px] max-h-[80vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-2 sm:mt-4"
+            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
@@ -1108,11 +1108,11 @@ export function ProfileView({
       {/* ========================================================================= */}
       {supportModalOpen && (
         <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-8 sm:pt-12 pb-24 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
           onClick={() => setSupportModalOpen(false)}
         >
           <div
-            className="w-full max-w-[390px] max-h-[80vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-2 sm:mt-4"
+            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
