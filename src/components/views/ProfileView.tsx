@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ToggleSwitch } from '@/components/AppSettingsModal';
 import { StripePaymentSheetModal, SavedCardItem } from '@/components/StripePaymentSheetModal';
+import { FxControlModal } from '@/components/FxControlModal';
 
 export interface ProfileViewProps {
   onBack: () => void;
@@ -39,6 +40,8 @@ export interface ProfileViewProps {
   handleToggleCurrency: (curr: 'USD' | 'MXN') => void;
   theme: 'dark' | 'light';
   handleToggleTheme: (theme: 'dark' | 'light') => void;
+  exchangeRate?: number;
+  onExchangeRateUpdated?: (newRate: number) => void;
   onUpdateProfile?: (updates: {
     firstName?: string;
     lastName?: string;
@@ -81,12 +84,15 @@ export function ProfileView({
   userId,
   theme,
   handleToggleTheme,
+  exchangeRate = 20.45,
+  onExchangeRateUpdated,
   onUpdateProfile,
   onUpdateAvatar,
   handleLogout,
 }: ProfileViewProps) {
   const isEn = language === 'en';
 
+  const [showFxModal, setShowFxModal] = useState(false);
   // Acceso nativo a fotos y cámara del dispositivo
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [currentAvatar, setCurrentAvatar] = useState<string | null>(userAvatar);
@@ -531,6 +537,55 @@ export function ProfileView({
             title={isEn ? 'Dark mode' : 'Modo oscuro'}
           />
         </div>
+
+        {/* ========================================================================= */}
+        {/* SECTION: TESORERÍA & TIPO DE CAMBIO (ADMIN KIN)                          */}
+        {/* ========================================================================= */}
+        <div className="anim-stagger-4 flex items-center justify-between px-1 mt-3 mb-2">
+          <span className="font-label-caps text-label-caps uppercase tracking-widest text-on-surface-variant font-bold">
+            {isEn ? 'Treasury & FX Control' : 'Tesorería & Tipo de Cambio'}
+          </span>
+          <span className="font-caption-sm text-[10px] text-primary font-black uppercase px-2 py-0.5 rounded-full bg-primary/15 border border-primary/30">
+            Admin Propietario
+          </span>
+        </div>
+
+        <button
+          type="button"
+          aria-label={isEn ? 'FX Market & Margin Control' : 'Control de Tipo de Cambio y Margen'}
+          onClick={() => setShowFxModal(true)}
+          className="anim-stagger-4 touch-press w-full p-4 mb-2.5 rounded-2xl bg-surface-container-low hover:bg-surface-container text-left transition-colors flex items-center justify-between group shadow-md cursor-pointer border border-primary/20 hover:border-primary/50 relative overflow-hidden"
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#2ED5A4]/25 to-primary/30 text-[#2ED5A4] border border-[#2ED5A4]/40 flex items-center justify-center group-hover:scale-105 transition-transform shadow-[0_0_12px_rgba(46,213,164,0.3)] shrink-0">
+              <span className="material-symbols-outlined text-[24px]">currency_exchange</span>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-title-base text-title-base text-white truncate font-bold">
+                  {isEn ? 'FX Market & Margin Control' : 'Control de Tipo de Cambio & Margen'}
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+              </div>
+              <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
+                {isEn
+                  ? `Active rate in app: 1 USD = $${Number(exchangeRate).toFixed(2)} MXN`
+                  : `Tasa activa en la app: 1 USD = $${Number(exchangeRate).toFixed(2)} MXN`}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-on-surface-variant">
+            <div className="flex flex-col items-end">
+              <span className="font-financial-mono text-sm font-black text-[#2ED5A4]">
+                ${Number(exchangeRate).toFixed(2)}
+              </span>
+              <span className="text-[10px] text-outline">MXN/USD</span>
+            </div>
+            <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-[#2ED5A4]">
+              tune
+            </span>
+          </div>
+        </button>
 
         {/* ========================================================================= */}
         {/* SECTION 3: SEGURIDAD Y RESPALDO                                           */}
@@ -1231,6 +1286,17 @@ export function ProfileView({
           </div>
         </div>
       )}
+
+      {/* Modal de Control de Tipo de Cambio & Tesorería */}
+      <FxControlModal
+        isOpen={showFxModal}
+        onClose={() => setShowFxModal(false)}
+        currentRate={exchangeRate}
+        onRateUpdated={(newRate) => {
+          onExchangeRateUpdated?.(newRate);
+        }}
+        language={language}
+      />
     </div>
   );
 }

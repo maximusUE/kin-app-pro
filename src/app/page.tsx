@@ -97,8 +97,8 @@ import { SendView } from '@/components/views/SendView';
 import { SendQuickView } from '@/components/views/SendQuickView';
 import { ProfileView } from '@/components/views/ProfileView';
 
-// Tasa de cambio real de mercado USD/MXN
-const USD_TO_MXN_RATE = 20.45;
+// Tasa de cambio base por defecto USD/MXN
+const DEFAULT_USD_TO_MXN_RATE = 20.45;
 
 // Red Oficial de Sucursales de Retiro en Efectivo (Cash Pickup México - 12 Redes Oficiales)
 const CASH_PICKUP_STORES = [
@@ -326,6 +326,10 @@ export default function MobileApp() {
   const [copiedClientId, setCopiedClientId] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
+  // Dynamic FX Exchange Rate (Treasury Control)
+  const [exchangeRate, setExchangeRate] = useState<number>(DEFAULT_USD_TO_MXN_RATE);
+  const USD_TO_MXN_RATE = exchangeRate;
+
   const loadUserData = (user: any) => {
     if (!user) return;
     if (user.id) setUserId(user.id);
@@ -426,6 +430,29 @@ export default function MobileApp() {
 
   // Authentication Gate State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+
+  // Sincronizar Tipo de Cambio FX desde LocalStorage y Endpoint de Tesorería (/api/fx)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedRate = localStorage.getItem('kin_active_exchange_rate');
+      if (savedRate) {
+        const parsed = parseFloat(savedRate);
+        if (!isNaN(parsed) && parsed > 0) {
+          setExchangeRate(parsed);
+        }
+      }
+    } catch (_) {}
+
+    fetch('/api/fx')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && typeof data.customerRate === 'number' && data.customerRate > 0) {
+          setExchangeRate(data.customerRate);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Sincronizar parámetros de URL y usuario activo (?view=login, ?view=dashboard, ?userId=...)
   useEffect(() => {
@@ -2055,6 +2082,10 @@ export default function MobileApp() {
                   localStorage.setItem('kin_avatar', newAvatar);
                 } catch (_) {}
               }
+            }}
+            exchangeRate={exchangeRate}
+            onExchangeRateUpdated={(newRate: number) => {
+              setExchangeRate(newRate);
             }}
             handleLogout={handleLogout}
           />
