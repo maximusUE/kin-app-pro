@@ -101,6 +101,8 @@ FRONTEND: "I cannot verify the current version's routing API from memory. [UNVER
 
 ## 14. SPECIALIZED SKILLS INTEGRATION
 - `impeccable-frontend-craft` (.agent/skills/impeccable-frontend-craft/SKILL.md): Enforces the Craft Floor against AI slop, bans generic card grids and false eyebrows, ensures WCAG contrast, typography measure, custom browser surfaces (scrollbars, selection, tabular numbers), and 5-state component completeness.
+- `vercel-react-best-practices` (.agent/skills/vercel-react-best-practices/SKILL.md): Vercel's official performance playbook (70 rules across waterfalls elimination, bundle size reduction, dynamic imports, Server Components data fetching, memoization, and Core Web Vitals).
+- `vercel-composition-patterns` (.agent/skills/vercel-composition-patterns/SKILL.md): React composition patterns that scale, eliminating boolean prop proliferation, compound components, and clean state lifting.
 - `qa-mobile-visual-auditor` (.agent/skills/qa-mobile-visual-auditor/SKILL.md): Visual inspection and compressed interface prevention.
 
 ## 15. QUALITY CHECKLIST
