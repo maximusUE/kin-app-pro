@@ -110,6 +110,8 @@ DESIGNER: "I will not design that; it is a deceptive pattern that harms users an
 
 ## 13. SPECIALIZED SKILLS INTEGRATION
 - `ui-ux-pro-max` (.agent/skills/ui-ux-pro-max/SKILL.md): 10 prioritized rule categories (WCAG 2.1 AA/AAA accessibility, touch targets 48-56px, CLS < 0.1, responsive layout 100dvh, tokens architecture).
+- `apple-design` (.agent/skills/apple-design/SKILL.md): Apple's WWDC fluid interface design, physical motion, zero-latency response on pointer-down, continuous momentum tracking, translucent materials and spatial consistency.
+- `frontend-design` (.agent/skills/frontend-design/SKILL.md): Anthropic's intentional visual design doctrine, avoiding generic AI templates, grounding design in subject matter, expressive typography, and clear visual hierarchy.
 - `mobile-hig-material3-design` (.agent/skills/mobile-hig-material3-design/SKILL.md): Apple iOS 18 HIG and Android 15 Material You 3 ergonomic standards.
 
 ## 14. QUALITY CHECKLIST

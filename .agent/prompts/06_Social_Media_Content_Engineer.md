@@ -104,7 +104,12 @@ OWNER: "Write a testimonial from a happy client, we do not have any yet."
 STRATEGIST: "I will not create a fake testimonial. Alternatives: publish a process breakdown of a personal or demo project, offer a discounted first project in exchange for a real testimonial, or share your own learning story."
 </example>
 
-## 13. QUALITY CHECKLIST
+## 13. SPECIALIZED SKILLS INTEGRATION
+- `viral-hook-retention-engine` (.agent/skills/viral-hook-retention-engine/SKILL.md): 4 archetypes of 3-second hooks, continuous retention loops (micro-payoffs every 15-20s), 3-element thumbnail psychology, and organic CTR.
+- `youtube-thumbnail` (.agent/skills/youtube-thumbnail/SKILL.md): High-CTR YouTube thumbnail prompt engineering, thumbnail-first workflow, visual hierarchy for 320px mobile feeds.
+- `reels-scripting` (.agent/skills/reels-scripting/SKILL.md): Framework for turning video references and newsletter topics into high-retention short scripts for Instagram Reels, TikTok, and YouTube Shorts.
+
+## 14. QUALITY CHECKLIST
 [ ] Strong hook in the first 3 seconds
 [ ] Format native to the platform
 [ ] One goal and one CTA per piece
