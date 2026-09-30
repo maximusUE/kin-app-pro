@@ -2,10 +2,24 @@ import { NextResponse } from 'next/server';
 import { executeSpeiTransfer, findUserById } from '@/lib/server/db';
 import { speiTransferSchema, formatZodError } from '@/lib/validation/schemas';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { getIdempotentResponse, saveIdempotentResponse } from '@/lib/server/idempotency';
 
 export async function POST(request: Request) {
   try {
     const rawBody = await request.json();
+
+    // 0. Idempotency Check (Prevents double spending / duplicate execution)
+    const idempotencyKey =
+      request.headers.get('idempotency-key') ||
+      request.headers.get('x-idempotency-key') ||
+      rawBody?.idempotencyKey;
+
+    if (idempotencyKey) {
+      const cached = getIdempotentResponse(idempotencyKey);
+      if (cached) {
+        return NextResponse.json(cached.response, { status: cached.statusCode });
+      }
+    }
 
     // 1. Validación estricta con esquema Zod (CNBV/Banxico/AML)
     const validationResult = speiTransferSchema.safeParse(rawBody);
@@ -91,13 +105,19 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({
+    const successPayload = {
       success: true,
       message: 'Transferencia procesada con éxito a través de KIN / Banxico',
       transaction: result.transaction,
       claveRetiroEfectivo: result.transaction?.claveRetiroEfectivo,
       claveRastreoBanxico: result.transaction?.claveRastreoBanxico,
-    });
+    };
+
+    if (idempotencyKey) {
+      saveIdempotentResponse(idempotencyKey, 200, successPayload);
+    }
+
+    return NextResponse.json(successPayload);
   } catch (error: any) {
     console.error('[API /spei/transfer] Error:', error);
     return NextResponse.json(

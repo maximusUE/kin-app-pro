@@ -924,321 +924,368 @@ a {
 }
 
 /* ========================================================================= */
-/* KIN GOOGLE ANTIGRAVITY & CATPPUCCIN LATTE LIGHT MODE DESIGN SYSTEM        */
+/* KIN LIGHT MODE DESIGN SYSTEM (UI/UX PRO MAX & IMPECCABLE CRAFT FLOOR)     */
 /* ========================================================================= */
 html.light {
-  /* Exact Google Antigravity & Catppuccin Latte Tokens */
+  /* Bank-grade Accessible Light Tokens (WCAG 2.1 AA/AAA Compliant) */
   --color-surface: 255 255 255;            /* #FFFFFF Crisp Card Surface */
-  --color-surface-container: 255 255 255;  /* #FFFFFF Crisp Card Surface */
-  --color-surface-container-low: 248 249 251;  /* #F8F9FB */
-  --color-surface-container-high: 239 241 245; /* #EFF1F5 Catppuccin Latte Base */
-  --color-surface-container-highest: 230 233 239; /* #E6E9EF Catppuccin Latte Mantle */
-  --color-surface-container-lowest: 234 236 240;  /* #EAECF0 Google Antigravity Background */
-  --color-surface-dim: 230 233 239;        /* #E6E9EF */
+  --color-surface-container: 248 250 252;  /* #F8FAFC Slate 50 */
+  --color-surface-container-low: 241 245 249;  /* #F1F5F9 Slate 100 */
+  --color-surface-container-high: 226 232 240; /* #E2E8F0 Slate 200 */
+  --color-surface-container-highest: 203 213 225; /* #CBD5E1 Slate 300 */
+  --color-surface-container-lowest: 255 255 255;  /* #FFFFFF Pure White */
+  --color-surface-dim: 241 245 249;        /* #F1F5F9 */
   --color-surface-bright: 255 255 255;     /* #FFFFFF */
-  --color-on-surface: 30 30 46;            /* #1E1E2E Deep Navy/Charcoal */
-  --color-on-surface-variant: 76 79 105;   /* #4C4F69 Google Antigravity Foreground */
+  --color-on-surface: 15 23 42;            /* #0F172A Slate 900 */
+  --color-on-surface-variant: 100 116 139; /* #64748B Slate 500 */
   --color-primary: 5 150 105;              /* #059669 Accessible Emerald Mint */
   --color-primary-container: 5 150 105;    /* #059669 */
   --color-on-primary: 255 255 255;         /* #FFFFFF */
-  --color-secondary: 136 57 239;           /* #8839EF Google Antigravity Accent */
-  --color-secondary-container: 237 230 254;/* #EDE6FE Soft Mauve Tint */
-  --color-outline: 156 160 176;            /* #9CA0B0 Catppuccin Overlay 0 */
-  --color-outline-variant: 220 224 232;    /* #DCE0E8 Catppuccin Crust */
-  --color-error: 210 15 57;                /* #D20F39 Catppuccin Red */
-  --color-error-container: 254 226 226;
+  --color-secondary: 109 40 217;           /* #6D28D9 Royal Violet */
+  --color-secondary-container: 237 233 254;/* #EDE9FE Soft Violet Tint */
+  --color-outline: 203 213 225;            /* #CBD5E1 Slate 300 */
+  --color-outline-variant: 226 232 240;    /* #E2E8F0 Slate 200 */
+  --color-error: 225 29 72;                /* #E11D48 Rose 600 */
+  --color-error-container: 255 228 230;
 
-  --bg-kin: #EFF1F5;
+  --bg-kin: #F1F5F9;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #F8F9FA;
-  --bg-pill: #EFF1F5;
-  --bg-pill-active: #E6E9EF;
+  --bg-card-hover: #F8FAFC;
+  --bg-pill: #F1F5F9;
+  --bg-pill-active: #E2E8F0;
   --mint-kin: #059669;
-  --violet-kin: #8839EF;
-  --text-muted: #6C6F85;
-  --text-sub: #5C5F77;
-  --border-kin: #DCE0E8;
+  --violet-kin: #6D28D9;
+  --text-muted: #64748B;
+  --text-sub: #475569;
+  --border-kin: #E2E8F0;
 }
 
-/* 1. App Canvas Background (Google Antigravity #EAECF0) & Base Typography */
+/* 1. App Canvas Background & Base Typography */
 html.light,
 html.light body {
-  background-color: #EAECF0 !important; /* Exact Google Antigravity Light Theme Background */
-  color: #4C4F69 !important;            /* Exact Google Antigravity Foreground */
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
 }
 
-/* 2. Flagship Mobile Frame / Viewport (Catppuccin Latte Base #EFF1F5) */
+/* 2. Flagship Mobile Frame / Viewport */
 html.light .phone-viewport,
 html.light div.max-w-\[412px\],
 html.light div[class*="max-w-[412px]"] {
-  background-color: #EFF1F5 !important;
-  box-shadow: 0 20px 60px -15px rgba(76, 79, 105, 0.12), 0 0 0 1px rgba(76, 79, 105, 0.08) !important;
-  color: #4C4F69 !important;
+  background-color: #F8FAFC !important;
+  box-shadow: 0 12px 40px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.05) !important;
+  color: #0F172A !important;
 }
 
-/* 3. Sticky Top Header & Status Bar in Light Mode */
+/* 3. Sticky Top Header & Status Bar */
 html.light .sticky.top-0,
 html.light div.sticky.top-0 {
-  background-color: rgba(239, 241, 245, 0.94) !important;
+  background-color: rgba(248, 250, 252, 0.94) !important;
   backdrop-filter: blur(16px) !important;
-  border-color: rgba(76, 79, 105, 0.10) !important;
+  border-bottom: 1px solid #E2E8F0 !important;
 }
 
-/* 4. Dynamic Island Pill (Authentic iOS Black Cutout) */
+/* 4. Dynamic Island Pill */
 html.light .h-3\.5.w-20.bg-\[\#121320\],
 html.light .bg-\[\#121320\].rounded-full {
-  background-color: #000000 !important;
-  border-color: #1E1E2E !important;
+  background-color: #0F172A !important;
+  border-color: #334155 !important;
 }
 
 /* 5. Status Bar Time & Hardware Icons */
 html.light .sticky.top-0 .font-financial-mono,
 html.light .sticky.top-0 .material-symbols-outlined {
-  color: #1E1E2E !important;
+  color: #0F172A !important;
 }
 
-/* 6. Subtle Pastel Atmospheric Glow (Replaces Murky Blobs) */
+/* 6. Subtle Pastel Atmosphere */
 html.light .bicolor-atmosphere-glow {
-  background: radial-gradient(circle at 18% 0%, rgba(5, 150, 105, 0.07) 0%, transparent 60%),
-              radial-gradient(circle at 82% 10%, rgba(136, 57, 239, 0.07) 0%, transparent 65%) !important;
+  background: radial-gradient(circle at 20% 0%, rgba(5, 150, 105, 0.06) 0%, transparent 60%),
+              radial-gradient(circle at 80% 10%, rgba(109, 40, 217, 0.05) 0%, transparent 65%) !important;
   filter: blur(48px) !important;
 }
 
-/* 7. Universal Card Surfaces & Dialogs (Crisp White #FFFFFF) */
+/* 7. Modal Backdrops in Light Mode */
+html.light .fixed.inset-0.bg-black\/85,
+html.light .fixed.inset-0.bg-black\/80,
+html.light div[class*="fixed"][class*="bg-black/"] {
+  background-color: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* 8. Universal Card Surfaces, Sheets & Dialogs (Crisp Pure White) */
 html.light .bg-\[\#06070B\],
 html.light .bg-\[\#06070B\]\/95,
 html.light .bg-\[\#06070B\]\/90,
 html.light .bg-\[\#06070B\]\/80,
-html.light .bg-\[\#0E0F1A\] {
-  background-color: #EFF1F5 !important;
-}
-
-html.light .bg-\[\#181928\],
-html.light .bg-\[\#141624\],
-html.light .bg-\[\#161828\],
+html.light .bg-\[\#0E0F1A\],
 html.light .bg-\[\#0D0F18\],
-html.light .bg-\[\#1C1F2E\],
+html.light .bg-\[\#10121D\],
+html.light .bg-\[\#12131A\],
 html.light .bg-\[\#121320\],
+html.light .bg-\[\#121622\],
 html.light .bg-\[\#131422\],
+html.light .bg-\[\#131522\],
 html.light .bg-\[\#141524\],
 html.light .bg-\[\#141525\],
+html.light .bg-\[\#141624\],
+html.light .bg-\[\#161828\],
+html.light .bg-\[\#161928\],
+html.light .bg-\[\#171b2a\],
+html.light .bg-\[\#181825\],
+html.light .bg-\[\#181928\],
+html.light .bg-\[\#182030\],
+html.light .bg-\[\#1A1C2C\],
+html.light .bg-\[\#1C1F2E\],
+html.light .bg-\[\#1D1E30\],
+html.light .bg-\[\#1E1E2E\],
 html.light .bg-\[\#1E2033\],
 html.light .bg-\[\#1F2133\],
+html.light .bg-\[\#1c1c1e\],
 html.light .bg-\[\#202236\],
 html.light .bg-\[\#222338\],
 html.light .bg-\[\#262939\],
 html.light .bg-\[\#2B2C42\],
+html.light .bg-\[\#313244\],
 html.light .bg-\[\#343552\],
-html.light .bg-\[\#1A1C2C\],
-html.light .bg-\[\#1D1E30\],
+html.light .bg-\[\#0F1322\],
 html.light .modal-card,
 html.light .modal-card-elevated {
   background-color: #FFFFFF !important;
-  border-color: #DCE0E8 !important;
-  box-shadow: 0 2px 10px rgba(76, 79, 105, 0.04) !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15, 23, 42, 0.04) !important;
+  color: #0F172A !important;
 }
 
-/* 8. Wells, Inner Containers & Opacity Classes in Light Mode */
+/* 9. Wells & Secondary Surfaces in Light Mode (Soft Slate) */
 html.light .bg-surface-container,
 html.light .bg-surface-container-high,
 html.light .bg-surface-container-highest,
 html.light .bg-surface-container-low,
 html.light .bg-surface-container-lowest,
 html.light .bg-surface-bright,
-html.light .bg-\[\#121622\],
-html.light .bg-\[\#0F1322\],
-html.light .bg-\[\#171b2a\],
-html.light .bg-\[\#1a1c2c\],
+html.light .bg-white\/5,
+html.light .bg-white\/10,
+html.light .bg-white\/15,
 html.light [class*="bg-surface-container-high/"],
 html.light [class*="bg-surface-container/"],
 html.light [class*="bg-surface-container-low/"] {
-  background-color: #FFFFFF !important;
-  border-color: #DCE0E8 !important;
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
 }
 
-html.light .bg-surface-container-high\/60,
-html.light .bg-surface-container-high\/70,
-html.light .bg-surface-container-high\/80,
-html.light .bg-surface-container-high\/90 {
-  background-color: #FFFFFF !important;
-  border-color: #DCE0E8 !important;
-  box-shadow: 0 2px 12px rgba(76, 79, 105, 0.05) !important;
-}
-
-/* 9. Typography & Contrast Hierarchy */
+/* 10. General Typography in Light Mode */
 html.light .text-white {
-  color: #1E1E2E !important;
+  color: #0F172A !important;
 }
 html.light .text-white\/90,
 html.light .text-white\/80 {
-  color: #303446 !important;
+  color: #1E293B !important;
 }
 html.light .text-white\/70,
 html.light .text-white\/60 {
-  color: #4C4F69 !important;
+  color: #334155 !important;
 }
 html.light .text-white\/50,
 html.light .text-white\/40 {
-  color: #5C5F77 !important;
+  color: #475569 !important;
 }
 html.light .text-white\/30,
 html.light .text-white\/20 {
-  color: #8C8FA1 !important;
+  color: #94A3B8 !important;
 }
 
 html.light .text-\[\#8E91A5\],
+html.light .text-\[\#8E9AA8\],
 html.light .text-\[\#5F6175\],
 html.light .text-\[\#525672\],
 html.light .text-on-surface-variant {
-  color: #5C5F77 !important;
+  color: #64748B !important;
 }
 html.light .text-on-surface {
-  color: #1E1E2E !important;
+  color: #0F172A !important;
 }
 
-/* 10. Brand Accents (Emerald Green & Google Antigravity Mauve) */
+/* 11. Accents in Light Mode */
 html.light .text-primary,
 html.light [class*="text-primary"] {
-  color: #059669 !important; /* High-contrast Accessible Emerald Mint */
+  color: #059669 !important; /* Accessible Emerald Green */
 }
 html.light .text-secondary {
-  color: #8839EF !important; /* Google Antigravity Mauve Accent */
+  color: #6D28D9 !important; /* Accessible Royal Violet */
 }
 
-/* 11. White Text Retention on Saturated Buttons */
+/* 12. BUTTON TEXT LEGIBILITY & SATURATED CTAS (HIGH-CONTRAST CRAFT FLOOR) */
+/* Neon Mint Buttons: Must have DEEP DARK text for extreme legibility */
+html.light .bg-\[\#2ED5A4\],
+html.light .bg-\[\#2ED5A4\] span,
+html.light .bg-\[\#2ED5A4\] p,
+html.light button.bg-\[\#2ED5A4\],
+html.light button.bg-\[\#2ED5A4\] * {
+  color: #00291B !important;
+  font-weight: 700 !important;
+}
+
+/* Emerald Green & Dark Saturated CTAs: Must have CRISP WHITE text */
 html.light .bg-primary,
 html.light .bg-primary *,
-html.light .bg-\[\#2ED5A4\],
-html.light .bg-\[\#2ED5A4\] *,
+html.light .bg-\[\#059669\],
+html.light .bg-\[\#059669\] *,
+html.light .btn-primary,
+html.light .btn-primary *,
+html.light .bg-emerald-600,
+html.light .bg-emerald-600 *,
+html.light button[type="submit"].bg-primary,
+html.light button[type="submit"].bg-primary * {
+  background-color: #059669 !important;
+  color: #FFFFFF !important;
+}
+
+/* Violet / Purple Buttons: Must have CRISP WHITE text */
 html.light .bg-\[\#7047EB\],
 html.light .bg-\[\#7047EB\] *,
 html.light .bg-\[\#8839EF\],
 html.light .bg-\[\#8839EF\] *,
-html.light .btn-primary,
-html.light .btn-primary *,
-html.light button[type="submit"].bg-primary,
-html.light button[type="submit"].bg-primary * {
+html.light .bg-purple-600,
+html.light .bg-purple-600 * {
   color: #FFFFFF !important;
 }
 
-/* 12. Bottom Navigation Dock (Google Antigravity & Catppuccin) */
+/* Red / Danger Buttons: Must have CRISP WHITE text */
+html.light .bg-red-500,
+html.light .bg-red-500 *,
+html.light .bg-rose-600,
+html.light .bg-rose-600 * {
+  color: #FFFFFF !important;
+}
+
+/* 13. Bottom Navigation Dock in Light Mode */
 html.light .stitch-bottom-dock {
   background-color: #FFFFFF !important;
-  border-top: 1px solid #DCE0E8 !important;
-  box-shadow: 0 -4px 20px rgba(76, 79, 105, 0.08) !important;
+  border-top: 1px solid #E2E8F0 !important;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05) !important;
 }
-
 html.light .stitch-bottom-dock button span {
-  color: #6C6F85 !important;
+  color: #64748B !important;
 }
-
 html.light .stitch-bottom-dock button.text-primary span,
-html.light .stitch-bottom-dock button[data-active="true"] span {
-  color: #8839EF !important; /* Google Antigravity Accent */
+html.light .stitch-bottom-dock button[class*="text-primary"] span {
+  color: #059669 !important;
+  font-weight: 800 !important;
 }
 
-/* 13. KIN Cash Keypad & Quick Amount Chips */
+/* 14. Quick Action Chips & Amount Selectors */
 html.light div.flex-wrap button,
 html.light button.bg-surface-container {
   background-color: #FFFFFF !important;
-  border: 1px solid #DCE0E8 !important;
-  color: #4C4F69 !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
 }
-
-html.light div.flex-wrap button.bg-primary {
+html.light div.flex-wrap button.bg-primary,
+html.light div.flex-wrap button.bg-\[\#2ED5A4\] {
   background-color: #059669 !important;
   border-color: #059669 !important;
   color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25) !important;
 }
 
-html.light button.bg-white\/5 {
-  background-color: #EFF1F5 !important;
-  border: 1px solid #DCE0E8 !important;
-  color: #4C4F69 !important;
-}
-
-/* 14. Inputs, Search Bars & Form Controls */
+/* 15. Inputs, Search Bars & Form Controls in Light Mode */
 html.light input,
 html.light select,
 html.light textarea {
-  color: #1E1E2E !important;
+  background-color: #FFFFFF !important;
+  border: 1.5px solid #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
 }
-
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+  outline: none !important;
+}
 html.light input::placeholder,
 html.light textarea::placeholder {
-  color: #9CA0B0 !important;
+  color: #94A3B8 !important;
 }
-
 html.light .auth-input-group,
 html.light div.relative input {
   background-color: #FFFFFF !important;
-  border-color: #DCE0E8 !important;
-  color: #1E1E2E !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
 }
-
-html.light .auth-input-field {
-  color: #1E1E2E !important;
-}
-
 html.light input:-webkit-autofill,
 html.light input:-webkit-autofill:hover, 
 html.light input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #1E1E2E !important;
+  -webkit-text-fill-color: #0F172A !important;
   -webkit-box-shadow: 0 0 0px 1000px #FFFFFF inset !important;
 }
 
-/* 15. Universal Borders & Translucent Overlays */
+/* 16. Universal Borders in Light Mode */
 html.light .border-white\/5,
 html.light .border-white\/10,
 html.light .border-white\/15,
 html.light .border-white\/20,
 html.light .border-white\/25,
 html.light .border-white\/30 {
-  border-color: #DCE0E8 !important;
+  border-color: #E2E8F0 !important;
 }
 
-html.light .bg-white\/5,
-html.light .bg-white\/10,
-html.light .bg-white\/15 {
-  background-color: #EFF1F5 !important;
-}
-
-/* 16. Circular Header & Action Buttons */
+/* 17. Circular Action Buttons */
 html.light .btn-circle {
   background-color: #FFFFFF !important;
-  border: 1px solid #DCE0E8 !important;
-  color: #1E1E2E !important;
-  box-shadow: 0 2px 8px rgba(76, 79, 105, 0.05) !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
-
 html.light .btn-circle:hover {
-  background-color: #EFF1F5 !important;
-  border-color: #CCD0DA !important;
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
 }
-
 html.light .btn-circle svg {
-  color: #1E1E2E !important;
+  color: #0F172A !important;
 }
 
+/* 18. Quick Action Cards */
 html.light .quick-action-card {
   background-color: #FFFFFF !important;
-  border: 1px solid #DCE0E8 !important;
-  box-shadow: 0 2px 10px rgba(76, 79, 105, 0.04) !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
 }
-
 html.light .quick-action-card:hover {
-  background-color: #F8F9FA !important;
+  background-color: #F8FAFC !important;
 }
 
-/* 17. Send Floating CTA Button in Light Mode */
+/* 19. Send Floating CTA Button in Light Mode */
 html.light .send-floating-btn {
   background-color: #059669 !important;
   color: #FFFFFF !important;
-  box-shadow: 0 12px 30px rgba(5, 150, 105, 0.35) !important;
+  box-shadow: 0 10px 25px -4px rgba(5, 150, 105, 0.4) !important;
 }
-
 html.light .send-floating-btn span {
   color: #FFFFFF !important;
+}
+
+/* 20. Custom Browser Surfaces (Selection & Scrollbars) */
+html.light ::selection {
+  background-color: #CCFBF1 !important;
+  color: #0F766E !important;
+}
+html.light ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html.light ::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
 
 /* Keyframe and Stagger Animation Styles (Profile & Dashboards) */

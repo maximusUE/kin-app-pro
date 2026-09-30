@@ -34,6 +34,9 @@ export async function GET() {
   try {
     return NextResponse.json({
       success: true,
+      customerRate: globalFxConfig.customerRate,
+      spotRate: globalFxConfig.spotRate,
+      marginPercent: globalFxConfig.marginPercent,
       data: globalFxConfig,
     });
   } catch (error: any) {
@@ -68,6 +71,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: 'Tipo de cambio actualizado con éxito',
+      customerRate: globalFxConfig.customerRate,
       data: globalFxConfig,
     });
   } catch (error: any) {

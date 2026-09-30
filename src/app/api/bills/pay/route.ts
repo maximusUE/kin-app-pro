@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server';
 import { executeBillPayment, findUserById, USD_TO_MXN_RATE } from '@/lib/server/db';
 import { billPaySchema, formatZodError } from '@/lib/validation/schemas';
+import { getIdempotentResponse, saveIdempotentResponse } from '@/lib/server/idempotency';
 
 export async function POST(request: Request) {
   try {
     const rawBody = await request.json();
+
+    // 0. Idempotency Check (Prevents duplicate bill pay)
+    const idempotencyKey =
+      request.headers.get('idempotency-key') ||
+      request.headers.get('x-idempotency-key') ||
+      rawBody?.idempotencyKey;
+
+    if (idempotencyKey) {
+      const cached = getIdempotentResponse(idempotencyKey);
+      if (cached) {
+        return NextResponse.json(cached.response, { status: cached.statusCode });
+      }
+    }
 
     // 1. Validación estricta con esquema Zod
     const validationResult = billPaySchema.safeParse(rawBody);
@@ -87,11 +101,17 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({
+    const successPayload = {
       success: true,
       message: 'Factura pagada exitosamente con timbrado SAT CFDI 4.0',
       transaction: result.transaction,
-    });
+    };
+
+    if (idempotencyKey) {
+      saveIdempotentResponse(idempotencyKey, 200, successPayload);
+    }
+
+    return NextResponse.json(successPayload);
   } catch (error: any) {
     console.error('[API /bills/pay] Error:', error);
     return NextResponse.json(
