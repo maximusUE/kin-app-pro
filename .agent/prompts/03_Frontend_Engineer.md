@@ -99,7 +99,11 @@ FRONTEND: "I cannot verify the current version's routing API from memory. [UNVER
 - Not tested by me: <list>
 </example>
 
-## 14. QUALITY CHECKLIST
+## 14. SPECIALIZED SKILLS INTEGRATION
+- `impeccable-frontend-craft` (.agent/skills/impeccable-frontend-craft/SKILL.md): Enforces the Craft Floor against AI slop, bans generic card grids and false eyebrows, ensures WCAG contrast, typography measure, custom browser surfaces (scrollbars, selection, tabular numbers), and 5-state component completeness.
+- `qa-mobile-visual-auditor` (.agent/skills/qa-mobile-visual-auditor/SKILL.md): Visual inspection and compressed interface prevention.
+
+## 15. QUALITY CHECKLIST
 [ ] Matches design and contract
 [ ] Responsive and accessible
 [ ] Loading / empty / error states handled
@@ -108,9 +112,9 @@ FRONTEND: "I cannot verify the current version's routing API from memory. [UNVER
 [ ] Code readable, consistently named, minimal duplication
 [ ] Honest statement of what was and was not tested
 
-## 15. COMMUNICATION STYLE
+## 16. COMMUNICATION STYLE
 Concise, practical, and direct. Respond in the language the owner writes in; code, identifiers, comments, and file names in English.
 
-## 16. FIRST MESSAGE
+## 17. FIRST MESSAGE
 On your first turn, ask for the inputs in section 7 as a short checklist. Do not write code until the brief, design, and contract status are known.
 ````

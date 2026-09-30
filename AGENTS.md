@@ -64,10 +64,17 @@ QUESTIONS TO RETURN IF BLOCKED: <what to ask>
 
 ---
 
-## 📦 Skills Especializadas Integradas en la Agencia
-- 📱 `mobile-hig-material3-design`: Lineamientos ergonómicos iOS 18 y Android 15.
-- 👁️ `gemini-multimodal-kyc-vision`: Visión computacional y OCR forense con Gemini.
-- 🏦 `spei-banxico-fintech-engine`: Algoritmos bancarios SPEI, validación CLABE Banxico y FX en tiempo real.
-- 🔒 `zero-knowledge-vault-security`: Cifrado cliente AES-GCM-256 y arquitectura Zero-Knowledge.
-- ⚖️ `fintech-aml-pld-compliance`: Normativas PLD/AML para remesas y límites por nivel.
-- 🔍 `qa-mobile-visual-auditor`: Inspección visual automatizada y prevención de interfaces comprimidas.
+## 📦 Skills Especializadas Integradas en la Agencia (Matriz de Competencias)
+
+Cada ingeniero cuenta con un arsenal de skills modulares de vanguardia (formato abierto `SKILL.md`):
+
+| Ingeniero / Rol | Skills Asignadas | Propósito & Capacidades Clave |
+| :--- | :--- | :--- |
+| **`Senior_Lead_Engineer`** | 🌳 [`grill-me-architecture`](file://.agent/skills/grill-me-architecture/SKILL.md) | Interrogatorio implacable en rondas (árbol de diseño), eliminación de suposiciones silenciosas, validación previa de arquitectura. |
+| **`Frontend_Engineer`** | 💎 [`impeccable-frontend-craft`](file://.agent/skills/impeccable-frontend-craft/SKILL.md)<br>🔍 [`qa-mobile-visual-auditor`](file://.agent/skills/qa-mobile-visual-auditor/SKILL.md) | Piso de calidad (Craft Floor), erradicación de vicios de diseño de IA, micro-interacciones, tipografía precisa y superficies de navegador personalizadas. |
+| **`UI_UX_Design_Engineer`** | 🎨 [`ui-ux-pro-max`](file://.agent/skills/ui-ux-pro-max/SKILL.md)<br>📱 [`mobile-hig-material3-design`](file://.agent/skills/mobile-hig-material3-design/SKILL.md) | 10 categorías prioritarias (accesibilidad WCAG, ergonomía táctil 48-56px, CLS < 0.1), arquitectura de tokens (primitivos, semánticos, componentes) y ergonomía iOS/Material 3. |
+| **`Backend_Engineer`** | 🛡️ [`supabase-postgres-security-engine`](file://.agent/skills/supabase-postgres-security-engine/SKILL.md)<br>🏦 [`spei-banxico-fintech-engine`](file://.agent/skills/spei-banxico-fintech-engine/SKILL.md)<br>🔒 [`zero-knowledge-vault-security`](file://.agent/skills/zero-knowledge-vault-security/SKILL.md)<br>⚖️ [`fintech-aml-pld-compliance`](file://.agent/skills/fintech-aml-pld-compliance/SKILL.md) | Mejores prácticas oficiales de Supabase & PostgreSQL (RLS estricto, vistas con `security_invoker`, índices B-Tree/GIN, concurrencia `FOR UPDATE`, idempotencia de pagos y seguridad HMAC de webhooks). |
+| **`Prompt_Engineer`** | 🧠 [`prompt-defense-and-evals`](file://.agent/skills/prompt-defense-and-evals/SKILL.md)<br>👁️ [`gemini-multimodal-kyc-vision`](file://.agent/skills/gemini-multimodal-kyc-vision/SKILL.md) | Blindaje contra inyección de prompts, delimitación estricta de entradas no confiables, esquemas JSON/Zod rígidos y evaluación sistemática de respuestas LLM. |
+| **`Social_Media_Content_Engineer`** | 🚀 [`viral-hook-retention-engine`](file://.agent/skills/viral-hook-retention-engine/SKILL.md) | Los 4 arquetipos de ganchos de 3 segundos, bucles de retención continua (micro-payoffs cada 15-20s), psicología de miniaturas de 3 elementos y CTR orgánico. |
+| **`Tech_Trends_Researcher`** | 📡 [`deep-research-radar`](file://.agent/skills/deep-research-radar/SKILL.md) | Jerarquía de fuentes primarias Tier 1-3, detección de hype publicitario, auditoría de precios reales / costos ocultos y matriz de decisión (Adopt/Trial/Watch/Ignore). |
+
