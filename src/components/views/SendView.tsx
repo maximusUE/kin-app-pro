@@ -21,6 +21,7 @@ import {
 } from '@/components/Icons';
 import { ContactAvatar } from '@/components/ContactAvatar';
 import { SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
+import { MEXICO_STATES, MexicoState } from '@/data/mexicoLocations';
 
 export const CASH_PICKUP_STORES = [
   {
@@ -38,11 +39,11 @@ export const CASH_PICKUP_STORES = [
     Logo: BodegaAurreraLogo,
   },
   {
-    id: 'walmart',
-    name: 'Walmart',
-    subtitle: 'Supercenter y Walmart Express en México',
-    badge: 'Nacional',
-    Logo: WalmartLogo,
+    id: 'guadalajara',
+    name: 'Farmacias Guadalajara',
+    subtitle: 'Más de 2,500 sucursales con farmacia y súper 24/7',
+    badge: 'Fcia. Guadalajara',
+    Logo: FarmaciasGuadalajaraLogo,
   },
   {
     id: 'elektra',
@@ -94,20 +95,6 @@ export const CASH_PICKUP_STORES = [
     Logo: SorianaLogo,
   },
   {
-    id: 'guadalajara',
-    name: 'Farmacias Guadalajara',
-    subtitle: 'Más de 2,500 sucursales con farmacia y súper',
-    badge: '24 Horas',
-    Logo: FarmaciasGuadalajaraLogo,
-  },
-  {
-    id: 'bienestar',
-    name: 'Banco del Bienestar / Telecomm',
-    subtitle: 'Presencia en zonas rurales y cabeceras municipales',
-    badge: 'Comunidades',
-    Logo: BansefiLogo,
-  },
-  {
     id: 'any',
     name: 'Cualquier Sucursal / Agente Autorizado',
     subtitle: 'El familiar cobra en cualquier punto con su clave y documento',
@@ -146,6 +133,7 @@ export interface SendViewProps {
   handleClearSendDraft: () => void;
   handleStartSendReview: () => void;
   pickupLocation?: SelectedPickupLocation | null;
+  setPickupLocation?: React.Dispatch<React.SetStateAction<SelectedPickupLocation | null>>;
   onOpenPickupLocationModal?: () => void;
   receiverMode?: 'existing' | 'new';
   setReceiverMode?: (mode: 'existing' | 'new') => void;
@@ -168,12 +156,183 @@ export function SendView({
   handleClearSendDraft,
   handleStartSendReview,
   pickupLocation,
+  setPickupLocation,
   onOpenPickupLocationModal,
   receiverMode = 'existing',
   setReceiverMode,
   onOpenNewRecipient,
 }: SendViewProps) {
   const isEn = language === 'en';
+
+  // Control de la hoja emergente (Drawer/Bottom Sheet) para selección de estado y sucursal
+  const [isCashPickupSheetOpen, setIsCashPickupSheetOpen] = React.useState(false);
+  const [stateSearchQuery, setStateSearchQuery] = React.useState('');
+
+  // Estado de México seleccionado para cobro en efectivo
+  const [selectedStateId, setSelectedStateId] = React.useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kin_draft_send_pickup_state');
+      if (saved) return saved;
+    }
+    if (pickupLocation?.state) {
+      const found = MEXICO_STATES.find(
+        (s) => s.name.toLowerCase() === pickupLocation.state.toLowerCase()
+      );
+      if (found) return found.id;
+    }
+    return 'michoacan';
+  });
+
+  // Lista de estados retenidos como opciones en pantalla (Screenshot Western Union / KIN)
+  const [pinnedStates, setPinnedStates] = React.useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('kin_pinned_states');
+        if (saved) return JSON.parse(saved);
+      } catch (_) {}
+    }
+    return ['michoacan', 'jalisco', 'guanajuato', 'edomex', 'cdmx'];
+  });
+
+  // Objeto del estado actual seleccionado
+  const currentStateObj = React.useMemo(() => {
+    return MEXICO_STATES.find((s) => s.id === selectedStateId) || MEXICO_STATES[0];
+  }, [selectedStateId]);
+
+  // Objeto de la tienda actual seleccionada
+  const selectedStoreObj = React.useMemo(() => {
+    return CASH_PICKUP_STORES.find((s) => s.id === selectedStore) || CASH_PICKUP_STORES[0];
+  }, [selectedStore]);
+
+  // Helper para normalizar texto sin acentos
+  const normalizeText = (str: string) =>
+    str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  // Nombre formateado para mostrar en pantalla (reconociendo CDMX y Distrito Federal)
+  const getStateDisplayName = (state: MexicoState) => {
+    if (state.id === 'cdmx') {
+      return 'Ciudad de México (Distrito Federal)';
+    }
+    return state.name;
+  };
+
+  // Filtrado de estados con la regla estricta de Don César:
+  // "tiene que esperar que el cliente ponga la primer letra para que empiecen a aparecer los estados que coincidan con esa letra"
+  const matchingStates = React.useMemo(() => {
+    const q = stateSearchQuery.trim();
+    if (q.length === 0) {
+      return [];
+    }
+
+    const qNorm = normalizeText(q);
+
+    return MEXICO_STATES.filter((s) => {
+      const nameNorm = normalizeText(s.name);
+      const codeNorm = normalizeText(s.code);
+      const isCdmx = s.id === 'cdmx';
+      const isEdomex = s.id === 'edomex';
+
+      const matchesCdmx =
+        isCdmx &&
+        ('distrito federal'.startsWith(qNorm) ||
+          'df'.startsWith(qNorm) ||
+          'cdmx'.startsWith(qNorm) ||
+          'distrito federal'.includes(qNorm));
+      const matchesEdomex =
+        isEdomex &&
+        ('mexico'.startsWith(qNorm) ||
+          'edomex'.startsWith(qNorm) ||
+          'estado de mexico'.includes(qNorm));
+
+      return (
+        nameNorm.startsWith(qNorm) ||
+        codeNorm.startsWith(qNorm) ||
+        matchesCdmx ||
+        matchesEdomex ||
+        nameNorm.includes(qNorm) ||
+        s.cities.some((c) => normalizeText(c).startsWith(qNorm) || normalizeText(c).includes(qNorm))
+      );
+    }).sort((a, b) => {
+      const aStarts =
+        normalizeText(a.name).startsWith(qNorm) ||
+        normalizeText(a.code).startsWith(qNorm) ||
+        (a.id === 'cdmx' && ('distrito federal'.startsWith(qNorm) || 'df'.startsWith(qNorm)));
+      const bStarts =
+        normalizeText(b.name).startsWith(qNorm) ||
+        normalizeText(b.code).startsWith(qNorm) ||
+        (b.id === 'cdmx' && ('distrito federal'.startsWith(qNorm) || 'df'.startsWith(qNorm)));
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [stateSearchQuery]);
+
+  // Seleccionar un estado y mantenerlo como opción en la pantalla
+  const handleSelectState = (state: MexicoState) => {
+    setSelectedStateId(state.id);
+    setStateSearchQuery('');
+
+    // Actualizar estados retenidos en pantalla y persistir en localStorage
+    setPinnedStates((prev) => {
+      const updated = [state.id, ...prev.filter((id) => id !== state.id)].slice(0, 6);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('kin_pinned_states', JSON.stringify(updated));
+          localStorage.setItem('kin_draft_send_pickup_state', state.id);
+        } catch (_) {}
+      }
+      return updated;
+    });
+
+    // Actualizar pickupLocation
+    if (setPickupLocation) {
+      const storeObj = CASH_PICKUP_STORES.find((s) => s.id === selectedStore) || CASH_PICKUP_STORES[0];
+      setPickupLocation({
+        state: state.name,
+        city: state.cities[0] || state.name,
+        branch: {
+          id: `${selectedStore}-${state.code.toLowerCase()}`,
+          storeName: storeObj.name,
+          chain: selectedStore,
+          address: `Cualquier sucursal ${storeObj.name} en ${state.name}`,
+          city: state.cities[0] || state.name,
+          state: state.name,
+          hours: storeObj.id === 'oxxo' ? 'Abierto 24 Horas' : 'Horario comercial',
+          is24Hours: storeObj.id === 'oxxo',
+          badge: storeObj.badge,
+        },
+      });
+    }
+  };
+
+  // Seleccionar una tienda o sucursal dentro del estado
+  const handleSelectStore = (storeId: string) => {
+    setSelectedStore(storeId);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_draft_send_store', storeId);
+      } catch (_) {}
+    }
+    if (setPickupLocation) {
+      const stateObj = currentStateObj;
+      const storeObj = CASH_PICKUP_STORES.find((s) => s.id === storeId) || CASH_PICKUP_STORES[0];
+      setPickupLocation({
+        state: stateObj.name,
+        city: stateObj.cities[0] || stateObj.name,
+        branch: {
+          id: `${storeId}-${stateObj.code.toLowerCase()}`,
+          storeName: storeObj.name,
+          chain: storeId,
+          address: `Cualquier sucursal ${storeObj.name} en ${stateObj.name}`,
+          city: stateObj.cities[0] || stateObj.name,
+          state: stateObj.name,
+          hours: storeObj.id === 'oxxo' ? 'Abierto 24 Horas' : 'Horario comercial',
+          is24Hours: storeObj.id === 'oxxo',
+          badge: storeObj.badge,
+        },
+      });
+    }
+  };
 
   return (
     <div className="animate-fade-in space-y-4">
@@ -383,7 +542,10 @@ export function SendView({
           {/* Opción 1: Retiro en Efectivo */}
           <button
             type="button"
-            onClick={() => setDeliveryMethod('cash')}
+            onClick={() => {
+              setDeliveryMethod('cash');
+              setIsCashPickupSheetOpen(true);
+            }}
             className={`h-[70px] px-1.5 rounded-xl transition-all duration-150 ease-out flex flex-col items-center justify-center text-center cursor-pointer active:scale-[0.96] border ${
               deliveryMethod === 'cash'
                 ? 'bg-primary/15 text-primary border-primary ring-1 ring-primary/40 shadow-sm shadow-primary/20 font-black'
@@ -433,80 +595,47 @@ export function SendView({
         </div>
       </div>
 
-      {/* PICKUP PARTNER NETWORK */}
+      {/* TARJETA RESUMEN DE RETIRO EN EFECTIVO CON DISPARADOR A LA HOJA EMERGENTE */}
       {deliveryMethod === 'cash' && (
         <div className="flex flex-col space-y-3 pt-1 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="font-title-base text-xs text-on-surface font-bold">
-                {isEn ? 'Pickup Partner Network' : 'Red de Sucursales y Tiendas'}
-              </span>
-              <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                {isEn ? '40,000+ branch and retail locations in Mexico' : 'Más de 40,000 puntos de cobro en todo México'}
-              </span>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5">
-              <span className="material-symbols-outlined text-primary text-[18px]">storefront</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            {CASH_PICKUP_STORES.filter((s) => s.id !== 'any').map((store) => {
-              const isSelected = selectedStore === store.id;
-              const StoreLogo = store.Logo;
-              return (
-                <button
-                  key={store.id}
-                  type="button"
-                  onClick={() => setSelectedStore(store.id)}
-                  className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-[0.97] ${
-                    isSelected
-                      ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)] scale-[1.02]'
-                      : 'border border-transparent hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="w-full h-7 flex items-center justify-center">
-                    <StoreLogo className="w-full h-full object-contain" />
-                  </div>
-                  <span className="text-[9px] font-bold text-slate-700 leading-tight truncate w-full">
-                    {store.badge}
-                  </span>
-                  {isSelected && (
-                    <span className="absolute top-1 right-1.5 text-primary text-[17px] font-black leading-none select-none drop-shadow-xs">
-                      ✓
+          <div
+            onClick={() => setIsCashPickupSheetOpen(true)}
+            className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/30 hover:border-primary/40 transition-all cursor-pointer shadow-md active:scale-[0.98]"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow-sm border border-slate-200">
+                  {(() => {
+                    const LogoComp = selectedStoreObj.Logo;
+                    return <LogoComp className="w-full h-full object-contain" />;
+                  })()}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-title-base text-xs font-bold text-on-surface truncate">
+                      {selectedStoreObj.name} • {currentStateObj.name}
                     </span>
-                  )}
-                </button>
-              );
-            })}
-
-            {/* 13. Any Available Network Partner */}
-            <button
-              type="button"
-              onClick={() => setSelectedStore('any')}
-              className={`network-btn col-span-3 h-13 rounded-xl bg-white text-slate-900 shadow-sm px-3.5 flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
-                selectedStore === 'any'
-                  ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)]'
-                  : 'border border-transparent hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="material-symbols-outlined text-primary-container text-[22px]">hub</span>
-                <div className="flex flex-col leading-tight">
-                  <span className="font-title-base text-xs font-bold text-slate-900">
-                    {isEn ? 'Any Available Network Partner' : 'Cualquier Tienda o Banco de la Red'}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-medium">
-                    {isEn ? 'Receiver picks up at any of 40,000+ locations' : 'El destinatario cobra en cualquier punto de los 40,000+'}
-                  </span>
+                    <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[9px] font-bold shrink-0">
+                      ✓ Seleccionado
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-on-surface-variant truncate mt-0.5">
+                    {currentStateObj.totalLocations} de cobro en {currentStateObj.name}
+                  </p>
                 </div>
               </div>
-              {selectedStore === 'any' && (
-                <span className="text-primary text-[24px] font-black leading-none select-none drop-shadow-xs">
-                  ✓
-                </span>
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCashPickupSheetOpen(true);
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-xs font-bold shrink-0 ml-2 cursor-pointer transition-colors border border-primary/30 flex items-center gap-1 active:scale-95"
+              >
+                <span>{isEn ? 'Change' : 'Cambiar'}</span>
+                <span className="material-symbols-outlined text-[14px]">expand_less</span>
+              </button>
+            </div>
           </div>
 
           {/* TARJETA INTERACTIVA DE CIUDAD Y SUCURSAL DE RETIRO EN MÉXICO */}
@@ -888,6 +1017,282 @@ export function SendView({
 
       {/* Spacer */}
       <div className="h-14 w-full pointer-events-none" aria-hidden="true" />
+
+      {/* ========================================================================= */}
+      {/* HOJA EMERGENTE (BOTTOM SHEET): RED DE TIENDAS Y BUSCADOR DE 32 ESTADOS + DF */}
+      {/* ========================================================================= */}
+      {isCashPickupSheetOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-xs transition-opacity duration-200">
+          <div
+            className="relative w-full max-w-md bg-[#181928] border-t border-white/10 rounded-t-3xl shadow-2xl p-4 max-h-[92vh] flex flex-col animate-slide-up"
+            style={{ animationDuration: '280ms' }}
+          >
+            {/* Tirador superior / Drag Pill */}
+            <div
+              className="w-12 h-1.5 rounded-full bg-white/20 mx-auto mb-2 shrink-0 cursor-pointer hover:bg-white/30"
+              onClick={() => setIsCashPickupSheetOpen(false)}
+            />
+
+            {/* Cabecera del modal emergente */}
+            <div className="flex items-center justify-between pb-2 border-b border-white/5 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[22px]">payments</span>
+                <div>
+                  <h3 className="font-title-base text-sm font-bold text-white leading-tight">
+                    {isEn ? 'Cash Pickup in Mexico' : 'Retiro en Efectivo en México'}
+                  </h3>
+                  <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight">
+                    {isEn ? 'Choose state and pickup partner' : 'Selecciona el estado y la tienda de cobro'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCashPickupSheetOpen(false)}
+                className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-slate-400 hover:text-white border border-white/5 cursor-pointer transition-colors"
+                title="Cerrar"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* BARRA DE BÚSQUEDA EN LA CABECERA (32 ESTADOS + DISTRITO FEDERAL) */}
+            <div className="relative my-3 shrink-0">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                search
+              </span>
+              <input
+                type="text"
+                value={stateSearchQuery}
+                onChange={(e) => setStateSearchQuery(e.target.value)}
+                placeholder={isEn ? 'Type first letter (e.g. M, J, C, D...)' : 'Escribe la primera letra del estado (ej. M, J, C, D...)'}
+                className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+              />
+              {stateSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setStateSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">close</span>
+                </button>
+              )}
+            </div>
+
+            {/* CONTENIDO PRINCIPAL: VISTA CONDICIONAL SEGÚN LA REGLA ESTRICTA DE BÚSQUEDA */}
+            {stateSearchQuery.trim().length >= 1 ? (
+              /* RESULTADOS DE BÚSQUEDA: MUESTRA LOS ESTADOS QUE COINCIDEN CON LA LETRA */
+              <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    {matchingStates.length} {isEn ? 'states found with' : 'estados encontrados con'} "{stateSearchQuery}":
+                  </span>
+                  <span className="text-[10px] text-primary">Toca uno para seleccionarlo</span>
+                </div>
+                {matchingStates.length > 0 ? (
+                  matchingStates.map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => handleSelectState(st)}
+                      className={`w-full p-3 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
+                        st.id === selectedStateId
+                          ? 'bg-primary/15 border-primary text-white shadow-sm'
+                          : 'bg-surface-container border-white/5 hover:border-primary/40 text-slate-200'
+                      }`}
+                    >
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-white">
+                            {getStateDisplayName(st)}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded-md bg-white/10 text-primary text-[10px] font-bold font-financial-mono">
+                            {st.code}
+                          </span>
+                          {st.isPopularRemittance && (
+                            <span className="text-[10px] text-amber-400 font-bold">★ Popular</span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-0.5">
+                          {st.totalLocations} • {st.cities.slice(0, 3).join(', ')}...
+                        </span>
+                      </div>
+                      <span className="material-symbols-outlined text-primary text-[18px]">
+                        chevron_right
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-slate-400 space-y-1">
+                    <p className="text-xs font-semibold">
+                      {isEn ? 'No states match' : 'No se encontraron estados con'} "{stateSearchQuery}"
+                    </p>
+                    <p className="text-[11px]">Prueba con otra letra (ej. M para Michoacán, J para Jalisco, C para CDMX/DF)</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* VISTA NORMAL (CUANDO query.length === 0): ESPERA LA PRIMER LETRA Y MUESTRA OPCIONES RETENIDAS */
+              <div className="flex-1 overflow-y-auto space-y-3 pr-0.5">
+                {/* 1. ESTADOS QUE QUEDAN COMO OPCIONES EN ESA PANTALLA (SCREENSHOT) */}
+                <div className="flex flex-col space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                      {isEn ? 'State in Mexico' : 'Estado de Retiro Seleccionado'}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      {isEn ? 'Search bar above filters all 32' : 'Buscador arriba filtra los 32 + DF'}
+                    </span>
+                  </div>
+
+                  {/* Estado Activo Pinned */}
+                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/40 flex items-center justify-between shadow-xs">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">
+                        <span className="material-symbols-outlined text-[18px]">location_on</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-white">
+                            {getStateDisplayName(currentStateObj)}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
+                            ✓ Activo
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-400">
+                          {currentStateObj.totalLocations} disponibles en todo el estado
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Opciones de estados que se quedan en esa pantalla (Screenshot de Don César) */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
+                    {pinnedStates.map((stId) => {
+                      const st = MEXICO_STATES.find((s) => s.id === stId);
+                      if (!st) return null;
+                      const isSelected = st.id === selectedStateId;
+                      return (
+                        <button
+                          key={st.id}
+                          type="button"
+                          onClick={() => handleSelectState(st)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 transition-all cursor-pointer border ${
+                            isSelected
+                              ? 'bg-primary/20 text-primary border-primary ring-1 ring-primary/40 shadow-xs'
+                              : 'bg-surface-container text-slate-300 border-white/5 hover:border-white/20'
+                          }`}
+                        >
+                          {isSelected && <span className="text-primary mr-1">✓</span>}
+                          {st.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Banner indicador de espera de la primer letra */}
+                  <div className="p-2 rounded-xl bg-surface-container-high/60 border border-white/5 flex items-center gap-2 text-[10px] text-slate-300">
+                    <span className="material-symbols-outlined text-primary text-[15px] shrink-0">info</span>
+                    <span>Escribe la primera letra en el buscador para ver y cambiar a cualquiera de los 32 estados y el Distrito Federal.</span>
+                  </div>
+                </div>
+
+                {/* 2. RED DE TIENDAS Y SUCURSALES EN ESE ESTADO (BOTONES QUE EMERGEN DE ABAJO) */}
+                <div className="flex flex-col space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="font-title-base text-xs text-on-surface font-bold">
+                        Red de Tiendas en {currentStateObj.name}
+                      </span>
+                      <span className="font-caption-sm text-[10px] text-on-surface-variant">
+                        Sucursales autorizadas para entrega de efectivo
+                      </span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-bold text-primary border border-white/10">
+                      10 Cadenas + Red
+                    </span>
+                  </div>
+
+                  {/* Cuadrícula de 10 Tiendas (Walmart y Bansefi eliminados, Farmacias Guadalajara agregada) */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {CASH_PICKUP_STORES.filter((s) => s.id !== 'any').map((store) => {
+                      const isSelected = selectedStore === store.id;
+                      const StoreLogo = store.Logo;
+                      return (
+                        <button
+                          key={store.id}
+                          type="button"
+                          onClick={() => handleSelectStore(store.id)}
+                          className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-[0.97] ${
+                            isSelected
+                              ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)] scale-[1.02]'
+                              : 'border border-transparent hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="w-full h-7 flex items-center justify-center">
+                            <StoreLogo className="w-full h-full object-contain" />
+                          </div>
+                          <span className="text-[9px] font-bold text-slate-700 leading-tight truncate w-full">
+                            {store.badge}
+                          </span>
+                          {isSelected && (
+                            <span className="absolute top-1 right-1.5 text-primary text-[17px] font-black leading-none select-none drop-shadow-xs">
+                              ✓
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+
+                    {/* 11. Cualquier Tienda o Banco de la Red (40,000+ Puntos) */}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectStore('any')}
+                      className={`network-btn col-span-3 h-13 rounded-xl bg-white text-slate-900 shadow-sm px-3.5 flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
+                        selectedStore === 'any'
+                          ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)]'
+                          : 'border border-transparent hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="material-symbols-outlined text-primary-container text-[22px]">hub</span>
+                        <div className="flex flex-col leading-tight">
+                          <span className="font-title-base text-xs font-bold text-slate-900">
+                            {isEn ? 'Any Available Network Partner' : 'Cualquier Tienda o Banco de la Red'}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium">
+                            {isEn ? 'Receiver picks up at any location in Mexico' : 'El familiar cobra en cualquier punto de los 40,000+ con su clave'}
+                          </span>
+                        </div>
+                      </div>
+                      {selectedStore === 'any' && (
+                        <span className="text-primary text-[24px] font-black leading-none select-none drop-shadow-xs">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* BOTÓN INFERIOR DE CONFIRMACIÓN */}
+            <div className="pt-3 mt-2 border-t border-white/10 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCashPickupSheetOpen(false)}
+                className="w-full py-3 rounded-xl bg-primary text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer"
+              >
+                <span>
+                  Confirmar Retiro en {selectedStoreObj.name} ({currentStateObj.name})
+                </span>
+                <span className="material-symbols-outlined text-[17px]">check_circle</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

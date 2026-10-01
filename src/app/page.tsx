@@ -969,6 +969,7 @@ export default function MobileApp() {
       localStorage.removeItem('kin_draft_send_store');
       localStorage.removeItem('kin_draft_send_pickup_location');
       localStorage.removeItem('kin_draft_send_payment_method');
+      localStorage.removeItem('kin_draft_send_pickup_state');
     }
     if (userId) {
       fetch('/api/account/data', {
@@ -2045,6 +2046,7 @@ export default function MobileApp() {
             handleClearSendDraft={handleClearSendDraft}
             handleStartSendReview={handleStartSendReview}
             pickupLocation={pickupLocation}
+            setPickupLocation={setPickupLocation}
             onOpenPickupLocationModal={() => setShowPickupLocationModal(true)}
             receiverMode={receiverMode}
             setReceiverMode={setReceiverMode}
