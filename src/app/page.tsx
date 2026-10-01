@@ -495,6 +495,10 @@ export default function MobileApp() {
       document.documentElement.classList.remove('dark', 'light');
       document.documentElement.classList.add(savedTheme);
     }
+    const savedTab = localStorage.getItem('kin_active_tab');
+    if (savedTab && ['home', 'send', 'bills', 'transactions', 'wallet', 'send-quick', 'profile', 'kin-cash', 'bill-pay', 'vault'].includes(savedTab)) {
+      setActiveTab(savedTab as any);
+    }
 
     // 1. Recuperar usuario guardado en localStorage (sesión activa tras login/registro)
     let savedUser: any = null;
@@ -553,6 +557,18 @@ export default function MobileApp() {
       const savedSendStore = localStorage.getItem('kin_draft_send_store');
       if (savedSendStore) {
         setSelectedStore(savedSendStore);
+      }
+      const savedPickupLocation = localStorage.getItem('kin_draft_send_pickup_location');
+      if (savedPickupLocation) {
+        try {
+          setPickupLocation(JSON.parse(savedPickupLocation));
+        } catch (e) {
+          console.warn('[PickupLocation restore error]', e);
+        }
+      }
+      const savedPaymentMethod = localStorage.getItem('kin_draft_send_payment_method');
+      if (savedPaymentMethod && ['debit', 'apple', 'bank', 'credit'].includes(savedPaymentMethod)) {
+        setPaymentMethod(savedPaymentMethod as any);
       }
     } catch (e) {
       console.warn('[Draft Restore Error]', e);
@@ -647,6 +663,15 @@ export default function MobileApp() {
             }
             if (data.user.draftSend.deliveryMethod) {
               setDeliveryMethod(data.user.draftSend.deliveryMethod as any);
+            }
+            if (data.user.draftSend.selectedStore) {
+              setSelectedStore((prev) => prev || data.user.draftSend.selectedStore);
+            }
+            if (data.user.draftSend.pickupLocation) {
+              setPickupLocation((prev) => prev || data.user.draftSend.pickupLocation);
+            }
+            if (data.user.draftSend.paymentMethod) {
+              setPaymentMethod((prev) => prev || data.user.draftSend.paymentMethod);
             }
           }
         }
@@ -936,11 +961,14 @@ export default function MobileApp() {
     setSelectedAvatar(null);
     setAmountValue('50');
     setDeliveryMethod('cash');
+    setPickupLocation(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('kin_draft_send_recipient');
       localStorage.removeItem('kin_draft_send_amount');
       localStorage.removeItem('kin_draft_send_delivery');
       localStorage.removeItem('kin_draft_send_store');
+      localStorage.removeItem('kin_draft_send_pickup_location');
+      localStorage.removeItem('kin_draft_send_payment_method');
     }
     if (userId) {
       fetch('/api/account/data', {
@@ -950,6 +978,35 @@ export default function MobileApp() {
       }).catch(() => {});
     }
   };
+
+  // Persistencia reactiva universal de configuración de usuario (idioma, tema, moneda, tab)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (language) {
+      localStorage.setItem('kin_language', language);
+    }
+  }, [language]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (theme) {
+      localStorage.setItem('kin_theme', theme);
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (currencyPref) {
+      localStorage.setItem('kin_currency_pref', currencyPref);
+    }
+  }, [currencyPref]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (activeTab) {
+      localStorage.setItem('kin_active_tab', activeTab);
+    }
+  }, [activeTab]);
 
   // Persistencia reactiva de Send Money en localStorage
   useEffect(() => {
@@ -963,7 +1020,7 @@ export default function MobileApp() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (amountValue && amountValue !== '50') {
+    if (amountValue) {
       localStorage.setItem('kin_draft_send_amount', amountValue);
     }
   }, [amountValue]);
@@ -981,6 +1038,22 @@ export default function MobileApp() {
       localStorage.setItem('kin_draft_send_store', selectedStore);
     }
   }, [selectedStore]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (pickupLocation) {
+      localStorage.setItem('kin_draft_send_pickup_location', JSON.stringify(pickupLocation));
+    } else {
+      localStorage.removeItem('kin_draft_send_pickup_location');
+    }
+  }, [pickupLocation]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (paymentMethod) {
+      localStorage.setItem('kin_draft_send_payment_method', paymentMethod);
+    }
+  }, [paymentMethod]);
 
   // Sincronización continua de borradores al backend de manera asíncrona (debounce 1200ms)
   useEffect(() => {
@@ -1008,6 +1081,8 @@ export default function MobileApp() {
           amount: amountValue,
           deliveryMethod,
           selectedStore,
+          pickupLocation,
+          paymentMethod,
           updatedAt: new Date().toISOString(),
         };
       }
@@ -1020,7 +1095,7 @@ export default function MobileApp() {
       }
     }, 1200);
     return () => clearTimeout(timer);
-  }, [userId, kinCashDraftContact, kinCashDraftAmount, kinCashDraftNote, selectedAvatar, amountValue, deliveryMethod, selectedStore]);
+  }, [userId, kinCashDraftContact, kinCashDraftAmount, kinCashDraftNote, selectedAvatar, amountValue, deliveryMethod, selectedStore, pickupLocation, paymentMethod]);
 
   // Reordenar contactos hacia arriba (subir orden)
   const handleMoveContactUp = (index: number) => {

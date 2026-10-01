@@ -321,14 +321,14 @@ export function SendView({
 
         {/* Animated Swap / Ticker Node */}
         <div className="relative z-10 flex items-center justify-center -my-2.5">
-          <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#1F2133] shadow-lg border border-white/10">
-            <span className="material-symbols-outlined text-primary text-[15px]">swap_vert</span>
-            <span className="font-financial-mono text-xs text-on-surface">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1F2133] shadow-lg border border-primary/30 max-w-[95%]">
+            <span className="material-symbols-outlined text-primary text-[15px] shrink-0">swap_vert</span>
+            <span className="font-financial-mono text-xs text-on-surface whitespace-nowrap">
               1 USD = <span className="text-primary font-bold">{USD_TO_MXN_RATE.toFixed(2)} MXN</span>
             </span>
             <span className="text-on-surface-variant font-caption-sm">•</span>
-            <span className="font-label-caps text-[10px] text-primary font-bold uppercase tracking-wider">
-              {isEn ? '$0 Fee' : 'Sin Comisión'}
+            <span className="font-label-caps text-[10px] text-primary font-black uppercase tracking-wider text-center">
+              {isEn ? '$0 Fee on First Transfer' : 'Sin Comisión en tu Primer Envío'}
             </span>
           </div>
         </div>
@@ -379,42 +379,56 @@ export function SendView({
             {isEn ? 'Free' : 'Gratis'}
           </span>
         </div>
-        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-surface-container-lowest border border-white/5">
+        <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-surface-container border border-outline-variant/30 shadow-xs">
+          {/* Opción 1: Retiro en Efectivo */}
           <button
-            className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
-              deliveryMethod === 'cash'
-                ? 'bg-surface-container-high text-primary shadow-sm border border-primary/20'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
+            type="button"
             onClick={() => setDeliveryMethod('cash')}
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[18px]">payments</span>
-            <span className="truncate">{isEn ? 'Cash Pickup' : 'Retiro en Efectivo'}</span>
-          </button>
-          <button
-            className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
-              deliveryMethod === 'bank'
-                ? 'bg-surface-container-high text-primary shadow-sm border border-primary/20'
-                : 'text-on-surface-variant hover:text-on-surface'
+            className={`h-[70px] px-1.5 rounded-xl transition-all duration-150 ease-out flex flex-col items-center justify-center text-center cursor-pointer active:scale-[0.96] border ${
+              deliveryMethod === 'cash'
+                ? 'bg-primary/15 text-primary border-primary ring-1 ring-primary/40 shadow-sm shadow-primary/20 font-black'
+                : 'bg-surface-container-high/60 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface border-transparent font-semibold'
             }`}
+          >
+            <span className="material-symbols-outlined text-[22px] mb-1 leading-none">payments</span>
+            <div className="text-[11px] leading-[1.15] flex flex-col items-center justify-center">
+              <span>{isEn ? 'Cash' : 'Retiro en'}</span>
+              <span>{isEn ? 'Pickup' : 'Efectivo'}</span>
+            </div>
+          </button>
+
+          {/* Opción 2: Cuenta Bancaria (SPEI) */}
+          <button
+            type="button"
             onClick={() => setDeliveryMethod('bank')}
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[18px]">account_balance</span>
-            <span className="truncate">{isEn ? 'Bank (SPEI)' : 'Cuenta Bancaria (SPEI)'}</span>
-          </button>
-          <button
-            className={`py-2.5 px-1.5 rounded-lg font-caption-sm text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
-              deliveryMethod === 'wallet'
-                ? 'bg-surface-container-high text-primary shadow-sm border border-primary/20'
-                : 'text-on-surface-variant hover:text-on-surface'
+            className={`h-[70px] px-1.5 rounded-xl transition-all duration-150 ease-out flex flex-col items-center justify-center text-center cursor-pointer active:scale-[0.96] border ${
+              deliveryMethod === 'bank'
+                ? 'bg-primary/15 text-primary border-primary ring-1 ring-primary/40 shadow-sm shadow-primary/20 font-black'
+                : 'bg-surface-container-high/60 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface border-transparent font-semibold'
             }`}
-            onClick={() => setDeliveryMethod('wallet')}
-            type="button"
           >
-            <span className="material-symbols-outlined text-[18px]">smartphone</span>
-            <span className="truncate">{isEn ? 'Mobile Wallet' : 'Billetera Móvil'}</span>
+            <span className="material-symbols-outlined text-[22px] mb-1 leading-none">account_balance</span>
+            <div className="text-[11px] leading-[1.15] flex flex-col items-center justify-center">
+              <span>{isEn ? 'Bank Account' : 'Cuenta Banco'}</span>
+              <span>{isEn ? '(SPEI 24/7)' : '(SPEI 24/7)'}</span>
+            </div>
+          </button>
+
+          {/* Opción 3: Billetera Móvil */}
+          <button
+            type="button"
+            onClick={() => setDeliveryMethod('wallet')}
+            className={`h-[70px] px-1.5 rounded-xl transition-all duration-150 ease-out flex flex-col items-center justify-center text-center cursor-pointer active:scale-[0.96] border ${
+              deliveryMethod === 'wallet'
+                ? 'bg-primary/15 text-primary border-primary ring-1 ring-primary/40 shadow-sm shadow-primary/20 font-black'
+                : 'bg-surface-container-high/60 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface border-transparent font-semibold'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[22px] mb-1 leading-none">smartphone</span>
+            <div className="text-[11px] leading-[1.15] flex flex-col items-center justify-center">
+              <span>{isEn ? 'Mobile' : 'Billetera'}</span>
+              <span>{isEn ? 'Wallet' : 'Móvil'}</span>
+            </div>
           </button>
         </div>
       </div>
@@ -445,8 +459,10 @@ export function SendView({
                   key={store.id}
                   type="button"
                   onClick={() => setSelectedStore(store.id)}
-                  className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer ${
-                    isSelected ? 'ring-2 ring-primary shadow-[0_0_16px_rgba(46,213,164,0.45)]' : 'hover:bg-slate-50'
+                  className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-[0.97] ${
+                    isSelected
+                      ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)] scale-[1.02]'
+                      : 'border border-transparent hover:bg-slate-50'
                   }`}
                 >
                   <div className="w-full h-7 flex items-center justify-center">
@@ -456,8 +472,8 @@ export function SendView({
                     {store.badge}
                   </span>
                   {isSelected && (
-                    <span className="selected-pill absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
-                      <span className="material-symbols-outlined text-[11px] font-bold">check</span>
+                    <span className="absolute top-1 right-1.5 text-primary text-[17px] font-black leading-none select-none drop-shadow-xs">
+                      ✓
                     </span>
                   )}
                 </button>
@@ -468,12 +484,14 @@ export function SendView({
             <button
               type="button"
               onClick={() => setSelectedStore('any')}
-              className={`network-btn col-span-3 h-12 rounded-xl bg-white text-slate-900 shadow-sm px-3 flex items-center justify-between text-left transition-all cursor-pointer ${
-                selectedStore === 'any' ? 'ring-2 ring-primary shadow-[0_0_16px_rgba(46,213,164,0.45)]' : 'hover:bg-slate-50'
+              className={`network-btn col-span-3 h-13 rounded-xl bg-white text-slate-900 shadow-sm px-3.5 flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
+                selectedStore === 'any'
+                  ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)]'
+                  : 'border border-transparent hover:bg-slate-50'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary-container text-[20px]">hub</span>
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-primary-container text-[22px]">hub</span>
                 <div className="flex flex-col leading-tight">
                   <span className="font-title-base text-xs font-bold text-slate-900">
                     {isEn ? 'Any Available Network Partner' : 'Cualquier Tienda o Banco de la Red'}
@@ -484,8 +502,8 @@ export function SendView({
                 </div>
               </div>
               {selectedStore === 'any' && (
-                <span className="selected-pill w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
-                  <span className="material-symbols-outlined text-[11px] font-bold">check</span>
+                <span className="text-primary text-[24px] font-black leading-none select-none drop-shadow-xs">
+                  ✓
                 </span>
               )}
             </button>
