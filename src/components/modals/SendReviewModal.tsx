@@ -4,6 +4,7 @@ import React from 'react';
 import { ChevronLeftIcon, CloseIcon, ShieldCheckIcon } from '@/components/Icons';
 import { ContactAvatar } from '@/components/ContactAvatar';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
 
 export interface SendReviewModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export interface SendReviewModalProps {
     badge: string;
     Logo?: React.ComponentType<{ className?: string }>;
   }>;
+  pickupLocation?: SelectedPickupLocation | null;
 }
 
 export function SendReviewModal({
@@ -53,6 +55,7 @@ export function SendReviewModal({
   isExecutingPayment,
   onExecutePayment,
   cashPickupStores,
+  pickupLocation,
 }: SendReviewModalProps) {
   if (!isOpen || !selectedAvatar) return null;
 
@@ -265,13 +268,17 @@ export function SendReviewModal({
                     <div>
                       <p className="text-xs font-bold text-on-surface">
                         {language === 'en' ? 'Cash Pickup' : 'Retiro en Efectivo'} •{' '}
-                        {(() => {
-                          const storeObj = cashPickupStores.find((s) => s.id === selectedStore);
-                          return storeObj?.name || 'OXXO';
-                        })()}
+                        {pickupLocation
+                          ? pickupLocation.branch.storeName
+                          : (() => {
+                              const storeObj = cashPickupStores.find((s) => s.id === selectedStore);
+                              return storeObj?.name || 'OXXO';
+                            })()}
                       </p>
                       <p className="text-[10px] text-on-surface-variant">
-                        {language === 'en' ? 'Authorized pickup network in Mexico' : 'Red de ventanillas autorizadas en México'}
+                        {pickupLocation
+                          ? `📍 ${pickupLocation.city}, ${pickupLocation.state} • ${pickupLocation.branch.address}`
+                          : (language === 'en' ? 'Authorized pickup network in Mexico' : 'Red de ventanillas autorizadas en México')}
                       </p>
                     </div>
                   </div>

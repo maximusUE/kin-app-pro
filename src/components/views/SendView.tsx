@@ -20,6 +20,7 @@ import {
   AnyAgentLogo,
 } from '@/components/Icons';
 import { ContactAvatar } from '@/components/ContactAvatar';
+import { SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
 
 export const CASH_PICKUP_STORES = [
   {
@@ -144,6 +145,11 @@ export interface SendViewProps {
   onSelectAvatarClick: () => void;
   handleClearSendDraft: () => void;
   handleStartSendReview: () => void;
+  pickupLocation?: SelectedPickupLocation | null;
+  onOpenPickupLocationModal?: () => void;
+  receiverMode?: 'existing' | 'new';
+  setReceiverMode?: (mode: 'existing' | 'new') => void;
+  onOpenNewRecipient?: () => void;
 }
 
 export function SendView({
@@ -161,6 +167,11 @@ export function SendView({
   onSelectAvatarClick,
   handleClearSendDraft,
   handleStartSendReview,
+  pickupLocation,
+  onOpenPickupLocationModal,
+  receiverMode = 'existing',
+  setReceiverMode,
+  onOpenNewRecipient,
 }: SendViewProps) {
   const isEn = language === 'en';
 
@@ -479,6 +490,66 @@ export function SendView({
               )}
             </button>
           </div>
+
+          {/* TARJETA INTERACTIVA DE CIUDAD Y SUCURSAL DE RETIRO EN MÉXICO */}
+          <div
+            onClick={onOpenPickupLocationModal}
+            className={`p-3.5 rounded-2xl border transition-all cursor-pointer shadow-md ${
+              pickupLocation
+                ? 'bg-primary/10 border-primary/40 hover:border-primary'
+                : 'bg-surface-container border-outline-variant/30 hover:border-primary/40'
+            } active:scale-[0.98]`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shrink-0">
+                  <span className="material-symbols-outlined text-[22px]">pin_drop</span>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-title-base text-xs font-bold text-on-surface truncate">
+                      {pickupLocation
+                        ? `${pickupLocation.city}, ${pickupLocation.state}`
+                        : (isEn ? 'Cash Pickup City in Mexico' : 'Ciudad y Sucursal de Retiro')}
+                    </span>
+                    {pickupLocation && (
+                      <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
+                        Confirmada
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-on-surface-variant truncate">
+                    {pickupLocation
+                      ? `${pickupLocation.branch.storeName} • ${pickupLocation.branch.address}`
+                      : (isEn
+                          ? 'Tap to search state & city (32 Mexican states available)'
+                          : 'Toca para buscar estado y ciudad (Michoacán, Jalisco, etc.)')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 shrink-0 ml-2">
+                <span className="text-[10px] text-primary font-bold">
+                  {pickupLocation ? (isEn ? 'Change' : 'Cambiar') : (isEn ? 'Search' : 'Buscar')}
+                </span>
+                <span className="material-symbols-outlined text-primary text-[18px]">
+                  chevron_right
+                </span>
+              </div>
+            </div>
+
+            {pickupLocation && (
+              <div className="mt-2.5 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-[10px] text-on-surface-variant">
+                <span className="flex items-center gap-1 font-medium">
+                  <span className="material-symbols-outlined text-[13px] text-primary">schedule</span>
+                  <span>{pickupLocation.branch.hours}</span>
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-bold text-[9px]">
+                  {pickupLocation.branch.badge}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -492,6 +563,41 @@ export function SendView({
             <span className="font-caption-sm text-[11px] text-primary font-bold">
               {isEn ? 'Official ID Required' : 'INE / Pasaporte Requerido'}
             </span>
+          </div>
+
+          {/* Conmutador de Receptor estilo Western Union: Guardado / Frecuente vs Nuevo */}
+          <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+            <button
+              type="button"
+              onClick={() => {
+                setReceiverMode?.('existing');
+                onSelectAvatarClick();
+              }}
+              className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+                receiverMode === 'existing'
+                  ? 'bg-primary text-on-primary shadow-sm'
+                  : 'bg-transparent text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">contacts</span>
+              <span>{isEn ? 'Existing Receiver' : 'Destinatario Frecuente'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setReceiverMode?.('new');
+                onOpenNewRecipient?.();
+              }}
+              className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+                receiverMode === 'new'
+                  ? 'bg-primary text-on-primary shadow-sm'
+                  : 'bg-transparent text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">person_add</span>
+              <span>{isEn ? 'New Receiver' : 'Nuevo Destinatario'}</span>
+            </button>
           </div>
 
           {selectedAvatar && (

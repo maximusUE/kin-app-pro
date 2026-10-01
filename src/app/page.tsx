@@ -101,6 +101,7 @@ import { ContactAvatarPickerModal } from '@/components/modals/ContactAvatarPicke
 import { UserProfileEditModal } from '@/components/modals/UserProfileEditModal';
 import { SendReviewModal } from '@/components/modals/SendReviewModal';
 import { TransactionDetailModal } from '@/components/modals/TransactionDetailModal';
+import { CashPickupLocationModal, SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
 
 // Tasa de cambio base por defecto USD/MXN
 const DEFAULT_USD_TO_MXN_RATE = 20.45;
@@ -895,6 +896,8 @@ export default function MobileApp() {
   const [showRateAlertToast, setShowRateAlertToast] = useState(false);
   const [showReceiverPicker, setShowReceiverPicker] = useState(false);
   const [isCashPickupExpanded, setIsCashPickupExpanded] = useState(false);
+  const [pickupLocation, setPickupLocation] = useState<SelectedPickupLocation | null>(null);
+  const [showPickupLocationModal, setShowPickupLocationModal] = useState(false);
 
   // Estados para Gestión Táctil de Contactos Rápidos (Action Sheet & Avatar Editor & iPhone Edit Mode)
   const [quickContactActionTarget, setQuickContactActionTarget] = useState<{ contact: ContactItem; index: number } | null>(null);
@@ -1405,7 +1408,9 @@ export default function MobileApp() {
       status: 'Completado',
       claveRastreoBanxico: clientClaveBanxico,
       claveRetiroEfectivo: deliveryMethod === 'cash' ? clientClaveRetiro : undefined,
-      pickupStore: storeObj?.name || 'OXXO',
+      pickupStore: pickupLocation ? pickupLocation.branch.storeName : (storeObj?.name || 'OXXO'),
+      pickupCity: pickupLocation?.city,
+      pickupState: pickupLocation?.state,
       nombreBeneficiario: selectedAvatar.name,
       recipientPhone: selectedAvatar.phone,
       bancoDestino: deliveryMethod === 'cash' ? (storeObj?.name || 'OXXO') : 'Red Banxico SPEI',
@@ -1964,6 +1969,14 @@ export default function MobileApp() {
             }}
             handleClearSendDraft={handleClearSendDraft}
             handleStartSendReview={handleStartSendReview}
+            pickupLocation={pickupLocation}
+            onOpenPickupLocationModal={() => setShowPickupLocationModal(true)}
+            receiverMode={receiverMode}
+            setReceiverMode={setReceiverMode}
+            onOpenNewRecipient={() => {
+              setBeneficiaryModalTab('register');
+              setShowContactModal(true);
+            }}
           />
         )}
 
@@ -2457,6 +2470,7 @@ export default function MobileApp() {
         isExecutingPayment={isExecutingPayment}
         onExecutePayment={handleExecuteSendPayment}
         cashPickupStores={CASH_PICKUP_STORES}
+        pickupLocation={pickupLocation}
       />
 
       {/* MODAL 5: Detalle de Transacción con Recibo Viral WhatsApp */}
@@ -2465,6 +2479,20 @@ export default function MobileApp() {
         onClose={() => setSelectedTransactionDetail(null)}
         USD_TO_MXN_RATE={USD_TO_MXN_RATE}
         language={language}
+      />
+
+      {/* MODAL 6: Selector de Estado, Ciudad y Sucursal en México (KIN Cash Pickup) */}
+      <CashPickupLocationModal
+        isOpen={showPickupLocationModal}
+        onClose={() => setShowPickupLocationModal(false)}
+        language={language}
+        currentSelection={pickupLocation}
+        onSelectLocation={(loc) => {
+          setPickupLocation(loc);
+          if (loc.branch.chain && loc.branch.chain !== 'any') {
+            setSelectedStore(loc.branch.chain);
+          }
+        }}
       />
     </div>
   );
