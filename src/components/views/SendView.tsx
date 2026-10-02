@@ -139,6 +139,9 @@ export interface SendViewProps {
   receiverMode?: 'existing' | 'new';
   setReceiverMode?: (mode: 'existing' | 'new') => void;
   onOpenNewRecipient?: () => void;
+  contactsList?: SendContactItem[];
+  onSelectContact?: (contact: SendContactItem) => void;
+  onAddContact?: (newContact: SendContactItem) => void;
 }
 
 export function SendView({
@@ -162,6 +165,9 @@ export function SendView({
   receiverMode = 'existing',
   setReceiverMode,
   onOpenNewRecipient,
+  contactsList = [],
+  onSelectContact,
+  onAddContact,
 }: SendViewProps) {
   const isEn = language === 'en';
 
@@ -338,6 +344,338 @@ export function SendView({
         },
       });
     }
+  };
+
+  // Modo de selección de destinatario (3: Destinatario Frecuente vs 4: + Nuevo Destinatario)
+  const [localReceiverMode, setLocalReceiverMode] = React.useState<'existing' | 'new'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kin_draft_receiver_mode');
+      if (saved === 'existing' || saved === 'new') return saved;
+    }
+    return receiverMode || 'existing';
+  });
+
+  const currentReceiverMode = receiverMode !== undefined ? receiverMode : localReceiverMode;
+
+  const handleSetReceiverMode = (mode: 'existing' | 'new') => {
+    setLocalReceiverMode(mode);
+    setReceiverMode?.(mode);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_draft_receiver_mode', mode);
+      } catch (_) {}
+    }
+  };
+
+  // Directorio de Destinatarios Frecuentes con persistencia en localStorage
+  const DEFAULT_FREQUENT_RECIPIENTS: SendContactItem[] = [
+    {
+      id: 'rec_maria_gomez',
+      name: 'María Elena',
+      fullName: 'María Elena Gómez Morales',
+      firstName: 'María Elena',
+      lastName: 'Gómez Morales',
+      phone: '+52 443 289 4410',
+      state: 'Michoacán',
+      city: 'Morelia',
+      bank: 'Red Retiro en Efectivo',
+      country: 'Mexico',
+      photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    },
+    {
+      id: 'rec_carlos_ramirez',
+      name: 'Carlos Eduardo',
+      fullName: 'Carlos Eduardo Ramírez Santos',
+      firstName: 'Carlos Eduardo',
+      lastName: 'Ramírez Santos',
+      phone: '+52 331 450 9922',
+      state: 'Jalisco',
+      city: 'Guadalajara',
+      bank: 'Red Retiro en Efectivo',
+      country: 'Mexico',
+      photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+    },
+    {
+      id: 'rec_rosa_fernandez',
+      name: 'Rosa Linda',
+      fullName: 'Rosa Linda Fernández Ruiz',
+      firstName: 'Rosa Linda',
+      lastName: 'Fernández Ruiz',
+      phone: '+52 477 392 8841',
+      state: 'Guanajuato',
+      city: 'León',
+      bank: 'Red Retiro en Efectivo',
+      country: 'Mexico',
+      photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    },
+  ];
+
+  const [frequentRecipients, setFrequentRecipients] = React.useState<SendContactItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('kin_frequent_cash_recipients');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (_) {}
+    }
+    return DEFAULT_FREQUENT_RECIPIENTS;
+  });
+
+  // Lista combinada de frecuentes con contactsList
+  const allFrequentList = React.useMemo(() => {
+    const map = new Map<string, SendContactItem>();
+    frequentRecipients.forEach((c) => map.set(c.id, c));
+    contactsList.forEach((c) => {
+      if (!map.has(c.id)) {
+        map.set(c.id, {
+          ...c,
+          fullName: c.fullName || c.name,
+          state: c.state || 'Michoacán',
+          city: (c as any).city || 'Morelia',
+          phone: c.phone || '+52 443 123 4567',
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [frequentRecipients, contactsList]);
+
+  // Búsqueda y control de expansión para destinatarios frecuentes
+  const [frequentSearchQuery, setFrequentSearchQuery] = React.useState('');
+  const [isFrequentListExpanded, setIsFrequentListExpanded] = React.useState(false);
+
+  const filteredFrequentRecipients = React.useMemo(() => {
+    const q = frequentSearchQuery.trim();
+    if (!q) return allFrequentList;
+    const qNorm = normalizeText(q);
+    return allFrequentList.filter((c) => {
+      const nameMatch = normalizeText(c.fullName || c.name).includes(qNorm);
+      const phoneDigits = (c.phone || '').replace(/\D/g, '');
+      const searchDigits = q.replace(/\D/g, '');
+      const phoneMatch = searchDigits ? phoneDigits.includes(searchDigits) : false;
+      const stateMatch = c.state && normalizeText(c.state).includes(qNorm);
+      const cityMatch = (c as any).city && normalizeText((c as any).city).includes(qNorm);
+      return nameMatch || phoneMatch || stateMatch || cityMatch;
+    });
+  }, [allFrequentList, frequentSearchQuery]);
+
+  // Formulario Western Union para Nuevo Destinatario
+  const [formNombre, setFormNombre] = React.useState('');
+  const [formApellido1, setFormApellido1] = React.useState('');
+  const [formApellido2, setFormApellido2] = React.useState('');
+  const [formState, setFormState] = React.useState('');
+  const [formCity, setFormCity] = React.useState('');
+  const [formPhone, setFormPhone] = React.useState('');
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+  const [formSuccessFeedback, setFormSuccessFeedback] = React.useState<string | null>(null);
+
+  // Modales Portal centrados para Selección de Estado y Ciudad
+  const [isFormStateModalOpen, setIsFormStateModalOpen] = React.useState(false);
+  const [isFormCityModalOpen, setIsFormCityModalOpen] = React.useState(false);
+  const [formStateModalSearch, setFormStateModalSearch] = React.useState('');
+  const [formCityModalSearch, setFormCityModalSearch] = React.useState('');
+
+  // Ciudades disponibles para el estado elegido en el formulario
+  const availableFormCities = React.useMemo(() => {
+    if (!formState) return [];
+    const stateObj = MEXICO_STATES.find(
+      (s) => s.name.toLowerCase() === formState.toLowerCase() || s.id === formState.toLowerCase()
+    );
+    return stateObj ? stateObj.cities : [];
+  }, [formState]);
+
+  const filteredFormCities = React.useMemo(() => {
+    const q = formCityModalSearch.trim();
+    if (!q) return availableFormCities;
+    const qNorm = normalizeText(q);
+    return availableFormCities.filter((c) => normalizeText(c).includes(qNorm));
+  }, [availableFormCities, formCityModalSearch]);
+
+  const filteredFormStates = React.useMemo(() => {
+    const q = formStateModalSearch.trim();
+    if (!q) return MEXICO_STATES;
+    const qNorm = normalizeText(q);
+    return MEXICO_STATES.filter((s) => {
+      const nameNorm = normalizeText(s.name);
+      const codeNorm = normalizeText(s.code);
+      const isCdmx = s.id === 'cdmx';
+      return (
+        nameNorm.includes(qNorm) ||
+        codeNorm.includes(qNorm) ||
+        (isCdmx && ('distrito federal'.includes(qNorm) || 'df'.includes(qNorm) || 'cdmx'.includes(qNorm))) ||
+        s.cities.some((c) => normalizeText(c).includes(qNorm))
+      );
+    });
+  }, [formStateModalSearch]);
+
+  // Selección de Estado en formulario (desbloquea Ciudad y abre su modal)
+  const handleSelectFormState = (stateObj: MexicoState) => {
+    setFormState(stateObj.name);
+    setFormCity(''); // Resetea ciudad anterior para consistencia
+    setIsFormStateModalOpen(false);
+    setFormStateModalSearch('');
+    if (formErrors.state) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next.state;
+        return next;
+      });
+    }
+    // Transición fluida estilo Western Union: abrir directamente el selector de ciudades de ese estado
+    setTimeout(() => {
+      setFormCityModalSearch('');
+      setIsFormCityModalOpen(true);
+    }, 150);
+  };
+
+  // Selección de Ciudad en formulario
+  const handleSelectFormCity = (cityName: string) => {
+    setFormCity(cityName);
+    setIsFormCityModalOpen(false);
+    setFormCityModalSearch('');
+    if (formErrors.city) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next.city;
+        return next;
+      });
+    }
+  };
+
+  // Selección de Destinatario Frecuente
+  const handleSelectFrequentContact = (contact: SendContactItem) => {
+    onSelectContact?.(contact);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_draft_send_recipient', JSON.stringify(contact));
+      } catch (_) {}
+    }
+
+    // Sincronizar estado y ciudad del contacto
+    const contactState = contact.state || currentStateObj.name;
+    const contactCity = (contact as any).city || currentStateObj.cities[0] || 'Centro';
+    const foundState = MEXICO_STATES.find(
+      (s) => s.name.toLowerCase() === contactState.toLowerCase()
+    ) || currentStateObj;
+    setSelectedStateId(foundState.id);
+
+    if (setPickupLocation) {
+      const storeObj = CASH_PICKUP_STORES.find((s) => s.id === selectedStore) || CASH_PICKUP_STORES[0];
+      setPickupLocation({
+        state: foundState.name,
+        city: contactCity,
+        branch: {
+          id: `${selectedStore}-${foundState.code.toLowerCase()}`,
+          storeName: storeObj.name,
+          chain: selectedStore,
+          address: `Cualquier sucursal ${storeObj.name} en ${contactCity}, ${foundState.name}`,
+          city: contactCity,
+          state: foundState.name,
+          hours: storeObj.id === 'oxxo' ? 'Abierto 24 Horas' : 'Horario comercial',
+          is24Hours: storeObj.id === 'oxxo',
+          badge: storeObj.badge,
+        },
+      });
+    }
+  };
+
+  // Guardar Nuevo Destinatario con validaciones rigurosas
+  const handleSaveNewRecipient = () => {
+    const errors: Record<string, string> = {};
+    if (!formNombre.trim()) {
+      errors.nombre = 'El nombre es obligatorio (según identificación oficial)';
+    }
+    if (!formApellido1.trim()) {
+      errors.apellido1 = 'El primer apellido es obligatorio';
+    }
+    if (!formState.trim()) {
+      errors.state = 'El Estado de retiro es obligatorio';
+    }
+    if (!formCity.trim()) {
+      errors.city = 'La Ciudad de retiro es obligatoria';
+    }
+    const cleanPhone = formPhone.replace(/[^\d]/g, '');
+    if (!cleanPhone || cleanPhone.length < 10) {
+      errors.phone = 'Ingresa el número celular completo de 10 dígitos';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
+
+    const fullName = `${formNombre.trim()} ${formApellido1.trim()}${formApellido2.trim() ? ' ' + formApellido2.trim() : ''}`;
+    const newContact: SendContactItem = {
+      id: 'rec_' + Date.now(),
+      name: formNombre.trim(),
+      fullName: fullName,
+      firstName: formNombre.trim(),
+      lastName: `${formApellido1.trim()}${formApellido2.trim() ? ' ' + formApellido2.trim() : ''}`,
+      phone: `+52 ${formPhone.trim()}`,
+      state: formState,
+      city: formCity,
+      bank: 'Red Retiro en Efectivo',
+      country: 'Mexico',
+      photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    };
+
+    // 1. Guardar en lista de frecuentes
+    const updatedList = [newContact, ...frequentRecipients.filter((c) => c.id !== newContact.id)];
+    setFrequentRecipients(updatedList);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_frequent_cash_recipients', JSON.stringify(updatedList));
+        localStorage.setItem('kin_draft_send_recipient', JSON.stringify(newContact));
+      } catch (_) {}
+    }
+
+    // 2. Notificar al sistema global
+    onAddContact?.(newContact);
+    onSelectContact?.(newContact);
+
+    // 3. Sincronizar pickupLocation
+    const foundState = MEXICO_STATES.find(
+      (s) => s.name.toLowerCase() === formState.toLowerCase()
+    ) || currentStateObj;
+    setSelectedStateId(foundState.id);
+
+    if (setPickupLocation) {
+      const storeObj = CASH_PICKUP_STORES.find((s) => s.id === selectedStore) || CASH_PICKUP_STORES[0];
+      setPickupLocation({
+        state: formState,
+        city: formCity,
+        branch: {
+          id: `${selectedStore}-${Date.now()}`,
+          storeName: storeObj.name,
+          chain: selectedStore,
+          address: `Cualquier sucursal ${storeObj.name} en ${formCity}, ${formState}`,
+          city: formCity,
+          state: formState,
+          hours: storeObj.id === 'oxxo' ? 'Abierto 24 Horas' : 'Horario comercial',
+          is24Hours: storeObj.id === 'oxxo',
+          badge: storeObj.badge,
+        },
+      });
+    }
+
+    // 4. Limpiar formulario
+    setFormNombre('');
+    setFormApellido1('');
+    setFormApellido2('');
+    setFormState('');
+    setFormCity('');
+    setFormPhone('');
+    setFormSuccessFeedback(`¡${newContact.fullName} registrado y guardado como destinatario frecuente!`);
+
+    // 5. Conmutar a vista de Destinatario Frecuente
+    handleSetReceiverMode('existing');
+
+    setTimeout(() => {
+      setFormSuccessFeedback(null);
+    }, 4500);
   };
 
   return (
@@ -706,9 +1044,9 @@ export function SendView({
         </div>
       )}
 
-      {/* CASH PICKUP BENEFICIARY SELECTION */}
+      {/* CASH PICKUP BENEFICIARY SELECTION (WESTERN UNION STYLE) */}
       {deliveryMethod === 'cash' && (
-        <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
+        <div className="flex flex-col space-y-3 pt-1 animate-fade-in">
           <div className="flex items-center justify-between">
             <span className="font-title-base text-xs text-on-surface font-bold">
               {isEn ? 'Recipient in Mexico' : 'Persona que Retira en México'}
@@ -718,17 +1056,14 @@ export function SendView({
             </span>
           </div>
 
-          {/* Conmutador de Receptor estilo Western Union: Guardado / Frecuente vs Nuevo */}
+          {/* Conmutador de Receptor estilo Western Union: 3. Destinatario Frecuente vs 4. + Nuevo Destinatario */}
           <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
             <button
               type="button"
-              onClick={() => {
-                setReceiverMode?.('existing');
-                onSelectAvatarClick();
-              }}
+              onClick={() => handleSetReceiverMode('existing')}
               className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
-                receiverMode === 'existing'
-                  ? 'bg-primary text-on-primary shadow-sm'
+                currentReceiverMode === 'existing'
+                  ? 'bg-primary text-on-primary shadow-sm ring-1 ring-primary/50'
                   : 'bg-transparent text-on-surface-variant hover:text-on-surface'
               }`}
             >
@@ -738,101 +1073,455 @@ export function SendView({
 
             <button
               type="button"
-              onClick={() => {
-                setReceiverMode?.('new');
-                onOpenNewRecipient?.();
-              }}
+              onClick={() => handleSetReceiverMode('new')}
               className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
-                receiverMode === 'new'
-                  ? 'bg-primary text-on-primary shadow-sm'
+                currentReceiverMode === 'new'
+                  ? 'bg-primary text-on-primary shadow-sm ring-1 ring-primary/50'
                   : 'bg-transparent text-on-surface-variant hover:text-on-surface'
               }`}
             >
               <span className="material-symbols-outlined text-[18px]">person_add</span>
-              <span>{isEn ? 'New Receiver' : 'Nuevo Destinatario'}</span>
+              <span>{isEn ? 'New Receiver' : '+ Nuevo Destinatario'}</span>
             </button>
           </div>
 
-          {selectedAvatar && (
-            <div className="flex items-center justify-between bg-primary/10 border border-primary/30 rounded-xl px-3 py-2 text-xs animate-fade-in shadow-inner">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="material-symbols-outlined text-primary text-[18px] shrink-0 animate-pulse">
-                  save
-                </span>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-white font-semibold text-[11px] truncate">
-                    {isEn ? 'Draft saved automatically' : 'Borrador guardado automáticamente'}
-                  </span>
-                  <span className="text-primary text-[10px] font-medium truncate">
-                    {isEn ? 'Beneficiary' : 'Beneficiario'}: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleClearSendDraft();
-                }}
-                className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
-                title={isEn ? 'Discard draft' : 'Descartar borrador'}
-              >
-                <span>{isEn ? '✕ Clear' : '✕ Limpiar'}</span>
-              </button>
+          {/* Banner de feedback al guardar nuevo destinatario */}
+          {formSuccessFeedback && (
+            <div className="p-3 rounded-xl bg-primary/20 border border-primary/40 text-primary text-xs font-bold flex items-center gap-2 animate-fade-in shadow-sm">
+              <span className="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
+              <span className="truncate">{formSuccessFeedback}</span>
             </div>
           )}
 
-          <div
-            onClick={onSelectAvatarClick}
-            className="p-3.5 rounded-2xl bg-surface-container border border-white/10 space-y-2 cursor-pointer hover:border-primary/40 transition-colors shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                {selectedAvatar ? (
-                  <>
-                    <ContactAvatar
-                      photoUrl={selectedAvatar.photoUrl}
-                      name={selectedAvatar.name}
-                      className="w-10 h-10 rounded-xl"
-                      iconSize="text-[22px]"
-                    />
-                    <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">
-                        {selectedAvatar.fullName || selectedAvatar.name}
-                      </p>
-                      <p className="font-financial-mono text-[11px] text-on-surface-variant truncate">
-                        {selectedAvatar.phone ? `Tel: ${selectedAvatar.phone}` : (isEn ? 'Pickup with KIN code & ID' : 'Retiro con Clave KIN y Cédula/INE')}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary border border-dashed border-primary/30 flex-shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">person_add</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">
-                        {isEn ? 'Select who picks up cash' : 'Selecciona quién retira en sucursal'}
-                      </p>
-                      <p className="text-[11px] text-on-surface-variant truncate">
-                        {isEn ? 'Tap to choose family member or add new' : 'Toca para elegir familiar o agregar uno nuevo'}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
+          {/* ========================================================================= */}
+          {/* TAB 3: DESTINATARIO FRECUENTE (SELECCIÓN Y LISTA DE CONTACTOS GUARDADOS)  */}
+          {/* ========================================================================= */}
+          {currentReceiverMode === 'existing' && (
+            <div className="space-y-3 animate-fade-in">
+              {/* Tarjeta del Destinatario Seleccionado Actualmente */}
               {selectedAvatar ? (
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="text-[10px] text-primary font-semibold">{isEn ? 'Change' : 'Cambiar'}</span>
-                  <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
+                <div className="p-3.5 rounded-2xl bg-primary/10 border-2 border-primary ring-2 ring-primary/40 shadow-[0_0_20px_rgba(46,213,164,0.35)] transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <ContactAvatar
+                        photoUrl={selectedAvatar.photoUrl}
+                        name={selectedAvatar.name}
+                        className="w-11 h-11 rounded-xl ring-2 ring-primary/40"
+                        iconSize="text-[22px]"
+                      />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-title-base text-xs font-bold text-white truncate">
+                            {selectedAvatar.fullName || selectedAvatar.name}
+                          </p>
+                          <span className="px-1.5 py-0.2 rounded-full bg-primary/25 text-primary text-[9px] font-bold shrink-0">
+                            Elegido
+                          </span>
+                        </div>
+                        <p className="font-financial-mono text-[11px] text-slate-300 truncate">
+                          {selectedAvatar.phone ? selectedAvatar.phone : 'Tel: +52 (Sin registrar)'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* Check verde sin círculo */}
+                      <span className="text-primary text-[22px] font-black leading-none select-none drop-shadow-xs">
+                        ✓
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsFrequentListExpanded(!isFrequentListExpanded)}
+                        className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                      >
+                        <span>{isFrequentListExpanded ? 'Ocultar' : 'Cambiar'}</span>
+                        <span className="material-symbols-outlined text-[15px]">
+                          {isFrequentListExpanded ? 'expand_less' : 'expand_more'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-300">
+                    <span className="flex items-center gap-1 truncate">
+                      <span className="material-symbols-outlined text-[14px] text-primary">pin_drop</span>
+                      <span>
+                        {(selectedAvatar as any).city || currentStateObj.cities[0] || 'Morelia'}, {selectedAvatar.state || currentStateObj.name}
+                      </span>
+                    </span>
+                    <span className="text-[10px] text-primary font-bold shrink-0">
+                      {selectedStoreObj.name}
+                    </span>
+                  </div>
                 </div>
               ) : (
-                <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold flex-shrink-0">
-                  {isEn ? 'Choose' : 'Elegir'}
-                </span>
+                <div className="p-4 rounded-2xl bg-surface-container border border-dashed border-primary/40 text-center space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary mx-auto flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[22px]">contacts</span>
+                  </div>
+                  <div>
+                    <p className="font-title-base text-xs font-bold text-white">
+                      {isEn ? 'Choose a frequent contact' : 'Selecciona un destinatario frecuente'}
+                    </p>
+                    <p className="text-[11px] text-on-surface-variant">
+                      {isEn ? 'Tap below to select who picks up cash in Mexico' : 'Toca uno de tus familiares guardados abajo para enviar'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Lista Desplegable de Destinatarios Frecuentes Guardados */}
+              {(!selectedAvatar || isFrequentListExpanded) && (
+                <div className="space-y-2 pt-1 animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="font-title-base text-[11px] text-on-surface font-bold uppercase tracking-wider">
+                      {isEn ? `Frequent Recipients (${filteredFrequentRecipients.length})` : `Destinatarios Frecuentes (${filteredFrequentRecipients.length})`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleSetReceiverMode('new')}
+                      className="text-[11px] text-primary font-bold hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <span>+ Nuevo</span>
+                    </button>
+                  </div>
+
+                  {/* Buscador de Destinatarios Frecuentes */}
+                  {allFrequentList.length > 2 && (
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary text-[17px]">
+                        search
+                      </span>
+                      <input
+                        type="text"
+                        value={frequentSearchQuery}
+                        onChange={(e) => setFrequentSearchQuery(e.target.value)}
+                        placeholder={isEn ? 'Filter by name, phone or city...' : 'Filtrar por nombre, teléfono o ciudad...'}
+                        className="w-full h-9 pl-9 pr-8 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary transition-all"
+                      />
+                      {frequentSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setFrequentSearchQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">close</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Tarjetas de contactos frecuentes */}
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                    {filteredFrequentRecipients.map((c) => {
+                      const isSelected = selectedAvatar?.id === c.id;
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            handleSelectFrequentContact(c);
+                            setIsFrequentListExpanded(false);
+                          }}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between active:scale-[0.98] ${
+                            isSelected
+                              ? 'bg-primary/15 border-2 border-primary ring-2 ring-primary/40 shadow-[0_0_15px_rgba(46,213,164,0.3)]'
+                              : 'bg-surface-container border-white/5 hover:border-primary/40 hover:bg-surface-container-high'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <ContactAvatar
+                              photoUrl={c.photoUrl}
+                              name={c.name}
+                              className={`w-9 h-9 rounded-lg ${isSelected ? 'ring-2 ring-primary' : ''}`}
+                              iconSize="text-[18px]"
+                            />
+                            <div className="min-w-0">
+                              <p className="font-title-base text-xs font-bold text-white truncate">
+                                {c.fullName || c.name}
+                              </p>
+                              <div className="flex items-center gap-1.5 text-[10px] text-slate-300">
+                                <span>{c.phone ? c.phone : 'Tel: +52...'}</span>
+                                <span>•</span>
+                                <span className="truncate">
+                                  {(c as any).city || 'Morelia'}, {c.state || 'Michoacán'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 ml-2">
+                            {isSelected ? (
+                              <span className="text-primary text-[20px] font-black leading-none drop-shadow-xs">
+                                ✓
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-lg bg-surface-container-high text-primary text-[10px] font-bold border border-white/5">
+                                Elegir
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {filteredFrequentRecipients.length === 0 && (
+                      <div className="p-4 text-center rounded-xl bg-surface-container text-xs text-slate-400">
+                        No hay contactos frecuentes que coincidan con &ldquo;{frequentSearchQuery}&rdquo;
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSetReceiverMode('new')}
+                    className="w-full py-2.5 rounded-xl border border-dashed border-primary/40 hover:border-primary text-primary hover:bg-primary/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">person_add</span>
+                    <span>{isEn ? '+ Add New Receiver' : '+ Registrar Nuevo Destinatario'}</span>
+                  </button>
+                </div>
               )}
             </div>
-          </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB 4: NUEVO DESTINATARIO (FORMULARIO ESTILO WESTERN UNION CON CAMPOS)     */}
+          {/* ========================================================================= */}
+          {currentReceiverMode === 'new' && (
+            <div className="p-4 rounded-2xl bg-surface-container border border-outline-variant/30 space-y-3.5 animate-fade-in shadow-md">
+              <div className="pb-1 border-b border-white/10">
+                <h4 className="font-title-base text-xs font-bold text-white">
+                  {isEn ? 'New Cash Pickup Receiver' : 'Datos del Nuevo Destinatario'}
+                </h4>
+                <p className="font-caption-sm text-[11px] text-on-surface-variant">
+                  {isEn
+                    ? 'Enter recipient details matching their official Mexican ID (INE/Passport)'
+                    : 'Ingresa los datos exactamente como aparecen en su identificación oficial (INE o Pasaporte).'}
+                </p>
+              </div>
+
+              {/* 1. NOMBRE(S) */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                  <span>{isEn ? 'Given Name(s)' : 'Nombre(s)'}</span>
+                  <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formNombre}
+                  onChange={(e) => {
+                    setFormNombre(e.target.value);
+                    if (formErrors.nombre) {
+                      setFormErrors((prev) => ({ ...prev, nombre: '' }));
+                    }
+                  }}
+                  placeholder={isEn ? 'e.g. Juan Carlos' : 'Ej. Juan Carlos'}
+                  className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+                {formErrors.nombre && (
+                  <p className="text-[10px] text-red-400 font-semibold">{formErrors.nombre}</p>
+                )}
+              </div>
+
+              {/* 2 & 3: APELLIDOS (APELLIDO 1 & APELLIDO 2) */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                    <span>{isEn ? 'First Surname' : 'Primer Apellido'}</span>
+                    <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formApellido1}
+                    onChange={(e) => {
+                      setFormApellido1(e.target.value);
+                      if (formErrors.apellido1) {
+                        setFormErrors((prev) => ({ ...prev, apellido1: '' }));
+                      }
+                    }}
+                    placeholder={isEn ? 'e.g. Garcia' : 'Ej. García'}
+                    className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                  {formErrors.apellido1 && (
+                    <p className="text-[10px] text-red-400 font-semibold">{formErrors.apellido1}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                    <span>{isEn ? 'Second Surname' : 'Segundo Apellido'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formApellido2}
+                    onChange={(e) => setFormApellido2(e.target.value)}
+                    placeholder={isEn ? 'e.g. Lopez' : 'Ej. López'}
+                    className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* 4. CASH PICKUP STATE (CAMPO OBLIGATORIO: ABRE PÁGINA/MODAL CON 32 ESTADOS Y BUSCADOR) */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <span>{isEn ? 'Cash Pickup State' : 'Estado de Retiro (Cash Pickup State)'}</span>
+                    <span className="text-red-400">*</span>
+                  </span>
+                  <span className="text-[10px] text-primary font-semibold">32 Estados + CDMX</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormStateModalSearch('');
+                    setIsFormStateModalOpen(true);
+                  }}
+                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
+                    formState
+                      ? 'bg-primary/10 border-primary/50 text-white'
+                      : 'bg-surface-container-high border-outline-variant/30 text-slate-400 hover:border-primary/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="material-symbols-outlined text-[19px] text-primary shrink-0">public</span>
+                    <span className={`text-xs truncate ${formState ? 'font-bold text-white' : 'text-slate-400'}`}>
+                      {formState ? formState : (isEn ? 'Tap to select State (32 states available)...' : 'Toca para seleccionar Estado de México...')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-[10px] text-primary font-bold">
+                      {formState ? 'Cambiar' : 'Buscar'}
+                    </span>
+                    <span className="material-symbols-outlined text-[17px] text-primary">chevron_right</span>
+                  </div>
+                </button>
+                {formErrors.state && (
+                  <p className="text-[10px] text-red-400 font-semibold">{formErrors.state}</p>
+                )}
+              </div>
+
+              {/* 5. CASH PICKUP CITY (BLOQUEADO HASTA QUE SE LLENE EL ESTADO ARRIBA) */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <span>{isEn ? 'Cash Pickup City' : 'Ciudad de Retiro (Cash Pickup City)'}</span>
+                    <span className="text-red-400">*</span>
+                  </span>
+                  {formState ? (
+                    <span className="text-[10px] text-primary font-semibold">
+                      {availableFormCities.length} ciudades en {formState}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-amber-400/90 font-semibold">🔒 Requiere Estado</span>
+                  )}
+                </label>
+
+                {!formState ? (
+                  // ESTADO DESACTIVADO / BLOQUEADO
+                  <div
+                    onClick={() => {
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        state: 'Selecciona primero el Estado de retiro arriba para activar las ciudades',
+                      }));
+                    }}
+                    className="w-full p-2.5 rounded-xl bg-surface-container-low/70 border border-dashed border-white/10 opacity-60 cursor-not-allowed flex items-center justify-between transition-all"
+                  >
+                    <div className="flex items-center gap-2 text-slate-400 text-xs">
+                      <span className="material-symbols-outlined text-[18px] text-amber-400">lock</span>
+                      <span className="text-[11px]">
+                        🔒 Primero selecciona un Estado arriba para activar las ciudades
+                      </span>
+                    </div>
+                    <span className="material-symbols-outlined text-[16px] text-slate-500">lock</span>
+                  </div>
+                ) : (
+                  // ESTADO ACTIVO / DESBLOQUEADO
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormCityModalSearch('');
+                      setIsFormCityModalOpen(true);
+                    }}
+                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
+                      formCity
+                        ? 'bg-primary/10 border-primary/50 text-white'
+                        : 'bg-surface-container-high border-outline-variant/30 text-slate-400 hover:border-primary/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="material-symbols-outlined text-[19px] text-primary shrink-0">pin_drop</span>
+                      <span className={`text-xs truncate ${formCity ? 'font-bold text-white' : 'text-slate-400'}`}>
+                        {formCity ? formCity : (isEn ? `Select city in ${formState}...` : `Selecciona ciudad o municipio en ${formState}...`)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-[10px] text-primary font-bold">
+                        {formCity ? 'Cambiar' : 'Seleccionar'}
+                      </span>
+                      <span className="material-symbols-outlined text-[17px] text-primary">chevron_right</span>
+                    </div>
+                  </button>
+                )}
+                {formErrors.city && (
+                  <p className="text-[10px] text-red-400 font-semibold">{formErrors.city}</p>
+                )}
+              </div>
+
+              {/* 6. NÚMERO TELEFÓNICO CON PREFIJO FIJO +52 (MÉXICO) */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <span>{isEn ? 'Mobile Phone' : 'Número Telefónico del Destinatario'}</span>
+                    <span className="text-red-400">*</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">Notificación SMS de cobro</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center gap-1.5 shrink-0 select-none shadow-xs">
+                    <span className="text-xs">🇲🇽</span>
+                    <span className="text-xs font-black text-primary font-mono">+52</span>
+                  </div>
+                  <input
+                    type="tel"
+                    maxLength={14}
+                    value={formPhone}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '').slice(0, 10);
+                      let formatted = raw;
+                      if (raw.length > 6) {
+                        formatted = `${raw.slice(0, 3)} ${raw.slice(3, 6)} ${raw.slice(6)}`;
+                      } else if (raw.length > 3) {
+                        formatted = `${raw.slice(0, 3)} ${raw.slice(3)}`;
+                      }
+                      setFormPhone(formatted);
+                      if (formErrors.phone) {
+                        setFormErrors((prev) => ({ ...prev, phone: '' }));
+                      }
+                    }}
+                    placeholder="10 dígitos (ej. 443 123 4567)"
+                    className="flex-1 h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                </div>
+                {formErrors.phone && (
+                  <p className="text-[10px] text-red-400 font-semibold">{formErrors.phone}</p>
+                )}
+              </div>
+
+              {/* BOTÓN PARA GUARDAR DESTINATARIO Y CONTINUAR */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleSaveNewRecipient}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary-container to-[#18A57E] text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer font-headline-md tracking-wide"
+                >
+                  <span className="material-symbols-outlined text-[18px]">person_check</span>
+                  <span>{isEn ? 'Save Recipient and Continue' : 'Guardar Destinatario y Continuar'}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1302,6 +1991,223 @@ export function SendView({
                 </span>
                 <span className="material-symbols-outlined text-[17px]">check_circle</span>
               </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 1: SELECTOR DE ESTADO DE RETIRO (CASH PICKUP STATE - 32 ESTADOS + DF) */}
+      {/* ========================================================================= */}
+      {isMounted && isFormStateModalOpen && createPortal(
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+          onClick={() => setIsFormStateModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          style={{ zIndex: 210 }}
+        >
+          <div
+            className="modal-card max-w-[430px] w-full max-h-[85vh] flex flex-col space-y-3 animate-scale-in relative border border-white/15 bg-[#181928] rounded-[28px] shadow-2xl p-4 sm:p-5 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            style={{ margin: 'auto' }}
+          >
+            {/* Header del modal */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
+                  <span className="material-symbols-outlined text-[20px]">public</span>
+                </div>
+                <div>
+                  <h3 className="font-title-base text-sm font-bold text-white leading-tight">
+                    {isEn ? 'Cash Pickup State' : 'Estado de Retiro en México'}
+                  </h3>
+                  <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight">
+                    {isEn ? '32 Mexican States + Mexico City' : '32 estados de la República y CDMX'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFormStateModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Barra de búsqueda en la cabecera */}
+            <div className="relative shrink-0">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                search
+              </span>
+              <input
+                type="text"
+                autoFocus
+                value={formStateModalSearch}
+                onChange={(e) => setFormStateModalSearch(e.target.value)}
+                placeholder={isEn ? 'Search state (e.g. Michoacan, Jalisco...)' : 'Buscar estado (ej. Michoacán, Jalisco, Puebla...)'}
+                className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+              />
+              {formStateModalSearch && (
+                <button
+                  type="button"
+                  onClick={() => setFormStateModalSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">close</span>
+                </button>
+              )}
+            </div>
+
+            {/* Lista scrollable de los 32 Estados + DF */}
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 py-1 custom-scrollbar min-h-0">
+              {filteredFormStates.map((st) => {
+                const isSelected = formState.toLowerCase() === st.name.toLowerCase();
+                return (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => handleSelectFormState(st)}
+                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.98] ${
+                      isSelected
+                        ? 'bg-primary/20 border-primary ring-1 ring-primary/40 shadow-xs'
+                        : 'bg-surface-container-high/60 border-white/5 hover:border-primary/30 hover:bg-surface-container-high'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="px-2 py-0.5 rounded-lg bg-surface-container font-mono text-[10px] font-bold text-primary shrink-0 border border-white/5">
+                        {st.code}
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-title-base text-xs font-bold text-white block truncate">
+                          {getStateDisplayName(st)}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {st.cities.length} ciudades disponibles • {st.totalLocations}
+                        </span>
+                      </div>
+                    </div>
+                    {isSelected ? (
+                      <span className="text-primary text-[19px] font-black leading-none drop-shadow-xs">✓</span>
+                    ) : (
+                      <span className="material-symbols-outlined text-slate-500 text-[18px]">chevron_right</span>
+                    )}
+                  </button>
+                );
+              })}
+              {filteredFormStates.length === 0 && (
+                <div className="p-4 text-center text-xs text-slate-400">
+                  No se encontraron estados con &ldquo;{formStateModalSearch}&rdquo;
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: SELECTOR DE CIUDAD DE RETIRO (CASH PICKUP CITY)                 */}
+      {/* ========================================================================= */}
+      {isMounted && isFormCityModalOpen && createPortal(
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+          onClick={() => setIsFormCityModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          style={{ zIndex: 210 }}
+        >
+          <div
+            className="modal-card max-w-[430px] w-full max-h-[85vh] flex flex-col space-y-3 animate-scale-in relative border border-white/15 bg-[#181928] rounded-[28px] shadow-2xl p-4 sm:p-5 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            style={{ margin: 'auto' }}
+          >
+            {/* Header del modal */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-xs shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">location_city</span>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-title-base text-sm font-bold text-white leading-tight truncate">
+                    {isEn ? `Cities in ${formState}` : `Ciudades en ${formState}`}
+                  </h3>
+                  <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight truncate">
+                    {isEn ? 'Select municipality or city for cash pickup' : 'Selecciona el municipio o ciudad de retiro'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFormCityModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90 shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Barra de búsqueda en la cabecera */}
+            <div className="relative shrink-0">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                search
+              </span>
+              <input
+                type="text"
+                autoFocus
+                value={formCityModalSearch}
+                onChange={(e) => setFormCityModalSearch(e.target.value)}
+                placeholder={isEn ? `Search city in ${formState}...` : `Buscar ciudad o municipio en ${formState}...`}
+                className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+              />
+              {formCityModalSearch && (
+                <button
+                  type="button"
+                  onClick={() => setFormCityModalSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">close</span>
+                </button>
+              )}
+            </div>
+
+            {/* Lista scrollable de ciudades */}
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 py-1 custom-scrollbar min-h-0">
+              {filteredFormCities.map((cityName) => {
+                const isSelected = formCity.toLowerCase() === cityName.toLowerCase();
+                return (
+                  <button
+                    key={cityName}
+                    type="button"
+                    onClick={() => handleSelectFormCity(cityName)}
+                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.98] ${
+                      isSelected
+                        ? 'bg-primary/20 border-primary ring-1 ring-primary/40 shadow-xs'
+                        : 'bg-surface-container-high/60 border-white/5 hover:border-primary/30 hover:bg-surface-container-high'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="material-symbols-outlined text-[18px] text-primary shrink-0">
+                        pin_drop
+                      </span>
+                      <span className="font-title-base text-xs font-bold text-white truncate">
+                        {cityName}
+                      </span>
+                    </div>
+                    {isSelected ? (
+                      <span className="text-primary text-[19px] font-black leading-none drop-shadow-xs">✓</span>
+                    ) : (
+                      <span className="material-symbols-outlined text-slate-500 text-[18px]">chevron_right</span>
+                    )}
+                  </button>
+                );
+              })}
+              {filteredFormCities.length === 0 && (
+                <div className="p-4 text-center text-xs text-slate-400">
+                  No se encontraron ciudades con &ldquo;{formCityModalSearch}&rdquo; en {formState}
+                </div>
+              )}
             </div>
           </div>
         </div>,

@@ -2054,6 +2054,48 @@ export default function MobileApp() {
               setBeneficiaryModalTab('register');
               setShowContactModal(true);
             }}
+            contactsList={contactsList}
+            onSelectContact={(contact) => {
+              setSelectedAvatar(contact);
+              if (contact.state && contact.city) {
+                setPickupLocation({
+                  state: contact.state,
+                  city: contact.city,
+                  branch: {
+                    id: 'br_' + Date.now(),
+                    storeName: selectedStore ? selectedStore.toUpperCase() : 'OXXO',
+                    chain: selectedStore || 'oxxo',
+                    address: `Sucursal Principal Centro, ${contact.city}`,
+                    city: contact.city,
+                    state: contact.state,
+                    hours: 'Abierto 24 Horas',
+                    is24Hours: true,
+                    badge: '24/7',
+                  },
+                });
+              }
+            }}
+            onAddContact={(newContact) => {
+              setContactsList((prev) => [newContact, ...prev.filter((c) => c.id !== newContact.id)]);
+              setSelectedAvatar(newContact);
+              if (newContact.state && newContact.city) {
+                setPickupLocation({
+                  state: newContact.state,
+                  city: newContact.city,
+                  branch: {
+                    id: 'br_' + Date.now(),
+                    storeName: selectedStore ? selectedStore.toUpperCase() : 'OXXO',
+                    chain: selectedStore || 'oxxo',
+                    address: `Sucursal Principal Centro, ${newContact.city}`,
+                    city: newContact.city,
+                    state: newContact.state,
+                    hours: 'Abierto 24 Horas',
+                    is24Hours: true,
+                    badge: '24/7',
+                  },
+                });
+              }
+            }}
           />
         )}
 
