@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChevronLeftIcon,
   DockAnalyticsIcon,
@@ -163,6 +164,11 @@ export function SendView({
   onOpenNewRecipient,
 }: SendViewProps) {
   const isEn = language === 'en';
+
+  const [isMounted, setIsMounted] = React.useState(false);
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Control de la hoja emergente (Drawer/Bottom Sheet) para selección de estado y sucursal
   const [isCashPickupSheetOpen, setIsCashPickupSheetOpen] = React.useState(false);
@@ -1019,26 +1025,33 @@ export function SendView({
       <div className="h-14 w-full pointer-events-none" aria-hidden="true" />
 
       {/* ========================================================================= */}
-      {/* HOJA EMERGENTE (BOTTOM SHEET): RED DE TIENDAS Y BUSCADOR DE 32 ESTADOS + DF */}
+      {/* MODAL UNIVERSAL CENTRADO: RED DE TIENDAS Y BUSCADOR DE 32 ESTADOS + DF     */}
       {/* ========================================================================= */}
-      {isCashPickupSheetOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-xs transition-opacity duration-200">
+      {isMounted && isCashPickupSheetOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="modal-backdrop animate-fade-in"
+          onClick={() => setIsCashPickupSheetOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cash-pickup-mexico-title"
+          style={{ zIndex: 200 }}
+        >
           <div
-            className="relative w-full max-w-md bg-[#181928] border-t border-white/10 rounded-t-3xl shadow-2xl p-4 max-h-[92vh] flex flex-col animate-slide-up"
-            style={{ animationDuration: '280ms' }}
+            className="modal-card max-w-[430px] w-full max-h-[88vh] flex flex-col space-y-3 animate-scale-in relative border border-white/15 bg-[#181928] rounded-[28px] shadow-2xl p-4 sm:p-5"
+            onClick={(e) => e.stopPropagation()}
+            style={{ margin: 'auto' }}
           >
-            {/* Tirador superior / Drag Pill */}
-            <div
-              className="w-12 h-1.5 rounded-full bg-white/20 mx-auto mb-2 shrink-0 cursor-pointer hover:bg-white/30"
-              onClick={() => setIsCashPickupSheetOpen(false)}
-            />
-
-            {/* Cabecera del modal emergente */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/5 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[22px]">payments</span>
+            {/* Cabecera del modal */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
+                  <span className="material-symbols-outlined text-[20px]">payments</span>
+                </div>
                 <div>
-                  <h3 className="font-title-base text-sm font-bold text-white leading-tight">
+                  <h3
+                    id="cash-pickup-mexico-title"
+                    className="font-title-base text-sm font-bold text-white leading-tight"
+                  >
                     {isEn ? 'Cash Pickup in Mexico' : 'Retiro en Efectivo en México'}
                   </h3>
                   <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight">
@@ -1049,15 +1062,15 @@ export function SendView({
               <button
                 type="button"
                 onClick={() => setIsCashPickupSheetOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-slate-400 hover:text-white border border-white/5 cursor-pointer transition-colors"
-                title="Cerrar"
+                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90"
+                title={isEn ? 'Close' : 'Cerrar'}
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
             {/* BARRA DE BÚSQUEDA EN LA CABECERA (32 ESTADOS + DISTRITO FEDERAL) */}
-            <div className="relative my-3 shrink-0">
+            <div className="relative my-1 shrink-0">
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
                 search
               </span>
@@ -1082,8 +1095,8 @@ export function SendView({
             {/* CONTENIDO PRINCIPAL: VISTA CONDICIONAL SEGÚN LA REGLA ESTRICTA DE BÚSQUEDA */}
             {stateSearchQuery.trim().length >= 1 ? (
               /* RESULTADOS DE BÚSQUEDA: MUESTRA LOS ESTADOS QUE COINCIDEN CON LA LETRA */
-              <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
-                <div className="flex items-center justify-between py-1">
+              <div className="flex-1 overflow-y-auto space-y-2 pr-0.5 max-h-[50vh]">
+                <div className="flex items-center justify-between py-1 sticky top-0 bg-[#181928] z-10">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     {matchingStates.length} {isEn ? 'states found with' : 'estados encontrados con'} "{stateSearchQuery}":
                   </span>
@@ -1133,7 +1146,7 @@ export function SendView({
               </div>
             ) : (
               /* VISTA NORMAL (CUANDO query.length === 0): ESPERA LA PRIMER LETRA Y MUESTRA OPCIONES RETENIDAS */
-              <div className="flex-1 overflow-y-auto space-y-3 pr-0.5">
+              <div className="flex-1 overflow-y-auto space-y-3 pr-0.5 max-h-[50vh]">
                 {/* 1. ESTADOS QUE QUEDAN COMO OPCIONES EN ESA PANTALLA (SCREENSHOT) */}
                 <div className="flex flex-col space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -1146,7 +1159,7 @@ export function SendView({
                   </div>
 
                   {/* Estado Activo Pinned */}
-                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/40 flex items-center justify-between shadow-xs">
+                  <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/40 flex items-center justify-between shadow-xs">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">
                         <span className="material-symbols-outlined text-[18px]">location_on</span>
@@ -1278,11 +1291,11 @@ export function SendView({
             )}
 
             {/* BOTÓN INFERIOR DE CONFIRMACIÓN */}
-            <div className="pt-3 mt-2 border-t border-white/10 shrink-0">
+            <div className="pt-3 mt-1 border-t border-white/10 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsCashPickupSheetOpen(false)}
-                className="w-full py-3 rounded-xl bg-primary text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary-container to-[#18A57E] text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer font-headline-md tracking-wide"
               >
                 <span>
                   Confirmar Retiro en {selectedStoreObj.name} ({currentStateObj.name})
@@ -1291,7 +1304,8 @@ export function SendView({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

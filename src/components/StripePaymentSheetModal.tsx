@@ -778,7 +778,7 @@ export function StripePaymentSheetModal({
 
       {/* Apple Pay Overlay Sheet Simulation */}
       {applePayActive && (
-        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-end justify-center p-3 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
           <div className="w-full max-w-[390px] rounded-3xl bg-[#1c1c1e] text-white p-5 border border-white/20 shadow-2xl flex flex-col items-center text-center space-y-4 animate-scale-in">
             <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white mb-1">
               {applePaySuccess ? (

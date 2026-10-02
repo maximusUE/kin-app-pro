@@ -388,11 +388,11 @@ export function WhatsAppContactsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-[#0D0F18] border border-white/10 sm:rounded-[32px] rounded-t-[32px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden shadow-2xl relative"
+        className="w-full max-w-md bg-[#0D0F18] border border-white/10 rounded-[28px] sm:rounded-[32px] h-[88vh] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl relative animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ===================================================================== */}
