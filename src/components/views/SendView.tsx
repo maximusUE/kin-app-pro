@@ -974,66 +974,6 @@ export function SendView({
               </button>
             </div>
           </div>
-
-          {/* TARJETA INTERACTIVA DE CIUDAD Y SUCURSAL DE RETIRO EN MÉXICO */}
-          <div
-            onClick={onOpenPickupLocationModal}
-            className={`p-3.5 rounded-2xl border transition-all cursor-pointer shadow-md ${
-              pickupLocation
-                ? 'bg-primary/10 border-primary/40 hover:border-primary'
-                : 'bg-surface-container border-outline-variant/30 hover:border-primary/40'
-            } active:scale-[0.98]`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[22px]">pin_drop</span>
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-title-base text-xs font-bold text-on-surface truncate">
-                      {pickupLocation
-                        ? `${pickupLocation.city}, ${pickupLocation.state}`
-                        : (isEn ? 'Cash Pickup City in Mexico' : 'Ciudad y Sucursal de Retiro')}
-                    </span>
-                    {pickupLocation && (
-                      <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
-                        Confirmada
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-on-surface-variant truncate">
-                    {pickupLocation
-                      ? `${pickupLocation.branch.storeName} • ${pickupLocation.branch.address}`
-                      : (isEn
-                          ? 'Tap to search state & city (32 Mexican states available)'
-                          : 'Toca para buscar estado y ciudad (Michoacán, Jalisco, etc.)')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0 ml-2">
-                <span className="text-[10px] text-primary font-bold">
-                  {pickupLocation ? (isEn ? 'Change' : 'Cambiar') : (isEn ? 'Search' : 'Buscar')}
-                </span>
-                <span className="material-symbols-outlined text-primary text-[18px]">
-                  chevron_right
-                </span>
-              </div>
-            </div>
-
-            {pickupLocation && (
-              <div className="mt-2.5 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-[10px] text-on-surface-variant">
-                <span className="flex items-center gap-1 font-medium">
-                  <span className="material-symbols-outlined text-[13px] text-primary">schedule</span>
-                  <span>{pickupLocation.branch.hours}</span>
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-bold text-[9px]">
-                  {pickupLocation.branch.badge}
-                </span>
-              </div>
-            )}
-          </div>
         </div>
       )}
 
@@ -1053,7 +993,10 @@ export function SendView({
           <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
             <button
               type="button"
-              onClick={() => handleSetReceiverMode('existing')}
+              onClick={() => {
+                handleSetReceiverMode('existing');
+                onSelectAvatarClick();
+              }}
               className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 currentReceiverMode === 'existing'
                   ? 'bg-primary text-on-primary shadow-sm ring-1 ring-primary/50'
@@ -1087,7 +1030,7 @@ export function SendView({
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 3: DESTINATARIO FRECUENTE (SELECCIÓN Y LISTA DE CONTACTOS GUARDADOS)  */}
+          {/* TAB 3: DESTINATARIO FRECUENTE (TARJETA LIMPIA DEL CONTACTO SELECCIONADO)   */}
           {/* ========================================================================= */}
           {currentReceiverMode === 'existing' && (
             <div className="space-y-3 animate-fade-in">
@@ -1124,12 +1067,12 @@ export function SendView({
                       </span>
                       <button
                         type="button"
-                        onClick={() => setIsFrequentListExpanded(!isFrequentListExpanded)}
+                        onClick={onSelectAvatarClick}
                         className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
                       >
-                        <span>{isFrequentListExpanded ? 'Ocultar' : 'Cambiar'}</span>
+                        <span>{isEn ? 'Change' : 'Cambiar'}</span>
                         <span className="material-symbols-outlined text-[15px]">
-                          {isFrequentListExpanded ? 'expand_less' : 'expand_more'}
+                          chevron_right
                         </span>
                       </button>
                     </div>
@@ -1147,133 +1090,7 @@ export function SendView({
                     </span>
                   </div>
                 </div>
-              ) : (
-                <div className="p-4 rounded-2xl bg-surface-container border border-dashed border-primary/40 text-center space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary mx-auto flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[22px]">contacts</span>
-                  </div>
-                  <div>
-                    <p className="font-title-base text-xs font-bold text-white">
-                      {isEn ? 'Choose a frequent contact' : 'Selecciona un destinatario frecuente'}
-                    </p>
-                    <p className="text-[11px] text-on-surface-variant">
-                      {isEn ? 'Tap below to select who picks up cash in Mexico' : 'Toca uno de tus familiares guardados abajo para enviar'}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Lista Desplegable de Destinatarios Frecuentes Guardados */}
-              {(!selectedAvatar || isFrequentListExpanded) && (
-                <div className="space-y-2 pt-1 animate-fade-in">
-                  <div className="flex items-center justify-between">
-                    <span className="font-title-base text-[11px] text-on-surface font-bold uppercase tracking-wider">
-                      {isEn ? `Frequent Recipients (${filteredFrequentRecipients.length})` : `Destinatarios Frecuentes (${filteredFrequentRecipients.length})`}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleSetReceiverMode('new')}
-                      className="text-[11px] text-primary font-bold hover:underline cursor-pointer flex items-center gap-1"
-                    >
-                      <span>+ Nuevo</span>
-                    </button>
-                  </div>
-
-                  {/* Buscador de Destinatarios Frecuentes */}
-                  {allFrequentList.length > 2 && (
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary text-[17px]">
-                        search
-                      </span>
-                      <input
-                        type="text"
-                        value={frequentSearchQuery}
-                        onChange={(e) => setFrequentSearchQuery(e.target.value)}
-                        placeholder={isEn ? 'Filter by name, phone or city...' : 'Filtrar por nombre, teléfono o ciudad...'}
-                        className="w-full h-9 pl-9 pr-8 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary transition-all"
-                      />
-                      {frequentSearchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => setFrequentSearchQuery('')}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                        >
-                          <span className="material-symbols-outlined text-[15px]">close</span>
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Tarjetas de contactos frecuentes */}
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                    {filteredFrequentRecipients.map((c) => {
-                      const isSelected = selectedAvatar?.id === c.id;
-                      return (
-                        <div
-                          key={c.id}
-                          onClick={() => {
-                            handleSelectFrequentContact(c);
-                            setIsFrequentListExpanded(false);
-                          }}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between active:scale-[0.98] ${
-                            isSelected
-                              ? 'bg-primary/15 border-2 border-primary ring-2 ring-primary/40 shadow-[0_0_15px_rgba(46,213,164,0.3)]'
-                              : 'bg-surface-container border-white/5 hover:border-primary/40 hover:bg-surface-container-high'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <ContactAvatar
-                              photoUrl={c.photoUrl}
-                              name={c.name}
-                              className={`w-9 h-9 rounded-lg ${isSelected ? 'ring-2 ring-primary' : ''}`}
-                              iconSize="text-[18px]"
-                            />
-                            <div className="min-w-0">
-                              <p className="font-title-base text-xs font-bold text-white truncate">
-                                {c.fullName || c.name}
-                              </p>
-                              <div className="flex items-center gap-1.5 text-[10px] text-slate-300">
-                                <span>{c.phone ? c.phone : 'Tel: +52...'}</span>
-                                <span>•</span>
-                                <span className="truncate">
-                                  {(c as any).city || 'Morelia'}, {c.state || 'Michoacán'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0 ml-2">
-                            {isSelected ? (
-                              <span className="text-primary text-[20px] font-black leading-none drop-shadow-xs">
-                                ✓
-                              </span>
-                            ) : (
-                              <span className="px-2 py-0.5 rounded-lg bg-surface-container-high text-primary text-[10px] font-bold border border-white/5">
-                                Elegir
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {filteredFrequentRecipients.length === 0 && (
-                      <div className="p-4 text-center rounded-xl bg-surface-container text-xs text-slate-400">
-                        No hay contactos frecuentes que coincidan con &ldquo;{frequentSearchQuery}&rdquo;
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleSetReceiverMode('new')}
-                    className="w-full py-2.5 rounded-xl border border-dashed border-primary/40 hover:border-primary text-primary hover:bg-primary/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">person_add</span>
-                    <span>{isEn ? '+ Add New Receiver' : '+ Registrar Nuevo Destinatario'}</span>
-                  </button>
-                </div>
-              )}
+              ) : null}
             </div>
           )}
 
