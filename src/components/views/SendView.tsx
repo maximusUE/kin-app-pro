@@ -10,13 +10,13 @@ import {
   BodegaAurreraLogo,
   WalmartLogo,
   ElektraLogo,
+  CoppelLogo,
   BancoppelLogo,
-  BancoAztecaLogo,
-  BbvaBancomerLogo,
-  BanorteLogo,
-  BanamexLogo,
   SorianaLogo,
   FarmaciasGuadalajaraLogo,
+  FarmaciasAhorroLogo,
+  SevenElevenLogo,
+  ChedrauiLogo,
   BansefiLogo,
   AnyAgentLogo,
 } from '@/components/Icons';
@@ -47,58 +47,51 @@ export const CASH_PICKUP_STORES = [
     Logo: FarmaciasGuadalajaraLogo,
   },
   {
+    id: 'walmart',
+    name: 'Walmart',
+    subtitle: 'Supercenter y Walmart Express en México',
+    badge: 'Nacional',
+    Logo: WalmartLogo,
+  },
+  {
+    id: 'bancoppel',
+    name: 'Tiendas Coppel',
+    subtitle: 'Más de 1,700 tiendas departamentales en México',
+    badge: 'Tiendas Coppel',
+    Logo: CoppelLogo,
+  },
+  {
     id: 'elektra',
     name: 'Elektra',
-    subtitle: 'Tiendas Elektra en todo el país',
+    subtitle: 'Más de 1,200 tiendas comerciales en todo el país',
     badge: 'Inmediato',
     Logo: ElektraLogo,
   },
   {
-    id: 'bancoppel',
-    name: 'BanCoppel',
-    subtitle: 'En tiendas Coppel y sucursales bancarias',
-    badge: 'Horario extendido',
-    Logo: BancoppelLogo,
+    id: 'ahorro',
+    name: 'Farmacias del Ahorro',
+    subtitle: 'Más de 1,600 sucursales en todo el país',
+    badge: 'Fcia. del Ahorro',
+    Logo: FarmaciasAhorroLogo,
   },
   {
-    id: 'azteca',
-    name: 'Banco Azteca',
-    subtitle: 'Abierto los 365 días de 9am a 9pm',
-    badge: '365 días',
-    Logo: BancoAztecaLogo,
-  },
-  {
-    id: 'bbva',
-    name: 'BBVA México',
-    subtitle: 'Cajeros y ventanillas BBVA en todo el país',
-    badge: 'Líder SPEI',
-    Logo: BbvaBancomerLogo,
-  },
-  {
-    id: 'banorte',
-    name: 'Banorte',
-    subtitle: 'Red nacional de sucursales Banorte',
-    badge: 'Cobertura',
-    Logo: BanorteLogo,
-  },
-  {
-    id: 'banamex',
-    name: 'Citibanamex',
-    subtitle: 'Sucursales Citi en todo México',
-    badge: 'Red Tradicional',
-    Logo: BanamexLogo,
+    id: 'seven_eleven',
+    name: '7-Eleven',
+    subtitle: 'Más de 1,800 tiendas 24/7 en México',
+    badge: '7-Eleven 24/7',
+    Logo: SevenElevenLogo,
   },
   {
     id: 'soriana',
     name: 'Soriana',
-    subtitle: 'Hiper, Súper y City Club en México',
+    subtitle: 'Más de 600 tiendas Híper, Súper y City Club',
     badge: 'Cajas Soriana',
     Logo: SorianaLogo,
   },
   {
     id: 'any',
-    name: 'Cualquier Sucursal / Agente Autorizado',
-    subtitle: 'El familiar cobra en cualquier punto con su clave y documento',
+    name: 'Cualquier Sucursal Comercial de la Red',
+    subtitle: 'El familiar cobra en cualquier punto de los 40,000+ con su clave',
     badge: 'Red Completa 40k+',
     Logo: AnyAgentLogo,
   },
@@ -1890,11 +1883,11 @@ export function SendView({
                         </span>
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-bold text-primary border border-white/10">
-                        10 Cadenas + Red
+                        9 Cadenas + Red
                       </span>
                     </div>
 
-                    {/* Cuadrícula de 10 Tiendas */}
+                    {/* Cuadrícula de 9 Cadenas Comerciales (3x3) */}
                     <div className="grid grid-cols-3 gap-2">
                       {CASH_PICKUP_STORES.filter((s) => s.id !== 'any').map((store) => {
                         const isSelected = selectedStore === store.id;
@@ -1925,7 +1918,7 @@ export function SendView({
                         );
                       })}
 
-                      {/* 11. Cualquier Tienda o Banco de la Red (40,000+ Puntos) */}
+                      {/* Tarjeta de Red Completa Comercial (40,000+ Puntos) */}
                       <button
                         type="button"
                         onClick={() => handleSelectStore('any')}
@@ -1939,10 +1932,10 @@ export function SendView({
                           <span className="material-symbols-outlined text-primary-container text-[22px]">hub</span>
                           <div className="flex flex-col leading-tight">
                             <span className="font-title-base text-xs font-bold text-slate-900">
-                              {isEn ? 'Any Available Network Partner' : 'Cualquier Tienda o Banco de la Red'}
+                              {isEn ? 'Any Authorized Retail Partner' : 'Cualquier Tienda Comercial de la Red'}
                             </span>
                             <span className="text-[10px] text-slate-500 font-medium">
-                              {isEn ? 'Receiver picks up at any location in Mexico' : 'El familiar cobra en cualquier punto de los 40,000+ con su clave'}
+                              {isEn ? 'Receiver picks up at 40,000+ retail locations in Mexico' : 'El familiar cobra en cualquiera de los 40,000+ comercios con su clave'}
                             </span>
                           </div>
                         </div>

@@ -572,6 +572,54 @@ export function BansefiLogo({ className = 'w-7 h-7' }: { className?: string }) {
   );
 }
 
+export function CoppelLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <img src="/logos/bancoppel.png" alt="Tiendas Coppel" className="w-full h-full object-contain" />
+    </div>
+  );
+}
+
+export function SevenElevenLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+        <rect width="100" height="100" rx="14" fill="#FFFFFF" />
+        <path d="M12 12 H88 V28 H12 Z" fill="#EE7203" />
+        <path d="M12 72 H88 V88 H12 Z" fill="#008060" />
+        <path d="M30 30 H70 V40 L50 72 H38 L56 40 H30 Z" fill="#E31837" />
+        <rect x="16" y="47" width="68" height="15" rx="3" fill="#008060" />
+        <text x="50" y="58.5" fill="#FFFFFF" fontSize="9.5" fontWeight="900" fontFamily="Arial, Helvetica, sans-serif" textAnchor="middle" letterSpacing="1">ELEVEN</text>
+      </svg>
+    </div>
+  );
+}
+
+export function FarmaciasAhorroLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+        <rect width="100" height="100" rx="14" fill="#0A2A66" />
+        <rect x="68" y="20" width="16" height="5" rx="1.5" fill="#E50020" />
+        <rect x="73.5" y="14.5" width="5" height="16" rx="1.5" fill="#E50020" />
+        <path d="M35 18 L20 74 H32 L36 60 H54 L58 74 H70 L55 18 H35 Z M45 32 L50.5 49 H39.5 L45 32 Z" fill="#FFFFFF" />
+        <path d="M18 80 Q50 90 82 80" stroke="#E50020" strokeWidth="4.5" strokeLinecap="round" />
+      </svg>
+    </div>
+  );
+}
+
+export function ChedrauiLogo({ className = 'w-7 h-7' }: { className?: string }) {
+  return (
+    <div className={`${className} bg-white rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
+      <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+        <rect width="100" height="100" rx="14" fill="#E85D04" />
+        <text x="50" y="58" fill="#FFFFFF" fontSize="16" fontWeight="900" fontFamily="Arial, Helvetica, sans-serif" textAnchor="middle" letterSpacing="-0.5">Chedraui</text>
+      </svg>
+    </div>
+  );
+}
+
 export function AnyAgentLogo({ className = 'w-7 h-7' }: { className?: string }) {
   return (
     <div className={`${className} bg-[#181928] border border-[#2ED5A4]/40 rounded-lg p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0`}>
