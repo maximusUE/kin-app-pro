@@ -29,6 +29,49 @@ import {
   BanxicoBankInfo,
 } from '@/lib/validation/spei';
 
+/**
+ * Desglosa un nombre completo en Nombre(s), Primer Apellido y Segundo Apellido
+ */
+export function parseContactName(rawName: string): { nombre: string; apellido1: string; apellido2: string } {
+  const cleaned = rawName.trim().replace(/\s+/g, ' ');
+  if (!cleaned) return { nombre: '', apellido1: '', apellido2: '' };
+  const parts = cleaned.split(' ');
+  if (parts.length === 1) {
+    return { nombre: parts[0], apellido1: '', apellido2: '' };
+  }
+  if (parts.length === 2) {
+    return { nombre: parts[0], apellido1: parts[1], apellido2: '' };
+  }
+  if (parts.length === 3) {
+    return { nombre: parts[0], apellido1: parts[1], apellido2: parts[2] };
+  }
+  // 4 o más palabras: ej. "María Elena Gómez Morales" -> Nombre: "María Elena", Apellido1: "Gómez", Apellido2: "Morales"
+  return {
+    nombre: parts.slice(0, parts.length - 2).join(' '),
+    apellido1: parts[parts.length - 2],
+    apellido2: parts[parts.length - 1],
+  };
+}
+
+/**
+ * Limpia y formatea un teléfono al estándar de 10 dígitos (ej. 443 123 4567)
+ */
+export function parseCleanPhone(rawPhone: string): string {
+  const digits = rawPhone.replace(/\D/g, '');
+  if (!digits) return '';
+  let tenDigits = digits;
+  if (digits.length === 12 && digits.startsWith('52')) {
+    tenDigits = digits.slice(2);
+  } else if (digits.length === 11 && (digits.startsWith('1') || digits.startsWith('0'))) {
+    tenDigits = digits.slice(1);
+  } else if (digits.length > 10) {
+    tenDigits = digits.slice(-10);
+  }
+  if (tenDigits.length <= 3) return tenDigits;
+  if (tenDigits.length <= 6) return `${tenDigits.slice(0, 3)} ${tenDigits.slice(3)}`;
+  return `${tenDigits.slice(0, 3)} ${tenDigits.slice(3, 6)} ${tenDigits.slice(6, 10)}`;
+}
+
 export const CASH_PICKUP_STORES = [
   {
     id: 'oxxo',
@@ -539,6 +582,128 @@ export function SendView({
         return next;
       });
     }
+  };
+
+  // =========================================================================
+  // CONTROL DE IMPORTACIÓN INTELIGENTE DE CONTACTOS (NATIVO O AGENDA INTERNA)
+  // =========================================================================
+  const [isImportContactModalOpen, setIsImportContactModalOpen] = React.useState(false);
+  const [importContactTarget, setImportContactTarget] = React.useState<'cash' | 'bank' | 'wallet'>('cash');
+  const [importContactSearch, setImportContactSearch] = React.useState('');
+  const [importPastedText, setImportPastedText] = React.useState('');
+
+  const filteredImportContacts = React.useMemo(() => {
+    const q = importContactSearch.trim();
+    if (!q) return allFrequentList;
+    const qNorm = normalizeText(q);
+    return allFrequentList.filter((c) => {
+      const nameMatch = normalizeText(c.fullName || c.name).includes(qNorm);
+      const phoneDigits = (c.phone || '').replace(/\D/g, '');
+      const searchDigits = q.replace(/\D/g, '');
+      const phoneMatch = searchDigits ? phoneDigits.includes(searchDigits) : false;
+      return nameMatch || phoneMatch;
+    });
+  }, [allFrequentList, importContactSearch]);
+
+  const applyImportedContact = (
+    target: 'cash' | 'bank' | 'wallet',
+    rawName: string,
+    rawPhone: string,
+    bankName?: string,
+    clabe?: string
+  ) => {
+    const { nombre, apellido1, apellido2 } = parseContactName(rawName);
+    const formattedPhone = parseCleanPhone(rawPhone);
+
+    if (target === 'cash') {
+      if (nombre) setFormNombre(nombre);
+      if (apellido1) setFormApellido1(apellido1);
+      if (apellido2) setFormApellido2(apellido2);
+      if (formattedPhone) setFormPhone(formattedPhone);
+      setFormErrors({});
+      setFormSuccessFeedback(
+        isEn
+          ? `✨ Imported "${rawName}" from contacts. Verify it matches their official Mexican ID (INE).`
+          : `✨ Datos de "${rawName}" importados. Verifica que el nombre coincida con su credencial oficial (INE).`
+      );
+      setTimeout(() => setFormSuccessFeedback(null), 6000);
+    } else if (target === 'bank') {
+      if (nombre) setBankNombre(nombre);
+      if (apellido1) setBankApellido1(apellido1);
+      if (apellido2) setBankApellido2(apellido2);
+      if (formattedPhone) setBankPhone(formattedPhone);
+      if (clabe) setBankClabe(formatearCLABE(clabe));
+      setBankErrors({});
+      setBankSuccessFeedback(
+        isEn
+          ? `✨ Imported "${rawName}" from contacts. Verify it matches the bank account title.`
+          : `✨ Datos de "${rawName}" importados. Verifica que el nombre coincida con el titular de la cuenta bancaria.`
+      );
+      setTimeout(() => setBankSuccessFeedback(null), 6000);
+    } else if (target === 'wallet') {
+      if (nombre) setWalletNombre(nombre);
+      if (apellido1) setWalletApellido1(apellido1);
+      if (apellido2) setWalletApellido2(apellido2);
+      if (formattedPhone) {
+        setWalletPhone(formattedPhone);
+        setWalletIdentifier(formattedPhone);
+      }
+      setWalletErrors({});
+      setWalletSuccessFeedback(
+        isEn
+          ? `✨ Imported "${rawName}" from contacts. Check wallet details.`
+          : `✨ Datos de "${rawName}" importados. Revisa que el número esté registrado en la billetera.`
+      );
+      setTimeout(() => setWalletSuccessFeedback(null), 6000);
+    }
+  };
+
+  const handleTriggerContactImport = async (target: 'cash' | 'bank' | 'wallet') => {
+    setImportContactTarget(target);
+
+    // 1. Intentar API nativa del navegador (Android Chrome / Samsung Internet / Edge)
+    const hasNativeContactPicker =
+      typeof window !== 'undefined' &&
+      typeof navigator !== 'undefined' &&
+      'contacts' in navigator &&
+      'ContactsManager' in window;
+
+    if (hasNativeContactPicker) {
+      try {
+        const props = ['name', 'tel'];
+        const contacts = await (navigator as any).contacts.select(props, { multiple: false });
+        if (contacts && contacts[0]) {
+          const rawName = contacts[0].name?.[0] || '';
+          const rawPhone = contacts[0].tel?.[0] || '';
+          if (rawName || rawPhone) {
+            applyImportedContact(target, rawName, rawPhone);
+            return;
+          }
+        }
+      } catch (err) {
+        console.log('Native contact picker cancelled or unavailable:', err);
+      }
+    }
+
+    // 2. Fallback ergonómico para iPhone iOS (Safari) o desktop:
+    setImportContactSearch('');
+    setImportPastedText('');
+    setIsImportContactModalOpen(true);
+  };
+
+  const handleApplyPastedContact = () => {
+    const text = importPastedText.trim();
+    if (!text) return;
+    const digits = text.replace(/\D/g, '');
+    let phone = '';
+    if (digits.length >= 10) {
+      phone = digits.slice(-10);
+    }
+    const nameWithoutDigits = text.replace(/[\d+()-]/g, '').trim().replace(/\s+/g, ' ');
+    const name = nameWithoutDigits || (phone ? `Contacto ${phone.slice(-4)}` : text);
+
+    applyImportedContact(importContactTarget, name, phone);
+    setIsImportContactModalOpen(false);
   };
 
   // Selección de Destinatario Frecuente
@@ -1350,6 +1515,18 @@ export function SendView({
                 </p>
               </div>
 
+              {/* BOTÓN INTELIGENTE: IMPORTAR DE CONTACTOS */}
+              <button
+                type="button"
+                onClick={() => handleTriggerContactImport('cash')}
+                className="w-full py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
+              >
+                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
+                  contact_phone
+                </span>
+                <span>{isEn ? '📱 Import from Phone Contacts' : '📱 Importar desde mis Contactos'}</span>
+              </button>
+
               {/* 1. NOMBRE(S) */}
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
@@ -1741,6 +1918,18 @@ export function SendView({
                     : 'Transferencia directa a cualquier cuenta bancaria en México. Acreditación en segundos.'}
                 </p>
               </div>
+
+              {/* BOTÓN INTELIGENTE: IMPORTAR DE CONTACTOS */}
+              <button
+                type="button"
+                onClick={() => handleTriggerContactImport('bank')}
+                className="w-full py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
+              >
+                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
+                  contact_phone
+                </span>
+                <span>{isEn ? '📱 Import from Phone Contacts' : '📱 Importar desde mis Contactos'}</span>
+              </button>
 
               {/* 1. CLABE INTERBANCARIA DE 18 DÍGITOS CON DETECCIÓN EN VIVO */}
               <div className="space-y-1.5">
@@ -2159,6 +2348,18 @@ export function SendView({
                         : 'Acreditación inmediata 24/7 en cualquier cuenta Mercado Pago México.')}
                 </p>
               </div>
+
+              {/* BOTÓN INTELIGENTE: IMPORTAR DE CONTACTOS */}
+              <button
+                type="button"
+                onClick={() => handleTriggerContactImport('wallet')}
+                className="w-full py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
+              >
+                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
+                  contact_phone
+                </span>
+                <span>{isEn ? '📱 Import from Phone Contacts' : '📱 Importar desde mis Contactos'}</span>
+              </button>
 
               {/* 1. NOMBRE(S) */}
               <div className="space-y-1">
@@ -2858,6 +3059,152 @@ export function SendView({
               {filteredFormCities.length === 0 && (
                 <div className="p-4 text-center text-xs text-slate-400">
                   No se encontraron ciudades con &ldquo;{formCityModalSearch}&rdquo; en {formState}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ========================================================================= */}
+      {/* PANTALLA COMPLETA MÓVIL: SELECTOR / IMPORTADOR DE CONTACTOS               */}
+      {/* ========================================================================= */}
+      {isMounted && isImportContactModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[210] flex justify-center bg-black/90 sm:backdrop-blur-md animate-fade-in"
+          onClick={() => setIsImportContactModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-[412px] h-[100dvh] bg-[#06070B] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del modal */}
+            <div className="px-4 pt-3 pb-2.5 border-b border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setIsImportContactModalOpen(false)}
+                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95 shrink-0"
+                  title={isEn ? 'Back' : 'Regresar'}
+                >
+                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                </button>
+                <div className="min-w-0">
+                  <h3 className="font-title-base text-sm font-bold text-white leading-tight truncate">
+                    {isEn ? 'Import from Contacts' : 'Importar desde Contactos'}
+                  </h3>
+                  <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight truncate">
+                    {isEn ? 'Tap a contact to autofill form' : 'Toca un contacto para autorrellenar campos'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsImportContactModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90 shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Caja de pegado rápido (para usuarios que copian de WhatsApp) */}
+            <div className="px-4 pt-3 pb-1 shrink-0 bg-[#06070B]">
+              <div className="p-2.5 rounded-xl bg-surface-container border border-dashed border-primary/30 flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px] shrink-0">content_paste</span>
+                <input
+                  type="text"
+                  value={importPastedText}
+                  onChange={(e) => setImportPastedText(e.target.value)}
+                  placeholder={isEn ? 'Paste contact or number (e.g. Maria 4431234567)...' : 'Pega texto o número copiado...'}
+                  className="flex-1 bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none font-medium"
+                />
+                {importPastedText && (
+                  <button
+                    type="button"
+                    onClick={handleApplyPastedContact}
+                    className="px-2.5 py-1 rounded-lg bg-primary text-slate-950 text-[11px] font-bold shrink-0 cursor-pointer active:scale-95"
+                  >
+                    {isEn ? 'Fill' : 'Rellenar'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Barra de búsqueda en la cabecera */}
+            <div className="px-4 py-2 shrink-0 bg-[#06070B]">
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                  search
+                </span>
+                <input
+                  type="text"
+                  value={importContactSearch}
+                  onChange={(e) => setImportContactSearch(e.target.value)}
+                  placeholder={isEn ? 'Search by name or phone...' : 'Buscar por nombre o número telefónico...'}
+                  className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+                {importContactSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setImportContactSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Lista scrollable de contactos */}
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 custom-scrollbar">
+              {filteredImportContacts.map((contact) => (
+                <div
+                  key={contact.id}
+                  onClick={() => {
+                    applyImportedContact(
+                      importContactTarget,
+                      contact.fullName || contact.name,
+                      contact.phone || '',
+                      contact.bank,
+                      contact.clabe
+                    );
+                    setIsImportContactModalOpen(false);
+                  }}
+                  className="p-3 rounded-2xl bg-surface-container-high/70 hover:bg-surface-container-high border border-white/5 hover:border-primary/40 transition-all cursor-pointer flex items-center justify-between group active:scale-[0.98]"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ContactAvatar
+                      photoUrl={contact.photoUrl}
+                      name={contact.name}
+                      className="w-10 h-10 rounded-xl ring-1 ring-white/10"
+                      iconSize="text-[20px]"
+                    />
+                    <div className="min-w-0">
+                      <p className="font-title-base text-xs font-bold text-white truncate">
+                        {contact.fullName || contact.name}
+                      </p>
+                      <p className="font-financial-mono text-[11px] text-slate-400 truncate">
+                        {contact.phone || 'Sin número'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-[11px] font-bold shrink-0 group-hover:bg-primary group-hover:text-slate-950 transition-colors">
+                    {isEn ? 'Autofill' : 'Autorrellenar'}
+                  </span>
+                </div>
+              ))}
+
+              {filteredImportContacts.length === 0 && (
+                <div className="p-8 text-center text-xs text-slate-400 space-y-1">
+                  <span className="material-symbols-outlined text-[32px] text-slate-500 block mb-1">
+                    search_off
+                  </span>
+                  <p>No se encontraron contactos con &ldquo;{importContactSearch}&rdquo;</p>
+                  <p className="text-[11px] text-slate-500">Puedes escribir el nombre o pegar el teléfono arriba.</p>
                 </div>
               )}
             </div>
