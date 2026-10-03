@@ -1714,28 +1714,31 @@ export function SendView({
       <div className="h-14 w-full pointer-events-none" aria-hidden="true" />
 
       {/* ========================================================================= */}
-      {/* MODAL UNIVERSAL CENTRADO: RED DE TIENDAS Y BUSCADOR DE 32 ESTADOS + DF     */}
+      {/* PANTALLA COMPLETA MÓVIL: RED DE TIENDAS Y BUSCADOR DE CIUDADES Y ESTADOS */}
       {/* ========================================================================= */}
       {isMounted && isCashPickupSheetOpen && typeof document !== 'undefined' && createPortal(
         <div
-          className="modal-backdrop animate-fade-in"
+          className="fixed inset-0 z-[200] flex justify-center bg-black/90 sm:backdrop-blur-md animate-fade-in"
           onClick={() => setIsCashPickupSheetOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="cash-pickup-mexico-title"
-          style={{ zIndex: 200 }}
         >
           <div
-            className="modal-card max-w-[430px] w-full max-h-[88vh] flex flex-col space-y-3 animate-scale-in relative border border-white/15 bg-[#181928] rounded-[28px] shadow-2xl p-4 sm:p-5"
+            className="w-full max-w-[412px] h-[100dvh] bg-[#06070B] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
-            style={{ margin: 'auto' }}
           >
-            {/* Cabecera del modal */}
-            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
+            {/* Cabecera nativa de pantalla móvil */}
+            <div className="px-4 pt-3 pb-2.5 border-b border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
-                  <span className="material-symbols-outlined text-[20px]">payments</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCashPickupSheetOpen(false)}
+                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95"
+                  title={isEn ? 'Back' : 'Regresar'}
+                >
+                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                </button>
                 <div>
                   <h3
                     id="cash-pickup-mexico-title"
@@ -1744,10 +1747,11 @@ export function SendView({
                     {isEn ? 'Cash Pickup in Mexico' : 'Retiro en Efectivo en México'}
                   </h3>
                   <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight">
-                    {isEn ? 'Choose state and pickup partner' : 'Selecciona el estado y la tienda de cobro'}
+                    {isEn ? 'Choose city and pickup partner' : 'Selecciona tu ciudad y tienda de cobro'}
                   </p>
                 </div>
               </div>
+
               <button
                 type="button"
                 onClick={() => setIsCashPickupSheetOpen(false)}
@@ -1758,229 +1762,204 @@ export function SendView({
               </button>
             </div>
 
-            {/* BARRA DE BÚSQUEDA EN LA CABECERA (32 ESTADOS + DISTRITO FEDERAL) */}
-            <div className="relative my-1 shrink-0">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
-                search
-              </span>
-              <input
-                type="text"
-                value={stateSearchQuery}
-                onChange={(e) => setStateSearchQuery(e.target.value)}
-                placeholder={isEn ? 'Type first letter (e.g. M, J, C, D...)' : 'Escribe la primera letra del estado (ej. M, J, C, D...)'}
-                className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
-              />
-              {stateSearchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setStateSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
+            {/* 3. BARRA DE BÚSQUEDA EN LA CABECERA: "Busca tu Ciudad" */}
+            <div className="px-4 py-2 shrink-0 bg-[#06070B]">
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                  search
+                </span>
+                <input
+                  type="text"
+                  value={stateSearchQuery}
+                  onChange={(e) => setStateSearchQuery(e.target.value)}
+                  placeholder={isEn ? 'Search your City...' : 'Busca tu Ciudad'}
+                  className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+                {stateSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setStateSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* CONTENIDO PRINCIPAL SCROLLABLE */}
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 custom-scrollbar">
+              {stateSearchQuery.trim().length >= 1 ? (
+                /* RESULTADOS DE BÚSQUEDA (CIUDADES Y ESTADOS) */
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between py-1 sticky top-0 bg-[#06070B] z-10">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      {matchingStates.length} {isEn ? 'locations found with' : 'lugares encontrados con'} "{stateSearchQuery}":
+                    </span>
+                    <span className="text-[10px] text-primary">Toca uno para seleccionarlo</span>
+                  </div>
+                  {matchingStates.length > 0 ? (
+                    matchingStates.map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => handleSelectState(st)}
+                        className={`w-full p-3 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
+                          st.id === selectedStateId
+                            ? 'bg-primary/15 border-primary text-white shadow-sm'
+                            : 'bg-surface-container border-white/5 hover:border-primary/40 text-slate-200'
+                        }`}
+                      >
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">
+                              {getStateDisplayName(st)}
+                            </span>
+                            <span className="px-1.5 py-0.2 rounded-md bg-white/10 text-primary text-[10px] font-bold font-financial-mono">
+                              {st.code}
+                            </span>
+                            {st.isPopularRemittance && (
+                              <span className="text-[10px] text-amber-400 font-bold">★ Popular</span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-slate-400 mt-0.5">
+                            {st.totalLocations} • {st.cities.slice(0, 4).join(', ')}...
+                          </span>
+                        </div>
+                        <span className="material-symbols-outlined text-primary text-[18px]">
+                          chevron_right
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-slate-400 space-y-1">
+                      <p className="text-xs font-semibold">
+                        {isEn ? 'No locations match' : 'No se encontraron lugares con'} "{stateSearchQuery}"
+                      </p>
+                      <p className="text-[11px]">Prueba buscando por tu ciudad (ej. Morelia, Guadalajara, León) o estado</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* VISTA NORMAL: RECUADRO 2 ELIMINADO! */
+                <div className="space-y-4">
+                  {/* Chips horizontales de estados (Recuadro 2 eliminado) */}
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                        {isEn ? 'States with Cash Pickup' : 'Estados con Retiro en Efectivo'}
+                      </span>
+                      <span className="text-[10px] text-primary font-medium">
+                        {currentStateObj.name} activo
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
+                      {pinnedStates.map((stId) => {
+                        const st = MEXICO_STATES.find((s) => s.id === stId);
+                        if (!st) return null;
+                        const isSelected = st.id === selectedStateId;
+                        return (
+                          <button
+                            key={st.id}
+                            type="button"
+                            onClick={() => handleSelectState(st)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer border ${
+                              isSelected
+                                ? 'bg-primary/20 text-primary border-primary ring-1 ring-primary/40 shadow-xs'
+                                : 'bg-surface-container text-slate-300 border-white/5 hover:border-white/20'
+                            }`}
+                          >
+                            {isSelected && <span className="text-primary mr-1">✓</span>}
+                            {st.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Red de tiendas y sucursales en ese estado */}
+                  <div className="flex flex-col space-y-2 pt-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="font-title-base text-xs text-on-surface font-bold">
+                          Red de Tiendas en {currentStateObj.name}
+                        </span>
+                        <span className="font-caption-sm text-[10px] text-on-surface-variant">
+                          Sucursales autorizadas para entrega de efectivo
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-bold text-primary border border-white/10">
+                        10 Cadenas + Red
+                      </span>
+                    </div>
+
+                    {/* Cuadrícula de 10 Tiendas */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {CASH_PICKUP_STORES.filter((s) => s.id !== 'any').map((store) => {
+                        const isSelected = selectedStore === store.id;
+                        const StoreLogo = store.Logo;
+                        return (
+                          <button
+                            key={store.id}
+                            type="button"
+                            onClick={() => handleSelectStore(store.id)}
+                            className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-[0.97] ${
+                              isSelected
+                                ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)] scale-[1.02]'
+                                : 'border border-transparent hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="w-full h-7 flex items-center justify-center">
+                              <StoreLogo className="w-full h-full object-contain" />
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-700 leading-tight truncate w-full">
+                              {store.badge}
+                            </span>
+                            {isSelected && (
+                              <span className="absolute top-1 right-1.5 text-primary text-[17px] font-black leading-none select-none drop-shadow-xs">
+                                ✓
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+
+                      {/* 11. Cualquier Tienda o Banco de la Red (40,000+ Puntos) */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectStore('any')}
+                        className={`network-btn col-span-3 h-13 rounded-xl bg-white text-slate-900 shadow-sm px-3.5 flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
+                          selectedStore === 'any'
+                            ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)]'
+                            : 'border border-transparent hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="material-symbols-outlined text-primary-container text-[22px]">hub</span>
+                          <div className="flex flex-col leading-tight">
+                            <span className="font-title-base text-xs font-bold text-slate-900">
+                              {isEn ? 'Any Available Network Partner' : 'Cualquier Tienda o Banco de la Red'}
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-medium">
+                              {isEn ? 'Receiver picks up at any location in Mexico' : 'El familiar cobra en cualquier punto de los 40,000+ con su clave'}
+                            </span>
+                          </div>
+                        </div>
+                        {selectedStore === 'any' && (
+                          <span className="text-primary text-[24px] font-black leading-none select-none drop-shadow-xs">
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* CONTENIDO PRINCIPAL: VISTA CONDICIONAL SEGÚN LA REGLA ESTRICTA DE BÚSQUEDA */}
-            {stateSearchQuery.trim().length >= 1 ? (
-              /* RESULTADOS DE BÚSQUEDA: MUESTRA LOS ESTADOS QUE COINCIDEN CON LA LETRA */
-              <div className="flex-1 overflow-y-auto space-y-2 pr-0.5 max-h-[50vh]">
-                <div className="flex items-center justify-between py-1 sticky top-0 bg-[#181928] z-10">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    {matchingStates.length} {isEn ? 'states found with' : 'estados encontrados con'} "{stateSearchQuery}":
-                  </span>
-                  <span className="text-[10px] text-primary">Toca uno para seleccionarlo</span>
-                </div>
-                {matchingStates.length > 0 ? (
-                  matchingStates.map((st) => (
-                    <button
-                      key={st.id}
-                      type="button"
-                      onClick={() => handleSelectState(st)}
-                      className={`w-full p-3 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
-                        st.id === selectedStateId
-                          ? 'bg-primary/15 border-primary text-white shadow-sm'
-                          : 'bg-surface-container border-white/5 hover:border-primary/40 text-slate-200'
-                      }`}
-                    >
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white">
-                            {getStateDisplayName(st)}
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded-md bg-white/10 text-primary text-[10px] font-bold font-financial-mono">
-                            {st.code}
-                          </span>
-                          {st.isPopularRemittance && (
-                            <span className="text-[10px] text-amber-400 font-bold">★ Popular</span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-slate-400 mt-0.5">
-                          {st.totalLocations} • {st.cities.slice(0, 3).join(', ')}...
-                        </span>
-                      </div>
-                      <span className="material-symbols-outlined text-primary text-[18px]">
-                        chevron_right
-                      </span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-slate-400 space-y-1">
-                    <p className="text-xs font-semibold">
-                      {isEn ? 'No states match' : 'No se encontraron estados con'} "{stateSearchQuery}"
-                    </p>
-                    <p className="text-[11px]">Prueba con otra letra (ej. M para Michoacán, J para Jalisco, C para CDMX/DF)</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* VISTA NORMAL (CUANDO query.length === 0): ESPERA LA PRIMER LETRA Y MUESTRA OPCIONES RETENIDAS */
-              <div className="flex-1 overflow-y-auto space-y-3 pr-0.5 max-h-[50vh]">
-                {/* 1. ESTADOS QUE QUEDAN COMO OPCIONES EN ESA PANTALLA (SCREENSHOT) */}
-                <div className="flex flex-col space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                      {isEn ? 'State in Mexico' : 'Estado de Retiro Seleccionado'}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      {isEn ? 'Search bar above filters all 32' : 'Buscador arriba filtra los 32 + DF'}
-                    </span>
-                  </div>
-
-                  {/* Estado Activo Pinned */}
-                  <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/40 flex items-center justify-between shadow-xs">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">
-                        <span className="material-symbols-outlined text-[18px]">location_on</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-white">
-                            {getStateDisplayName(currentStateObj)}
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
-                            ✓ Activo
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-400">
-                          {currentStateObj.totalLocations} disponibles en todo el estado
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Opciones de estados que se quedan en esa pantalla (Screenshot de Don César) */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
-                    {pinnedStates.map((stId) => {
-                      const st = MEXICO_STATES.find((s) => s.id === stId);
-                      if (!st) return null;
-                      const isSelected = st.id === selectedStateId;
-                      return (
-                        <button
-                          key={st.id}
-                          type="button"
-                          onClick={() => handleSelectState(st)}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 transition-all cursor-pointer border ${
-                            isSelected
-                              ? 'bg-primary/20 text-primary border-primary ring-1 ring-primary/40 shadow-xs'
-                              : 'bg-surface-container text-slate-300 border-white/5 hover:border-white/20'
-                          }`}
-                        >
-                          {isSelected && <span className="text-primary mr-1">✓</span>}
-                          {st.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Banner indicador de espera de la primer letra */}
-                  <div className="p-2 rounded-xl bg-surface-container-high/60 border border-white/5 flex items-center gap-2 text-[10px] text-slate-300">
-                    <span className="material-symbols-outlined text-primary text-[15px] shrink-0">info</span>
-                    <span>Escribe la primera letra en el buscador para ver y cambiar a cualquiera de los 32 estados y el Distrito Federal.</span>
-                  </div>
-                </div>
-
-                {/* 2. RED DE TIENDAS Y SUCURSALES EN ESE ESTADO (BOTONES QUE EMERGEN DE ABAJO) */}
-                <div className="flex flex-col space-y-2 pt-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="font-title-base text-xs text-on-surface font-bold">
-                        Red de Tiendas en {currentStateObj.name}
-                      </span>
-                      <span className="font-caption-sm text-[10px] text-on-surface-variant">
-                        Sucursales autorizadas para entrega de efectivo
-                      </span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-bold text-primary border border-white/10">
-                      10 Cadenas + Red
-                    </span>
-                  </div>
-
-                  {/* Cuadrícula de 10 Tiendas (Walmart y Bansefi eliminados, Farmacias Guadalajara agregada) */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {CASH_PICKUP_STORES.filter((s) => s.id !== 'any').map((store) => {
-                      const isSelected = selectedStore === store.id;
-                      const StoreLogo = store.Logo;
-                      return (
-                        <button
-                          key={store.id}
-                          type="button"
-                          onClick={() => handleSelectStore(store.id)}
-                          className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-[0.97] ${
-                            isSelected
-                              ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)] scale-[1.02]'
-                              : 'border border-transparent hover:bg-slate-50'
-                          }`}
-                        >
-                          <div className="w-full h-7 flex items-center justify-center">
-                            <StoreLogo className="w-full h-full object-contain" />
-                          </div>
-                          <span className="text-[9px] font-bold text-slate-700 leading-tight truncate w-full">
-                            {store.badge}
-                          </span>
-                          {isSelected && (
-                            <span className="absolute top-1 right-1.5 text-primary text-[17px] font-black leading-none select-none drop-shadow-xs">
-                              ✓
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-
-                    {/* 11. Cualquier Tienda o Banco de la Red (40,000+ Puntos) */}
-                    <button
-                      type="button"
-                      onClick={() => handleSelectStore('any')}
-                      className={`network-btn col-span-3 h-13 rounded-xl bg-white text-slate-900 shadow-sm px-3.5 flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
-                        selectedStore === 'any'
-                          ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)]'
-                          : 'border border-transparent hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="material-symbols-outlined text-primary-container text-[22px]">hub</span>
-                        <div className="flex flex-col leading-tight">
-                          <span className="font-title-base text-xs font-bold text-slate-900">
-                            {isEn ? 'Any Available Network Partner' : 'Cualquier Tienda o Banco de la Red'}
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-medium">
-                            {isEn ? 'Receiver picks up at any location in Mexico' : 'El familiar cobra en cualquier punto de los 40,000+ con su clave'}
-                          </span>
-                        </div>
-                      </div>
-                      {selectedStore === 'any' && (
-                        <span className="text-primary text-[24px] font-black leading-none select-none drop-shadow-xs">
-                          ✓
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* BOTÓN INFERIOR DE CONFIRMACIÓN */}
-            <div className="pt-3 mt-1 border-t border-white/10 shrink-0">
+            <div className="p-4 border-t border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0">
               <button
                 type="button"
                 onClick={() => setIsCashPickupSheetOpen(false)}
@@ -1998,27 +1977,30 @@ export function SendView({
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 1: SELECTOR DE ESTADO DE RETIRO (CASH PICKUP STATE - 32 ESTADOS + DF) */}
+      {/* PANTALLA COMPLETA MÓVIL: SELECTOR DE ESTADO DE RETIRO (32 ESTADOS + DF)    */}
       {/* ========================================================================= */}
       {isMounted && isFormStateModalOpen && createPortal(
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+          className="fixed inset-0 z-[210] flex justify-center bg-black/90 sm:backdrop-blur-md animate-fade-in"
           onClick={() => setIsFormStateModalOpen(false)}
           role="dialog"
           aria-modal="true"
-          style={{ zIndex: 210 }}
         >
           <div
-            className="modal-card max-w-[430px] w-full max-h-[85vh] flex flex-col space-y-3 animate-scale-in relative border border-white/15 bg-[#181928] rounded-[28px] shadow-2xl p-4 sm:p-5 overflow-hidden"
+            className="w-full max-w-[412px] h-[100dvh] bg-[#06070B] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
-            style={{ margin: 'auto' }}
           >
-            {/* Header del modal */}
-            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
+            {/* Cabecera nativa */}
+            <div className="px-4 pt-3 pb-2.5 border-b border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
-                  <span className="material-symbols-outlined text-[20px]">public</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsFormStateModalOpen(false)}
+                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95"
+                  title={isEn ? 'Back' : 'Regresar'}
+                >
+                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                </button>
                 <div>
                   <h3 className="font-title-base text-sm font-bold text-white leading-tight">
                     {isEn ? 'Cash Pickup State' : 'Estado de Retiro en México'}
@@ -2038,31 +2020,33 @@ export function SendView({
             </div>
 
             {/* Barra de búsqueda en la cabecera */}
-            <div className="relative shrink-0">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
-                search
-              </span>
-              <input
-                type="text"
-                autoFocus
-                value={formStateModalSearch}
-                onChange={(e) => setFormStateModalSearch(e.target.value)}
-                placeholder={isEn ? 'Search state (e.g. Michoacan, Jalisco...)' : 'Buscar estado (ej. Michoacán, Jalisco, Puebla...)'}
-                className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
-              />
-              {formStateModalSearch && (
-                <button
-                  type="button"
-                  onClick={() => setFormStateModalSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              )}
+            <div className="px-4 py-2 shrink-0 bg-[#06070B]">
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                  search
+                </span>
+                <input
+                  type="text"
+                  autoFocus
+                  value={formStateModalSearch}
+                  onChange={(e) => setFormStateModalSearch(e.target.value)}
+                  placeholder={isEn ? 'Search state (e.g. Michoacan, Jalisco...)' : 'Buscar estado (ej. Michoacán, Jalisco, Puebla...)'}
+                  className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+                {formStateModalSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setFormStateModalSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Lista scrollable de los 32 Estados + DF */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 py-1 custom-scrollbar min-h-0">
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
               {filteredFormStates.map((st) => {
                 const isSelected = formState.toLowerCase() === st.name.toLowerCase();
                 return (
@@ -2070,7 +2054,7 @@ export function SendView({
                     key={st.id}
                     type="button"
                     onClick={() => handleSelectFormState(st)}
-                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.98] ${
+                    className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.98] ${
                       isSelected
                         ? 'bg-primary/20 border-primary ring-1 ring-primary/40 shadow-xs'
                         : 'bg-surface-container-high/60 border-white/5 hover:border-primary/30 hover:bg-surface-container-high'
@@ -2109,27 +2093,30 @@ export function SendView({
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: SELECTOR DE CIUDAD DE RETIRO (CASH PICKUP CITY)                 */}
+      {/* PANTALLA COMPLETA MÓVIL: SELECTOR DE CIUDAD DE RETIRO (CASH PICKUP CITY)  */}
       {/* ========================================================================= */}
       {isMounted && isFormCityModalOpen && createPortal(
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+          className="fixed inset-0 z-[210] flex justify-center bg-black/90 sm:backdrop-blur-md animate-fade-in"
           onClick={() => setIsFormCityModalOpen(false)}
           role="dialog"
           aria-modal="true"
-          style={{ zIndex: 210 }}
         >
           <div
-            className="modal-card max-w-[430px] w-full max-h-[85vh] flex flex-col space-y-3 animate-scale-in relative border border-white/15 bg-[#181928] rounded-[28px] shadow-2xl p-4 sm:p-5 overflow-hidden"
+            className="w-full max-w-[412px] h-[100dvh] bg-[#06070B] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
-            style={{ margin: 'auto' }}
           >
             {/* Header del modal */}
-            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
+            <div className="px-4 pt-3 pb-2.5 border-b border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0 flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-xs shrink-0">
-                  <span className="material-symbols-outlined text-[20px]">location_city</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsFormCityModalOpen(false)}
+                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95 shrink-0"
+                  title={isEn ? 'Back' : 'Regresar'}
+                >
+                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                </button>
                 <div className="min-w-0">
                   <h3 className="font-title-base text-sm font-bold text-white leading-tight truncate">
                     {isEn ? `Cities in ${formState}` : `Ciudades en ${formState}`}
@@ -2149,31 +2136,33 @@ export function SendView({
             </div>
 
             {/* Barra de búsqueda en la cabecera */}
-            <div className="relative shrink-0">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
-                search
-              </span>
-              <input
-                type="text"
-                autoFocus
-                value={formCityModalSearch}
-                onChange={(e) => setFormCityModalSearch(e.target.value)}
-                placeholder={isEn ? `Search city in ${formState}...` : `Buscar ciudad o municipio en ${formState}...`}
-                className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
-              />
-              {formCityModalSearch && (
-                <button
-                  type="button"
-                  onClick={() => setFormCityModalSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              )}
+            <div className="px-4 py-2 shrink-0 bg-[#06070B]">
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                  search
+                </span>
+                <input
+                  type="text"
+                  autoFocus
+                  value={formCityModalSearch}
+                  onChange={(e) => setFormCityModalSearch(e.target.value)}
+                  placeholder={isEn ? `Search city in ${formState}...` : `Buscar ciudad o municipio en ${formState}...`}
+                  className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+                {formCityModalSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setFormCityModalSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Lista scrollable de ciudades */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 py-1 custom-scrollbar min-h-0">
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
               {filteredFormCities.map((cityName) => {
                 const isSelected = formCity.toLowerCase() === cityName.toLowerCase();
                 return (
@@ -2181,7 +2170,7 @@ export function SendView({
                     key={cityName}
                     type="button"
                     onClick={() => handleSelectFormCity(cityName)}
-                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.98] ${
+                    className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.98] ${
                       isSelected
                         ? 'bg-primary/20 border-primary ring-1 ring-primary/40 shadow-xs'
                         : 'bg-surface-container-high/60 border-white/5 hover:border-primary/30 hover:bg-surface-container-high'
