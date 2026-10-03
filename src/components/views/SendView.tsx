@@ -19,6 +19,7 @@ import {
   ChedrauiLogo,
   BansefiLogo,
   AnyAgentLogo,
+  WhatsAppIcon,
 } from '@/components/Icons';
 import { ContactAvatar } from '@/components/ContactAvatar';
 import { MEXICO_STATES, MexicoState } from '@/data/mexicoLocations';
@@ -658,34 +659,35 @@ export function SendView({
     }
   };
 
-  const handleTriggerContactImport = async (target: 'cash' | 'bank' | 'wallet') => {
-    setImportContactTarget(target);
-
-    // 1. Intentar API nativa del navegador (Android Chrome / Samsung Internet / Edge)
-    const hasNativeContactPicker =
-      typeof window !== 'undefined' &&
-      typeof navigator !== 'undefined' &&
-      'contacts' in navigator &&
-      'ContactsManager' in window;
-
-    if (hasNativeContactPicker) {
-      try {
-        const props = ['name', 'tel'];
-        const contacts = await (navigator as any).contacts.select(props, { multiple: false });
-        if (contacts && contacts[0]) {
-          const rawName = contacts[0].name?.[0] || '';
-          const rawPhone = contacts[0].tel?.[0] || '';
-          if (rawName || rawPhone) {
-            applyImportedContact(target, rawName, rawPhone);
-            return;
-          }
-        }
-      } catch (err) {
-        console.log('Native contact picker cancelled or unavailable:', err);
-      }
+  // Control de permisos para WhatsApp
+  const [hasWhatsAppPermission, setHasWhatsAppPermission] = React.useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('kin_whatsapp_contacts_permission') === 'granted';
     }
+    return false;
+  });
+  const [isWhatsAppPermissionPromptOpen, setIsWhatsAppPermissionPromptOpen] = React.useState(false);
 
-    // 2. Fallback ergonómico para iPhone iOS (Safari) o desktop:
+  const handleTriggerContactImport = (target: 'cash' | 'bank' | 'wallet') => {
+    setImportContactTarget(target);
+    // Preguntar al cliente si desea que la app tenga acceso a sus contactos de WhatsApp
+    if (!hasWhatsAppPermission) {
+      setIsWhatsAppPermissionPromptOpen(true);
+    } else {
+      setImportContactSearch('');
+      setImportPastedText('');
+      setIsImportContactModalOpen(true);
+    }
+  };
+
+  const handleGrantWhatsAppPermission = () => {
+    setHasWhatsAppPermission(true);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_whatsapp_contacts_permission', 'granted');
+      } catch (_) {}
+    }
+    setIsWhatsAppPermissionPromptOpen(false);
     setImportContactSearch('');
     setImportPastedText('');
     setIsImportContactModalOpen(true);
@@ -1515,16 +1517,14 @@ export function SendView({
                 </p>
               </div>
 
-              {/* BOTÓN INTELIGENTE: IMPORTAR DE CONTACTOS */}
+              {/* BOTÓN: ACCEDER A LISTA DE CONTACTOS DE WHATSAPP */}
               <button
                 type="button"
                 onClick={() => handleTriggerContactImport('cash')}
-                className="w-full py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
+                className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
               >
-                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
-                  contact_phone
-                </span>
-                <span>{isEn ? '📱 Import from Phone Contacts' : '📱 Importar desde mis Contactos'}</span>
+                <WhatsAppIcon className="w-4 h-4 text-[#25D366] group-hover:scale-110 transition-transform" />
+                <span>{isEn ? '💬 Access WhatsApp Contacts List' : '💬 Acceder a Lista de Contactos (WhatsApp)'}</span>
               </button>
 
               {/* 1. NOMBRE(S) */}
@@ -1919,16 +1919,14 @@ export function SendView({
                 </p>
               </div>
 
-              {/* BOTÓN INTELIGENTE: IMPORTAR DE CONTACTOS */}
+              {/* BOTÓN: ACCEDER A LISTA DE CONTACTOS DE WHATSAPP */}
               <button
                 type="button"
                 onClick={() => handleTriggerContactImport('bank')}
-                className="w-full py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
+                className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
               >
-                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
-                  contact_phone
-                </span>
-                <span>{isEn ? '📱 Import from Phone Contacts' : '📱 Importar desde mis Contactos'}</span>
+                <WhatsAppIcon className="w-4 h-4 text-[#25D366] group-hover:scale-110 transition-transform" />
+                <span>{isEn ? '💬 Access WhatsApp Contacts List' : '💬 Acceder a Lista de Contactos (WhatsApp)'}</span>
               </button>
 
               {/* 1. CLABE INTERBANCARIA DE 18 DÍGITOS CON DETECCIÓN EN VIVO */}
@@ -2349,16 +2347,14 @@ export function SendView({
                 </p>
               </div>
 
-              {/* BOTÓN INTELIGENTE: IMPORTAR DE CONTACTOS */}
+              {/* BOTÓN: ACCEDER A LISTA DE CONTACTOS DE WHATSAPP */}
               <button
                 type="button"
                 onClick={() => handleTriggerContactImport('wallet')}
-                className="w-full py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
+                className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-xs group"
               >
-                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
-                  contact_phone
-                </span>
-                <span>{isEn ? '📱 Import from Phone Contacts' : '📱 Importar desde mis Contactos'}</span>
+                <WhatsAppIcon className="w-4 h-4 text-[#25D366] group-hover:scale-110 transition-transform" />
+                <span>{isEn ? '💬 Access WhatsApp Contacts List' : '💬 Acceder a Lista de Contactos (WhatsApp)'}</span>
               </button>
 
               {/* 1. NOMBRE(S) */}
@@ -3068,7 +3064,81 @@ export function SendView({
       )}
 
       {/* ========================================================================= */}
-      {/* PANTALLA COMPLETA MÓVIL: SELECTOR / IMPORTADOR DE CONTACTOS               */}
+      {/* MODAL 1: PERMISO PARA ACCEDER A CONTACTOS DE WHATSAPP                     */}
+      {/* ========================================================================= */}
+      {isMounted && isWhatsAppPermissionPromptOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in"
+          onClick={() => setIsWhatsAppPermissionPromptOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-[360px] rounded-3xl bg-[#111B21] border border-[#25D366]/40 p-5 shadow-2xl relative overflow-hidden animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Glow verde sutil de WhatsApp */}
+            <div className="absolute -top-16 -right-16 w-36 h-36 bg-[#25D366]/15 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex flex-col items-center text-center space-y-3.5 relative z-10">
+              <div className="w-14 h-14 rounded-2xl bg-[#25D366]/20 border border-[#25D366]/50 flex items-center justify-center shadow-lg shadow-[#25D366]/20">
+                <WhatsAppIcon className="w-8 h-8 text-[#25D366]" />
+              </div>
+
+              <div>
+                <h3 className="font-title-base text-base font-bold text-white">
+                  {isEn ? 'Access WhatsApp Contacts?' : '¿Acceder a Contactos de WhatsApp?'}
+                </h3>
+                <p className="font-caption-sm text-xs text-slate-300 mt-1 leading-relaxed">
+                  {isEn
+                    ? 'Allow KIN to access your WhatsApp contacts to autofill your beneficiary name and phone number with 1 tap.'
+                    : 'Permite que KIN acceda a tus contactos de WhatsApp para autocompletar el nombre y teléfono de tus familiares en 1 solo toque.'}
+                </p>
+              </div>
+
+              {/* Puntos clave de seguridad y confianza */}
+              <div className="w-full p-3 rounded-xl bg-[#202C33] border border-white/5 space-y-2 text-left">
+                <div className="flex items-center gap-2 text-[11px] text-slate-200">
+                  <span className="material-symbols-outlined text-[#25D366] text-[16px] shrink-0">bolt</span>
+                  <span>{isEn ? 'Instant autofill without manual typing' : 'Autocompletado instantáneo sin teclear'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-slate-200">
+                  <span className="material-symbols-outlined text-[#25D366] text-[16px] shrink-0">lock</span>
+                  <span>{isEn ? 'End-to-end encrypted • Zero spam' : 'Cifrado seguro • Jamás enviamos spam'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-slate-200">
+                  <span className="material-symbols-outlined text-[#25D366] text-[16px] shrink-0">verified_user</span>
+                  <span>{isEn ? 'You always retain total control' : 'Solo se usa cuando tú lo solicitas'}</span>
+                </div>
+              </div>
+
+              {/* Botones de acción */}
+              <div className="w-full pt-1 space-y-2">
+                <button
+                  type="button"
+                  onClick={handleGrantWhatsAppPermission}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#25D366] to-[#128C7E] text-slate-950 font-black text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#25D366]/30 cursor-pointer"
+                >
+                  <WhatsAppIcon className="w-4 h-4 text-slate-950" />
+                  <span>{isEn ? 'Allow Access & Open Contacts' : 'Permitir y Acceder a Contactos'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsWhatsAppPermissionPromptOpen(false)}
+                  className="w-full py-2.5 rounded-xl bg-transparent hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+                >
+                  {isEn ? 'Not Now' : 'Ahora no'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: LIBRETA DE CONTACTOS DE WHATSAPP                                 */}
       {/* ========================================================================= */}
       {isMounted && isImportContactModalOpen && createPortal(
         <div
@@ -3078,54 +3148,57 @@ export function SendView({
           aria-modal="true"
         >
           <div
-            className="w-full max-w-[412px] h-[100dvh] bg-[#06070B] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
+            className="w-full max-w-[412px] h-[100dvh] bg-[#111B21] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header del modal */}
-            <div className="px-4 pt-3 pb-2.5 border-b border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0 flex items-center justify-between">
+            {/* Header oficial estilo WhatsApp */}
+            <div className="px-4 pt-3 pb-2.5 border-b border-white/10 bg-[#202C33] shrink-0 flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
                 <button
                   type="button"
                   onClick={() => setIsImportContactModalOpen(false)}
-                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95 shrink-0"
+                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-200 border border-white/10 cursor-pointer transition-colors active:scale-95 shrink-0"
                   title={isEn ? 'Back' : 'Regresar'}
                 >
                   <span className="material-symbols-outlined text-[22px]">chevron_left</span>
                 </button>
                 <div className="min-w-0">
-                  <h3 className="font-title-base text-sm font-bold text-white leading-tight truncate">
-                    {isEn ? 'Import from Contacts' : 'Importar desde Contactos'}
-                  </h3>
-                  <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight truncate">
-                    {isEn ? 'Tap a contact to autofill form' : 'Toca un contacto para autorrellenar campos'}
+                  <div className="flex items-center gap-1.5">
+                    <WhatsAppIcon className="w-4 h-4 text-[#25D366] shrink-0" />
+                    <h3 className="font-title-base text-sm font-bold text-white leading-tight truncate">
+                      {isEn ? 'WhatsApp Contacts' : 'Contactos de WhatsApp'}
+                    </h3>
+                  </div>
+                  <p className="font-caption-sm text-[11px] text-[#25D366] leading-tight truncate">
+                    {filteredImportContacts.length} {isEn ? 'contacts available' : 'contactos disponibles'}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsImportContactModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90 shrink-0"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90 shrink-0"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            {/* Caja de pegado rápido (para usuarios que copian de WhatsApp) */}
-            <div className="px-4 pt-3 pb-1 shrink-0 bg-[#06070B]">
-              <div className="p-2.5 rounded-xl bg-surface-container border border-dashed border-primary/30 flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[18px] shrink-0">content_paste</span>
+            {/* Caja de pegado rápido (opcional para usuarios que copian de un chat de WhatsApp) */}
+            <div className="px-4 pt-3 pb-1 shrink-0 bg-[#111B21]">
+              <div className="p-2.5 rounded-xl bg-[#202C33] border border-dashed border-[#25D366]/40 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#25D366] text-[18px] shrink-0">content_paste</span>
                 <input
                   type="text"
                   value={importPastedText}
                   onChange={(e) => setImportPastedText(e.target.value)}
-                  placeholder={isEn ? 'Paste contact or number (e.g. Maria 4431234567)...' : 'Pega texto o número copiado...'}
+                  placeholder={isEn ? 'Paste contact or number (e.g. Maria 4431234567)...' : 'Pega texto o número copiado de WhatsApp...'}
                   className="flex-1 bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none font-medium"
                 />
                 {importPastedText && (
                   <button
                     type="button"
                     onClick={handleApplyPastedContact}
-                    className="px-2.5 py-1 rounded-lg bg-primary text-slate-950 text-[11px] font-bold shrink-0 cursor-pointer active:scale-95"
+                    className="px-2.5 py-1 rounded-lg bg-[#25D366] text-slate-950 text-[11px] font-bold shrink-0 cursor-pointer active:scale-95"
                   >
                     {isEn ? 'Fill' : 'Rellenar'}
                   </button>
@@ -3134,17 +3207,17 @@ export function SendView({
             </div>
 
             {/* Barra de búsqueda en la cabecera */}
-            <div className="px-4 py-2 shrink-0 bg-[#06070B]">
+            <div className="px-4 py-2 shrink-0 bg-[#111B21]">
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#25D366] text-[19px]">
                   search
                 </span>
                 <input
                   type="text"
                   value={importContactSearch}
                   onChange={(e) => setImportContactSearch(e.target.value)}
-                  placeholder={isEn ? 'Search by name or phone...' : 'Buscar por nombre o número telefónico...'}
-                  className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  placeholder={isEn ? 'Search WhatsApp contact...' : 'Buscar contacto de WhatsApp...'}
+                  className="w-full h-11 pl-11 pr-10 rounded-xl bg-[#202C33] border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] transition-all font-medium"
                 />
                 {importContactSearch && (
                   <button
@@ -3158,7 +3231,7 @@ export function SendView({
               </div>
             </div>
 
-            {/* Lista scrollable de contactos */}
+            {/* Lista scrollable de contactos de WhatsApp */}
             <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 custom-scrollbar">
               {filteredImportContacts.map((contact) => (
                 <div
@@ -3173,26 +3246,31 @@ export function SendView({
                     );
                     setIsImportContactModalOpen(false);
                   }}
-                  className="p-3 rounded-2xl bg-surface-container-high/70 hover:bg-surface-container-high border border-white/5 hover:border-primary/40 transition-all cursor-pointer flex items-center justify-between group active:scale-[0.98]"
+                  className="p-3 rounded-2xl bg-[#202C33]/70 hover:bg-[#202C33] border border-white/5 hover:border-[#25D366]/40 transition-all cursor-pointer flex items-center justify-between group active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <ContactAvatar
-                      photoUrl={contact.photoUrl}
-                      name={contact.name}
-                      className="w-10 h-10 rounded-xl ring-1 ring-white/10"
-                      iconSize="text-[20px]"
-                    />
+                    <div className="relative shrink-0">
+                      <ContactAvatar
+                        photoUrl={contact.photoUrl}
+                        name={contact.name}
+                        className="w-10 h-10 rounded-xl ring-1 ring-white/10"
+                        iconSize="text-[20px]"
+                      />
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#25D366] border border-[#111B21] flex items-center justify-center shadow-xs">
+                        <WhatsAppIcon className="w-2.5 h-2.5 text-slate-950" />
+                      </div>
+                    </div>
                     <div className="min-w-0">
                       <p className="font-title-base text-xs font-bold text-white truncate">
                         {contact.fullName || contact.name}
                       </p>
-                      <p className="font-financial-mono text-[11px] text-slate-400 truncate">
+                      <p className="font-financial-mono text-[11px] text-[#25D366] truncate">
                         {contact.phone || 'Sin número'}
                       </p>
                     </div>
                   </div>
 
-                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-[11px] font-bold shrink-0 group-hover:bg-primary group-hover:text-slate-950 transition-colors">
+                  <span className="px-2.5 py-1 rounded-lg bg-[#25D366]/20 text-[#25D366] text-[11px] font-bold shrink-0 group-hover:bg-[#25D366] group-hover:text-slate-950 transition-colors">
                     {isEn ? 'Autofill' : 'Autorrellenar'}
                   </span>
                 </div>
