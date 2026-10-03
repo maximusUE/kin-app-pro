@@ -21,8 +21,13 @@ import {
   AnyAgentLogo,
 } from '@/components/Icons';
 import { ContactAvatar } from '@/components/ContactAvatar';
-import { SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
 import { MEXICO_STATES, MexicoState } from '@/data/mexicoLocations';
+import {
+  validarCLABE,
+  detectarBancoPorCLABE,
+  formatearCLABE,
+  BanxicoBankInfo,
+} from '@/lib/validation/spei';
 
 export const CASH_PICKUP_STORES = [
   {
@@ -671,6 +676,219 @@ export function SendView({
     }, 4500);
   };
 
+  // =========================================================================
+  // ESTADO Y MANEJADORES PARA CUENTA BANCARIA (SPEI 24/7 EN MÉXICO)
+  // =========================================================================
+  const [bankReceiverMode, setBankReceiverMode] = React.useState<'existing' | 'new'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kin_draft_bank_receiver_mode');
+      if (saved === 'existing' || saved === 'new') return saved;
+    }
+    return 'existing';
+  });
+
+  const [bankNombre, setBankNombre] = React.useState('');
+  const [bankApellido1, setBankApellido1] = React.useState('');
+  const [bankApellido2, setBankApellido2] = React.useState('');
+  const [bankClabe, setBankClabe] = React.useState('');
+  const [bankPhone, setBankPhone] = React.useState('');
+  const [bankErrors, setBankErrors] = React.useState<Record<string, string>>({});
+  const [bankSuccessFeedback, setBankSuccessFeedback] = React.useState<string | null>(null);
+
+  // Detección automática en tiempo real de banco por los primeros 3 dígitos
+  const detectedBank = React.useMemo(() => {
+    return detectarBancoPorCLABE(bankClabe);
+  }, [bankClabe]);
+
+  // Validación matemática Banxico (Módulo 10 ponderado 3-7-1)
+  const bankClabeValidation = React.useMemo(() => {
+    const clean = bankClabe.replace(/\D/g, '');
+    if (clean.length === 18) {
+      return validarCLABE(clean);
+    }
+    return null;
+  }, [bankClabe]);
+
+  const handleSetBankReceiverMode = (mode: 'existing' | 'new') => {
+    setBankReceiverMode(mode);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_draft_bank_receiver_mode', mode);
+      } catch (_) {}
+    }
+  };
+
+  const handleSaveBankRecipient = () => {
+    const errors: Record<string, string> = {};
+    if (!bankNombre.trim()) {
+      errors.nombre = isEn ? 'Given name is required' : 'El nombre es obligatorio (según titular de la cuenta)';
+    }
+    if (!bankApellido1.trim()) {
+      errors.apellido1 = isEn ? 'First surname is required' : 'El primer apellido es obligatorio';
+    }
+    const cleanClabe = bankClabe.replace(/\D/g, '');
+    if (!cleanClabe || cleanClabe.length !== 18) {
+      errors.clabe = isEn ? 'CLABE must have exactly 18 digits' : 'La CLABE interbancaria debe tener exactamente 18 dígitos';
+    } else {
+      const val = validarCLABE(cleanClabe);
+      if (!val.valida) {
+        errors.clabe = val.error || (isEn ? 'Invalid CLABE checksum (Banxico Módulo 10)' : 'Dígito verificador inválido según Banxico (Módulo 10)');
+      }
+    }
+    const cleanPhone = bankPhone.replace(/\D/g, '');
+    if (!cleanPhone || cleanPhone.length < 10) {
+      errors.phone = isEn ? 'Enter 10-digit mobile phone for CEP tracking' : 'Ingresa el celular de 10 dígitos para comprobante CEP Banxico';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setBankErrors(errors);
+      return;
+    }
+
+    setBankErrors({});
+
+    const fullName = `${bankNombre.trim()} ${bankApellido1.trim()}${bankApellido2.trim() ? ' ' + bankApellido2.trim() : ''}`;
+    const bankName = detectedBank?.shortName || bankClabeValidation?.banco?.shortName || 'SPEI Banxico';
+    const newBankContact: SendContactItem = {
+      id: 'bank_' + Date.now(),
+      name: bankNombre.trim(),
+      fullName: fullName,
+      firstName: bankNombre.trim(),
+      lastName: `${bankApellido1.trim()}${bankApellido2.trim() ? ' ' + bankApellido2.trim() : ''}`,
+      phone: `+52 ${cleanPhone.slice(-10)}`,
+      clabe: cleanClabe,
+      bank: bankName,
+      country: 'Mexico',
+      photoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+    };
+
+    onAddContact?.(newBankContact);
+    onSelectContact?.(newBankContact);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_draft_send_recipient', JSON.stringify(newBankContact));
+      } catch (_) {}
+    }
+
+    setBankNombre('');
+    setBankApellido1('');
+    setBankApellido2('');
+    setBankClabe('');
+    setBankPhone('');
+    setBankSuccessFeedback(
+      isEn
+        ? `Account ${fullName} (${bankName}) saved successfully!`
+        : `¡Cuenta ${bankName} de ${fullName} guardada exitosamente!`
+    );
+    handleSetBankReceiverMode('existing');
+
+    setTimeout(() => {
+      setBankSuccessFeedback(null);
+    }, 4500);
+  };
+
+  // =========================================================================
+  // ESTADO Y MANEJADORES PARA BILLETERA MÓVIL (KIN CASH / MERCADO PAGO)
+  // =========================================================================
+  const [walletProvider, setWalletProvider] = React.useState<'kin' | 'mercadopago'>('kin');
+  const [walletReceiverMode, setWalletReceiverMode] = React.useState<'existing' | 'new'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kin_draft_wallet_receiver_mode');
+      if (saved === 'existing' || saved === 'new') return saved;
+    }
+    return 'existing';
+  });
+
+  const [walletNombre, setWalletNombre] = React.useState('');
+  const [walletApellido1, setWalletApellido1] = React.useState('');
+  const [walletApellido2, setWalletApellido2] = React.useState('');
+  const [walletIdentifier, setWalletIdentifier] = React.useState('');
+  const [walletPhone, setWalletPhone] = React.useState('');
+  const [walletErrors, setWalletErrors] = React.useState<Record<string, string>>({});
+  const [walletSuccessFeedback, setWalletSuccessFeedback] = React.useState<string | null>(null);
+
+  const handleSetWalletReceiverMode = (mode: 'existing' | 'new') => {
+    setWalletReceiverMode(mode);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_draft_wallet_receiver_mode', mode);
+      } catch (_) {}
+    }
+  };
+
+  const handleSaveWalletRecipient = () => {
+    const errors: Record<string, string> = {};
+    if (!walletNombre.trim()) {
+      errors.nombre = isEn ? 'Name is required' : 'El nombre es obligatorio (titular de la cuenta)';
+    }
+    if (!walletApellido1.trim()) {
+      errors.apellido1 = isEn ? 'First surname is required' : 'El primer apellido es obligatorio';
+    }
+    const cleanId = walletIdentifier.trim();
+    if (!cleanId) {
+      errors.identifier = walletProvider === 'kin'
+        ? (isEn ? 'Enter KIN phone or @kinTag' : 'Ingresa el número celular KIN o @kinTag')
+        : (isEn ? 'Enter phone, email or STP CLABE' : 'Ingresa celular a 10 dígitos, email o CLABE STP (646)');
+    } else if (walletProvider === 'mercadopago') {
+      const digits = cleanId.replace(/\D/g, '');
+      const isEmail = cleanId.includes('@') && cleanId.includes('.');
+      const isClabe = digits.length === 18;
+      const isPhone = digits.length === 10;
+      if (!isEmail && !isClabe && !isPhone) {
+        errors.identifier = isEn
+          ? 'Enter a valid 10-digit phone, email, or 18-digit CLABE'
+          : 'Ingresa un celular válido de 10 dígitos, email o CLABE STP de 18 dígitos';
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setWalletErrors(errors);
+      return;
+    }
+
+    setWalletErrors({});
+
+    const fullName = `${walletNombre.trim()} ${walletApellido1.trim()}${walletApellido2.trim() ? ' ' + walletApellido2.trim() : ''}`;
+    const providerName = walletProvider === 'kin' ? 'KIN Cash' : 'Mercado Pago';
+    const cleanDigits = (walletPhone || walletIdentifier).replace(/\D/g, '').slice(-10);
+    const newWalletContact: SendContactItem = {
+      id: 'wallet_' + Date.now(),
+      name: walletNombre.trim(),
+      fullName: fullName,
+      firstName: walletNombre.trim(),
+      lastName: `${walletApellido1.trim()}${walletApellido2.trim() ? ' ' + walletApellido2.trim() : ''}`,
+      phone: cleanDigits ? `+52 ${cleanDigits}` : '+52 55 0000 0000',
+      bank: providerName,
+      country: 'Mexico',
+      photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+      walletId: walletIdentifier.trim(),
+    };
+
+    onAddContact?.(newWalletContact);
+    onSelectContact?.(newWalletContact);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_draft_send_recipient', JSON.stringify(newWalletContact));
+      } catch (_) {}
+    }
+
+    setWalletNombre('');
+    setWalletApellido1('');
+    setWalletApellido2('');
+    setWalletIdentifier('');
+    setWalletPhone('');
+    setWalletSuccessFeedback(
+      isEn
+        ? `${providerName} wallet for ${fullName} saved successfully!`
+        : `¡Billetera ${providerName} de ${fullName} guardada exitosamente!`
+    );
+    handleSetWalletReceiverMode('existing');
+
+    setTimeout(() => {
+      setWalletSuccessFeedback(null);
+    }, 4500);
+  };
+
   return (
     <div className="animate-fade-in space-y-4">
       {/* Header: < | Send money | Historial */}
@@ -1090,7 +1308,29 @@ export function SendView({
                     </span>
                   </div>
                 </div>
-              ) : null}
+              ) : (
+                <div
+                  onClick={onSelectAvatarClick}
+                  className="p-3.5 rounded-2xl bg-surface-container border border-dashed border-primary/30 hover:border-primary/60 transition-all cursor-pointer flex items-center justify-between group shadow-sm active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <span className="material-symbols-outlined text-[22px]">contacts</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-title-base text-xs font-bold text-white truncate">
+                        {isEn ? 'Select Saved Recipient' : 'Seleccionar Destinatario Frecuente'}
+                      </p>
+                      <p className="text-[11px] text-on-surface-variant truncate">
+                        {isEn ? 'Tap to choose from your frequent list' : 'Toca para elegir de tu lista de contactos'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold shrink-0">
+                    {isEn ? 'Choose' : 'Elegir'}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -1335,133 +1575,746 @@ export function SendView({
         </div>
       )}
 
-      {/* BANK (SPEI) SELECTION */}
+      {/* ========================================================================= */}
+      {/* CUENTA BANCARIA (SPEI 24/7 EN MÉXICO - BANXICO)                          */}
+      {/* ========================================================================= */}
       {deliveryMethod === 'bank' && (
-        <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
+        <div className="flex flex-col space-y-3 pt-1 animate-fade-in">
           <div className="flex items-center justify-between">
             <span className="font-title-base text-xs text-on-surface font-bold">
-              {isEn ? 'Bank SPEI Beneficiary' : 'Beneficiario Cuenta Bancaria SPEI'}
+              {isEn ? 'Bank Account Beneficiary (SPEI)' : 'Beneficiario Cuenta Bancaria SPEI'}
             </span>
             <span className="font-caption-sm text-[11px] text-primary font-bold">
-              {isEn ? '24/7 Instant' : 'Inmediato 24/7'}
+              {isEn ? '24/7 Instant • Banxico' : 'Inmediato 24/7 • Banxico'}
             </span>
           </div>
 
-          {selectedAvatar && (
-            <div className="flex items-center justify-between bg-primary/10 border border-primary/30 rounded-xl px-3 py-2 text-xs animate-fade-in shadow-inner">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="material-symbols-outlined text-primary text-[18px] shrink-0 animate-pulse">
-                  save
-                </span>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-white font-semibold text-[11px] truncate">
-                    {isEn ? 'Draft saved automatically' : 'Borrador guardado automáticamente'}
-                  </span>
-                  <span className="text-primary text-[10px] font-medium truncate">
-                    {isEn ? 'Beneficiary' : 'Beneficiario'}: {selectedAvatar.fullName || selectedAvatar.name} • ${parseFloat(amountValue) || 50} USD
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleClearSendDraft();
-                }}
-                className="text-white hover:text-red-300 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-red-500/20 text-[11px] font-bold shrink-0 ml-2 cursor-pointer transition-all border border-white/10 flex items-center gap-1 active:scale-95"
-                title={isEn ? 'Discard draft' : 'Descartar borrador'}
-              >
-                <span>{isEn ? '✕ Clear' : '✕ Limpiar'}</span>
-              </button>
+          {/* Selector de modo: Destinatario Frecuente vs + Nueva Cuenta */}
+          <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+            <button
+              type="button"
+              onClick={() => {
+                handleSetBankReceiverMode('existing');
+                onSelectAvatarClick();
+              }}
+              className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+                bankReceiverMode === 'existing'
+                  ? 'bg-primary text-on-primary shadow-sm ring-1 ring-primary/50'
+                  : 'bg-transparent text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">contacts</span>
+              <span>{isEn ? 'Existing Receiver' : 'Destinatario Frecuente'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetBankReceiverMode('new')}
+              className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+                bankReceiverMode === 'new'
+                  ? 'bg-primary text-on-primary shadow-sm ring-1 ring-primary/50'
+                  : 'bg-transparent text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">add_card</span>
+              <span>{isEn ? '+ New Bank Account' : '+ Nueva Cuenta'}</span>
+            </button>
+          </div>
+
+          {/* Banner de feedback al registrar exitosamente */}
+          {bankSuccessFeedback && (
+            <div className="p-3 rounded-xl bg-primary/20 border border-primary/40 text-primary text-xs font-bold flex items-center gap-2 animate-fade-in shadow-sm">
+              <span className="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
+              <span className="truncate">{bankSuccessFeedback}</span>
             </div>
           )}
 
-          <div
-            onClick={onSelectAvatarClick}
-            className="p-3.5 rounded-2xl bg-surface-container border border-white/10 space-y-2 cursor-pointer hover:border-primary/40 transition-colors shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                {selectedAvatar ? (
-                  <>
-                    <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm overflow-hidden flex-shrink-0">
-                      {getBankLogoUrl(selectedAvatar.bank) ? (
-                        <img src={getBankLogoUrl(selectedAvatar.bank)!} alt={selectedAvatar.bank} className="w-full h-full object-contain" />
-                      ) : (
-                        <span className="font-financial-mono text-xs font-black text-[#004481]">
-                          {(selectedAvatar.bank || 'SPEI').slice(0, 4).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">
-                        {selectedAvatar.fullName || selectedAvatar.name}
-                      </p>
-                      <p className="font-financial-mono text-[11px] text-on-surface-variant truncate">
-                        CLABE: {selectedAvatar.clabe || (isEn ? 'Interbank SPEI' : 'SPEI Interbancario')}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary border border-dashed border-primary/30 flex-shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">person_add</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">
-                        {isEn ? 'Select a beneficiary' : 'Selecciona un beneficiario'}
-                      </p>
-                      <p className="text-[11px] text-on-surface-variant truncate">
-                        {isEn ? 'Tap to choose from list or add one' : 'Toca para elegir de tu lista o agregar uno'}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
+          {/* MODO 1: CUENTA FRECUENTE / SELECCIONADA */}
+          {bankReceiverMode === 'existing' && (
+            <div className="space-y-3 animate-fade-in">
               {selectedAvatar ? (
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="text-[10px] text-primary font-semibold">{isEn ? 'Change' : 'Cambiar'}</span>
-                  <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
+                <div className="p-3.5 rounded-2xl bg-primary/10 border-2 border-primary ring-2 ring-primary/40 shadow-[0_0_20px_rgba(46,213,164,0.35)] transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {/* Logo oficial del banco */}
+                      <div className="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm overflow-hidden shrink-0 border border-slate-200">
+                        {getBankLogoUrl(selectedAvatar.bank) ? (
+                          <img
+                            src={getBankLogoUrl(selectedAvatar.bank)!}
+                            alt={selectedAvatar.bank || 'Banco'}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-[#004481] rounded-lg flex items-center justify-center">
+                            <span className="font-financial-mono text-xs font-black text-white">
+                              {(selectedAvatar.bank || 'SPEI').slice(0, 4).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-title-base text-xs font-bold text-white truncate">
+                            {selectedAvatar.fullName || selectedAvatar.name}
+                          </p>
+                          <span className="px-1.5 py-0.2 rounded-full bg-primary/25 text-primary text-[9px] font-bold shrink-0">
+                            Elegido
+                          </span>
+                        </div>
+                        <p className="font-financial-mono text-[11px] text-slate-300 truncate">
+                          {selectedAvatar.clabe
+                            ? `CLABE: ${formatearCLABE(selectedAvatar.clabe)}`
+                            : (selectedAvatar.phone ? selectedAvatar.phone : 'Cuenta SPEI')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-primary text-[22px] font-black leading-none select-none drop-shadow-xs">
+                        ✓
+                      </span>
+                      <button
+                        type="button"
+                        onClick={onSelectAvatarClick}
+                        className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                      >
+                        <span>{isEn ? 'Change' : 'Cambiar'}</span>
+                        <span className="material-symbols-outlined text-[15px]">chevron_right</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-300">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span className="material-symbols-outlined text-[15px] text-primary">account_balance</span>
+                      <span className="font-bold text-white">
+                        {selectedAvatar.bank || 'Banco SPEI México'}
+                      </span>
+                    </span>
+                    <span className="text-[10px] text-primary font-bold shrink-0">
+                      SPEI Inmediato 24/7
+                    </span>
+                  </div>
                 </div>
               ) : (
-                <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold flex-shrink-0">
-                  {isEn ? 'Choose' : 'Elegir'}
-                </span>
+                <div
+                  onClick={onSelectAvatarClick}
+                  className="p-3.5 rounded-2xl bg-surface-container border border-dashed border-primary/30 hover:border-primary/60 transition-all cursor-pointer flex items-center justify-between group shadow-sm active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <span className="material-symbols-outlined text-[22px]">account_balance</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-title-base text-xs font-bold text-white truncate">
+                        {isEn ? 'Select Saved Bank Account' : 'Seleccionar Destinatario Frecuente'}
+                      </p>
+                      <p className="text-[11px] text-on-surface-variant truncate">
+                        {isEn ? 'Tap to choose from your frequent list' : 'Toca para elegir de tu lista de contactos'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold shrink-0">
+                    {isEn ? 'Choose' : 'Elegir'}
+                  </span>
+                </div>
               )}
             </div>
-          </div>
+          )}
+
+          {/* MODO 2: NUEVA CUENTA BANCARIA (FORMULARIO SPEI OFICIAL) */}
+          {bankReceiverMode === 'new' && (
+            <div className="p-4 rounded-2xl bg-surface-container border border-outline-variant/30 space-y-3.5 animate-fade-in shadow-md">
+              <div className="pb-1 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-title-base text-xs font-bold text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-primary text-[17px]">account_balance</span>
+                    <span>{isEn ? 'New SPEI Bank Account' : 'Datos de la Cuenta Bancaria (SPEI)'}</span>
+                  </h4>
+                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                    Banxico Oficial
+                  </span>
+                </div>
+                <p className="font-caption-sm text-[11px] text-on-surface-variant mt-0.5">
+                  {isEn
+                    ? 'Transfer directly to any Mexican bank account in seconds.'
+                    : 'Transferencia directa a cualquier cuenta bancaria en México. Acreditación en segundos.'}
+                </p>
+              </div>
+
+              {/* 1. CLABE INTERBANCARIA DE 18 DÍGITOS CON DETECCIÓN EN VIVO */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                    <span>{isEn ? '18-digit CLABE Interbancaria' : 'CLABE Interbancaria (18 dígitos)'}</span>
+                    <span className="text-red-400">*</span>
+                  </label>
+                  <span className="font-mono text-[10px] text-slate-400">
+                    {bankClabe.replace(/\D/g, '').length}/18 dígitos
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={22}
+                    value={bankClabe}
+                    onChange={(e) => {
+                      const formatted = formatearCLABE(e.target.value);
+                      setBankClabe(formatted);
+                      if (bankErrors.clabe) {
+                        setBankErrors((prev) => ({ ...prev, clabe: '' }));
+                      }
+                    }}
+                    placeholder="012 180 0156 7890 1234"
+                    className="w-full h-11 px-3.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 font-mono tracking-wider focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-semibold"
+                  />
+                  {bankClabe.replace(/\D/g, '').length === 18 && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {bankClabeValidation?.valida ? (
+                        <span className="text-primary text-[20px] font-black leading-none drop-shadow-xs">✓</span>
+                      ) : (
+                        <span className="text-red-400 material-symbols-outlined text-[18px]">error</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Badge reactivo de banco detectado automáticamente */}
+                {detectedBank && (
+                  <div className="p-2 rounded-xl bg-surface-container-high/80 border border-primary/30 flex items-center justify-between animate-fade-in">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-white p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                        {detectedBank.logoUrl ? (
+                          <img src={detectedBank.logoUrl} alt={detectedBank.shortName} className="w-full h-full object-contain" />
+                        ) : (
+                          <span className="font-financial-mono text-[9px] font-black text-[#004481]">
+                            {detectedBank.shortName.slice(0, 3)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-white font-bold text-[11px] block truncate">
+                          {detectedBank.name}
+                        </span>
+                        <span className="text-[10px] text-primary font-medium block">
+                          Código Banxico: {detectedBank.code} • SPEI Habilitado
+                        </span>
+                      </div>
+                    </div>
+                    {bankClabeValidation?.valida && (
+                      <span className="px-2 py-0.5 rounded-md bg-primary/20 text-primary text-[10px] font-black shrink-0">
+                        Válida ✓
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {bankErrors.clabe && (
+                  <p className="text-[10px] text-red-400 font-semibold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[13px]">warning</span>
+                    <span>{bankErrors.clabe}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* 2. NOMBRE(S) */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                  <span>{isEn ? 'Account Holder Given Name(s)' : 'Nombre(s) del Titular'}</span>
+                  <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={bankNombre}
+                  onChange={(e) => {
+                    setBankNombre(e.target.value);
+                    if (bankErrors.nombre) {
+                      setBankErrors((prev) => ({ ...prev, nombre: '' }));
+                    }
+                  }}
+                  placeholder={isEn ? 'e.g. Sofia Mariana' : 'Ej. Sofía Mariana'}
+                  className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+                {bankErrors.nombre && (
+                  <p className="text-[10px] text-red-400 font-semibold">{bankErrors.nombre}</p>
+                )}
+              </div>
+
+              {/* 3 & 4: PRIMER APELLIDO Y SEGUNDO APELLIDO */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                    <span>{isEn ? 'First Surname' : 'Primer Apellido'}</span>
+                    <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={bankApellido1}
+                    onChange={(e) => {
+                      setBankApellido1(e.target.value);
+                      if (bankErrors.apellido1) {
+                        setBankErrors((prev) => ({ ...prev, apellido1: '' }));
+                      }
+                    }}
+                    placeholder={isEn ? 'e.g. Hernandez' : 'Ej. Hernández'}
+                    className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                  {bankErrors.apellido1 && (
+                    <p className="text-[10px] text-red-400 font-semibold">{bankErrors.apellido1}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                    <span>{isEn ? 'Second Surname' : 'Segundo Apellido'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={bankApellido2}
+                    onChange={(e) => setBankApellido2(e.target.value)}
+                    placeholder={isEn ? 'e.g. Castro' : 'Ej. Castro'}
+                    className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* 5. TELÉFONO CELULAR DEL BENEFICIARIO (+52) */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <span>{isEn ? 'Beneficiary Mobile Phone' : 'Teléfono Celular del Beneficiario'}</span>
+                    <span className="text-red-400">*</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">Comprobante CEP Banxico</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center gap-1.5 shrink-0 select-none shadow-xs">
+                    <span className="text-xs">🇲🇽</span>
+                    <span className="text-xs font-black text-primary font-mono">+52</span>
+                  </div>
+                  <input
+                    type="tel"
+                    maxLength={14}
+                    value={bankPhone}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '').slice(0, 10);
+                      let formatted = raw;
+                      if (raw.length > 6) {
+                        formatted = `${raw.slice(0, 3)} ${raw.slice(3, 6)} ${raw.slice(6)}`;
+                      } else if (raw.length > 3) {
+                        formatted = `${raw.slice(0, 3)} ${raw.slice(3)}`;
+                      }
+                      setBankPhone(formatted);
+                      if (bankErrors.phone) {
+                        setBankErrors((prev) => ({ ...prev, phone: '' }));
+                      }
+                    }}
+                    placeholder="10 dígitos (ej. 55 1234 5678)"
+                    className="flex-1 h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                </div>
+                {bankErrors.phone && (
+                  <p className="text-[10px] text-red-400 font-semibold">{bankErrors.phone}</p>
+                )}
+              </div>
+
+              {/* BOTÓN PARA GUARDAR CUENTA BANCARIA */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleSaveBankRecipient}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary-container to-[#18A57E] text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer font-headline-md tracking-wide"
+                >
+                  <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                  <span>{isEn ? 'Save Bank Account and Continue' : 'Guardar Cuenta SPEI y Continuar'}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* MOBILE WALLET SELECTION */}
+      {/* ========================================================================= */}
+      {/* BILLETERA MÓVIL (KIN CASH & MERCADO PAGO MÉXICO)                         */}
+      {/* ========================================================================= */}
       {deliveryMethod === 'wallet' && (
-        <div className="flex flex-col space-y-2.5 pt-1 animate-fade-in">
+        <div className="flex flex-col space-y-3 pt-1 animate-fade-in">
           <div className="flex items-center justify-between">
             <span className="font-title-base text-xs text-on-surface font-bold">
               {isEn ? 'Mobile Wallet Destination' : 'Billetera Móvil de Destino'}
             </span>
             <span className="font-caption-sm text-[11px] text-primary font-bold">
-              {isEn ? 'Zero Fee' : 'Sin Comisión'}
+              {isEn ? 'Zero Fee • Instant' : 'Sin Comisión • Inmediato'}
             </span>
           </div>
+
+          {/* Selector de Proveedor: KIN Cash vs Mercado Pago */}
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              className="p-3 rounded-xl bg-surface-container border border-primary text-left transition-all shadow-[0_0_16px_rgba(46,213,164,0.3)] cursor-pointer"
+              onClick={() => setWalletProvider('kin')}
+              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden active:scale-[0.98] ${
+                walletProvider === 'kin'
+                  ? 'bg-primary/10 border-primary shadow-[0_0_16px_rgba(46,213,164,0.3)] ring-1 ring-primary/40'
+                  : 'bg-surface-container border-white/10 hover:border-white/20'
+              }`}
             >
-              <span className="material-symbols-outlined text-primary text-[22px]">account_balance_wallet</span>
-              <p className="font-title-base text-xs font-bold text-white mt-1">KIN Cash</p>
-              <p className="text-[10px] text-primary">{isEn ? 'Direct P2P Transit' : 'Transferencia P2P Directa'}</p>
+              <div className="flex items-center justify-between">
+                <span className="material-symbols-outlined text-primary text-[24px]">account_balance_wallet</span>
+                {walletProvider === 'kin' && (
+                  <span className="text-primary text-[16px] font-black">✓</span>
+                )}
+              </div>
+              <p className="font-title-base text-xs font-bold text-white mt-1.5">KIN Cash</p>
+              <p className="text-[10px] text-primary font-medium">
+                {isEn ? 'Direct P2P • 0% Fee' : 'Transferencia P2P • 0% Comisión'}
+              </p>
             </button>
+
             <button
               type="button"
-              className="p-3 rounded-xl bg-surface-container border border-white/10 text-left transition-all hover:border-white/20 cursor-pointer"
+              onClick={() => setWalletProvider('mercadopago')}
+              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden active:scale-[0.98] ${
+                walletProvider === 'mercadopago'
+                  ? 'bg-[#009EE3]/15 border-[#009EE3] shadow-[0_0_16px_rgba(0,158,227,0.3)] ring-1 ring-[#009EE3]/40'
+                  : 'bg-surface-container border-white/10 hover:border-white/20'
+              }`}
             >
-              <span className="material-symbols-outlined text-secondary text-[22px]">smartphone</span>
-              <p className="font-title-base text-xs font-bold text-white mt-1">Mercado Pago</p>
-              <p className="text-[10px] text-on-surface-variant">{isEn ? 'Instant Transfer' : 'Transferencia Instantánea'}</p>
+              <div className="flex items-center justify-between">
+                <div className="w-6 h-6 rounded-lg bg-[#009EE3] flex items-center justify-center text-white text-[12px] font-black">
+                  MP
+                </div>
+                {walletProvider === 'mercadopago' && (
+                  <span className="text-[#009EE3] text-[16px] font-black">✓</span>
+                )}
+              </div>
+              <p className="font-title-base text-xs font-bold text-white mt-1.5">Mercado Pago</p>
+              <p className="text-[10px] text-sky-400 font-medium">
+                {isEn ? '12M+ Accounts in Mexico' : 'Red #1 en México • 12M+ cuentas'}
+              </p>
             </button>
           </div>
+
+          {/* Selector de modo: Destinatario Frecuente vs + Nueva Billetera */}
+          <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+            <button
+              type="button"
+              onClick={() => {
+                handleSetWalletReceiverMode('existing');
+                onSelectAvatarClick();
+              }}
+              className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+                walletReceiverMode === 'existing'
+                  ? 'bg-primary text-on-primary shadow-sm ring-1 ring-primary/50'
+                  : 'bg-transparent text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">contacts</span>
+              <span>{isEn ? 'Existing Receiver' : 'Destinatario Frecuente'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetWalletReceiverMode('new')}
+              className={`h-11 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+                walletReceiverMode === 'new'
+                  ? 'bg-primary text-on-primary shadow-sm ring-1 ring-primary/50'
+                  : 'bg-transparent text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">add_circle</span>
+              <span>{isEn ? '+ New Wallet' : '+ Nueva Billetera'}</span>
+            </button>
+          </div>
+
+          {/* Banner de feedback al registrar exitosamente */}
+          {walletSuccessFeedback && (
+            <div className="p-3 rounded-xl bg-primary/20 border border-primary/40 text-primary text-xs font-bold flex items-center gap-2 animate-fade-in shadow-sm">
+              <span className="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
+              <span className="truncate">{walletSuccessFeedback}</span>
+            </div>
+          )}
+
+          {/* MODO 1: BILLETERA FRECUENTE / SELECCIONADA */}
+          {walletReceiverMode === 'existing' && (
+            <div className="space-y-3 animate-fade-in">
+              {selectedAvatar ? (
+                <div className="p-3.5 rounded-2xl bg-primary/10 border-2 border-primary ring-2 ring-primary/40 shadow-[0_0_20px_rgba(46,213,164,0.35)] transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-sm shrink-0 border border-white/10 ${
+                        selectedAvatar.bank?.toLowerCase().includes('mercado')
+                          ? 'bg-[#009EE3] text-white'
+                          : 'bg-[#18A57E] text-slate-950'
+                      }`}>
+                        {selectedAvatar.bank?.toLowerCase().includes('mercado') ? (
+                          <span className="font-financial-mono text-sm font-black">MP</span>
+                        ) : (
+                          <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-title-base text-xs font-bold text-white truncate">
+                            {selectedAvatar.fullName || selectedAvatar.name}
+                          </p>
+                          <span className="px-1.5 py-0.2 rounded-full bg-primary/25 text-primary text-[9px] font-bold shrink-0">
+                            Elegido
+                          </span>
+                        </div>
+                        <p className="font-financial-mono text-[11px] text-slate-300 truncate">
+                          {selectedAvatar.walletId
+                            ? selectedAvatar.walletId
+                            : (selectedAvatar.phone || 'Billetera Móvil')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-primary text-[22px] font-black leading-none select-none drop-shadow-xs">
+                        ✓
+                      </span>
+                      <button
+                        type="button"
+                        onClick={onSelectAvatarClick}
+                        className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                      >
+                        <span>{isEn ? 'Change' : 'Cambiar'}</span>
+                        <span className="material-symbols-outlined text-[15px]">chevron_right</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-300">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span className="material-symbols-outlined text-[15px] text-primary">smartphone</span>
+                      <span className="font-bold text-white">
+                        {selectedAvatar.bank || (walletProvider === 'kin' ? 'KIN Cash' : 'Mercado Pago')}
+                      </span>
+                    </span>
+                    <span className="text-[10px] text-primary font-bold shrink-0">
+                      Sin Comisión • Inmediato
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={onSelectAvatarClick}
+                  className="p-3.5 rounded-2xl bg-surface-container border border-dashed border-primary/30 hover:border-primary/60 transition-all cursor-pointer flex items-center justify-between group shadow-sm active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <span className="material-symbols-outlined text-[22px]">smartphone</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-title-base text-xs font-bold text-white truncate">
+                        {isEn ? 'Select Saved Wallet' : 'Seleccionar Destinatario Frecuente'}
+                      </p>
+                      <p className="text-[11px] text-on-surface-variant truncate">
+                        {isEn ? 'Tap to choose from your frequent list' : 'Toca para elegir de tu lista de contactos'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold shrink-0">
+                    {isEn ? 'Choose' : 'Elegir'}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MODO 2: NUEVA BILLETERA MÓVIL (FORMULARIO FINTECH OFICIAL) */}
+          {walletReceiverMode === 'new' && (
+            <div className="p-4 rounded-2xl bg-surface-container border border-outline-variant/30 space-y-3.5 animate-fade-in shadow-md">
+              <div className="pb-1 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-title-base text-xs font-bold text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-primary text-[17px]">
+                      {walletProvider === 'kin' ? 'account_balance_wallet' : 'smartphone'}
+                    </span>
+                    <span>
+                      {walletProvider === 'kin'
+                        ? (isEn ? 'KIN Cash Wallet Beneficiary' : 'Datos de Billetera KIN Cash')
+                        : (isEn ? 'Mercado Pago Mexico Beneficiary' : 'Datos de Cuenta Mercado Pago México')}
+                    </span>
+                  </h4>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                    walletProvider === 'kin'
+                      ? 'bg-primary/10 text-primary border-primary/20'
+                      : 'bg-[#009EE3]/15 text-[#009EE3] border-[#009EE3]/30'
+                  }`}>
+                    {walletProvider === 'kin' ? '0% Comisión P2P' : 'Fintech Regulada'}
+                  </span>
+                </div>
+                <p className="font-caption-sm text-[11px] text-on-surface-variant mt-0.5">
+                  {walletProvider === 'kin'
+                    ? (isEn
+                        ? 'Instant transit between KIN accounts. Zero commission fees.'
+                        : 'Transferencia directa entre cuentas KIN. Sin comisión y disponible al segundo.')
+                    : (isEn
+                        ? 'Deposits immediately into any Mexican Mercado Pago account.'
+                        : 'Acreditación inmediata 24/7 en cualquier cuenta Mercado Pago México.')}
+                </p>
+              </div>
+
+              {/* 1. NOMBRE(S) */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                  <span>{isEn ? 'Holder Given Name(s)' : 'Nombre(s) del Titular'}</span>
+                  <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={walletNombre}
+                  onChange={(e) => {
+                    setWalletNombre(e.target.value);
+                    if (walletErrors.nombre) {
+                      setWalletErrors((prev) => ({ ...prev, nombre: '' }));
+                    }
+                  }}
+                  placeholder={isEn ? 'e.g. Daniel Alejandro' : 'Ej. Daniel Alejandro'}
+                  className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+                {walletErrors.nombre && (
+                  <p className="text-[10px] text-red-400 font-semibold">{walletErrors.nombre}</p>
+                )}
+              </div>
+
+              {/* 2 & 3: PRIMER APELLIDO Y SEGUNDO APELLIDO */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                    <span>{isEn ? 'First Surname' : 'Primer Apellido'}</span>
+                    <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={walletApellido1}
+                    onChange={(e) => {
+                      setWalletApellido1(e.target.value);
+                      if (walletErrors.apellido1) {
+                        setWalletErrors((prev) => ({ ...prev, apellido1: '' }));
+                      }
+                    }}
+                    placeholder={isEn ? 'e.g. Morales' : 'Ej. Morales'}
+                    className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                  {walletErrors.apellido1 && (
+                    <p className="text-[10px] text-red-400 font-semibold">{walletErrors.apellido1}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1">
+                    <span>{isEn ? 'Second Surname' : 'Segundo Apellido'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={walletApellido2}
+                    onChange={(e) => setWalletApellido2(e.target.value)}
+                    placeholder={isEn ? 'e.g. Vargas' : 'Ej. Vargas'}
+                    className="w-full h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* 4. IDENTIFICADOR DE BILLETERA SEGÚN PROVEEDOR */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <span>
+                      {walletProvider === 'kin'
+                        ? (isEn ? 'KIN Account Identifier' : 'Identificador KIN (Celular o @kinTag)')
+                        : (isEn ? 'Mercado Pago Identifier' : 'Identificador Mercado Pago')}
+                    </span>
+                    <span className="text-red-400">*</span>
+                  </span>
+                  <span className="text-[10px] text-primary font-semibold">
+                    {walletProvider === 'kin' ? 'Celular / @tag' : 'Celular, Correo o CLABE STP'}
+                  </span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={walletIdentifier}
+                    onChange={(e) => {
+                      setWalletIdentifier(e.target.value);
+                      if (walletErrors.identifier) {
+                        setWalletErrors((prev) => ({ ...prev, identifier: '' }));
+                      }
+                    }}
+                    placeholder={
+                      walletProvider === 'kin'
+                        ? '10 dígitos (ej. 443 123 4567) o @usuario'
+                        : '10 dígitos, correo@gmail.com o CLABE STP (646)'
+                    }
+                    className="w-full h-11 px-3.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono font-medium"
+                  />
+                </div>
+                {walletErrors.identifier && (
+                  <p className="text-[10px] text-red-400 font-semibold">{walletErrors.identifier}</p>
+                )}
+                <p className="text-[10px] text-slate-400">
+                  {walletProvider === 'kin'
+                    ? 'Identificador único del receptor en la red KIN Cash.'
+                    : 'Mercado Pago permite vincular mediante número celular mexicano a 10 dígitos, email registrado o CLABE STP (646).'}
+                </p>
+              </div>
+
+              {/* 5. TELÉFONO DE CONFIRMACIÓN */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <span>{isEn ? 'Notification Phone' : 'Teléfono Celular de Notificación'}</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">(Opcional)</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center gap-1.5 shrink-0 select-none shadow-xs">
+                    <span className="text-xs">🇲🇽</span>
+                    <span className="text-xs font-black text-primary font-mono">+52</span>
+                  </div>
+                  <input
+                    type="tel"
+                    maxLength={14}
+                    value={walletPhone}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '').slice(0, 10);
+                      let formatted = raw;
+                      if (raw.length > 6) {
+                        formatted = `${raw.slice(0, 3)} ${raw.slice(3, 6)} ${raw.slice(6)}`;
+                      } else if (raw.length > 3) {
+                        formatted = `${raw.slice(0, 3)} ${raw.slice(3)}`;
+                      }
+                      setWalletPhone(formatted);
+                    }}
+                    placeholder="10 dígitos (ej. 443 123 4567)"
+                    className="flex-1 h-10 px-3 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* BOTÓN PARA GUARDAR BILLETERA MÓVIL */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleSaveWalletRecipient}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary-container to-[#18A57E] text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer font-headline-md tracking-wide"
+                >
+                  <span className="material-symbols-outlined text-[18px]">person_check</span>
+                  <span>
+                    {isEn
+                      ? `Save ${walletProvider === 'kin' ? 'KIN Cash' : 'Mercado Pago'} and Continue`
+                      : `Guardar ${walletProvider === 'kin' ? 'KIN Cash' : 'Mercado Pago'} y Continuar`}
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
