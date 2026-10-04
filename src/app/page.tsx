@@ -80,6 +80,7 @@ import {
   LanguageIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
+import { BillPayView } from '@/components/views/BillPayView';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/components/KinCashP2PModal';
 import { ClientVaultModal } from '@/components/ClientVaultModal';
@@ -2007,16 +2008,12 @@ export default function MobileApp() {
         {/* ========================================================================= */}
         {activeTab === 'bill-pay' && (
           <ErrorBoundary fallbackTitle={language === 'en' ? 'Bill Pay' : 'Pago de Servicios'}>
-            <div className="animate-fade-in space-y-4">
-              <MexicanBillPayModal
-                isScreen={true}
-                isOpen={true}
-                language={language}
-                onPaymentSuccess={handleBillPaymentSuccess}
-                selectedServiceId={selectedBillServiceId}
-                exchangeRate={USD_TO_MXN_RATE}
-              />
-            </div>
+            <BillPayView
+              onPaymentSuccess={handleBillPaymentSuccess}
+              selectedServiceId={selectedBillServiceId}
+              exchangeRate={USD_TO_MXN_RATE}
+              language={language}
+            />
           </ErrorBoundary>
         )}
 
@@ -2096,21 +2093,18 @@ export default function MobileApp() {
         )}
 
         {/* ========================================================================= */}
-        {/* SCREEN 3: "BILL PAYMENTS" (IMAGEN 2 CENTRO)                                */}
+        {/* SCREEN 3: "BILL PAYMENTS" (VISTA UNIFICADA Y PROFESIONAL)                  */}
         {/* ========================================================================= */}
         {activeTab === 'bills' && (
-          <BillsView
-            onBack={() => setActiveTab('home')}
-            selectedBillServiceId={selectedBillServiceId}
-            language={language}
-            onSelectService={(serviceId) => {
-              setSelectedBillServiceId(serviceId);
-              setShowBillPayModal(true);
-            }}
-            transactions={transactions}
-            onSelectTransaction={setSelectedTransactionDetail}
-            renderTransactionIcon={renderTransactionIcon}
-          />
+          <ErrorBoundary fallbackTitle={language === 'en' ? 'Bill Pay' : 'Pago de Servicios'}>
+            <BillPayView
+              onBack={() => setActiveTab('home')}
+              onPaymentSuccess={handleBillPaymentSuccess}
+              selectedServiceId={selectedBillServiceId}
+              exchangeRate={USD_TO_MXN_RATE}
+              language={language}
+            />
+          </ErrorBoundary>
         )}
 
         {/* ========================================================================= */}
