@@ -1,36 +1,54 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createRemittancePaymentIntent } from '@/lib/server/stripe';
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
-export async function POST(req: NextRequest) {
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+const stripe = new Stripe(stripeSecretKey);
+
+export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { amountUsd, userId, userEmail, remittanceId, recipientName, deliveryMethod } = body;
+    const { amount, currency = 'usd', customerEmail, description, metadata } = body;
 
-    if (!amountUsd || amountUsd <= 0) {
+    if (!amount || Number(amount) <= 0) {
+      return NextResponse.json({ error: 'Monto inválido para procesar el pago' }, { status: 400 });
+    }
+
+    if (!stripeSecretKey) {
       return NextResponse.json(
-        { error: 'Monto inválido para procesar el pago.' },
-        { status: 400 }
+        { error: 'STRIPE_SECRET_KEY no está configurada en las variables de entorno' },
+        { status: 500 }
       );
     }
 
-    const intent = await createRemittancePaymentIntent({
-      amountUsd: Number(amountUsd),
-      userId: userId || 'anonymous',
-      userEmail,
-      remittanceId: remittanceId || `kin_${Date.now()}`,
-      recipientName: recipientName || 'Destinatario KIN',
-      deliveryMethod: deliveryMethod || 'cash',
+    // Monto en centavos (ej. 100.50 USD = 10050 centavos)
+    const amountInCents = Math.round(Number(amount) * 100);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amountInCents,
+      currency: currency.toLowerCase(),
+      description: description || 'Envío de dinero KIN (Remesa)',
+      receipt_email: customerEmail || undefined,
+      metadata: {
+        platform: 'kin-app-pro',
+        ...metadata,
+      },
+      automatic_payment_methods: {
+        enabled: true,
+      },
     });
 
     return NextResponse.json({
       success: true,
-      clientSecret: intent.clientSecret,
-      paymentIntentId: intent.paymentIntentId,
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: paymentIntent.amount,
+      currency: paymentIntent.currency,
+      status: paymentIntent.status,
     });
   } catch (error: any) {
-    console.error('[Stripe API Error]:', error);
+    console.error('[Stripe create-payment-intent Error]:', error);
     return NextResponse.json(
-      { error: error?.message || 'Error al comunicarse con la pasarela de pagos de Stripe.' },
+      { error: error?.message || 'Error al crear intento de pago con Stripe' },
       { status: 500 }
     );
   }
