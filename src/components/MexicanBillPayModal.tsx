@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { CloseIcon, CheckCircleIcon } from './Icons';
 import { BillCameraScannerModal, ScannedBillResult } from './BillCameraScannerModal';
-import { KinCardCheckoutModal } from './modals/KinCardCheckoutModal';
+import { CardCheckoutView } from './views/CardCheckoutView';
 
 export interface MexicanBillPayModalProps {
   isOpen?: boolean;
@@ -210,6 +210,36 @@ export function MexicanBillPayModal({
   const currentMXN = servicioSeleccionado.sampleMXN;
   const currentUSD = +(currentMXN / exchangeRate).toFixed(2);
   const totalUSDToCharge = +(currentUSD + KIN_SERVICE_FEE).toFixed(2);
+
+  // Despliegue de Pantalla Completa Dedicada (Arquitectura Profesional sin Modales Flotantes)
+  if (isCardCheckoutOpen) {
+    return (
+      <CardCheckoutView
+        onBack={() => setIsCardCheckoutOpen(false)}
+        title={isEn ? 'Bill Pay Card Checkout' : 'Pago de Factura con Tarjeta'}
+        conceptTitle={servicioSeleccionado.nombre}
+        conceptSubtitle={`${servicioSeleccionado.sampleTitular} • ${servicioSeleccionado.sampleLocation} (${servicioSeleccionado.sampleContrato})`}
+        amountBaseUSD={currentUSD}
+        amountMXN={currentMXN}
+        feeUSD={KIN_SERVICE_FEE}
+        exchangeRate={exchangeRate}
+        language={language}
+        metadata={{
+          serviceId: servicioSeleccionado.id,
+          empresa: servicioSeleccionado.empresa,
+          contrato: servicioSeleccionado.sampleContrato,
+          titular: servicioSeleccionado.sampleTitular,
+        }}
+        onPaymentSuccess={() => {
+          setIsCardCheckoutOpen(false);
+          setIsSuccess(true);
+          if (onPaymentSuccess) {
+            onPaymentSuccess(servicioSeleccionado.nombre, currentMXN);
+          }
+        }}
+      />
+    );
+  }
 
   // Filter categories by search input
   const filteredServices = SERVICIOS_MEXICO.filter((s) =>
@@ -608,33 +638,6 @@ export function MexicanBillPayModal({
           </div>
         </div>
       )}
-
-      {/* Modal de Pago Seguro con Tarjeta en Stripe Sandbox */}
-      <KinCardCheckoutModal
-        isOpen={isCardCheckoutOpen}
-        onClose={() => setIsCardCheckoutOpen(false)}
-        title={isEn ? 'Bill Pay Card Checkout' : 'Pago de Factura con Tarjeta'}
-        conceptTitle={servicioSeleccionado.nombre}
-        conceptSubtitle={`${servicioSeleccionado.sampleTitular} • ${servicioSeleccionado.sampleLocation} (${servicioSeleccionado.sampleContrato})`}
-        amountBaseUSD={currentUSD}
-        amountMXN={currentMXN}
-        feeUSD={KIN_SERVICE_FEE}
-        exchangeRate={exchangeRate}
-        language={language}
-        metadata={{
-          serviceId: servicioSeleccionado.id,
-          empresa: servicioSeleccionado.empresa,
-          contrato: servicioSeleccionado.sampleContrato,
-          titular: servicioSeleccionado.sampleTitular,
-        }}
-        onPaymentSuccess={() => {
-          setIsCardCheckoutOpen(false);
-          setIsSuccess(true);
-          if (onPaymentSuccess) {
-            onPaymentSuccess(servicioSeleccionado.nombre, currentMXN);
-          }
-        }}
-      />
 
       {/* Modal de Cámara en Vivo y Escáner de Códigos de Barras */}
       <BillCameraScannerModal

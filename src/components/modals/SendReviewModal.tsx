@@ -66,14 +66,14 @@ export function SendReviewModal({
 
   return (
     <div
-      className="modal-backdrop animate-fade-in"
+      className="fixed inset-0 z-[160] bg-[#06070B] text-white flex flex-col items-center justify-start overflow-y-auto selection:bg-primary/30 selection:text-primary animate-fade-in p-3 sm:p-8"
       onClick={() => !isExecutingPayment && onClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="send-review-title"
     >
       <div
-        className="modal-card space-y-4 max-h-[92vh] flex flex-col overflow-hidden"
+        className="w-full max-w-2xl bg-[#0B0F17] border border-white/10 rounded-3xl p-5 sm:p-7 shadow-[0_24px_80px_rgba(0,0,0,0.9)] space-y-4 my-auto flex flex-col text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile drag handle for bottom sheet feel */}
