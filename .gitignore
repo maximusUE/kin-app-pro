@@ -37,4 +37,6 @@ scratch/
 *.pdf
 leads/
 lead-magnet/
+backups/
+*.tar.gz
 
