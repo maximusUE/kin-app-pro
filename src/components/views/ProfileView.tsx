@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToggleSwitch } from '@/components/AppSettingsModal';
-import { StripePaymentSheetModal, SavedCardItem } from '@/components/StripePaymentSheetModal';
+import { PaymentMethodsView, SavedCardItem } from '@/components/views/PaymentMethodsView';
 import { FxControlModal } from '@/components/FxControlModal';
 
 export interface ProfileViewProps {
@@ -128,6 +128,7 @@ export function ProfileView({
 
   // 5 Core Modals State (Exact mapping to stitch_kin_mobile_CLIENTE)
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
+  const [isPaymentMethodsViewActive, setIsPaymentMethodsViewActive] = useState(false);
   const [paymentCardsModalOpen, setPaymentCardsModalOpen] = useState(false);
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const [securityModalOpen, setSecurityModalOpen] = useState(false);
@@ -328,6 +329,19 @@ export function ProfileView({
   const displayEmail = userEmail || '';
   const displayPhone = draftPhone || userPhone || '';
 
+  if (isPaymentMethodsViewActive) {
+    return (
+      <PaymentMethodsView
+        onBack={() => setIsPaymentMethodsViewActive(false)}
+        savedCards={savedCards}
+        onSelectDefaultCard={handleSelectDefaultCard}
+        onAddNewCard={handleAddNewCardFromSheet}
+        onDeleteCard={handleDeleteCard}
+        language={language}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col w-full pb-8 select-none relative animate-fade-in">
       {/* Ambient Backdrop Halo Glows */}
@@ -446,7 +460,7 @@ export function ProfileView({
           type="button"
           aria-label={isEn ? 'Payment Methods and Cards' : 'Métodos de Pago y Tarjetas'}
           className="anim-stagger-3 touch-press w-full p-4 mb-2.5 rounded-2xl bg-surface-container-low hover:bg-surface-container text-left transition-colors flex items-center justify-between group shadow-md cursor-pointer border border-white/5"
-          onClick={() => setPaymentCardsModalOpen(true)}
+          onClick={() => setIsPaymentMethodsViewActive(true)}
         >
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
@@ -909,20 +923,6 @@ export function ProfileView({
           </div>
         </div>
       )}
-
-      {/* ========================================================================= */}
-      {/* MODAL 2: STRIPE MOBILE PAYMENT SHEET (APPLE PAY, LINK, CARDS & ACH)       */}
-      {/* ========================================================================= */}
-      <StripePaymentSheetModal
-        isOpen={paymentCardsModalOpen}
-        onClose={() => setPaymentCardsModalOpen(false)}
-        savedCards={savedCards}
-        onSelectDefaultCard={handleSelectDefaultCard}
-        onAddNewCard={handleAddNewCardFromSheet}
-        onDeleteCard={handleDeleteCard}
-        language={language}
-        userId={userId}
-      />
 
       {/* ========================================================================= */}
       {/* MODAL 3: IDIOMA / LANGUAGE SELECTOR                                       */}
