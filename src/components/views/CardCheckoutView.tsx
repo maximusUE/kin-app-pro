@@ -42,7 +42,7 @@ export function CardCheckoutView({
 }: CardCheckoutViewProps) {
   const isEn = language === 'en';
 
-  // Cards state - Pre-inicializado con INITIAL_SAVED_CARDS para evitar null pointers en primer render
+  // Cards state - Pre-inicializado con INITIAL_SAVED_CARDS para evitar null pointers
   const [cards, setCards] = useState<SavedCardItem[]>(INITIAL_SAVED_CARDS);
   const [selectedCardId, setSelectedCardId] = useState<string>(INITIAL_SAVED_CARDS[0]?.id || 'card-1');
   const [paymentMode, setPaymentMode] = useState<'saved' | 'new'>('saved');
@@ -80,23 +80,18 @@ export function CardCheckoutView({
     }
   }, []);
 
-  const totalUSD = +(amountBaseUSD + feeUSD).toFixed(2);
+  const activeCard = cards.find((c) => c.id === selectedCardId) || cards[0];
   const calculatedMXN = amountMXN || +(amountBaseUSD * exchangeRate).toFixed(2);
+  const totalUSD = +(amountBaseUSD + feeUSD).toFixed(2);
 
-  // Active selected card for visual preview (Con triple fallback ultra-seguro)
-  const activeCard = cards.find((c) => c.id === selectedCardId) || cards[0] || INITIAL_SAVED_CARDS[0];
-
-  // 1-Tap Autofill for Stripe Sandbox Test Card
+  // Quick helper to fill test Stripe 4242 sandbox card
   const handleAutofillTestCard = () => {
     setPaymentMode('new');
     setNewCardNumber('4242 4242 4242 4242');
     setNewCardExp('12/28');
-    setNewCardCvv('123');
-    setNewCardHolder('Don César (Prueba Sandbox)');
-    toast.success(
-      isEn ? 'Stripe Sandbox Test Card Loaded (4242)' : 'Tarjeta de Prueba Stripe Cargada (4242)',
-      { description: isEn ? 'Ready for instantaneous sandbox authorization' : 'Lista para autorización instantánea en Stripe Sandbox' }
-    );
+    setNewCardCvv('942');
+    setNewCardHolder('Don César (Stripe Tester)');
+    toast.info(isEn ? 'Stripe 4242 Sandbox Card Loaded' : 'Tarjeta de Prueba Stripe 4242 Cargada');
   };
 
   // Card number input formatter
@@ -164,37 +159,35 @@ export function CardCheckoutView({
         const updated = [newCardItem, ...cards];
         setCards(updated);
         saveStoredCards(updated);
+        setSelectedCardId(newCardItem.id);
       }
     }
 
     setIsProcessing(true);
-    setProcessingStatus(isEn ? 'Contacting Stripe Sandbox API...' : 'Conectando con nodo de Stripe Sandbox...');
+    setProcessingStatus(isEn ? 'Connecting to Stripe Gateway...' : 'Conectando con pasarela Stripe...');
 
     try {
-      // Direct call to live Stripe endpoint
-      const response = await fetch('/api/stripe/create-payment-intent', {
+      const res = await fetch('/api/stripe/payment-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: totalUSD,
-          currency: 'usd',
-          description: `${conceptTitle} - ${conceptSubtitle} (KIN App Pro)`,
+          amountUSD: totalUSD,
+          conceptTitle,
+          conceptSubtitle,
+          feeUSD,
+          amountBaseUSD,
           metadata: {
-            concept: conceptTitle,
-            subConcept: conceptSubtitle,
-            baseAmountUSD: amountBaseUSD.toString(),
-            serviceFeeUSD: feeUSD.toString(),
+            ...metadata,
             cardLast4: last4,
             cardBrand: brand,
-            ...metadata,
+            flow: 'bill-pay-card',
           },
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Stripe payment failed');
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Error al procesar el cobro');
       }
 
       setProcessingStatus(isEn ? 'Stripe approved. Generating SAT CFDI & Banxico stamp...' : 'Pago aprobado por Stripe. Generando timbre SAT CFDI y Banxico...');
@@ -270,65 +263,65 @@ export function CardCheckoutView({
   };
 
   // =========================================================================
-  // VISTA 1: RECIBO OFICIAL TRAS AUTORIZACIÓN EXITOSA EN STRIPE
+  // VISTA 1: RECIBO OFICIAL TRAS AUTORIZACIÓN EXITOSA (MODO APP MÓVIL 412PX)
   // =========================================================================
   if (successReceipt) {
     return (
-      <div className="fixed inset-0 z-[200] bg-[#06070B] text-white flex flex-col items-center justify-start overflow-y-auto selection:bg-primary/30 selection:text-primary animate-fade-in p-4 sm:p-8">
-        <div className="w-full max-w-2xl bg-[#0B0F17] border border-white/10 rounded-3xl p-6 sm:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.9)] space-y-6 my-auto text-center relative">
+      <div className="fixed inset-0 z-[200] bg-[#06070B] text-white flex justify-center overflow-y-auto selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4] p-3">
+        <div className="w-full max-w-[412px] bg-[#121622] border border-white/10 rounded-3xl p-5 shadow-2xl space-y-4 my-auto text-center relative">
           {/* Sello de Aprobación Institucional */}
-          <div className="w-20 h-20 mx-auto rounded-full bg-[#2ED5A4]/20 border-2 border-[#2ED5A4]/40 flex items-center justify-center text-[#2ED5A4] shadow-[0_0_32px_rgba(46,213,164,0.35)]">
-            <span className="material-symbols-outlined text-[48px] font-bold">verified</span>
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#2ED5A4]/20 border-2 border-[#2ED5A4]/40 flex items-center justify-center text-[#2ED5A4] shadow-[0_0_24px_rgba(46,213,164,0.35)]">
+            <span className="material-symbols-outlined text-[36px] font-bold">verified</span>
           </div>
 
-          <div className="space-y-1.5">
-            <span className="px-3.5 py-1 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-xs font-bold text-[#2ED5A4] uppercase tracking-wider inline-block">
+          <div className="space-y-1">
+            <span className="px-3 py-0.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[10px] font-bold text-[#2ED5A4] uppercase tracking-wider inline-block">
               {isEn ? 'Stripe Sandbox Authorized' : 'Autorizado por Stripe Sandbox'}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight pt-1">
+            <h1 className="text-xl font-black text-white tracking-tight pt-1">
               {isEn ? 'Payment Successfully Processed!' : '¡Pago Procesado con Éxito!'}
             </h1>
-            <p className="text-sm text-slate-400 font-medium">
+            <p className="text-xs text-[#A6ADC8]">
               {conceptTitle} • {conceptSubtitle}
             </p>
           </div>
 
           {/* Tarjeta de Montos Liquidados */}
-          <div className="w-full p-5 rounded-2xl bg-[#121622] border border-white/10 space-y-3 text-sm text-left shadow-inner">
-            <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
-              <span className="text-slate-400">{isEn ? 'Amount Settled in Mexico' : 'Monto Aplicado en México'}</span>
-              <span className="text-white font-bold font-mono text-base">
-                ${calculatedMXN.toFixed(2)} MXN <span className="text-xs text-slate-400">(${amountBaseUSD.toFixed(2)} USD)</span>
+          <div className="w-full p-4 rounded-2xl bg-[#0B0F17] border border-white/10 space-y-2 text-xs text-left shadow-inner">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <span className="text-[#A6ADC8]">{isEn ? 'Amount Settled in Mexico' : 'Monto Aplicado en México'}</span>
+              <span className="text-white font-bold font-mono text-sm">
+                ${calculatedMXN.toFixed(2)} MXN <span className="text-[11px] text-[#A6ADC8]">(${amountBaseUSD.toFixed(2)} USD)</span>
               </span>
             </div>
-            <div className="flex items-center justify-between text-slate-400">
+            <div className="flex items-center justify-between text-[#A6ADC8]">
               <span className="flex items-center gap-1.5">
                 <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
-                <span className="px-2 py-0.5 rounded bg-primary/20 text-[#2ED5A4] text-[10px] font-bold">TARIFA</span>
+                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-[#2ED5A4] text-[9px] font-bold">TARIFA</span>
               </span>
               <span className="text-[#2ED5A4] font-bold font-mono">+${feeUSD.toFixed(2)} USD</span>
             </div>
-            <div className="flex items-center justify-between text-slate-400">
+            <div className="flex items-center justify-between text-[#A6ADC8]">
               <span>{isEn ? 'Payment Method' : 'Tarjeta Utilizada'}</span>
               <span className="text-white font-bold font-mono">{successReceipt.cardBrand} •••• {successReceipt.cardLast4}</span>
             </div>
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between">
               <div>
-                <span className="text-base font-bold text-white block">{isEn ? 'Total Charged' : 'Total Cobrado'}</span>
-                <span className="text-xs text-slate-400">Debitado vía Stripe Sandbox</span>
+                <span className="text-xs font-bold text-white block">{isEn ? 'Total Charged' : 'Total Cobrado'}</span>
+                <span className="text-[10px] text-[#A6ADC8]">Debitado vía Stripe Sandbox</span>
               </div>
-              <span className="text-2xl font-black text-[#2ED5A4] font-mono">
-                ${successReceipt.totalUSD.toFixed(2)} <span className="text-sm text-white">USD</span>
+              <span className="text-xl font-black text-[#2ED5A4] font-mono">
+                ${successReceipt.totalUSD.toFixed(2)} <span className="text-xs text-white">USD</span>
               </span>
             </div>
           </div>
 
           {/* Folios Fiscales y de Auditoría Bancaria */}
-          <div className="w-full p-4 rounded-2xl bg-black/60 border border-white/10 text-xs space-y-2.5 text-left font-mono">
+          <div className="w-full p-3.5 rounded-2xl bg-black/60 border border-white/10 text-[11px] space-y-2 text-left font-mono">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Folio Stripe PI:</span>
-              <div className="flex items-center gap-2">
-                <span className="text-[#2ED5A4] font-bold truncate max-w-[220px] sm:max-w-none">
+              <span className="text-[#A6ADC8]">Folio Stripe PI:</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#2ED5A4] font-bold truncate max-w-[170px]">
                   {successReceipt.paymentIntentId}
                 </span>
                 <button
@@ -337,41 +330,41 @@ export function CardCheckoutView({
                   className="p-1 rounded bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
                   title={isEn ? 'Copy' : 'Copiar'}
                 >
-                  <span className="material-symbols-outlined text-[15px]">
+                  <span className="material-symbols-outlined text-[13px]">
                     {copiedFolio ? 'check' : 'content_copy'}
                   </span>
                 </button>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Timbre SAT CFDI 4.0:</span>
+              <span className="text-[#A6ADC8]">Timbre SAT CFDI:</span>
               <span className="text-slate-200 font-semibold">{successReceipt.satUuid}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Rastreo SPEI Banxico:</span>
-              <span className="text-slate-200 font-semibold">{successReceipt.banxicoTracking}</span>
+              <span className="text-[#A6ADC8]">Rastreo Banxico:</span>
+              <span className="text-white font-bold">{successReceipt.banxicoTracking}</span>
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-white/10">
-              <span>Fecha: {successReceipt.date}</span>
-              <span>Hora: {successReceipt.time}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[#A6ADC8]">Fecha y Hora:</span>
+              <span className="text-slate-300">{successReceipt.date} • {successReceipt.time}</span>
             </div>
           </div>
 
           {/* Acciones de Footer del Comprobante */}
-          <div className="w-full space-y-3 pt-2">
+          <div className="w-full space-y-2.5 pt-1">
             <button
               type="button"
               onClick={handleShareWhatsApp}
-              className="w-full h-14 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-slate-950 font-bold text-sm flex items-center justify-center gap-2.5 shadow-lg transition-transform active:scale-[0.98] cursor-pointer"
+              className="w-full h-12 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-[0.98] cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[22px]">share</span>
-              <span>{isEn ? 'Share Receipt via WhatsApp' : 'Compartir Comprobante por WhatsApp'}</span>
+              <span className="material-symbols-outlined text-[20px]">share</span>
+              <span>{isEn ? 'Share via WhatsApp' : 'Compartir por WhatsApp'}</span>
             </button>
 
             <button
               type="button"
               onClick={onBack}
-              className="w-full h-12 rounded-full bg-white/10 hover:bg-white/15 text-white text-sm font-semibold transition-colors cursor-pointer active:scale-[0.98]"
+              className="w-full h-11 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-colors cursor-pointer active:scale-[0.98]"
             >
               {isEn ? 'Done & Return to Services' : 'Listo y Regresar a Servicios'}
             </button>
@@ -382,402 +375,384 @@ export function CardCheckoutView({
   }
 
   // =========================================================================
-  // VISTA 2: PÁGINA COMPLETA DE CHECKOUT PROFESIONAL (RESPONSIVA)
+  // VISTA 2: CHECKOUT EN "MODO APP" NATIVO (CENTRADÍSIMO EN 412PX, CERO MODO WEB)
   // =========================================================================
   return (
-    <div className="fixed inset-0 z-[150] bg-[#06070B] text-white flex flex-col overflow-y-auto selection:bg-primary/30 selection:text-primary animate-fade-in">
-      {/* 1. Header Nativo de Pantalla Completa */}
-      <header className="sticky top-0 z-40 bg-[#06070B]/95 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between shrink-0 shadow-md">
-        <div className="flex items-center gap-3">
+    <div className="fixed inset-0 z-[150] bg-[#06070B] text-white flex justify-center overflow-y-auto selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4]">
+      {/* Contenedor Ergonómico de App Móvil (Exacto 412px, apilado nativo) */}
+      <div className="w-full max-w-[412px] min-h-screen flex flex-col relative bg-[#06070B] pb-32">
+        
+        {/* 1. Header Nativo de App Móvil */}
+        <header className="sticky top-0 z-40 bg-[#06070B]/95 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between shrink-0 shadow-md">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onBack}
+              disabled={isProcessing}
+              className="w-9 h-9 rounded-xl bg-[#121622] hover:bg-[#1a2030] border border-white/10 flex items-center justify-center text-[#2ED5A4] cursor-pointer transition-all active:scale-95 disabled:opacity-40"
+              title={isEn ? 'Back' : 'Regresar'}
+            >
+              <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+            </button>
+            <div>
+              <h1 className="text-sm font-bold text-white leading-tight font-headline-md tracking-tight flex items-center gap-1.5">
+                <span>{title || (isEn ? 'Card Checkout' : 'Pago con Tarjeta')}</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-[#2ED5A4] text-[9px] font-bold border border-emerald-500/30">
+                  Sandbox
+                </span>
+              </h1>
+              <p className="text-[10px] text-[#A6ADC8] flex items-center gap-1">
+                <span className="material-symbols-outlined text-[12px] text-[#2ED5A4]">verified_user</span>
+                <span>{isEn ? 'AES-256 Encryption • Banxico SPEI' : 'Cifrado Bancario AES-256 • Banxico'}</span>
+              </p>
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={onBack}
             disabled={isProcessing}
-            className="w-10 h-10 rounded-xl bg-[#121622] hover:bg-[#1a2030] border border-white/10 flex items-center justify-center text-primary cursor-pointer transition-all active:scale-95 disabled:opacity-40"
-            title={isEn ? 'Back' : 'Regresar'}
+            className="w-8 h-8 rounded-full bg-[#121622] hover:bg-white/10 flex items-center justify-center text-[#A6ADC8] hover:text-white transition-colors cursor-pointer disabled:opacity-40"
           >
-            <span className="material-symbols-outlined text-[24px]">chevron_left</span>
+            <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-white leading-tight font-headline-md tracking-tight flex items-center gap-2">
-              <span>{title || (isEn ? 'Card Checkout' : 'Pago Seguro con Tarjeta')}</span>
-              <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold border border-primary/20">
-                Stripe Sandbox
-              </span>
-            </h1>
-            <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[14px] text-primary">verified_user</span>
-              <span>{isEn ? 'Zero-Knowledge Security • 256-bit Encryption' : 'Seguridad Bancaria Cifrada AES-256 • Banxico'}</span>
-            </p>
-          </div>
-        </div>
+        </header>
 
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={isProcessing}
-          className="w-9 h-9 rounded-full bg-[#121622] hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer disabled:opacity-40"
-        >
-          <span className="material-symbols-outlined text-[20px]">close</span>
-        </button>
-      </header>
-
-      {/* 2. Cuerpo Principal: Estructura Expansiva en Escritorio / Fluida en Móvil */}
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 pb-28">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        {/* 2. Cuerpo Apilado Vertical en Modo App */}
+        <main className="flex-1 w-full px-4 pt-3.5 space-y-4">
           
-          {/* ========================================================================= */}
-          {/* COLUMNA IZQUIERDA (5 COLS): DESGLOSE FINANCIERO Y CERTIFICADO DEL RECIBO  */}
-          {/* ========================================================================= */}
-          <div className="lg:col-span-5 space-y-5">
-            {/* Tarjeta de Factura Oficial / Concepto */}
-            <div className="p-5 rounded-3xl bg-[#0B0F17] border border-white/10 shadow-xl space-y-4 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+          {/* A. Tarjeta de Factura Oficial / Concepto */}
+          <div className="p-4 rounded-3xl bg-[#121622] border border-white/10 shadow-xl space-y-3 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
 
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary block">
-                    {isEn ? 'Service Invoice' : 'Factura de Servicio'}
-                  </span>
-                  <h3 className="text-lg font-bold text-white leading-tight mt-0.5">{conceptTitle}</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">{conceptSubtitle}</p>
-                </div>
-                <span className="px-2.5 py-1 rounded-full bg-primary/20 text-primary text-[11px] font-bold border border-primary/30">
-                  {isEn ? 'Verified' : 'Verificado'}
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-[#2ED5A4] block">
+                  {isEn ? 'Service Invoice' : 'Factura de Servicio'}
                 </span>
+                <h3 className="text-base font-bold text-white leading-tight mt-0.5">{conceptTitle}</h3>
+                <p className="text-xs text-[#A6ADC8] mt-0.5">{conceptSubtitle}</p>
               </div>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[#2ED5A4] text-[10px] font-bold border border-emerald-500/30">
+                {isEn ? 'Verified' : 'Verificado'}
+              </span>
+            </div>
 
-              {/* Simulación de Código de Barras / Contrato */}
-              <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-2 font-mono text-xs">
-                <div className="flex justify-between text-slate-400 text-[11px]">
-                  <span>Identificador Oficial:</span>
-                  <span className="text-white font-bold">{metadata?.contrato || '0182 9384 7162'}</span>
-                </div>
-                <div className="flex justify-between text-slate-400 text-[11px]">
-                  <span>Titular Registrado:</span>
-                  <span className="text-slate-200">{metadata?.titular || 'Casa Mamá'}</span>
-                </div>
-                {/* Visual de Código de Barras */}
-                <div className="pt-1 flex items-center justify-center gap-1 opacity-70">
-                  <div className="h-6 w-1 bg-white" />
-                  <div className="h-6 w-0.5 bg-white" />
-                  <div className="h-6 w-2 bg-white" />
-                  <div className="h-6 w-1 bg-white" />
-                  <div className="h-6 w-0.5 bg-white" />
-                  <div className="h-6 w-3 bg-white" />
-                  <div className="h-6 w-1 bg-white" />
-                  <div className="h-6 w-2 bg-white" />
-                  <div className="h-6 w-0.5 bg-white" />
-                  <div className="h-6 w-1 bg-white" />
-                  <div className="h-6 w-2 bg-white" />
-                </div>
+            {/* Simulación de Código de Barras / Contrato */}
+            <div className="p-2.5 rounded-2xl bg-black/40 border border-white/5 space-y-1.5 font-mono text-[11px]">
+              <div className="flex justify-between text-[#A6ADC8]">
+                <span>Identificador Oficial:</span>
+                <span className="text-white font-bold">{metadata?.contrato || '0182 9384 7162'}</span>
               </div>
-
-              {/* Desglose de Costos Transparente (Nivel Institucional) */}
-              <div className="space-y-2.5 pt-2 border-t border-white/10 text-xs">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span>{isEn ? 'Official Invoice Amount' : 'Monto Oficial del Recibo'}</span>
-                  <span className="font-mono font-semibold text-white">
-                    ${calculatedMXN.toFixed(2)} MXN (${amountBaseUSD.toFixed(2)} USD)
-                  </span>
-                </div>
-
-                {/* NUESTRA GANANCIA / CARGO POR ENVÍO TRANSPARENTE */}
-                <div className="flex items-center justify-between text-slate-300">
-                  <span className="flex items-center gap-1.5">
-                    <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
-                    <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[9px] font-bold">
-                      TARIFA
-                    </span>
-                  </span>
-                  <span className="font-mono font-bold text-primary">+${feeUSD.toFixed(2)} USD</span>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
-                  <span>{isEn ? 'Guaranteed Rate (Frozen 15m)' : 'Tipo de Cambio Garantizado (15 min)'}</span>
-                  <span className="font-mono">1 USD = {exchangeRate.toFixed(2)} MXN</span>
-                </div>
-
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                  <div>
-                    <span className="text-sm font-bold text-white block">
-                      {isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      {isEn ? 'Debited via Stripe Sandbox' : 'Debitado vía Stripe Sandbox'}
-                    </span>
-                  </div>
-                  <span className="text-2xl font-black font-mono text-primary">
-                    ${totalUSD.toFixed(2)} <span className="text-xs text-white">USD</span>
-                  </span>
-                </div>
+              <div className="flex justify-between text-[#A6ADC8]">
+                <span>Titular Registrado:</span>
+                <span className="text-slate-200">{metadata?.titular || 'Casa Mamá'}</span>
+              </div>
+              {/* Visual de Código de Barras */}
+              <div className="pt-1 flex items-center justify-center gap-1 opacity-70">
+                <div className="h-5 w-1 bg-white" />
+                <div className="h-5 w-0.5 bg-white" />
+                <div className="h-5 w-2 bg-white" />
+                <div className="h-5 w-1 bg-white" />
+                <div className="h-5 w-0.5 bg-white" />
+                <div className="h-5 w-3 bg-white" />
+                <div className="h-5 w-1 bg-white" />
+                <div className="h-5 w-2 bg-white" />
+                <div className="h-5 w-0.5 bg-white" />
+                <div className="h-5 w-1 bg-white" />
+                <div className="h-5 w-2 bg-white" />
               </div>
             </div>
 
-            {/* Sellos de Cumplimiento SAT y Banxico */}
-            <div className="p-4 rounded-2xl bg-[#0B0F17] border border-white/10 flex items-center gap-3 text-xs text-slate-400">
-              <span className="material-symbols-outlined text-primary text-[24px] shrink-0">verified</span>
-              <span>
-                {isEn
-                  ? 'Official SAT CFDI 4.0 voucher & Banxico CEP tracking generated instantly upon card debit authorization.'
-                  : 'Comprobante fiscal oficial SAT CFDI 4.0 y clave de rastreo Banxico emitidos en tiempo real al autorizar el cobro.'}
-              </span>
+            {/* Desglose de Costos Transparente (Nivel Institucional) */}
+            <div className="space-y-2 pt-2 border-t border-white/10 text-xs">
+              <div className="flex items-center justify-between text-[#A6ADC8]">
+                <span>{isEn ? 'Official Invoice Amount' : 'Monto Oficial del Recibo'}</span>
+                <span className="font-mono font-semibold text-white">
+                  ${calculatedMXN.toFixed(2)} MXN (${amountBaseUSD.toFixed(2)} USD)
+                </span>
+              </div>
+
+              {/* NUESTRA GANANCIA / CARGO POR ENVÍO TRANSPARENTE */}
+              <div className="flex items-center justify-between text-slate-300">
+                <span className="flex items-center gap-1.5">
+                  <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-[#2ED5A4] text-[9px] font-bold">
+                    TARIFA
+                  </span>
+                </span>
+                <span className="font-mono font-bold text-[#2ED5A4]">+${feeUSD.toFixed(2)} USD</span>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-[#A6ADC8]">
+                <span>{isEn ? 'Guaranteed Rate (Frozen 15m)' : 'Tipo de Cambio Garantizado (15 min)'}</span>
+                <span className="font-mono">1 USD = {exchangeRate.toFixed(2)} MXN</span>
+              </div>
+
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-white block">
+                    {isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}
+                  </span>
+                  <span className="text-[10px] text-[#A6ADC8]">
+                    {isEn ? 'Debited via Stripe Sandbox' : 'Debitado vía Stripe Sandbox'}
+                  </span>
+                </div>
+                <span className="text-xl font-black font-mono text-[#2ED5A4]">
+                  ${totalUSD.toFixed(2)} <span className="text-xs text-white">USD</span>
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* ========================================================================= */}
-          {/* COLUMNA DERECHA (7 COLS): TERMINAL DE TARJETA Y AUTORIZACIÓN STRIPE        */}
-          {/* ========================================================================= */}
-          <div className="lg:col-span-7 space-y-5">
-            {/* Visual de Tarjeta Digital Titanium */}
-            <div className="w-full rounded-3xl bg-gradient-to-tr from-[#151922] via-[#0E121A] to-[#1C2331] p-6 border border-white/15 shadow-2xl relative overflow-hidden text-white flex flex-col justify-between min-h-[190px]">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          {/* B. Visual de Tarjeta Digital Titanium (Aspecto Móvil) */}
+          <div className="w-full rounded-2xl bg-gradient-to-tr from-[#151922] via-[#0E121A] to-[#1C2331] p-4.5 border border-white/15 shadow-xl relative overflow-hidden text-white flex flex-col justify-between min-h-[175px]">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#2ED5A4]/10 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black tracking-widest uppercase text-slate-300">KIN DIGITAL TITANIUM</span>
-                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-[9px] font-bold text-slate-300 uppercase">
-                    EMV Contactless
-                  </span>
-                </div>
-                <span className="text-lg font-black tracking-tight font-headline-md text-white">
-                  {paymentMode === 'new' ? 'VISA / MC' : ((activeCard?.brand || 'visa').toUpperCase())}
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-black tracking-widest uppercase text-slate-300">KIN DIGITAL TITANIUM</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-white/10 text-[8px] font-bold text-slate-300 uppercase">
+                  EMV Contactless
                 </span>
               </div>
+              <span className="text-base font-black tracking-tight font-headline-md text-white">
+                {paymentMode === 'new' ? 'VISA / MC' : ((activeCard?.brand || 'visa').toUpperCase())}
+              </span>
+            </div>
 
-              {/* Monospace Card Number Preview */}
-              <div className="py-4 relative z-10">
-                <div className="font-mono text-lg sm:text-xl font-bold tracking-[0.25em] text-white">
-                  {paymentMode === 'new'
-                    ? (newCardNumber || '•••• •••• •••• ••••')
-                    : `•••• •••• •••• ${activeCard?.last4 || '8942'}`}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-slate-400 relative z-10">
-                <div>
-                  <span className="text-[9px] uppercase tracking-wider block text-slate-400">Titular</span>
-                  <span className="font-bold text-white truncate max-w-[180px] block">
-                    {paymentMode === 'new' ? (newCardHolder || 'NOMBRE TITULAR') : (activeCard?.name || 'Tarjeta Principal')}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[9px] uppercase tracking-wider block text-slate-400">Vence</span>
-                  <span className="font-mono font-bold text-white">
-                    {paymentMode === 'new' ? (newCardExp || 'MM/AA') : (activeCard?.exp || '12/28')}
-                  </span>
-                </div>
+            {/* Monospace Card Number Preview */}
+            <div className="py-2.5 relative z-10">
+              <div className="font-mono text-base font-bold tracking-[0.2em] text-white">
+                {paymentMode === 'new'
+                  ? (newCardNumber || '•••• •••• •••• ••••')
+                  : `•••• •••• •••• ${activeCard?.last4 || '8942'}`}
               </div>
             </div>
 
-            {/* Banner de Entorno de Pruebas Sandbox con Botón 1-Toque */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs shadow-md">
-              <div className="flex items-center gap-2.5">
-                <span className="material-symbols-outlined text-[22px]">bug_report</span>
-                <div>
-                  <strong className="block text-white leading-tight">
-                    {isEn ? 'Sandbox Testing Rail Active' : 'Riel de Pruebas Stripe Sandbox Activo'}
-                  </strong>
-                  <span className="text-[11px] text-amber-200/80">
-                    {isEn ? 'Click to instantly autofill test card 4242' : 'Clic para rellenar automáticamente la tarjeta de prueba 4242'}
-                  </span>
-                </div>
+            <div className="flex items-center justify-between text-[11px] text-[#A6ADC8] relative z-10">
+              <div>
+                <span className="text-[8px] uppercase tracking-wider block text-[#A6ADC8]">Titular</span>
+                <span className="font-bold text-white truncate max-w-[170px] block">
+                  {paymentMode === 'new' ? (newCardHolder || 'NOMBRE TITULAR') : (activeCard?.name || 'Tarjeta Principal')}
+                </span>
               </div>
-              <button
-                type="button"
-                onClick={handleAutofillTestCard}
-                className="px-3 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:brightness-110 active:scale-95 transition-transform cursor-pointer shrink-0 shadow-sm"
-              >
-                {isEn ? '⚡ Fill Test Card' : '⚡ Rellenar 4242'}
-              </button>
+              <div>
+                <span className="text-[8px] uppercase tracking-wider block text-[#A6ADC8]">Vence</span>
+                <span className="font-mono font-bold text-white">
+                  {paymentMode === 'new' ? (newCardExp || 'MM/AA') : (activeCard?.exp || '12/28')}
+                </span>
+              </div>
             </div>
+          </div>
 
-            {/* Selector de Pestañas: Guardadas vs Nueva */}
-            <div className="grid grid-cols-2 p-1.5 rounded-2xl bg-[#0B0F17] border border-white/10 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setPaymentMode('saved')}
-                className={`py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                  paymentMode === 'saved'
-                    ? 'bg-[#2ED5A4] text-slate-950 font-bold shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-                <span>{isEn ? 'Saved Cards' : 'Tarjetas Guardadas'} ({cards.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPaymentMode('new')}
-                className={`py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                  paymentMode === 'new'
-                    ? 'bg-[#2ED5A4] text-slate-950 font-bold shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px]">add_card</span>
-                <span>{isEn ? 'New Card' : 'Ingresar Nueva Tarjeta'}</span>
-              </button>
+          {/* C. Banner de Entorno de Pruebas Sandbox con Botón 1-Toque */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs shadow-md">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px]">bug_report</span>
+              <div>
+                <strong className="block text-white text-xs leading-tight">
+                  {isEn ? 'Sandbox Testing Rail Active' : 'Riel de Pruebas Stripe Sandbox'}
+                </strong>
+                <span className="text-[10px] text-amber-200/80">
+                  {isEn ? 'Click to fill test card 4242' : 'Clic para rellenar tarjeta 4242'}
+                </span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={handleAutofillTestCard}
+              className="px-2.5 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-[11px] hover:brightness-110 active:scale-95 transition-transform cursor-pointer shrink-0 shadow-sm"
+            >
+              {isEn ? '⚡ Fill 4242' : '⚡ Rellenar 4242'}
+            </button>
+          </div>
 
-            {/* OPCIÓN A: TARJETAS GUARDADAS */}
-            {paymentMode === 'saved' && (
-              <div className="space-y-2.5">
-                {cards.map((c) => {
-                  const isSelected = selectedCardId === c.id;
-                  return (
-                    <div
-                      key={c.id}
-                      onClick={() => setSelectedCardId(c.id)}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                        isSelected
-                          ? 'bg-[#121622] border-primary shadow-[0_4px_20px_rgba(46,213,164,0.15)]'
-                          : 'bg-[#0B0F17] border-white/5 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-8 rounded-lg bg-gradient-to-br from-slate-800 to-slate-950 border border-white/20 flex items-center justify-center text-xs font-black text-white uppercase tracking-wider">
-                          {(c.brand || 'visa').toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-white flex items-center gap-2">
-                            <span>{c.name}</span>
-                            {c.isDefault && (
-                              <span className="px-2 py-0.5 rounded-full bg-white/10 text-slate-300 text-[10px] uppercase font-bold">
-                                {isEn ? 'Primary' : 'Predeterminada'}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-xs text-slate-400 font-mono mt-0.5">
-                            •••• {c.last4} • Vence {c.exp}
-                          </p>
-                        </div>
+          {/* D. Selector de Pestañas Móviles: Guardadas vs Nueva */}
+          <div className="grid grid-cols-2 p-1 rounded-2xl bg-[#121622] border border-white/10 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setPaymentMode('saved')}
+              className={`py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                paymentMode === 'saved'
+                  ? 'bg-[#2ED5A4] text-slate-950 font-bold shadow-md'
+                  : 'text-[#A6ADC8] hover:text-white'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+              <span>{isEn ? 'Saved Cards' : 'Tarjetas Guardadas'} ({cards.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPaymentMode('new')}
+              className={`py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                paymentMode === 'new'
+                  ? 'bg-[#2ED5A4] text-slate-950 font-bold shadow-md'
+                  : 'text-[#A6ADC8] hover:text-white'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">add_card</span>
+              <span>{isEn ? 'New Card' : 'Nueva Tarjeta'}</span>
+            </button>
+          </div>
+
+          {/* OPCIÓN A: TARJETAS GUARDADAS */}
+          {paymentMode === 'saved' && (
+            <div className="space-y-2">
+              {cards.map((c) => {
+                const isSelected = selectedCardId === c.id;
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => setSelectedCardId(c.id)}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      isSelected
+                        ? 'bg-[#181825] border-[#2ED5A4] shadow-[0_0_15px_rgba(46,213,164,0.2)]'
+                        : 'bg-[#121622] border-white/5 hover:border-white/15'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-7 rounded-lg bg-gradient-to-br from-slate-800 to-slate-950 border border-white/20 flex items-center justify-center text-[10px] font-black text-white uppercase tracking-wider">
+                        {(c.brand || 'visa').toUpperCase()}
                       </div>
-
-                      <div
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                          isSelected
-                            ? 'border-primary bg-primary text-slate-950'
-                            : 'border-slate-500 bg-transparent'
-                        }`}
-                      >
-                        {isSelected && <span className="material-symbols-outlined text-[16px] font-bold">check</span>}
+                      <div>
+                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>{c.name}</span>
+                          {c.isDefault && (
+                            <span className="px-1.5 py-0.2 rounded-full bg-white/10 text-slate-300 text-[8px] uppercase font-bold">
+                              {isEn ? 'Primary' : 'Predeterminada'}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-[11px] text-[#A6ADC8] font-mono mt-0.5">
+                          •••• {c.last4} • Vence {c.exp}
+                        </p>
                       </div>
                     </div>
-                  );
-                })}
+
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected
+                          ? 'border-[#2ED5A4] bg-[#2ED5A4] text-slate-950'
+                          : 'border-slate-500 bg-transparent'
+                      }`}
+                    >
+                      {isSelected && <span className="material-symbols-outlined text-[14px] font-bold">check</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* OPCIÓN B: INGRESAR NUEVA TARJETA */}
+          {paymentMode === 'new' && (
+            <div className="space-y-3 p-4 rounded-3xl bg-[#121622] border border-white/10 shadow-lg">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                  {isEn ? 'Card Number (Debit or Credit)' : 'Número de Tarjeta (Débito o Crédito)'}
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={newCardNumber}
+                    onChange={handleCardNumberChange}
+                    placeholder="4242 4242 4242 4242"
+                    className="w-full h-11 px-3.5 rounded-xl bg-[#181825] border border-white/10 text-xs text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-[#2ED5A4] focus:ring-1 focus:ring-[#2ED5A4] transition-all"
+                  />
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+                    credit_card
+                  </span>
+                </div>
               </div>
-            )}
 
-            {/* OPCIÓN B: INGRESAR NUEVA TARJETA */}
-            {paymentMode === 'new' && (
-              <div className="space-y-3.5 p-5 rounded-3xl bg-[#0B0F17] border border-white/10 shadow-lg">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    {isEn ? 'Card Number (Debit or Credit)' : 'Número de Tarjeta (Débito o Crédito)'}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={newCardNumber}
-                      onChange={handleCardNumberChange}
-                      placeholder="4242 4242 4242 4242"
-                      className="w-full h-12 px-4 rounded-xl bg-[#121622] border border-white/10 text-sm text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                    />
-                    <span className="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">
-                      credit_card
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      {isEn ? 'Exp (MM/YY)' : 'Vencimiento (MM/AA)'}
-                    </label>
-                    <input
-                      type="text"
-                      value={newCardExp}
-                      onChange={handleExpChange}
-                      placeholder="MM/AA"
-                      className="w-full h-12 px-4 rounded-xl bg-[#121622] border border-white/10 text-sm text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      {isEn ? 'CVC Security' : 'Código CVC'}
-                    </label>
-                    <input
-                      type="password"
-                      maxLength={4}
-                      value={newCardCvv}
-                      onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                      placeholder="123"
-                      className="w-full h-12 px-4 rounded-xl bg-[#121622] border border-white/10 text-sm text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    {isEn ? 'Cardholder Full Name' : 'Nombre Completo del Titular'}
+                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    {isEn ? 'Exp (MM/YY)' : 'Vencimiento (MM/AA)'}
                   </label>
                   <input
                     type="text"
-                    value={newCardHolder}
-                    onChange={(e) => setNewCardHolder(e.target.value)}
-                    placeholder="Como aparece en el plástico bancario"
-                    className="w-full h-12 px-4 rounded-xl bg-[#121622] border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                    value={newCardExp}
+                    onChange={handleExpChange}
+                    placeholder="MM/AA"
+                    className="w-full h-11 px-3.5 rounded-xl bg-[#181825] border border-white/10 text-xs text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-[#2ED5A4] focus:ring-1 focus:ring-[#2ED5A4] transition-all"
                   />
                 </div>
-
-                <label className="flex items-center gap-2.5 pt-1 text-xs text-slate-300 cursor-pointer">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    {isEn ? 'CVC Security' : 'Código CVC'}
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={saveCardInVault}
-                    onChange={(e) => setSaveCardInVault(e.target.checked)}
-                    className="w-4 h-4 rounded bg-[#121622] border-white/20 text-primary focus:ring-0 cursor-pointer"
+                    type="password"
+                    maxLength={4}
+                    value={newCardCvv}
+                    onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="123"
+                    className="w-full h-11 px-3.5 rounded-xl bg-[#181825] border border-white/10 text-xs text-white placeholder:text-slate-500 font-mono focus:outline-none focus:border-[#2ED5A4] focus:ring-1 focus:ring-[#2ED5A4] transition-all"
                   />
-                  <span>{isEn ? 'Save card securely in encrypted vault for future transactions' : 'Guardar tarjeta en bóveda cifrada para transacciones futuras'}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                  {isEn ? 'Cardholder Full Name' : 'Nombre Completo del Titular'}
                 </label>
+                <input
+                  type="text"
+                  value={newCardHolder}
+                  onChange={(e) => setNewCardHolder(e.target.value)}
+                  placeholder="Como aparece en el plástico"
+                  className="w-full h-11 px-3.5 rounded-xl bg-[#181825] border border-white/10 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#2ED5A4] focus:ring-1 focus:ring-[#2ED5A4] transition-all"
+                />
               </div>
-            )}
 
-            {/* BOTÓN PRIMARIO DE AUTORIZACIÓN STRIPE */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleAuthorizePayment}
-                disabled={isProcessing}
-                className="w-full h-15 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-slate-950 font-bold font-headline-md text-base shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
-                    <span>{processingStatus || (isEn ? 'Authorizing in Stripe...' : 'Autorizando en Stripe...')}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined text-[22px]">lock</span>
-                    <span>
-                      {isEn ? 'Authorize Secure Payment' : 'Autorizar Pago Seguro'} • ${totalUSD.toFixed(2)} USD
-                    </span>
-                  </>
-                )}
-              </button>
-
-              <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 mt-3 text-center">
-                <span className="material-symbols-outlined text-[14px] text-primary">verified</span>
-                <span>
-                  {isEn ? 'Protected by Stripe Sandbox & Banco de México SPEI Regulations' : 'Protegido por Stripe Sandbox y Normativa SPEI de Banco de México'}
-                </span>
-              </div>
+              <label className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={saveCardInVault}
+                  onChange={(e) => setSaveCardInVault(e.target.checked)}
+                  className="w-4 h-4 rounded bg-[#181825] border-white/20 text-[#2ED5A4] focus:ring-0 cursor-pointer"
+                />
+                <span>{isEn ? 'Save card securely in encrypted vault' : 'Guardar tarjeta en bóveda cifrada KIN'}</span>
+              </label>
             </div>
+          )}
 
+          {/* BOTÓN PRIMARIO DE AUTORIZACIÓN STRIPE EN MODO APP */}
+          <div className="pt-2 pb-6">
+            <button
+              type="button"
+              onClick={handleAuthorizePayment}
+              disabled={isProcessing}
+              className="w-full h-14 rounded-full bg-gradient-to-r from-[#2ED5A4] to-[#18A57E] text-slate-950 font-bold text-sm shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {isProcessing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <span>{processingStatus || (isEn ? 'Authorizing in Stripe...' : 'Autorizando en Stripe...')}</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[20px]">lock</span>
+                  <span>
+                    {isEn ? 'Authorize Secure Payment' : 'Autorizar Pago Seguro'} • ${totalUSD.toFixed(2)} USD
+                  </span>
+                </>
+              )}
+            </button>
+
+            <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#A6ADC8] mt-2.5 text-center">
+              <span className="material-symbols-outlined text-[13px] text-[#2ED5A4]">verified</span>
+              <span>
+                {isEn ? 'Protected by Stripe Sandbox & Banxico SPEI' : 'Protegido por Stripe Sandbox y Normativa SPEI de Banco de México'}
+              </span>
+            </div>
           </div>
-        </div>
-      </main>
+
+        </main>
+      </div>
     </div>
   );
 }
