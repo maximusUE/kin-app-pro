@@ -2529,60 +2529,106 @@ export function SendView({
         </div>
       )}
 
-      {/* TRANSPARENT FEE BREAKDOWN CARD */}
-      <div className="rounded-2xl bg-surface-container p-4 shadow-md space-y-2.5 border border-white/5">
-        <div className="flex items-center justify-between">
-          <span className="font-caption-sm text-xs text-on-surface-variant">
-            {isEn ? 'Transfer Fee' : 'Comisión por Envío'}
-          </span>
-          <div className="flex items-center gap-1.5">
-            <span className="font-financial-mono text-xs text-on-surface-variant line-through">$4.99</span>
-            <span className="font-financial-mono text-xs text-primary font-bold">
-              {isEn ? '$0.00 Free' : '$0.00 Gratis'}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="font-caption-sm text-xs text-on-surface-variant">
-            {isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}
-          </span>
-          <span className="font-financial-mono text-xs text-on-surface font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="font-caption-sm text-xs text-on-surface-variant">
-            {isEn ? 'Estimated Delivery Time' : 'Tiempo Estimado de Entrega'}
-          </span>
-          <span className="font-caption-sm text-xs text-primary font-bold flex items-center gap-1">
-            <span className="material-symbols-outlined text-[15px]">bolt</span> {isEn ? 'Within 5 minutes' : 'En menos de 5 minutos'}
-          </span>
-        </div>
-        <div className="pt-2 flex items-center justify-between border-t border-white/5">
-          <span className="font-title-base text-xs text-on-surface font-bold">
-            {isEn ? 'Total to Charge' : 'Total a Cobrar'}
-          </span>
-          <span className="font-financial-mono text-sm text-primary font-bold">
-            ${(parseFloat(amountValue) || 300).toFixed(2)} USD
-          </span>
-        </div>
-      </div>
+      {/* TRANSPARENT FINANCIAL LEDGER BREAKDOWN CARD */}
+      {(() => {
+        const currentBaseUSD = parseFloat(amountValue) || 50;
+        const KIN_SEND_FEE = 1.99;
+        const currentTotalUSD = +(currentBaseUSD + KIN_SEND_FEE).toFixed(2);
+        const currentMXNReceives = +(currentBaseUSD * USD_TO_MXN_RATE).toFixed(2);
 
-      {/* PERSISTENT STICKY PRIMARY CTA */}
-      <div className="sticky bottom-20 z-30 pt-2 pb-1">
-        <button
-          type="button"
-          onClick={handleStartSendReview}
-          className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-105"
-        >
-          <span>
-            {!selectedAvatar
-              ? (isEn ? 'Select Beneficiary in Mexico' : 'Seleccionar Beneficiario en México')
-              : (isEn
-                  ? `Review Breakdown & Send • $${(parseFloat(amountValue) || 50).toFixed(2)} USD`
-                  : `Revisar Desglose y Enviar • $${(parseFloat(amountValue) || 50).toFixed(2)} USD`)}
-          </span>
-          <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-        </button>
-      </div>
+        return (
+          <>
+            <div className="rounded-2xl bg-surface-container p-4 shadow-md space-y-2.5 border border-white/5">
+              <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
+                <span className="font-caption-sm text-xs font-bold text-white">
+                  {isEn ? 'Cost Transparency' : 'Transparencia de Costos'}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                  {isEn ? 'Audited Ledger' : 'Desglose Oficial'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="font-caption-sm text-xs text-on-surface-variant">
+                  {isEn ? 'Base Amount Sent' : 'Monto Base a Enviar'}
+                </span>
+                <span className="font-financial-mono text-xs text-white font-bold">
+                  ${currentBaseUSD.toFixed(2)} USD
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="font-caption-sm text-xs text-on-surface-variant flex items-center gap-1">
+                  <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[9px] font-bold">
+                    {isEn ? 'FEE' : 'TARIFA'}
+                  </span>
+                </span>
+                <span className="font-financial-mono text-xs text-primary font-bold">
+                  +${KIN_SEND_FEE.toFixed(2)} USD
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="font-caption-sm text-xs text-on-surface-variant">
+                  {isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}
+                </span>
+                <span className="font-financial-mono text-xs text-on-surface font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="font-caption-sm text-xs text-on-surface-variant">
+                  {isEn ? 'Delivered in Mexico' : 'Monto a Entregar en México'}
+                </span>
+                <span className="font-financial-mono text-xs text-primary font-bold">
+                  ${currentMXNReceives.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="font-caption-sm text-xs text-on-surface-variant">
+                  {isEn ? 'Estimated Delivery Time' : 'Tiempo Estimado de Entrega'}
+                </span>
+                <span className="font-caption-sm text-xs text-primary font-bold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[15px]">bolt</span> {isEn ? 'Within 5 minutes' : 'En menos de 5 minutos'}
+                </span>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-white/5">
+                <div>
+                  <span className="font-title-base text-xs text-on-surface font-bold block">
+                    {isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}
+                  </span>
+                  <span className="text-[10px] text-on-surface-variant">
+                    {isEn ? 'Includes transparent KIN fee' : 'Incluye cargo de envío KIN'}
+                  </span>
+                </div>
+                <span className="font-financial-mono text-base text-primary font-bold">
+                  ${currentTotalUSD.toFixed(2)} USD
+                </span>
+              </div>
+            </div>
+
+            {/* PERSISTENT STICKY PRIMARY CTA */}
+            <div className="sticky bottom-20 z-30 pt-2 pb-1">
+              <button
+                type="button"
+                onClick={handleStartSendReview}
+                className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-105"
+              >
+                <span>
+                  {!selectedAvatar
+                    ? (isEn ? 'Select Beneficiary in Mexico' : 'Seleccionar Beneficiario en México')
+                    : (isEn
+                        ? `Review Breakdown & Send • $${currentTotalUSD.toFixed(2)} USD`
+                        : `Revisar Desglose y Enviar • $${currentTotalUSD.toFixed(2)} USD`)}
+                </span>
+                <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+              </button>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Spacer */}
       <div className="h-14 w-full pointer-events-none" aria-hidden="true" />

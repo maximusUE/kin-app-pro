@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { CloseIcon, CheckCircleIcon } from './Icons';
 import { BillCameraScannerModal, ScannedBillResult } from './BillCameraScannerModal';
+import { KinCardCheckoutModal } from './modals/KinCardCheckoutModal';
 
 export interface MexicanBillPayModalProps {
   isOpen?: boolean;
@@ -181,7 +182,11 @@ export function MexicanBillPayModal({
   const [isSuccess, setIsSuccess] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [showCameraScanner, setShowCameraScanner] = useState(false);
+  const [isCardCheckoutOpen, setIsCardCheckoutOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Tarifa transparente del servicio KIN (Ganancia de plataforma por liquidación)
+  const KIN_SERVICE_FEE = 1.99;
 
   // Sync selected service if changed via props
   useEffect(() => {
@@ -204,6 +209,7 @@ export function MexicanBillPayModal({
   // Calculate USD amount based on selected service MXN amount and exchange rate
   const currentMXN = servicioSeleccionado.sampleMXN;
   const currentUSD = +(currentMXN / exchangeRate).toFixed(2);
+  const totalUSDToCharge = +(currentUSD + KIN_SERVICE_FEE).toFixed(2);
 
   // Filter categories by search input
   const filteredServices = SERVICIOS_MEXICO.filter((s) =>
@@ -481,21 +487,33 @@ export function MexicanBillPayModal({
               </span>
             </div>
             <div className="h-px w-full bg-surface-container-highest" />
-            <div className="flex items-end justify-between pt-1">
-              <div className="flex flex-col">
-                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase font-bold">
-                  {isEn ? 'Amount Due (MXN)' : 'Monto a Pagar (MXN)'}
-                </span>
-                <span className="font-headline-md text-headline-md text-on-surface font-bold">
-                  ${currentMXN.toLocaleString('en-US', { minimumFractionDigits: 2 })} MXN
+            <div className="flex flex-col space-y-1.5 pt-1 text-xs">
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span>{isEn ? 'Official Invoice Amount' : 'Monto Oficial del Recibo'}</span>
+                <span className="font-mono font-bold text-white">
+                  ${currentMXN.toLocaleString('en-US', { minimumFractionDigits: 2 })} MXN (${currentUSD.toFixed(2)} USD)
                 </span>
               </div>
-              <div className="flex flex-col items-end">
-                <span className="font-label-caps text-label-caps text-primary uppercase font-bold">
-                  {isEn ? 'USD Debit (KIN Rate)' : 'Cargo USD (Tasa KIN)'}
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span className="flex items-center gap-1">
+                  <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[9px] font-bold">
+                    {isEn ? 'FEE' : 'TARIFA'}
+                  </span>
                 </span>
-                <span className="font-financial-mono text-[18px] text-primary font-bold">
-                  ${currentUSD.toFixed(2)} USD
+                <span className="font-mono font-bold text-primary">+${KIN_SERVICE_FEE.toFixed(2)} USD</span>
+              </div>
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="font-title-base text-xs text-white font-bold block">
+                    {isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}
+                  </span>
+                  <span className="text-[10px] text-on-surface-variant">
+                    {isEn ? 'Processed via Stripe Sandbox' : 'Procesado vía Stripe Sandbox'}
+                  </span>
+                </div>
+                <span className="font-financial-mono text-base font-black text-primary">
+                  ${totalUSDToCharge.toFixed(2)} <span className="text-xs text-white">USD</span>
                 </span>
               </div>
             </div>
@@ -525,27 +543,18 @@ export function MexicanBillPayModal({
       <div className="flex flex-col space-y-2 pt-1 pb-4">
         <button
           type="button"
-          onClick={handlePayBill}
-          disabled={isPaying}
-          className="w-full h-14 rounded-full bg-primary hover:bg-primary-container text-on-primary font-title-base text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(87,242,191,0.3)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
+          onClick={() => setIsCardCheckoutOpen(true)}
+          className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-slate-950 font-title-base text-title-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(87,242,191,0.3)] transition-all active:scale-[0.98] cursor-pointer hover:brightness-110"
           id="pay-trigger-btn"
         >
-          {isPaying ? (
-            <>
-              <span className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
-              <span>{isEn ? 'Processing via SPEI...' : 'Procesando vía SPEI...'}</span>
-            </>
-          ) : (
-            <>
-              <span>{isEn ? `Pay Selected Bill ($${currentUSD.toFixed(2)} USD)` : `Pagar Servicio ($${currentUSD.toFixed(2)} USD)`}</span>
-              <span className="material-symbols-outlined text-[20px] font-bold">arrow_forward</span>
-            </>
-          )}
+          <span className="material-symbols-outlined text-[20px] font-bold">credit_card</span>
+          <span>{isEn ? `Pay Bill with Card ($${totalUSDToCharge.toFixed(2)} USD)` : `Pagar Servicio con Tarjeta ($${totalUSDToCharge.toFixed(2)} USD)`}</span>
+          <span className="material-symbols-outlined text-[20px] font-bold">arrow_forward</span>
         </button>
         <div className="flex items-center justify-center gap-1.5 text-center">
           <span className="material-symbols-outlined text-[14px] text-outline">lock</span>
           <span className="font-label-caps text-[10px] text-outline uppercase tracking-wider">
-            {isEn ? 'Secured with KIN Zero-Knowledge SPEI Node • Protected by Banxico' : 'Asegurado con Nodo SPEI Zero-Knowledge KIN • Protegido por Banxico'}
+            {isEn ? 'Secured with Stripe Sandbox & KIN SPEI Node • Protected by Banxico' : 'Asegurado con Stripe Sandbox y Nodo SPEI KIN • Protegido por Banxico'}
           </span>
         </div>
       </div>
@@ -599,6 +608,33 @@ export function MexicanBillPayModal({
           </div>
         </div>
       )}
+
+      {/* Modal de Pago Seguro con Tarjeta en Stripe Sandbox */}
+      <KinCardCheckoutModal
+        isOpen={isCardCheckoutOpen}
+        onClose={() => setIsCardCheckoutOpen(false)}
+        title={isEn ? 'Bill Pay Card Checkout' : 'Pago de Factura con Tarjeta'}
+        conceptTitle={servicioSeleccionado.nombre}
+        conceptSubtitle={`${servicioSeleccionado.sampleTitular} • ${servicioSeleccionado.sampleLocation} (${servicioSeleccionado.sampleContrato})`}
+        amountBaseUSD={currentUSD}
+        amountMXN={currentMXN}
+        feeUSD={KIN_SERVICE_FEE}
+        exchangeRate={exchangeRate}
+        language={language}
+        metadata={{
+          serviceId: servicioSeleccionado.id,
+          empresa: servicioSeleccionado.empresa,
+          contrato: servicioSeleccionado.sampleContrato,
+          titular: servicioSeleccionado.sampleTitular,
+        }}
+        onPaymentSuccess={() => {
+          setIsCardCheckoutOpen(false);
+          setIsSuccess(true);
+          if (onPaymentSuccess) {
+            onPaymentSuccess(servicioSeleccionado.nombre, currentMXN);
+          }
+        }}
+      />
 
       {/* Modal de Cámara en Vivo y Escáner de Códigos de Barras */}
       <BillCameraScannerModal

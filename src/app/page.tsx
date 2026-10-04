@@ -1420,7 +1420,7 @@ export default function MobileApp() {
     setIsExecutingPayment(true);
 
     const amt = parseFloat(amountValue) || 50;
-    const fee = paymentMethod === 'credit' ? 1.99 : 0.0;
+    const fee = 1.99; // Tarifa de Servicio y Cargo por Envío KIN (Ganancia transparente)
     const totalPaid = +(amt + fee).toFixed(2);
     const txId = 'KIN-' + Math.floor(100000 + Math.random() * 900000);
     const now = new Date();
@@ -1432,10 +1432,7 @@ export default function MobileApp() {
       ? `Retiro en Efectivo (${storeObj?.name || 'OXXO'})`
       : 'Depósito a Cuenta Bancaria (SPEI)';
     
-    const paymentTitle = paymentMethod === 'debit' ? 'Tarjeta de Débito ($0.00 fee)'
-      : paymentMethod === 'apple' ? 'Apple Pay ($0.00 fee)'
-      : paymentMethod === 'bank' ? 'Cuenta de Banco ($0.00 fee)'
-      : 'Tarjeta de Crédito ($1.99 fee)';
+    const paymentTitle = 'Tarjeta Bancaria (Stripe Sandbox • $1.99 fee)';
 
     // Generar Clave de Retiro en Efectivo (PIN de 8 dígitos formato XXXX-XXXX para cobro en sucursal)
     const p1 = Math.floor(1000 + Math.random() * 9000);
@@ -1496,6 +1493,23 @@ export default function MobileApp() {
       const data = await res.json();
       const finalClaveRetiro = data.claveRetiroEfectivo || clientClaveRetiro;
       const finalClaveBanxico = data.claveRastreoBanxico || clientClaveBanxico;
+
+      // Registrar PaymentIntent en Stripe Sandbox
+      fetch('/api/stripe/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: totalPaid,
+          currency: 'usd',
+          description: `Envío a ${selectedAvatar.name} (${deliveryTitle})`,
+          metadata: {
+            recipient: selectedAvatar.name,
+            amountUSD: amt.toString(),
+            serviceFeeUSD: fee.toString(),
+            deliveryMethod,
+          },
+        }),
+      }).catch((sErr) => console.warn('[Stripe PaymentIntent background call]:', sErr));
 
       setTransactions((prev) =>
         prev.map((t) =>

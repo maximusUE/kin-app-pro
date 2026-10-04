@@ -60,7 +60,8 @@ export function SendReviewModal({
   if (!isOpen || !selectedAvatar) return null;
 
   const baseAmount = parseFloat(amountValue) || 50;
-  const totalUSD = baseAmount + paymentFee;
+  const kinServiceFee = 1.99;
+  const totalUSD = baseAmount + kinServiceFee;
   const totalMXN = baseAmount * USD_TO_MXN_RATE;
 
   return (
@@ -156,17 +157,17 @@ export function SendReviewModal({
 
             <div className="flex items-center justify-between text-on-surface-variant">
               <span className="flex items-center gap-1">
-                {language === 'en' ? 'KIN transfer fee' : 'Tarifa por transferencia KIN'}
+                {language === 'en' ? 'KIN transfer & delivery fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}
                 <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
-                  PROMO
+                  {language === 'en' ? 'FEE' : 'TARIFA'}
                 </span>
               </span>
-              <span className="text-primary font-bold">$0.00 USD</span>
+              <span className="text-primary font-bold font-mono">+$1.99 USD</span>
             </div>
 
             <div className="flex items-center justify-between text-on-surface-variant">
               <span>
-                {language === 'en' ? 'Payment method fee (' : 'Comisión método de pago ('}
+                {language === 'en' ? 'Payment method processing (' : 'Procesamiento método de pago ('}
                 {paymentMethod === 'credit'
                   ? (language === 'en' ? 'Credit Card' : 'Tarjeta de Crédito')
                   : paymentMethod === 'debit'
@@ -176,11 +177,7 @@ export function SendReviewModal({
                   : (language === 'en' ? 'Bank Account' : 'Cuenta Bancaria')}
                 )
               </span>
-              {paymentMethod === 'credit' ? (
-                <span className="text-amber-500 font-mono font-semibold">+$1.99 USD</span>
-              ) : (
-                <span className="text-on-surface font-mono font-bold">$0.00 USD</span>
-              )}
+              <span className="text-on-surface font-mono font-bold">$0.00 USD</span>
             </div>
 
             <div className="flex items-center justify-between text-on-surface-variant">
