@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/server/stripe';
+import { getStripeClient } from '@/lib/server/stripe';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
@@ -9,6 +11,8 @@ export async function POST(req: Request) {
     if (!amount || Number(amount) <= 0) {
       return NextResponse.json({ error: 'Monto inválido para procesar el pago' }, { status: 400 });
     }
+
+    const stripe = getStripeClient();
 
     // Monto en centavos (ej. 100.50 USD = 10050 centavos)
     const amountInCents = Math.round(Number(amount) * 100);
