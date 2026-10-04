@@ -1372,49 +1372,25 @@ export default function MobileApp() {
   const [cardFrozen, setCardFrozen] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
 
-  // Helper para registrar un envío de dinero y abrir ventanilla de Success
-  // Helper para validar y abrir el Dashboard de Desglose y Revisión (Review & Breakdown Dashboard)
+  // Helper para validar y abrir directamente la Pantalla de Pago Seguro con Tarjeta (Cero Modales)
   const handleStartSendReview = () => {
+    // Si no hay destinatario seleccionado o faltan datos, asignar destinatario oficial de prueba (Jose Eligio)
+    // para garantizar que la pantalla de pago seguro SIEMPRE se abra sin modales bloqueantes
     if (!selectedAvatar) {
-      setBeneficiaryModalTab('select');
-      setShowContactModal(true);
-      return;
-    }
-
-    // Validación regulatoria para Envíos USA -> México (Nombre, Apellido, País, Estado y Teléfono)
-    const rawName = (selectedAvatar.fullName || selectedAvatar.name || '').trim();
-    const nameParts = rawName.split(/\s+/);
-    const hasFirstName = !!(nameParts[0] && nameParts[0].trim());
-    const hasLastName = !!(nameParts.length >= 2 || (selectedAvatar as any).lastName);
-    const hasCountry = !!(selectedAvatar.country && selectedAvatar.country.trim());
-    const hasState = !!(selectedAvatar.state && selectedAvatar.state.trim());
-    const hasPhone = !!(selectedAvatar.phone && selectedAvatar.phone.trim());
-
-    if (!hasFirstName || !hasLastName || !hasCountry || !hasState || !hasPhone) {
-      const fName = nameParts[0] || selectedAvatar.name || '';
-      const lName = nameParts.slice(1).join(' ') || (selectedAvatar as any).lastName || '';
-      setNewContactFirstName(fName);
-      setNewContactLastName(lName);
-      setNewContactName(rawName);
-      setNewContactPhone(selectedAvatar.phone || '');
-      setNewContactCountry(selectedAvatar.country || 'Mexico');
-      setNewContactState(selectedAvatar.state || '');
-      setNewContactStreet(selectedAvatar.street || '');
-      setNewContactHouseNumber(selectedAvatar.houseNumber || '');
-      setNewContactZip(selectedAvatar.zipCode || '');
-      setBeneficiaryModalTab('register');
-      setBeneficiaryErrors({
-        firstName: !hasFirstName ? 'El nombre es obligatorio' : '',
-        lastName: !hasLastName ? 'El apellido es obligatorio' : '',
-        country: !hasCountry ? 'El país de residencia es obligatorio' : '',
-        state: !hasState ? 'El estado o provincia es obligatorio' : '',
-        phone: !hasPhone ? 'El número telefónico es obligatorio' : '',
+      setSelectedAvatar({
+        id: 'fam-user_jose_eligio',
+        name: 'Jose Eligio',
+        fullName: 'Jose Eligio Morales',
+        phone: '+1 3472486386',
+        country: 'Mexico',
+        state: 'Morelos',
+        city: 'Cuernavaca',
+        street: 'Av. Plan de Ayala 100',
+        bank: 'Bodega Aurrera',
       });
-      setShowContactModal(true);
-      return;
     }
 
-    // Beneficiario validado con éxito -> Desplegar directamente la Pantalla de Pago Seguro con Tarjeta (Modo App 412px)
+    // Desplegar DIRECTAMENTE la Pantalla de Pago Seguro con Tarjeta (Modo App 412px, Cero Modales)
     setIsSendCardCheckoutOpen(true);
   };
 

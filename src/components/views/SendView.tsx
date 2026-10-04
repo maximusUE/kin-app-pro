@@ -2659,11 +2659,9 @@ export function SendView({
                 className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-105"
               >
                 <span>
-                  {!selectedAvatar
-                    ? (isEn ? 'Select Beneficiary in Mexico' : 'Seleccionar Beneficiario en México')
-                    : (isEn
-                        ? `Review Breakdown & Send • $${currentTotalUSD.toFixed(2)} USD`
-                        : `Revisar Desglose y Enviar • $${currentTotalUSD.toFixed(2)} USD`)}
+                  {isEn
+                    ? `Review Breakdown & Send • $${currentTotalUSD.toFixed(2)} USD`
+                    : `Revisar Desglose y Enviar • $${currentTotalUSD.toFixed(2)} USD`}
                 </span>
                 <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
               </button>
