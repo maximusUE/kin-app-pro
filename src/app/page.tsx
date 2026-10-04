@@ -1400,7 +1400,7 @@ export default function MobileApp() {
     setIsExecutingPayment(true);
 
     const amt = parseFloat(amountValue) || 50;
-    const fee = 1.99; // Tarifa de Servicio y Cargo por Envío KIN (Ganancia transparente)
+    const fee = amt <= 250 ? 1.99 : 2.99; // Tarifa KIN Transparente ($1.99 <= $250, $2.99 > $250)
     const totalPaid = +(amt + fee).toFixed(2);
     const txId = 'KIN-' + Math.floor(100000 + Math.random() * 900000);
     const now = new Date();
@@ -1412,7 +1412,7 @@ export default function MobileApp() {
       ? `Retiro en Efectivo (${storeObj?.name || 'OXXO'})`
       : 'Depósito a Cuenta Bancaria (SPEI)';
     
-    const paymentTitle = 'Tarjeta Bancaria (Stripe Sandbox • $1.99 fee)';
+    const paymentTitle = `Tarjeta Bancaria (Stripe Sandbox • $${fee.toFixed(2)} fee)`;
 
     // Generar Clave de Retiro en Efectivo (PIN de 8 dígitos formato XXXX-XXXX para cobro en sucursal)
     const p1 = Math.floor(1000 + Math.random() * 9000);
@@ -2014,7 +2014,7 @@ export default function MobileApp() {
                 conceptSubtitle={`${selectedAvatar?.name || 'Beneficiario'} • ${deliveryMethod === 'cash' ? (CASH_PICKUP_STORES.find((s) => s.id === selectedStore)?.name || 'Efectivo') : 'SPEI Banxico'} (${selectedAvatar?.city || (selectedAvatar as any)?.state || 'México'})`}
                 amountBaseUSD={parseFloat(amountValue) || 90}
                 amountMXN={+((parseFloat(amountValue) || 90) * USD_TO_MXN_RATE).toFixed(2)}
-                feeUSD={1.99}
+                feeUSD={(parseFloat(amountValue) || 90) <= 250 ? 1.99 : 2.99}
                 exchangeRate={USD_TO_MXN_RATE}
                 language={language}
                 metadata={{

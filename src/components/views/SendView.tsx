@@ -221,6 +221,7 @@ export function SendView({
 
   // Control de la hoja emergente (Drawer/Bottom Sheet) para selección de estado y sucursal
   const [isCashPickupSheetOpen, setIsCashPickupSheetOpen] = React.useState(false);
+  const [showFeeBreakdownSheet, setShowFeeBreakdownSheet] = React.useState(false);
   const [stateSearchQuery, setStateSearchQuery] = React.useState('');
 
   // Estado de México seleccionado para cobro en efectivo
@@ -2571,107 +2572,145 @@ export function SendView({
         </div>
       )}
 
-      {/* TRANSPARENT FINANCIAL LEDGER BREAKDOWN CARD */}
+      {/* WESTERN UNION-STYLE COMPACT FLOATING BOTTOM ACTION BAR & OPTIONAL DISCLOSURE */}
       {(() => {
         const currentBaseUSD = parseFloat(amountValue) || 50;
-        const KIN_SEND_FEE = 1.99;
+        const KIN_SEND_FEE = currentBaseUSD <= 250 ? 1.99 : 2.99;
         const currentTotalUSD = +(currentBaseUSD + KIN_SEND_FEE).toFixed(2);
         const currentMXNReceives = +(currentBaseUSD * USD_TO_MXN_RATE).toFixed(2);
 
         return (
           <>
-            <div className="rounded-2xl bg-surface-container p-4 shadow-md space-y-2.5 border border-white/5">
-              <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
-                <span className="font-caption-sm text-xs font-bold text-white">
-                  {isEn ? 'Cost Transparency' : 'Transparencia de Costos'}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
-                  {isEn ? 'Audited Ledger' : 'Desglose Oficial'}
-                </span>
-              </div>
+            {/* BARRA FLOTANTE COMPACTA A PIE DE PÁGINA (ESTILO WESTERN UNION) */}
+            <div className="fixed bottom-[68px] left-1/2 -translate-x-1/2 w-full max-w-[412px] px-3.5 z-30 pointer-events-none">
+              <div className="w-full bg-[#080B11]/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.85)] px-4 py-2.5 flex items-center justify-between pointer-events-auto">
+                {/* Lado Izquierdo: Total a pagar con trigger informativo */}
+                <button
+                  type="button"
+                  onClick={() => setShowFeeBreakdownSheet(true)}
+                  className="flex flex-col text-left group cursor-pointer active:scale-95 transition-transform"
+                  title={isEn ? "View transparent fee breakdown" : "Ver desglose transparente de comisiones"}
+                >
+                  <div className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 group-hover:text-primary transition-colors">
+                    <span>{isEn ? 'Total you pay :' : 'Total a pagar :'}</span>
+                    <span className="material-symbols-outlined text-[15px] text-primary">info</span>
+                  </div>
+                  <div className="font-financial-mono text-[19px] font-black text-white tracking-tight flex items-baseline gap-1">
+                    <span>${currentTotalUSD.toFixed(2)}</span>
+                    <span className="text-xs text-neutral-400 font-bold">USD</span>
+                  </div>
+                </button>
 
-              <div className="flex items-center justify-between">
-                <span className="font-caption-sm text-xs text-on-surface-variant">
-                  {isEn ? 'Base Amount Sent' : 'Monto Base a Enviar'}
-                </span>
-                <span className="font-financial-mono text-xs text-white font-bold">
-                  ${currentBaseUSD.toFixed(2)} USD
-                </span>
+                {/* Lado Derecho: Botón Continuar de alto contraste (Verde KIN Esmeralda) */}
+                <button
+                  type="button"
+                  onClick={handleStartSendReview}
+                  className="h-12 px-6 rounded-xl bg-gradient-to-r from-primary to-[#18A57E] text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+                >
+                  <span>{isEn ? 'Continue' : 'Continuar'}</span>
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </button>
               </div>
+            </div>
 
-              <div className="flex items-center justify-between">
-                <span className="font-caption-sm text-xs text-on-surface-variant flex items-center gap-1">
-                  <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
-                  <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[9px] font-bold">
-                    {isEn ? 'FEE' : 'TARIFA'}
-                  </span>
-                </span>
-                <span className="font-financial-mono text-xs text-primary font-bold">
-                  +${KIN_SEND_FEE.toFixed(2)} USD
-                </span>
-              </div>
+            {/* MINI-MODAL / BOTTOM-SHEET: DESGLOSE TRANSPARENTE SI EL CLIENTE LO DESEA */}
+            {isMounted && showFeeBreakdownSheet && typeof document !== 'undefined' && createPortal(
+              <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+                <div
+                  className="fixed inset-0"
+                  onClick={() => setShowFeeBreakdownSheet(false)}
+                  aria-hidden="true"
+                />
+                <div className="relative w-full max-w-[412px] bg-[#0E131F] border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl z-10 space-y-4 animate-slide-up">
+                  {/* Encabezado */}
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                    <div>
+                      <h3 className="font-title-base text-base font-bold text-white flex items-center gap-2">
+                        <span>{isEn ? 'Send Cost Breakdown' : 'Desglose Transparente de Envío'}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                          {isEn ? 'Audited' : 'Oficial'}
+                        </span>
+                      </h3>
+                      <p className="text-xs text-neutral-400">
+                        {isEn ? 'Guaranteed transparent pricing with no hidden charges' : 'Precios justos garantizados sin cargos ocultos'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowFeeBreakdownSheet(false)}
+                      className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <span className="font-caption-sm text-xs text-on-surface-variant">
-                  {isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}
-                </span>
-                <span className="font-financial-mono text-xs text-on-surface font-semibold">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
-              </div>
+                  {/* Filas del desglose */}
+                  <div className="space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-400">{isEn ? 'Base Amount Sent' : 'Monto Base a Enviar'}</span>
+                      <span className="font-financial-mono font-bold text-white">${currentBaseUSD.toFixed(2)} USD</span>
+                    </div>
 
-              <div className="flex items-center justify-between">
-                <span className="font-caption-sm text-xs text-on-surface-variant">
-                  {isEn ? 'Delivered in Mexico' : 'Monto a Entregar en México'}
-                </span>
-                <span className="font-financial-mono text-xs text-primary font-bold">
-                  ${currentMXNReceives.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
-                </span>
-              </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-400 flex items-center gap-1.5">
+                        <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío KIN'}</span>
+                        <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[9px] font-bold">
+                          {isEn ? 'FEE' : 'TARIFA'}
+                        </span>
+                      </span>
+                      <span className="font-financial-mono font-bold text-primary">+${KIN_SEND_FEE.toFixed(2)} USD</span>
+                    </div>
 
-              <div className="flex items-center justify-between">
-                <span className="font-caption-sm text-xs text-on-surface-variant">
-                  {isEn ? 'Estimated Delivery Time' : 'Tiempo Estimado de Entrega'}
-                </span>
-                <span className="font-caption-sm text-xs text-primary font-bold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[15px]">bolt</span> {isEn ? 'Within 5 minutes' : 'En menos de 5 minutos'}
-                </span>
-              </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-400">{isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}</span>
+                      <span className="font-financial-mono font-semibold text-white">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+                    </div>
 
-              <div className="pt-2 flex items-center justify-between border-t border-white/5">
-                <div>
-                  <span className="font-title-base text-xs text-on-surface font-bold block">
-                    {isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}
-                  </span>
-                  <span className="text-[10px] text-on-surface-variant">
-                    {isEn ? 'Includes transparent KIN fee' : 'Incluye cargo de envío KIN'}
-                  </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-400">{isEn ? 'Delivered in Mexico' : 'Monto a Entregar en México'}</span>
+                      <span className="font-financial-mono font-bold text-primary">
+                        ${currentMXNReceives.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-400">{isEn ? 'Estimated Delivery Time' : 'Tiempo Estimado de Entrega'}</span>
+                      <span className="font-bold text-primary flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">bolt</span> {isEn ? 'Within 5 minutes' : 'En menos de 5 minutos'}
+                      </span>
+                    </div>
+
+                    <div className="pt-3 flex items-center justify-between border-t border-white/10">
+                      <div>
+                        <span className="font-bold text-white block">{isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}</span>
+                        <span className="text-[10px] text-neutral-400">{isEn ? 'Includes transparent KIN fee' : 'Incluye cargo de envío KIN'}</span>
+                      </div>
+                      <span className="font-financial-mono text-base font-bold text-primary">${currentTotalUSD.toFixed(2)} USD</span>
+                    </div>
+                  </div>
+
+                  {/* Botón para proceder */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowFeeBreakdownSheet(false);
+                      handleStartSendReview();
+                    }}
+                    className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-[#18A57E] text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all cursor-pointer"
+                  >
+                    <span>{isEn ? `Continue • $${currentTotalUSD.toFixed(2)} USD` : `Continuar • $${currentTotalUSD.toFixed(2)} USD`}</span>
+                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </button>
                 </div>
-                <span className="font-financial-mono text-base text-primary font-bold">
-                  ${currentTotalUSD.toFixed(2)} USD
-                </span>
-              </div>
-            </div>
-
-            {/* PERSISTENT STICKY PRIMARY CTA */}
-            <div className="sticky bottom-20 z-30 pt-2 pb-1">
-              <button
-                type="button"
-                onClick={handleStartSendReview}
-                className="w-full h-14 rounded-full bg-gradient-to-r from-primary-container to-[#18A57E] text-white font-headline-md text-title-base font-bold shadow-[0_12px_28px_-4px_rgba(46,213,164,0.45)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-105"
-              >
-                <span>
-                  {isEn
-                    ? `Review Breakdown & Send • $${currentTotalUSD.toFixed(2)} USD`
-                    : `Revisar Desglose y Enviar • $${currentTotalUSD.toFixed(2)} USD`}
-                </span>
-                <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-              </button>
-            </div>
+              </div>,
+              document.body
+            )}
           </>
         );
       })()}
 
-      {/* Spacer */}
-      <div className="h-14 w-full pointer-events-none" aria-hidden="true" />
+      {/* Spacer para holgura de scroll con la barra flotante */}
+      <div className="h-28 w-full pointer-events-none" aria-hidden="true" />
 
       {/* ========================================================================= */}
       {/* PANTALLA COMPLETA MÓVIL: RED DE TIENDAS Y BUSCADOR DE CIUDADES Y ESTADOS */}
