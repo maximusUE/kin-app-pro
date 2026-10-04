@@ -29,6 +29,7 @@ import {
   formatearCLABE,
   BanxicoBankInfo,
 } from '@/lib/validation/spei';
+import { requestDeviceContact } from '@/lib/native/contactsBridge';
 
 /**
  * Desglosa un nombre completo en Nombre(s), Primer Apellido y Segundo Apellido
@@ -668,8 +669,21 @@ export function SendView({
   });
   const [isWhatsAppPermissionPromptOpen, setIsWhatsAppPermissionPromptOpen] = React.useState(false);
 
-  const handleTriggerContactImport = (target: 'cash' | 'bank' | 'wallet') => {
+  const handleTriggerContactImport = async (target: 'cash' | 'bank' | 'wallet') => {
     setImportContactTarget(target);
+
+    // 1. Intento nativo directo (App Nativa iOS / Android vía Capacitor o Web API)
+    try {
+      const nativeResult = await requestDeviceContact();
+      if (nativeResult.success && nativeResult.name) {
+        applyImportedContact(target, nativeResult.name, nativeResult.phone || '');
+        return;
+      }
+    } catch (err) {
+      console.warn('[KIN Contacts Bridge] Fallback a diálogo de contactos:', err);
+    }
+
+    // 2. Si estamos en Web o no devolvió contacto nativo:
     // Preguntar al cliente si desea que la app tenga acceso a sus contactos de WhatsApp
     if (!hasWhatsAppPermission) {
       setIsWhatsAppPermissionPromptOpen(true);
@@ -3285,6 +3299,16 @@ export function SendView({
                   <p className="text-[11px] text-slate-500">Puedes escribir el nombre o pegar el teléfono arriba.</p>
                 </div>
               )}
+            </div>
+
+            {/* Pie de modal con garantía de privacidad y puente nativo */}
+            <div className="px-4 py-2.5 bg-[#111B21] border-t border-white/10 shrink-0 text-center">
+              <p className="text-[10px] text-slate-400 flex items-center justify-center gap-1.5 font-medium">
+                <span className="material-symbols-outlined text-[14px] text-[#25D366]">verified_user</span>
+                {isEn
+                  ? 'En la App Móvil oficial de KIN (iOS / Android), se conecta directo a los contactos de tu teléfono.'
+                  : 'En la App Móvil oficial de KIN (iOS / Android), se conecta directo a los contactos de tu teléfono.'}
+              </p>
             </div>
           </div>
         </div>,
