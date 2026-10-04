@@ -2582,36 +2582,39 @@ export function SendView({
         return (
           <>
             {/* BARRA FLOTANTE COMPACTA A PIE DE PÁGINA (ESTILO WESTERN UNION) */}
-            <div className="fixed bottom-[68px] left-1/2 -translate-x-1/2 w-full max-w-[412px] px-3.5 z-30 pointer-events-none">
-              <div className="w-full bg-[#080B11]/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.85)] px-4 py-2.5 flex items-center justify-between pointer-events-auto">
-                {/* Lado Izquierdo: Total a pagar con trigger informativo */}
-                <button
-                  type="button"
-                  onClick={() => setShowFeeBreakdownSheet(true)}
-                  className="flex flex-col text-left group cursor-pointer active:scale-95 transition-transform"
-                  title={isEn ? "View transparent fee breakdown" : "Ver desglose transparente de comisiones"}
-                >
-                  <div className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 group-hover:text-primary transition-colors">
-                    <span>{isEn ? 'Total you pay :' : 'Total a pagar :'}</span>
-                    <span className="material-symbols-outlined text-[15px] text-primary">info</span>
-                  </div>
-                  <div className="font-financial-mono text-[19px] font-black text-white tracking-tight flex items-baseline gap-1">
-                    <span>${currentTotalUSD.toFixed(2)}</span>
-                    <span className="text-xs text-neutral-400 font-bold">USD</span>
-                  </div>
-                </button>
+            {isMounted && typeof document !== 'undefined' && createPortal(
+              <div className="fixed bottom-[74px] left-1/2 -translate-x-1/2 w-full max-w-[412px] px-3.5 z-40 pointer-events-none">
+                <div className="w-full bg-[#080B11]/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.85)] px-4 py-2.5 flex items-center justify-between pointer-events-auto">
+                  {/* Lado Izquierdo: Total a pagar con trigger informativo */}
+                  <button
+                    type="button"
+                    onClick={() => setShowFeeBreakdownSheet(true)}
+                    className="flex flex-col text-left group cursor-pointer active:scale-95 transition-transform"
+                    title={isEn ? "View transparent fee breakdown" : "Ver desglose transparente de comisiones"}
+                  >
+                    <div className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 group-hover:text-primary transition-colors">
+                      <span>{isEn ? 'Total you pay :' : 'Total a pagar :'}</span>
+                      <span className="material-symbols-outlined text-[15px] text-primary">info</span>
+                    </div>
+                    <div className="font-financial-mono text-[19px] font-black text-white tracking-tight flex items-baseline gap-1">
+                      <span>${currentTotalUSD.toFixed(2)}</span>
+                      <span className="text-xs text-neutral-400 font-bold">USD</span>
+                    </div>
+                  </button>
 
-                {/* Lado Derecho: Botón Continuar de alto contraste (Verde KIN Esmeralda) */}
-                <button
-                  type="button"
-                  onClick={handleStartSendReview}
-                  className="h-12 px-6 rounded-xl bg-gradient-to-r from-primary to-[#18A57E] text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
-                >
-                  <span>{isEn ? 'Continue' : 'Continuar'}</span>
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </button>
-              </div>
-            </div>
+                  {/* Lado Derecho: Botón Continuar de alto contraste (Verde KIN Esmeralda) */}
+                  <button
+                    type="button"
+                    onClick={handleStartSendReview}
+                    className="h-12 px-6 rounded-xl bg-gradient-to-r from-primary to-[#18A57E] text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <span>{isEn ? 'Continue' : 'Continuar'}</span>
+                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </button>
+                </div>
+              </div>,
+              document.body
+            )}
 
             {/* MINI-MODAL / BOTTOM-SHEET: DESGLOSE TRANSPARENTE SI EL CLIENTE LO DESEA */}
             {isMounted && showFeeBreakdownSheet && typeof document !== 'undefined' && createPortal(
