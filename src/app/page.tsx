@@ -81,6 +81,7 @@ import {
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
 import { BillPayView } from '@/components/views/BillPayView';
+import { CardCheckoutView } from '@/components/views/CardCheckoutView';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/components/KinCashP2PModal';
 import { ClientVaultModal } from '@/components/ClientVaultModal';
@@ -1349,6 +1350,7 @@ export default function MobileApp() {
 
   // Review & Checkout Breakdown Dashboard Modal State
   const [showSendReviewModal, setShowSendReviewModal] = useState(false);
+  const [isSendCardCheckoutOpen, setIsSendCardCheckoutOpen] = useState(false);
   const [isExecutingPayment, setIsExecutingPayment] = useState(false);
   const [copiedWithdrawalPin, setCopiedWithdrawalPin] = useState(false);
   const [copiedTrackingBanxico, setCopiedTrackingBanxico] = useState(false);
@@ -1412,8 +1414,8 @@ export default function MobileApp() {
       return;
     }
 
-    // Beneficiario validado con éxito -> Abrir Dashboard de Desglose y Revisión
-    setShowSendReviewModal(true);
+    // Beneficiario validado con éxito -> Desplegar directamente la Pantalla de Pago Seguro con Tarjeta (Modo App 412px)
+    setIsSendCardCheckoutOpen(true);
   };
 
   // Helper para ejecutar el pago desde el Dashboard de Desglose y redirigir a Success con la Clave de Retiro
@@ -2020,76 +2022,111 @@ export default function MobileApp() {
         {/* ========================================================================= */}
         {/* SCREEN 2: "SEND MONEY" (ARQUITECTURA EXACTA DE LA IMAGEN 1)               */}
         {/* ========================================================================= */}
+        {/* ========================================================================= */}
+        {/* SCREEN 2: "SEND MONEY" (ARQUITECTURA EXACTA DE LA IMAGEN 1)               */}
+        {/* ========================================================================= */}
         {activeTab === 'send' && (
-          <SendView
-            onBack={() => setActiveTab('home')}
-            onViewHistory={() => setActiveTab('transactions')}
-            amountValue={amountValue}
-            setAmountValue={setAmountValue}
-            USD_TO_MXN_RATE={USD_TO_MXN_RATE}
-            language={language}
-            deliveryMethod={deliveryMethod}
-            setDeliveryMethod={setDeliveryMethod}
-            selectedStore={selectedStore}
-            setSelectedStore={setSelectedStore}
-            selectedAvatar={selectedAvatar}
-            onSelectAvatarClick={() => {
-              setShowContactModal(true);
-            }}
-            handleClearSendDraft={handleClearSendDraft}
-            handleStartSendReview={handleStartSendReview}
-            pickupLocation={pickupLocation}
-            setPickupLocation={setPickupLocation}
-            onOpenPickupLocationModal={() => setShowPickupLocationModal(true)}
-            receiverMode={receiverMode}
-            setReceiverMode={setReceiverMode}
-            onOpenNewRecipient={() => {
-              setBeneficiaryModalTab('register');
-              setShowContactModal(true);
-            }}
-            contactsList={contactsList}
-            onSelectContact={(contact) => {
-              setSelectedAvatar(contact);
-              if (contact.state && contact.city) {
-                setPickupLocation({
-                  state: contact.state,
-                  city: contact.city,
-                  branch: {
-                    id: 'br_' + Date.now(),
-                    storeName: selectedStore ? selectedStore.toUpperCase() : 'OXXO',
-                    chain: selectedStore || 'oxxo',
-                    address: `Sucursal Principal Centro, ${contact.city}`,
-                    city: contact.city,
+          isSendCardCheckoutOpen ? (
+            <ErrorBoundary
+              fallbackTitle={language === 'en' ? 'Remittance Card Checkout' : 'Pago de Envío con Tarjeta'}
+              onReset={() => setIsSendCardCheckoutOpen(false)}
+            >
+              <CardCheckoutView
+                onBack={() => setIsSendCardCheckoutOpen(false)}
+                title={language === 'en' ? 'Remittance Card Checkout' : 'Pago de Envío con Tarjeta'}
+                conceptTitle={language === 'en' ? `Money Transfer to ${selectedAvatar?.name || 'Mexico'}` : `Envío de Dinero a ${selectedAvatar?.name || 'México'}`}
+                conceptSubtitle={`${selectedAvatar?.name || 'Beneficiario'} • ${deliveryMethod === 'cash' ? (CASH_PICKUP_STORES.find((s) => s.id === selectedStore)?.name || 'Efectivo') : 'SPEI Banxico'} (${selectedAvatar?.city || (selectedAvatar as any)?.state || 'México'})`}
+                amountBaseUSD={parseFloat(amountValue) || 90}
+                amountMXN={+((parseFloat(amountValue) || 90) * USD_TO_MXN_RATE).toFixed(2)}
+                feeUSD={1.99}
+                exchangeRate={USD_TO_MXN_RATE}
+                language={language}
+                metadata={{
+                  recipient: selectedAvatar?.name || '',
+                  phone: selectedAvatar?.phone || '',
+                  deliveryMethod,
+                  store: selectedStore,
+                  contrato: (selectedAvatar as any)?.clabe || selectedAvatar?.phone || 'KIN-MX-REMITTANCE',
+                  titular: selectedAvatar?.name || 'Beneficiario en México',
+                  flow: 'send-money-card',
+                }}
+                onPaymentSuccess={async () => {
+                  setIsSendCardCheckoutOpen(false);
+                  await handleExecuteSendPayment();
+                }}
+              />
+            </ErrorBoundary>
+          ) : (
+            <SendView
+              onBack={() => setActiveTab('home')}
+              onViewHistory={() => setActiveTab('transactions')}
+              amountValue={amountValue}
+              setAmountValue={setAmountValue}
+              USD_TO_MXN_RATE={USD_TO_MXN_RATE}
+              language={language}
+              deliveryMethod={deliveryMethod}
+              setDeliveryMethod={setDeliveryMethod}
+              selectedStore={selectedStore}
+              setSelectedStore={setSelectedStore}
+              selectedAvatar={selectedAvatar}
+              onSelectAvatarClick={() => {
+                setShowContactModal(true);
+              }}
+              handleClearSendDraft={handleClearSendDraft}
+              handleStartSendReview={handleStartSendReview}
+              pickupLocation={pickupLocation}
+              setPickupLocation={setPickupLocation}
+              onOpenPickupLocationModal={() => setShowPickupLocationModal(true)}
+              receiverMode={receiverMode}
+              setReceiverMode={setReceiverMode}
+              onOpenNewRecipient={() => {
+                setBeneficiaryModalTab('register');
+                setShowContactModal(true);
+              }}
+              contactsList={contactsList}
+              onSelectContact={(contact) => {
+                setSelectedAvatar(contact);
+                if (contact.state && contact.city) {
+                  setPickupLocation({
                     state: contact.state,
-                    hours: 'Abierto 24 Horas',
-                    is24Hours: true,
-                    badge: '24/7',
-                  },
-                });
-              }
-            }}
-            onAddContact={(newContact) => {
-              setContactsList((prev) => [newContact, ...prev.filter((c) => c.id !== newContact.id)]);
-              setSelectedAvatar(newContact);
-              if (newContact.state && newContact.city) {
-                setPickupLocation({
-                  state: newContact.state,
-                  city: newContact.city,
-                  branch: {
-                    id: 'br_' + Date.now(),
-                    storeName: selectedStore ? selectedStore.toUpperCase() : 'OXXO',
-                    chain: selectedStore || 'oxxo',
-                    address: `Sucursal Principal Centro, ${newContact.city}`,
-                    city: newContact.city,
+                    city: contact.city,
+                    branch: {
+                      id: 'br_' + Date.now(),
+                      storeName: selectedStore ? selectedStore.toUpperCase() : 'OXXO',
+                      chain: selectedStore || 'oxxo',
+                      address: `Sucursal Principal Centro, ${contact.city}`,
+                      city: contact.city,
+                      state: contact.state,
+                      hours: 'Abierto 24 Horas',
+                      is24Hours: true,
+                      badge: '24/7',
+                    },
+                  });
+                }
+              }}
+              onAddContact={(newContact) => {
+                setContactsList((prev) => [newContact, ...prev.filter((c) => c.id !== newContact.id)]);
+                setSelectedAvatar(newContact);
+                if (newContact.state && newContact.city) {
+                  setPickupLocation({
                     state: newContact.state,
-                    hours: 'Abierto 24 Horas',
-                    is24Hours: true,
-                    badge: '24/7',
-                  },
-                });
-              }
-            }}
-          />
+                    city: newContact.city,
+                    branch: {
+                      id: 'br_' + Date.now(),
+                      storeName: selectedStore ? selectedStore.toUpperCase() : 'OXXO',
+                      chain: selectedStore || 'oxxo',
+                      address: `Sucursal Principal Centro, ${newContact.city}`,
+                      city: newContact.city,
+                      state: newContact.state,
+                      hours: 'Abierto 24 Horas',
+                      is24Hours: true,
+                      badge: '24/7',
+                    },
+                  });
+                }
+              }}
+            />
+          )
         )}
 
         {/* ========================================================================= */}

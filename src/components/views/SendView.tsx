@@ -1459,20 +1459,34 @@ export function SendView({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {/* Check verde sin círculo */}
-                      <span className="text-primary text-[22px] font-black leading-none select-none drop-shadow-xs">
+                      <span className="text-primary text-[20px] font-black leading-none select-none drop-shadow-xs">
                         ✓
                       </span>
                       <button
                         type="button"
                         onClick={onSelectAvatarClick}
-                        className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        className="px-2 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        title={isEn ? 'Change Recipient' : 'Cambiar Destinatario'}
                       >
                         <span>{isEn ? 'Change' : 'Cambiar'}</span>
-                        <span className="material-symbols-outlined text-[15px]">
+                        <span className="material-symbols-outlined text-[14px]">
                           chevron_right
                         </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearSendDraft();
+                        }}
+                        className="px-2 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-[11px] font-bold text-red-400 border border-red-500/25 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        title={isEn ? 'Remove Recipient' : 'Quitar / Eliminar Destinatario'}
+                        id="btn-remove-recipient-cash"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">delete</span>
+                        <span>{isEn ? 'Remove' : 'Quitar'}</span>
                       </button>
                     </div>
                   </div>
@@ -1860,17 +1874,31 @@ export function SendView({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-primary text-[22px] font-black leading-none select-none drop-shadow-xs">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-primary text-[20px] font-black leading-none select-none drop-shadow-xs">
                         ✓
                       </span>
                       <button
                         type="button"
                         onClick={onSelectAvatarClick}
-                        className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        className="px-2 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        title={isEn ? 'Change Recipient' : 'Cambiar Destinatario'}
                       >
                         <span>{isEn ? 'Change' : 'Cambiar'}</span>
-                        <span className="material-symbols-outlined text-[15px]">chevron_right</span>
+                        <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearSendDraft();
+                        }}
+                        className="px-2 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-[11px] font-bold text-red-400 border border-red-500/25 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        title={isEn ? 'Remove Recipient' : 'Quitar / Eliminar Destinatario'}
+                        id="btn-remove-recipient-bank"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">delete</span>
+                        <span>{isEn ? 'Remove' : 'Quitar'}</span>
                       </button>
                     </div>
                   </div>
@@ -2274,17 +2302,31 @@ export function SendView({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-primary text-[22px] font-black leading-none select-none drop-shadow-xs">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-primary text-[20px] font-black leading-none select-none drop-shadow-xs">
                         ✓
                       </span>
                       <button
                         type="button"
                         onClick={onSelectAvatarClick}
-                        className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        className="px-2 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-[11px] font-bold text-primary border border-white/10 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        title={isEn ? 'Change Recipient' : 'Cambiar Destinatario'}
                       >
                         <span>{isEn ? 'Change' : 'Cambiar'}</span>
-                        <span className="material-symbols-outlined text-[15px]">chevron_right</span>
+                        <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearSendDraft();
+                        }}
+                        className="px-2 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-[11px] font-bold text-red-400 border border-red-500/25 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                        title={isEn ? 'Remove Recipient' : 'Quitar / Eliminar Destinatario'}
+                        id="btn-remove-recipient-wallet"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">delete</span>
+                        <span>{isEn ? 'Remove' : 'Quitar'}</span>
                       </button>
                     </div>
                   </div>
