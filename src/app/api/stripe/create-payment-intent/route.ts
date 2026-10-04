@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
-const stripe = new Stripe(stripeSecretKey);
+import { stripe } from '@/lib/server/stripe';
 
 export async function POST(req: Request) {
   try {
@@ -11,13 +8,6 @@ export async function POST(req: Request) {
 
     if (!amount || Number(amount) <= 0) {
       return NextResponse.json({ error: 'Monto inválido para procesar el pago' }, { status: 400 });
-    }
-
-    if (!stripeSecretKey) {
-      return NextResponse.json(
-        { error: 'STRIPE_SECRET_KEY no está configurada en las variables de entorno' },
-        { status: 500 }
-      );
     }
 
     // Monto en centavos (ej. 100.50 USD = 10050 centavos)
