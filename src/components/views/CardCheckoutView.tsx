@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { getStoredCards, saveStoredCards, SavedCardItem } from '@/lib/cards';
+import { getStoredCards, saveStoredCards, SavedCardItem, INITIAL_SAVED_CARDS } from '@/lib/cards';
 
 export interface CardCheckoutViewProps {
   onBack: () => void;
@@ -42,9 +42,9 @@ export function CardCheckoutView({
 }: CardCheckoutViewProps) {
   const isEn = language === 'en';
 
-  // Cards state
-  const [cards, setCards] = useState<SavedCardItem[]>([]);
-  const [selectedCardId, setSelectedCardId] = useState<string>('');
+  // Cards state - Pre-inicializado con INITIAL_SAVED_CARDS para evitar null pointers en primer render
+  const [cards, setCards] = useState<SavedCardItem[]>(INITIAL_SAVED_CARDS);
+  const [selectedCardId, setSelectedCardId] = useState<string>(INITIAL_SAVED_CARDS[0]?.id || 'card-1');
   const [paymentMode, setPaymentMode] = useState<'saved' | 'new'>('saved');
 
   // New card inputs
@@ -73,16 +73,18 @@ export function CardCheckoutView({
   // Load cards on mount
   useEffect(() => {
     const stored = getStoredCards();
-    setCards(stored);
-    const def = stored.find((c) => c.isDefault) || stored[0];
-    if (def) setSelectedCardId(def.id);
+    if (stored && stored.length > 0) {
+      setCards(stored);
+      const def = stored.find((c) => c.isDefault) || stored[0];
+      if (def) setSelectedCardId(def.id);
+    }
   }, []);
 
   const totalUSD = +(amountBaseUSD + feeUSD).toFixed(2);
   const calculatedMXN = amountMXN || +(amountBaseUSD * exchangeRate).toFixed(2);
 
-  // Active selected card for visual preview
-  const activeCard = cards.find((c) => c.id === selectedCardId) || cards[0];
+  // Active selected card for visual preview (Con triple fallback ultra-seguro)
+  const activeCard = cards.find((c) => c.id === selectedCardId) || cards[0] || INITIAL_SAVED_CARDS[0];
 
   // 1-Tap Autofill for Stripe Sandbox Test Card
   const handleAutofillTestCard = () => {
@@ -539,7 +541,7 @@ export function CardCheckoutView({
                   </span>
                 </div>
                 <span className="text-lg font-black tracking-tight font-headline-md text-white">
-                  {paymentMode === 'new' ? 'VISA / MC' : activeCard?.brand.toUpperCase()}
+                  {paymentMode === 'new' ? 'VISA / MC' : ((activeCard?.brand || 'visa').toUpperCase())}
                 </span>
               </div>
 
@@ -556,13 +558,13 @@ export function CardCheckoutView({
                 <div>
                   <span className="text-[9px] uppercase tracking-wider block text-slate-400">Titular</span>
                   <span className="font-bold text-white truncate max-w-[180px] block">
-                    {paymentMode === 'new' ? (newCardHolder || 'NOMBRE TITULAR') : activeCard?.name}
+                    {paymentMode === 'new' ? (newCardHolder || 'NOMBRE TITULAR') : (activeCard?.name || 'Tarjeta Principal')}
                   </span>
                 </div>
                 <div>
                   <span className="text-[9px] uppercase tracking-wider block text-slate-400">Vence</span>
                   <span className="font-mono font-bold text-white">
-                    {paymentMode === 'new' ? (newCardExp || 'MM/AA') : activeCard?.exp}
+                    {paymentMode === 'new' ? (newCardExp || 'MM/AA') : (activeCard?.exp || '12/28')}
                   </span>
                 </div>
               </div>
@@ -636,7 +638,7 @@ export function CardCheckoutView({
                     >
                       <div className="flex items-center gap-3.5">
                         <div className="w-12 h-8 rounded-lg bg-gradient-to-br from-slate-800 to-slate-950 border border-white/20 flex items-center justify-center text-xs font-black text-white uppercase tracking-wider">
-                          {c.brand.toUpperCase()}
+                          {(c.brand || 'visa').toUpperCase()}
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white flex items-center gap-2">

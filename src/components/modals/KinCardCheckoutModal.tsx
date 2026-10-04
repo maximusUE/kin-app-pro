@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { CardCheckoutView } from '@/components/views/CardCheckoutView';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export interface KinCardCheckoutModalProps {
   isOpen: boolean;
@@ -49,18 +50,20 @@ export function KinCardCheckoutModal({
   if (!isOpen) return null;
 
   return (
-    <CardCheckoutView
-      onBack={onClose}
-      title={title}
-      conceptTitle={conceptTitle}
-      conceptSubtitle={conceptSubtitle}
-      amountBaseUSD={amountBaseUSD}
-      amountMXN={amountMXN}
-      feeUSD={feeUSD}
-      exchangeRate={exchangeRate}
-      metadata={metadata}
-      language={language}
-      onPaymentSuccess={onPaymentSuccess}
-    />
+    <ErrorBoundary fallbackTitle={title} onReset={onClose}>
+      <CardCheckoutView
+        onBack={onClose}
+        title={title}
+        conceptTitle={conceptTitle}
+        conceptSubtitle={conceptSubtitle}
+        amountBaseUSD={amountBaseUSD}
+        amountMXN={amountMXN}
+        feeUSD={feeUSD}
+        exchangeRate={exchangeRate}
+        metadata={metadata}
+        language={language}
+        onPaymentSuccess={onPaymentSuccess}
+      />
+    </ErrorBoundary>
   );
 }

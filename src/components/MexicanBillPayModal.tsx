@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { CloseIcon, CheckCircleIcon } from './Icons';
 import { BillCameraScannerModal, ScannedBillResult } from './BillCameraScannerModal';
 import { CardCheckoutView } from './views/CardCheckoutView';
+import { ErrorBoundary } from './ErrorBoundary';
 
 export interface MexicanBillPayModalProps {
   isOpen?: boolean;
@@ -206,38 +207,44 @@ export function MexicanBillPayModal({
     });
   };
 
+  // Objeto de servicio activo garantizado contra null/undefined
+  const activeService = servicioSeleccionado || SERVICIOS_MEXICO[0];
+  const safeExchangeRate = exchangeRate > 0 ? exchangeRate : 20.45;
+
   // Calculate USD amount based on selected service MXN amount and exchange rate
-  const currentMXN = servicioSeleccionado.sampleMXN;
-  const currentUSD = +(currentMXN / exchangeRate).toFixed(2);
+  const currentMXN = activeService.sampleMXN || 842.00;
+  const currentUSD = +(currentMXN / safeExchangeRate).toFixed(2);
   const totalUSDToCharge = +(currentUSD + KIN_SERVICE_FEE).toFixed(2);
 
   // Despliegue de Pantalla Completa Dedicada (Arquitectura Profesional sin Modales Flotantes)
   if (isCardCheckoutOpen) {
     return (
-      <CardCheckoutView
-        onBack={() => setIsCardCheckoutOpen(false)}
-        title={isEn ? 'Bill Pay Card Checkout' : 'Pago de Factura con Tarjeta'}
-        conceptTitle={servicioSeleccionado.nombre}
-        conceptSubtitle={`${servicioSeleccionado.sampleTitular} • ${servicioSeleccionado.sampleLocation} (${servicioSeleccionado.sampleContrato})`}
-        amountBaseUSD={currentUSD}
-        amountMXN={currentMXN}
-        feeUSD={KIN_SERVICE_FEE}
-        exchangeRate={exchangeRate}
-        language={language}
-        metadata={{
-          serviceId: servicioSeleccionado.id,
-          empresa: servicioSeleccionado.empresa,
-          contrato: servicioSeleccionado.sampleContrato,
-          titular: servicioSeleccionado.sampleTitular,
-        }}
-        onPaymentSuccess={() => {
-          setIsCardCheckoutOpen(false);
-          setIsSuccess(true);
-          if (onPaymentSuccess) {
-            onPaymentSuccess(servicioSeleccionado.nombre, currentMXN);
-          }
-        }}
-      />
+      <ErrorBoundary fallbackTitle={isEn ? 'Bill Pay Card Checkout' : 'Pago de Factura con Tarjeta'} onReset={() => setIsCardCheckoutOpen(false)}>
+        <CardCheckoutView
+          onBack={() => setIsCardCheckoutOpen(false)}
+          title={isEn ? 'Bill Pay Card Checkout' : 'Pago de Factura con Tarjeta'}
+          conceptTitle={activeService.nombre}
+          conceptSubtitle={`${activeService.sampleTitular} • ${activeService.sampleLocation} (${activeService.sampleContrato})`}
+          amountBaseUSD={currentUSD}
+          amountMXN={currentMXN}
+          feeUSD={KIN_SERVICE_FEE}
+          exchangeRate={safeExchangeRate}
+          language={language}
+          metadata={{
+            serviceId: activeService.id,
+            empresa: activeService.empresa,
+            contrato: activeService.sampleContrato,
+            titular: activeService.sampleTitular,
+          }}
+          onPaymentSuccess={() => {
+            setIsCardCheckoutOpen(false);
+            setIsSuccess(true);
+            if (onPaymentSuccess) {
+              onPaymentSuccess(activeService.nombre, currentMXN);
+            }
+          }}
+        />
+      </ErrorBoundary>
     );
   }
 
@@ -477,28 +484,28 @@ export function MexicanBillPayModal({
             <div className="flex items-center gap-3">
               {/* Institutional Logo Capsule */}
               <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/10 p-1 flex items-center justify-center shadow-sm shrink-0 border border-slate-200/60 dark:border-white/10">
-                <div className={`w-full h-full rounded-xl ${servicioSeleccionado.logoBg} flex items-center justify-center ${servicioSeleccionado.logoColor} px-1 overflow-hidden shadow-sm`}>
+                <div className={`w-full h-full rounded-xl ${activeService.logoBg} flex items-center justify-center ${activeService.logoColor} px-1 overflow-hidden shadow-sm`}>
                   <span className="font-headline-md text-[10px] font-black leading-none tracking-wider text-center uppercase truncate">
-                    {servicioSeleccionado.logoText}
+                    {activeService.logoText}
                   </span>
                 </div>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="font-title-base text-title-base text-on-surface font-semibold">
-                    {servicioSeleccionado.sampleTitular}
+                    {activeService.sampleTitular}
                   </span>
                   <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-surface-container-high text-slate-700 dark:text-on-surface-variant font-label-caps text-[9px] border border-slate-200/60 dark:border-transparent">
-                    {servicioSeleccionado.sampleLocation}
+                    {activeService.sampleLocation}
                   </span>
                 </div>
                 <span className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {servicioSeleccionado.empresa}
+                  {activeService.empresa}
                 </span>
               </div>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-surface-container-high text-emerald-700 dark:text-primary font-caption-sm text-caption-sm font-semibold border border-emerald-200/50 dark:border-white/5">
-              {isEn ? servicioSeleccionado.sampleDueDate : servicioSeleccionado.sampleDueDate.replace('Due in', 'Vence en').replace('days', 'días')}
+              {isEn ? activeService.sampleDueDate : (activeService.sampleDueDate || 'Due in 5 days').replace('Due in', 'Vence en').replace('days', 'días')}
             </span>
           </div>
 
@@ -507,13 +514,13 @@ export function MexicanBillPayModal({
             <div className="flex items-center justify-between">
               <span className="font-caption-sm text-caption-sm text-on-surface-variant">{isEn ? 'Service Identifier' : 'Número de Servicio'}</span>
               <span className="font-financial-mono text-financial-mono text-on-surface font-bold">
-                {servicioSeleccionado.sampleContrato}
+                {activeService.sampleContrato}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="font-caption-sm text-caption-sm text-on-surface-variant">{isEn ? 'Billing Cycle' : 'Ciclo de Facturación'}</span>
               <span className="font-body-medium text-body-medium text-on-surface">
-                {servicioSeleccionado.billingCycle}
+                {activeService.billingCycle}
               </span>
             </div>
             <div className="h-px w-full bg-surface-container-highest" />
@@ -601,18 +608,18 @@ export function MexicanBillPayModal({
             </h3>
             <p className="font-caption-sm text-on-surface-variant">
               {isEn
-                ? `Payment sent via SPEI Banxico to ${servicioSeleccionado.empresa}.`
-                : `Pago enviado vía SPEI Banxico a ${servicioSeleccionado.empresa}.`}
+                ? `Payment sent via SPEI Banxico to ${activeService.empresa}.`
+                : `Pago enviado vía SPEI Banxico a ${activeService.empresa}.`}
             </p>
 
             <div className="p-3.5 rounded-2xl bg-surface-container-low border border-white/5 text-left space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">{isEn ? 'Service:' : 'Servicio:'}</span>
-                <span className="font-bold text-white">{servicioSeleccionado.nombre}</span>
+                <span className="font-bold text-white">{activeService.nombre}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">{isEn ? 'Reference:' : 'Referencia:'}</span>
-                <span className="font-financial-mono font-bold text-white">{servicioSeleccionado.sampleContrato}</span>
+                <span className="font-financial-mono font-bold text-white">{activeService.sampleContrato}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">{isEn ? 'Amount Settled:' : 'Monto Liquidado:'}</span>
@@ -644,7 +651,7 @@ export function MexicanBillPayModal({
         isOpen={showCameraScanner}
         onClose={() => setShowCameraScanner(false)}
         onScanSuccess={handleScanSuccess}
-        targetServiceName={servicioSeleccionado.nombre}
+        targetServiceName={activeService.nombre}
       />
     </div>
   );

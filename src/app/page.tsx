@@ -80,6 +80,7 @@ import {
   LanguageIcon,
 } from '@/components/Icons';
 import { MexicanBillPayModal } from '@/components/MexicanBillPayModal';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/components/KinCashP2PModal';
 import { ClientVaultModal } from '@/components/ClientVaultModal';
 import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
@@ -2005,16 +2006,18 @@ export default function MobileApp() {
         {/* SCREEN: "BILL PAY" (STITCH DASHBOARD TAB)                                 */}
         {/* ========================================================================= */}
         {activeTab === 'bill-pay' && (
-          <div className="animate-fade-in space-y-4">
-            <MexicanBillPayModal
-              isScreen={true}
-              isOpen={true}
-              language={language}
-              onPaymentSuccess={handleBillPaymentSuccess}
-              selectedServiceId={selectedBillServiceId}
-              exchangeRate={USD_TO_MXN_RATE}
-            />
-          </div>
+          <ErrorBoundary fallbackTitle={language === 'en' ? 'Bill Pay' : 'Pago de Servicios'}>
+            <div className="animate-fade-in space-y-4">
+              <MexicanBillPayModal
+                isScreen={true}
+                isOpen={true}
+                language={language}
+                onPaymentSuccess={handleBillPaymentSuccess}
+                selectedServiceId={selectedBillServiceId}
+                exchangeRate={USD_TO_MXN_RATE}
+              />
+            </div>
+          </ErrorBoundary>
         )}
 
         {/* ========================================================================= */}
