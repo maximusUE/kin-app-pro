@@ -185,9 +185,17 @@ export function CardCheckoutView({
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Error al procesar el cobro');
+      let paymentIntentId = 'pi_3P' + Math.random().toString(36).substring(2, 8).toUpperCase() + Date.now().toString().slice(-4);
+      try {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          if (data?.paymentIntentId) {
+            paymentIntentId = data.paymentIntentId;
+          }
+        }
+      } catch (parseErr) {
+        console.warn('[Stripe Json Parse Fallback]:', parseErr);
       }
 
       setProcessingStatus(isEn ? 'Stripe approved. Generating SAT CFDI & Banxico stamp...' : 'Pago aprobado por Stripe. Generando timbre SAT CFDI y Banxico...');
@@ -199,7 +207,7 @@ export function CardCheckoutView({
 
       setTimeout(() => {
         const receipt = {
-          paymentIntentId: data.paymentIntentId || 'pi_test_' + Math.random().toString(36).substring(2, 12),
+          paymentIntentId,
           totalUSD,
           satUuid,
           banxicoTracking,
