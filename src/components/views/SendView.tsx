@@ -2581,10 +2581,10 @@ export function SendView({
 
         return (
           <>
-            {/* BARRA FLOTANTE COMPACTA A PIE DE PÁGINA (ESTILO WESTERN UNION) */}
+            {/* BARRA FLOTANTE COMPACTA A PIE DE PÁGINA (ESTILO WESTERN UNION / APPLE) */}
             {isMounted && typeof document !== 'undefined' && createPortal(
               <div className="fixed bottom-[74px] left-1/2 -translate-x-1/2 w-full max-w-[412px] px-3.5 z-40 pointer-events-none">
-                <div className="w-full bg-[#080B11]/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.85)] px-4 py-2.5 flex items-center justify-between pointer-events-auto">
+                <div className="w-full bg-white/95 dark:bg-[#080B11]/95 backdrop-blur-xl border border-slate-200/90 dark:border-white/15 rounded-2xl shadow-[0_12px_36px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.85)] px-4 py-2.5 flex items-center justify-between pointer-events-auto">
                   {/* Lado Izquierdo: Total a pagar con trigger informativo */}
                   <button
                     type="button"
@@ -2592,13 +2592,13 @@ export function SendView({
                     className="flex flex-col text-left group cursor-pointer active:scale-95 transition-transform"
                     title={isEn ? "View transparent fee breakdown" : "Ver desglose transparente de comisiones"}
                   >
-                    <div className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 group-hover:text-primary transition-colors">
+                    <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-neutral-400 group-hover:text-emerald-600 dark:group-hover:text-primary transition-colors">
                       <span>{isEn ? 'Total you pay :' : 'Total a pagar :'}</span>
-                      <span className="material-symbols-outlined text-[15px] text-primary">info</span>
+                      <span className="material-symbols-outlined text-[15px] text-emerald-600 dark:text-primary">info</span>
                     </div>
-                    <div className="font-financial-mono text-[19px] font-black text-white tracking-tight flex items-baseline gap-1">
+                    <div className="font-financial-mono text-[19px] font-black text-slate-900 dark:text-white tracking-tight flex items-baseline gap-1">
                       <span>${currentTotalUSD.toFixed(2)}</span>
-                      <span className="text-xs text-neutral-400 font-bold">USD</span>
+                      <span className="text-xs text-slate-500 dark:text-neutral-400 font-bold">USD</span>
                     </div>
                   </button>
 
@@ -2606,7 +2606,7 @@ export function SendView({
                   <button
                     type="button"
                     onClick={handleStartSendReview}
-                    className="h-12 px-6 rounded-xl bg-gradient-to-r from-primary to-[#18A57E] text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+                    className="h-12 px-6 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
                   >
                     <span>{isEn ? 'Continue' : 'Continuar'}</span>
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -2618,30 +2618,30 @@ export function SendView({
 
             {/* MINI-MODAL / BOTTOM-SHEET: DESGLOSE TRANSPARENTE SI EL CLIENTE LO DESEA */}
             {isMounted && showFeeBreakdownSheet && typeof document !== 'undefined' && createPortal(
-              <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+              <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
                 <div
                   className="fixed inset-0"
                   onClick={() => setShowFeeBreakdownSheet(false)}
                   aria-hidden="true"
                 />
-                <div className="relative w-full max-w-[412px] bg-[#0E131F] border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl z-10 space-y-4 animate-slide-up">
+                <div className="relative w-full max-w-[412px] bg-white dark:bg-[#0E131F] border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl z-10 space-y-4 animate-slide-up">
                   {/* Encabezado */}
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-white/10">
                     <div>
-                      <h3 className="font-title-base text-base font-bold text-white flex items-center gap-2">
+                      <h3 className="font-title-base text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span>{isEn ? 'Send Cost Breakdown' : 'Desglose Transparente de Envío'}</span>
-                        <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-primary/20 text-emerald-800 dark:text-primary text-[10px] font-bold">
                           {isEn ? 'Audited' : 'Oficial'}
                         </span>
                       </h3>
-                      <p className="text-xs text-neutral-400">
+                      <p className="text-xs text-slate-500 dark:text-neutral-400">
                         {isEn ? 'Guaranteed transparent pricing with no hidden charges' : 'Precios justos garantizados sin cargos ocultos'}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowFeeBreakdownSheet(false)}
-                      className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">close</span>
                     </button>
@@ -2650,45 +2650,45 @@ export function SendView({
                   {/* Filas del desglose */}
                   <div className="space-y-2.5 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-neutral-400">{isEn ? 'Base Amount Sent' : 'Monto Base a Enviar'}</span>
-                      <span className="font-financial-mono font-bold text-white">${currentBaseUSD.toFixed(2)} USD</span>
+                      <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Base Amount Sent' : 'Monto Base a Enviar'}</span>
+                      <span className="font-financial-mono font-bold text-slate-900 dark:text-white">${currentBaseUSD.toFixed(2)} USD</span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-neutral-400 flex items-center gap-1.5">
+                      <span className="text-slate-500 dark:text-neutral-400 flex items-center gap-1.5">
                         <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío KIN'}</span>
-                        <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[9px] font-bold">
+                        <span className="px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-primary/20 text-emerald-800 dark:text-primary text-[9px] font-bold">
                           {isEn ? 'FEE' : 'TARIFA'}
                         </span>
                       </span>
-                      <span className="font-financial-mono font-bold text-primary">+${KIN_SEND_FEE.toFixed(2)} USD</span>
+                      <span className="font-financial-mono font-bold text-emerald-600 dark:text-primary">+${KIN_SEND_FEE.toFixed(2)} USD</span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-neutral-400">{isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}</span>
-                      <span className="font-financial-mono font-semibold text-white">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+                      <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}</span>
+                      <span className="font-financial-mono font-semibold text-slate-800 dark:text-white">1 USD = {USD_TO_MXN_RATE.toFixed(2)} MXN</span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-neutral-400">{isEn ? 'Delivered in Mexico' : 'Monto a Entregar en México'}</span>
-                      <span className="font-financial-mono font-bold text-primary">
+                      <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Delivered in Mexico' : 'Monto a Entregar en México'}</span>
+                      <span className="font-financial-mono font-bold text-emerald-600 dark:text-primary">
                         ${currentMXNReceives.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-neutral-400">{isEn ? 'Estimated Delivery Time' : 'Tiempo Estimado de Entrega'}</span>
-                      <span className="font-bold text-primary flex items-center gap-1">
+                      <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Estimated Delivery Time' : 'Tiempo Estimado de Entrega'}</span>
+                      <span className="font-bold text-emerald-600 dark:text-primary flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px]">bolt</span> {isEn ? 'Within 5 minutes' : 'En menos de 5 minutos'}
                       </span>
                     </div>
 
-                    <div className="pt-3 flex items-center justify-between border-t border-white/10">
+                    <div className="pt-3 flex items-center justify-between border-t border-slate-200/80 dark:border-white/10">
                       <div>
-                        <span className="font-bold text-white block">{isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}</span>
-                        <span className="text-[10px] text-neutral-400">{isEn ? 'Includes transparent KIN fee' : 'Incluye cargo de envío KIN'}</span>
+                        <span className="font-bold text-slate-900 dark:text-white block">{isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-neutral-400">{isEn ? 'Includes transparent KIN fee' : 'Incluye cargo de envío KIN'}</span>
                       </div>
-                      <span className="font-financial-mono text-base font-bold text-primary">${currentTotalUSD.toFixed(2)} USD</span>
+                      <span className="font-financial-mono text-base font-bold text-emerald-600 dark:text-primary">${currentTotalUSD.toFixed(2)} USD</span>
                     </div>
                   </div>
 

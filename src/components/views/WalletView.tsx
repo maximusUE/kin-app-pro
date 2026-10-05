@@ -65,7 +65,7 @@ export function WalletView({
 
       {/* KIN Platinum Debit Card */}
       <div
-        className={`relative p-5 rounded-3xl bg-gradient-to-br from-[#1C1D2F] via-[#141524] to-[#0A0B12] border transition-all duration-300 shadow-2xl overflow-hidden ${
+        className={`kin-vault-card relative p-5 rounded-3xl bg-gradient-to-br from-[#1C1D2F] via-[#141524] to-[#0A0B12] border transition-all duration-300 shadow-2xl overflow-hidden ${
           cardFrozen ? 'border-[#FF5555]/40 opacity-75 grayscale-[50%]' : 'border-[#2ED5A4]/30'
         }`}
       >
@@ -163,19 +163,19 @@ export function WalletView({
         </div>
       </div>
 
-      {/* Quick Card Controls (3 Botones Ergonómicos) */}
+      {/* Quick Card Controls (3 Botones Ergonómicos estilo Apple) */}
       <div className="grid grid-cols-3 gap-2">
         {/* Congelar */}
         <button
           type="button"
           onClick={() => setCardFrozen(!cardFrozen)}
-          className={`p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer ${
+          className={`p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer shadow-sm ${
             cardFrozen
-              ? 'bg-[#FF5555]/15 border-[#FF5555]/40 text-[#FF5555]'
-              : 'bg-[#181928] border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15'
+              ? 'bg-rose-50 dark:bg-[#FF5555]/15 border-rose-300 dark:border-[#FF5555]/40 text-rose-600 dark:text-[#FF5555]'
+              : 'bg-white dark:bg-[#181928] border-slate-200/80 dark:border-white/5 text-slate-700 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/15'
           }`}
         >
-          <div className="w-8 h-8 rounded-full bg-[#202236] flex items-center justify-center text-current text-sm">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#202236] flex items-center justify-center text-current text-sm">
             {cardFrozen ? '❄️' : '🔒'}
           </div>
           <span className="text-[11px] font-bold leading-tight">
@@ -187,12 +187,12 @@ export function WalletView({
         <button
           type="button"
           onClick={() => alert(isEn ? 'Your ATM PIN is: 4892 (Encrypted with FaceID)' : 'Tu PIN de cajero es: 4892 (Encriptado con FaceID)')}
-          className="p-3 rounded-2xl bg-[#181928] border border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer"
+          className="p-3 rounded-2xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 text-slate-700 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-full bg-[#202236] flex items-center justify-center text-white text-sm">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#202236] flex items-center justify-center text-slate-800 dark:text-white text-sm">
             🔑
           </div>
-          <span className="text-[11px] font-bold text-white leading-tight">
+          <span className="text-[11px] font-bold text-slate-800 dark:text-white leading-tight">
             {isEn ? 'View PIN' : 'Ver PIN'}
           </span>
         </button>
@@ -201,59 +201,59 @@ export function WalletView({
         <button
           type="button"
           onClick={() => alert(isEn ? 'Current daily limit: $5,000.00 USD' : 'Límite diario actual: $5,000.00 USD')}
-          className="p-3 rounded-2xl bg-[#181928] border border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer"
+          className="p-3 rounded-2xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 text-slate-700 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-full bg-[#202236] flex items-center justify-center text-white text-sm">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#202236] flex items-center justify-center text-slate-800 dark:text-white text-sm">
             ⚙️
           </div>
-          <span className="text-[11px] font-bold text-white leading-tight">
+          <span className="text-[11px] font-bold text-slate-800 dark:text-white leading-tight">
             {isEn ? 'Limits' : 'Límites'}
           </span>
         </button>
       </div>
 
       {/* Desglose de Balances (USD & MXN) */}
-      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3">
-        <span className="text-xs font-bold text-[#8E91A5] uppercase tracking-wider block">
+      <div className="p-4 rounded-3xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 space-y-3 shadow-sm">
+        <span className="text-xs font-bold text-slate-500 dark:text-[#8E91A5] uppercase tracking-wider block">
           {isEn ? 'Currency Vaults' : 'Bóvedas de Divisas'}
         </span>
 
         <div className="space-y-2">
-          <div className="p-3 rounded-2xl bg-[#0E0F1A] border border-white/5 flex items-center justify-between">
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#0E0F1A] border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white font-bold text-xs">
+              <div className="w-9 h-9 rounded-full bg-white dark:bg-[#202236] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-900 dark:text-white font-bold text-xs shadow-xs">
                 🇺🇸
               </div>
               <div>
-                <p className="text-xs font-bold text-white">{isEn ? 'USD Wallet' : 'Billetera USD'}</p>
-                <p className="text-[10px] text-[#8E91A5]">{isEn ? 'Primary KIN Account' : 'Cuenta principal KIN'}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white">{isEn ? 'USD Wallet' : 'Billetera USD'}</p>
+                <p className="text-[10px] text-slate-500 dark:text-[#8E91A5]">{isEn ? 'Primary KIN Account' : 'Cuenta principal KIN'}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xs font-black text-white">
+              <p className="text-xs font-black text-slate-900 dark:text-white">
                 ${netBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-[10px] text-[#2ED5A4] font-semibold">{isEn ? 'USD Active' : 'USD Activo'}</p>
+              <p className="text-[10px] text-emerald-600 dark:text-[#2ED5A4] font-semibold">{isEn ? 'USD Active' : 'USD Activo'}</p>
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#0E0F1A] border border-white/5 flex items-center justify-between">
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#0E0F1A] border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#202236] border border-white/10 flex items-center justify-center text-white font-bold text-xs">
+              <div className="w-9 h-9 rounded-full bg-white dark:bg-[#202236] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-900 dark:text-white font-bold text-xs shadow-xs">
                 🇲🇽
               </div>
               <div>
-                <p className="text-xs font-bold text-white">{isEn ? 'SPEI MXN Vault' : 'Bóveda SPEI MXN'}</p>
-                <p className="text-[10px] text-[#8E91A5]">
+                <p className="text-xs font-bold text-slate-900 dark:text-white">{isEn ? 'SPEI MXN Vault' : 'Bóveda SPEI MXN'}</p>
+                <p className="text-[10px] text-slate-500 dark:text-[#8E91A5]">
                   {isEn ? `Exchange rate $${USD_TO_MXN_RATE.toFixed(2)} MXN/USD` : `Tipo de cambio $${USD_TO_MXN_RATE.toFixed(2)} MXN/USD`}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xs font-black text-white">
+              <p className="text-xs font-black text-slate-900 dark:text-white">
                 ${(netBalance * USD_TO_MXN_RATE).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-[10px] text-[#8E91A5] font-semibold">{isEn ? 'MXN Equivalent' : 'MXN Equivalente'}</p>
+              <p className="text-[10px] text-slate-500 dark:text-[#8E91A5] font-semibold">{isEn ? 'MXN Equivalent' : 'MXN Equivalente'}</p>
             </div>
           </div>
         </div>

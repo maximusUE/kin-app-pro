@@ -1047,6 +1047,9 @@ html.light .bg-\[\#202236\],
 html.light .bg-\[\#222338\],
 html.light .bg-\[\#242638\],
 html.light .bg-\[\#14141F\],
+html.light .bg-\[\#0E0F1A\],
+html.light .bg-\[\#080B11\],
+html.light .bg-\[\#0E131F\],
 html.light .bg-\[\#262939\],
 html.light .bg-\[\#2B2C42\],
 html.light .bg-\[\#313244\],
@@ -1161,6 +1164,23 @@ html.light .bg-red-500 *,
 html.light .bg-rose-600,
 html.light .bg-rose-600 * {
   color: #FFFFFF !important;
+}
+
+/* KIN Obsidian Debit Card & Preserved Dark Cards: Keep White & Gold Elements */
+html.light .kin-vault-card,
+html.light .kin-vault-card .text-white,
+html.light .kin-vault-card [class*="text-white"],
+html.light .dark-surface-preserve,
+html.light .dark-surface-preserve .text-white {
+  color: #FFFFFF !important;
+}
+html.light .kin-vault-card .text-\[\#8E91A5\],
+html.light .kin-vault-card [class*="text-neutral-400"],
+html.light .kin-vault-card [class*="text-white\/60"] {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+html.light .kin-vault-card .text-\[\#2ED5A4\] {
+  color: #2ED5A4 !important;
 }
 
 /* 13. Bottom Navigation Dock in Light Mode */
