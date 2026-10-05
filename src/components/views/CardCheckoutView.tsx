@@ -25,6 +25,82 @@ export interface CardCheckoutViewProps {
     satUuid: string;
     banxicoTracking: string;
   }) => void;
+// =========================================================================
+// COMPONENTES SVG VECTORIALES OFICIALES (VISA, MASTERCARD, CHIP EMV, CONTACTLESS)
+// =========================================================================
+
+export function MastercardLogo({ className = 'w-7 h-4.5' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 36 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" fill="#EB001B" />
+      <circle cx="24" cy="12" r="10" fill="#F79E1B" />
+      <path
+        d="M18 5.333a9.96 9.96 0 0 1 4 6.667 9.96 9.96 0 0 1-4 6.667 9.96 9.96 0 0 1-4-6.667 9.96 9.96 0 0 1 4-6.667z"
+        fill="#FF5F00"
+      />
+    </svg>
+  );
+}
+
+export function VisaLogo({ className = 'w-8 h-3.5' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 16" className={className} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M18.8 15.2h-3.4l2.1-13h3.4l-2.1 13zm12.3-12.7c-.7-.3-1.8-.5-3.1-.5-3.4 0-5.8 1.8-5.8 4.4 0 1.9 1.7 3 3 3.6 1.3.6 1.8 1 1.8 1.6 0 .8-1 1.3-2 1.3-1.3 0-2.1-.2-3.1-.6l-.4-.2-.5 2.9c.8.4 2.3.7 3.8.7 3.6 0 6-1.8 6-4.5 0-1.5-.9-2.7-3-3.6-1.2-.6-1.9-1-1.9-1.6 0-.6.6-1.1 1.9-1.1 1.1 0 1.9.2 2.5.5l.3.1.5-2.6zm8.8 8.1l1.6-4.3c-.1 0 .3-.9.5-1.5l.3 1.3.9 4.5h-3.3zm4.8-8.4h-2.6c-.8 0-1.4.2-1.8 1.1l-5.1 12h3.6l.7-2h4.4l.4 2h3.2l-2.8-13.1zm-28.9 0l-3.3 8.9-.4-1.8c-.6-2-.2-2.7-1.4-3.4-1-.5-2.6-1-4-1.4l.1.5c2.3.5 4.4 1.3 5.8 3.5l3.2 12.3h3.6l5.4-13.1h-3.6l-5.4 0z"
+      />
+    </svg>
+  );
+}
+
+export function EmvChip({ isGold = true }: { isGold?: boolean }) {
+  return (
+    <div className={`relative w-9 h-6.5 rounded-md overflow-hidden p-[1px] shadow-sm ${
+      isGold
+        ? 'bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600'
+        : 'bg-gradient-to-br from-slate-200 via-slate-400 to-slate-600'
+    }`}>
+      <div className={`w-full h-full rounded-[5px] flex items-center justify-center relative ${
+        isGold
+          ? 'bg-gradient-to-tr from-amber-500 via-amber-300 to-amber-400'
+          : 'bg-gradient-to-tr from-slate-400 via-slate-300 to-slate-400'
+      }`}>
+        <div className="absolute inset-0 border border-black/20 rounded-[5px]" />
+        <div className="w-full h-[1px] bg-black/25" />
+        <div className="h-full w-[1px] bg-black/25 absolute" />
+        <div className="w-3.5 h-3 border border-black/25 rounded-[3px] absolute" />
+      </div>
+    </div>
+  );
+}
+
+export function ContactlessWaveIcon({ className = 'w-4 h-4 text-white/70' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M8.5 16.5a6 6 0 0 1 0-9" />
+      <path d="M12 19a10 10 0 0 1 0-14" />
+      <path d="M15.5 21.5a14 14 0 0 1 0-19" />
+    </svg>
+  );
+}
+
+export function CardBrandBadge({ brand }: { brand?: string }) {
+  const b = (brand || 'visa').toLowerCase();
+  const isMastercard = b === 'mastercard';
+  const isVisa = b === 'visa';
+
+  return (
+    <div className="w-12 h-8 rounded-xl bg-gradient-to-b from-[#181D28] to-[#0D1017] border border-white/12 flex items-center justify-center shrink-0 shadow-inner px-1.5">
+      {isMastercard ? (
+        <MastercardLogo className="w-7 h-4.5" />
+      ) : isVisa ? (
+        <div className="text-white">
+          <VisaLogo className="w-8 h-3" />
+        </div>
+      ) : (
+        <span className="text-[9px] font-black text-white uppercase">{b.slice(0, 4)}</span>
+      )}
+    </div>
+  );
 }
 
 export function CardCheckoutView({
@@ -513,46 +589,98 @@ export function CardCheckoutView({
             </div>
           </div>
 
-          {/* B. Visual de Tarjeta Digital Titanium (Aspecto Móvil) */}
-          <div className="w-full rounded-2xl bg-gradient-to-tr from-[#151922] via-[#0E121A] to-[#1C2331] p-4.5 border border-white/15 shadow-xl relative overflow-hidden text-white flex flex-col justify-between min-h-[175px]">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[#2ED5A4]/10 rounded-full blur-3xl pointer-events-none" />
+          {/* B. Visual de Tarjeta Digital Titanium / Metal Rediseñada */}
+          {(() => {
+            const activeBrand = (paymentMode === 'new'
+              ? (newCardNumber.startsWith('5') ? 'mastercard' : newCardNumber.startsWith('4') ? 'visa' : 'visa')
+              : (activeCard?.brand || 'visa')
+            ).toLowerCase();
+            const isMastercard = activeBrand === 'mastercard';
+            const isSandbox = (activeCard?.id || '').includes('sandbox') || (activeCard?.name || '').includes('Sandbox') || (activeCard?.last4 === '4242');
+            const isTitanium = (activeCard?.name || '').toLowerCase().includes('titanium') || isMastercard;
 
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-black tracking-widest uppercase text-slate-300">KIN DIGITAL TITANIUM</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-white/10 text-[8px] font-bold text-slate-300 uppercase">
-                  EMV Contactless
-                </span>
-              </div>
-              <span className="text-base font-black tracking-tight font-headline-md text-white">
-                {paymentMode === 'new' ? 'VISA / MC' : ((activeCard?.brand || 'visa').toUpperCase())}
-              </span>
-            </div>
+            let cardBgGradient = 'from-[#171C26] via-[#0E1118] to-[#07090D]';
+            let cardBorder = 'border-white/15';
+            let cardGlow = 'bg-[#2ED5A4]/10';
+            let cardSeriesTitle = 'KIN OBSIDIAN METAL';
+            let cardBadgeText = isEn ? 'PREMIUM DEBIT' : 'DÉBITO PREMIUM';
 
-            {/* Monospace Card Number Preview */}
-            <div className="py-2.5 relative z-10">
-              <div className="font-mono text-base font-bold tracking-[0.2em] text-white">
-                {paymentMode === 'new'
-                  ? (newCardNumber || '•••• •••• •••• ••••')
-                  : `•••• •••• •••• ${activeCard?.last4 || '8942'}`}
-              </div>
-            </div>
+            if (isSandbox) {
+              cardBgGradient = 'from-[#2B2312] via-[#1A150A] to-[#0D0B05]';
+              cardBorder = 'border-amber-400/40';
+              cardGlow = 'bg-amber-400/20';
+              cardSeriesTitle = 'KIN VIP PLATINUM';
+              cardBadgeText = 'SANDBOX 4242';
+            } else if (isTitanium || isMastercard) {
+              cardBgGradient = 'from-[#2A3142] via-[#181D29] to-[#0E121B]';
+              cardBorder = 'border-white/20';
+              cardGlow = 'bg-sky-400/15';
+              cardSeriesTitle = 'KIN TITANIUM FREEDOM';
+              cardBadgeText = isEn ? 'BLACK CREDIT' : 'CRÉDITO BLACK';
+            }
 
-            <div className="flex items-center justify-between text-[11px] text-[#A6ADC8] relative z-10">
-              <div>
-                <span className="text-[8px] uppercase tracking-wider block text-[#A6ADC8]">Titular</span>
-                <span className="font-bold text-white truncate max-w-[170px] block">
-                  {paymentMode === 'new' ? (newCardHolder || 'NOMBRE TITULAR') : (activeCard?.name || 'Tarjeta Principal')}
-                </span>
+            return (
+              <div className={`w-full rounded-2xl bg-gradient-to-tr ${cardBgGradient} p-4 sm:p-5 border ${cardBorder} shadow-[0_16px_36px_rgba(0,0,0,0.85)] relative overflow-hidden text-white flex flex-col justify-between min-h-[188px] transition-all duration-300`}>
+                {/* Iluminación Especular Metálica */}
+                <div className={`absolute top-0 right-0 w-52 h-52 ${cardGlow} rounded-full blur-3xl pointer-events-none`} />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/[0.04] via-transparent to-white/[0.02] pointer-events-none" />
+
+                {/* Cabecera de la Tarjeta */}
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black tracking-[0.2em] uppercase text-slate-200">
+                      {cardSeriesTitle}
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-full bg-white/10 text-[8px] font-bold text-slate-300 uppercase tracking-wider border border-white/10">
+                      {cardBadgeText}
+                    </span>
+                  </div>
+
+                  {/* Logo Oficial y Contactless */}
+                  <div className="flex items-center gap-2">
+                    <ContactlessWaveIcon className="w-4 h-4 text-white/70" />
+                    {isMastercard ? (
+                      <MastercardLogo className="w-8 h-5 drop-shadow-sm" />
+                    ) : (
+                      <div className="text-white drop-shadow-sm">
+                        <VisaLogo className="w-10 h-4" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chip EMV y Número Monospace en Relieve */}
+                <div className="py-2.5 relative z-10 flex items-center justify-between">
+                  <EmvChip isGold={!isTitanium} />
+                  <div className="font-mono text-base sm:text-lg font-bold tracking-[0.22em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    {paymentMode === 'new'
+                      ? (newCardNumber || '•••• •••• •••• ••••')
+                      : `•••• •••• •••• ${activeCard?.last4 || '8942'}`}
+                  </div>
+                </div>
+
+                {/* Pie de Tarjeta: Titular y Vencimiento */}
+                <div className="flex items-end justify-between text-[11px] text-[#A6ADC8] relative z-10 pt-1">
+                  <div>
+                    <span className="text-[8px] uppercase font-bold tracking-widest block text-slate-400">
+                      {isEn ? 'CARDHOLDER' : 'TITULAR'}
+                    </span>
+                    <span className="font-bold text-white text-xs tracking-wide truncate max-w-[190px] block mt-0.5">
+                      {paymentMode === 'new' ? (newCardHolder || 'NOMBRE TITULAR') : (activeCard?.name || 'Tarjeta Principal')}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[8px] uppercase font-bold tracking-widest block text-slate-400">
+                      {isEn ? 'EXPIRES' : 'VENCE'}
+                    </span>
+                    <span className="font-mono font-bold text-white text-xs tracking-wider block mt-0.5">
+                      {paymentMode === 'new' ? (newCardExp || 'MM/AA') : (activeCard?.exp || '12/28')}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <span className="text-[8px] uppercase tracking-wider block text-[#A6ADC8]">Vence</span>
-                <span className="font-mono font-bold text-white">
-                  {paymentMode === 'new' ? (newCardExp || 'MM/AA') : (activeCard?.exp || '12/28')}
-                </span>
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* C. Banner de Entorno de Pruebas Sandbox con Botón 1-Toque */}
           <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs shadow-md">
@@ -605,50 +733,72 @@ export function CardCheckoutView({
             </button>
           </div>
 
-          {/* OPCIÓN A: TARJETAS GUARDADAS */}
+          {/* OPCIÓN A: TARJETAS GUARDADAS (BOTONES REDISEÑADOS CON ALTA ERGONOMÍA) */}
           {paymentMode === 'saved' && (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {cards.map((c) => {
                 const isSelected = selectedCardId === c.id;
+                const cardBrand = (c.brand || 'visa').toLowerCase();
+                const isCardMastercard = cardBrand === 'mastercard';
+                const isCardSandbox = (c.id || '').includes('sandbox') || (c.name || '').includes('Sandbox') || c.last4 === '4242';
+
                 return (
-                  <div
+                  <button
                     key={c.id}
+                    type="button"
                     onClick={() => setSelectedCardId(c.id)}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                    className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between group active:scale-[0.99] ${
                       isSelected
-                        ? 'bg-[#181825] border-[#2ED5A4] shadow-[0_0_15px_rgba(46,213,164,0.2)]'
-                        : 'bg-[#121622] border-white/5 hover:border-white/15'
+                        ? 'bg-gradient-to-r from-[#17222F] to-[#111722] border-[#2ED5A4] shadow-[0_4px_20px_rgba(46,213,164,0.18)] ring-1 ring-[#2ED5A4]/40'
+                        : 'bg-[#0E121A] border-white/8 hover:border-white/20 hover:bg-[#131824]'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-7 rounded-lg bg-gradient-to-br from-slate-800 to-slate-950 border border-white/20 flex items-center justify-center text-[10px] font-black text-white uppercase tracking-wider">
-                        {(c.brand || 'visa').toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span>{c.name}</span>
+                    {/* Lado Izquierdo: Badge de Marca Oficial SVG + Info de Tarjeta */}
+                    <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                      {/* Badge de Marca con SVG Oficial (48x32px, CERO Desborde) */}
+                      <CardBrandBadge brand={c.brand} />
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-bold text-white truncate max-w-[170px]">
+                            {c.name}
+                          </span>
                           {c.isDefault && (
-                            <span className="px-1.5 py-0.2 rounded-full bg-white/10 text-slate-300 text-[8px] uppercase font-bold">
-                              {isEn ? 'Primary' : 'Predeterminada'}
+                            <span className="px-1.5 py-0.2 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4] text-[8px] uppercase font-bold border border-[#2ED5A4]/30">
+                              {isEn ? 'Default' : 'Predeterminada'}
                             </span>
                           )}
-                        </p>
-                        <p className="text-[11px] text-[#A6ADC8] font-mono mt-0.5">
-                          •••• {c.last4} • Vence {c.exp}
-                        </p>
+                          {isCardSandbox && (
+                            <span className="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 text-[8px] uppercase font-bold border border-amber-500/30">
+                              Sandbox
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-[#A6ADC8] font-mono mt-0.5">
+                          <span>•••• {c.last4}</span>
+                          <span className="text-white/20">•</span>
+                          <span>{isEn ? 'Exp' : 'Vence'} {c.exp}</span>
+                          <span className="text-white/20">•</span>
+                          <span className="text-[10px] font-sans text-emerald-400/90 font-medium">
+                            {isCardMastercard ? 'Crédito' : 'Débito'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
+                    {/* Lado Derecho: Indicador Radio Estilo Apple HIG */}
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                         isSelected
-                          ? 'border-[#2ED5A4] bg-[#2ED5A4] text-slate-950'
-                          : 'border-slate-500 bg-transparent'
+                          ? 'border-[#2ED5A4] bg-[#2ED5A4] text-[#06070B] shadow-[0_2px_8px_rgba(46,213,164,0.4)]'
+                          : 'border-slate-500 bg-white/5 group-hover:border-slate-400'
                       }`}
                     >
-                      {isSelected && <span className="material-symbols-outlined text-[14px] font-bold">check</span>}
+                      {isSelected && (
+                        <span className="material-symbols-outlined text-[15px] font-bold">check</span>
+                      )}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
