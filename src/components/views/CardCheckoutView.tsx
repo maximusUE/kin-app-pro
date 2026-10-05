@@ -25,6 +25,8 @@ export interface CardCheckoutViewProps {
     satUuid: string;
     banxicoTracking: string;
   }) => void;
+}
+
 // =========================================================================
 // COMPONENTES SVG VECTORIALES OFICIALES (VISA, MASTERCARD, CHIP EMV, CONTACTLESS)
 // =========================================================================
