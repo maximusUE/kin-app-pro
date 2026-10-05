@@ -373,13 +373,15 @@ export default function MobileApp() {
         } catch (_) {}
       }
     }
-    if (user.theme === 'dark' || user.theme === 'light') {
-      setTheme(user.theme);
+    const activeSavedTheme = typeof window !== 'undefined' ? localStorage.getItem('kin_theme') : null;
+    const resolvedTheme = (activeSavedTheme === 'light' || activeSavedTheme === 'dark') ? activeSavedTheme : user.theme;
+    if (resolvedTheme === 'dark' || resolvedTheme === 'light') {
+      setTheme(resolvedTheme);
       if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem('kin_theme', user.theme);
+          localStorage.setItem('kin_theme', resolvedTheme);
           document.documentElement.classList.remove('dark', 'light');
-          document.documentElement.classList.add(user.theme);
+          document.documentElement.classList.add(resolvedTheme);
         } catch (_) {}
       }
     }
