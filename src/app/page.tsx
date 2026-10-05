@@ -87,7 +87,7 @@ import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/compo
 import { ClientVaultModal } from '@/components/ClientVaultModal';
 import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
 import { KinLogo } from '@/components/KinLogo';
-import { BilingualAuthScreen } from '@/components/BilingualAuthScreen';
+import { EnterpriseAuthScreen } from '@/components/EnterpriseAuthScreen';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 import { ContactAvatar } from '@/components/ContactAvatar';
 import { WhatsAppContactsModal } from '@/components/WhatsAppContactsModal';
@@ -1841,10 +1841,10 @@ export default function MobileApp() {
     return acc;
   }, {});
 
-  // Si el usuario aún no ha iniciado sesión, desplegar pantalla de autenticación y login Stitch
+  // Si el usuario aún no ha iniciado sesión, desplegar pantalla de autenticación empresarial KIN
   if (!isAuthenticated) {
     return (
-      <BilingualAuthScreen
+      <EnterpriseAuthScreen
         initialMode="login"
         onLoginSuccess={(userData) => {
           setIsAuthenticated(true);

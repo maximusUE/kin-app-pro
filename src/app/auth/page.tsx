@@ -2,13 +2,13 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { BilingualAuthScreen } from '@/components/BilingualAuthScreen';
+import { EnterpriseAuthScreen } from '@/components/EnterpriseAuthScreen';
 
 export default function AuthPage() {
   const router = useRouter();
 
   return (
-    <BilingualAuthScreen
+    <EnterpriseAuthScreen
       initialMode="login"
       onLoginSuccess={(userData) => {
         if (typeof window !== 'undefined') {
