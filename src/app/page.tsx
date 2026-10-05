@@ -462,6 +462,9 @@ export default function MobileApp() {
       setIsAuthenticated(false);
     }
 
+    const queryTheme = params.get('theme');
+    const queryTab = params.get('tab');
+
     // 0. Recuperar idioma, moneda y tema guardados en localStorage
     const savedLang = localStorage.getItem('kin_language');
     if (savedLang === 'es' || savedLang === 'en') {
@@ -472,14 +475,19 @@ export default function MobileApp() {
       setCurrencyPref(savedCurr);
     }
     const savedTheme = localStorage.getItem('kin_theme') as 'dark' | 'light' | null;
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      setTheme(savedTheme);
+    const effectiveTheme = (queryTheme === 'light' || queryTheme === 'dark') ? queryTheme : savedTheme;
+    if (effectiveTheme === 'dark' || effectiveTheme === 'light') {
+      setTheme(effectiveTheme);
       document.documentElement.classList.remove('dark', 'light');
-      document.documentElement.classList.add(savedTheme);
+      document.documentElement.classList.add(effectiveTheme);
+      try {
+        localStorage.setItem('kin_theme', effectiveTheme);
+      } catch (_) {}
     }
     const savedTab = localStorage.getItem('kin_active_tab');
-    if (savedTab && ['home', 'send', 'bills', 'transactions', 'wallet', 'send-quick', 'profile', 'kin-cash', 'bill-pay', 'vault'].includes(savedTab)) {
-      setActiveTab(savedTab as any);
+    const effectiveTab = (queryTab && ['home', 'send', 'bills', 'transactions', 'wallet', 'send-quick', 'profile', 'kin-cash', 'bill-pay', 'vault'].includes(queryTab)) ? queryTab : savedTab;
+    if (effectiveTab && ['home', 'send', 'bills', 'transactions', 'wallet', 'send-quick', 'profile', 'kin-cash', 'bill-pay', 'vault'].includes(effectiveTab)) {
+      setActiveTab(effectiveTab as any);
     }
 
     // 1. Recuperar usuario guardado en localStorage (sesión activa tras login/registro)
