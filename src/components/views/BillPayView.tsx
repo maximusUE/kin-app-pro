@@ -139,23 +139,23 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
 
 export const getCategoryIconTheme = (id: string, isSelected: boolean) => {
   if (isSelected) {
-    return 'bg-emerald-500 text-white font-bold shadow-md shadow-emerald-500/25';
+    return 'bg-emerald-600 dark:bg-emerald-500 text-white font-bold shadow-md shadow-emerald-600/30';
   }
   switch (id) {
     case 'electricidad':
-      return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20';
+      return 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-500/20';
     case 'telefono':
-      return 'bg-blue-500/15 text-blue-400 border border-blue-500/20';
+      return 'bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-400 border border-blue-200/70 dark:border-blue-500/20';
     case 'internet':
-      return 'bg-purple-500/15 text-purple-300 border border-purple-500/20';
+      return 'bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-200/70 dark:border-purple-500/20';
     case 'television':
-      return 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20';
+      return 'bg-indigo-100 dark:bg-indigo-500/15 text-indigo-800 dark:text-indigo-400 border border-indigo-200/70 dark:border-indigo-500/20';
     case 'agua':
-      return 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20';
+      return 'bg-cyan-100 dark:bg-cyan-500/15 text-cyan-800 dark:text-cyan-400 border border-cyan-200/70 dark:border-cyan-500/20';
     case 'gas':
-      return 'bg-amber-500/15 text-amber-400 border border-amber-500/20';
+      return 'bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-200/70 dark:border-amber-500/20';
     default:
-      return 'bg-white/10 text-slate-200 border border-white/10';
+      return 'bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10';
   }
 };
 
@@ -278,28 +278,28 @@ export function BillPayView({
   };
 
   return (
-    <div className="flex flex-col w-full min-h-[700px] space-y-5 text-white select-none pb-28 relative">
+    <div className="flex flex-col w-full min-h-[700px] space-y-5 text-slate-900 dark:text-white select-none pb-28 relative">
       {/* Dynamic Atmospheric Glow */}
       <div className="relative w-full">
-        <div className="absolute -top-6 -left-10 w-44 h-44 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -top-4 -right-10 w-48 h-48 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-6 -left-10 w-44 h-44 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-4 -right-10 w-48 h-48 bg-purple-600/10 dark:bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Context Header */}
         <div className="relative flex flex-col space-y-1.5 z-10 pt-1">
-          <div className="inline-flex items-center gap-2 self-start px-2.5 py-1 rounded-full bg-[#181825] text-[#2ED5A4] border border-white/10 shadow-inner">
+          <div className="inline-flex items-center gap-2 self-start px-2.5 py-1 rounded-full bg-white dark:bg-[#181825] text-emerald-700 dark:text-[#2ED5A4] border border-slate-200/80 dark:border-white/10 shadow-sm">
             <span className="material-symbols-outlined text-[14px]">bolt</span>
             <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
               {isEn ? 'Zero Fees • Instant SPEI Receipt' : 'Sin Comisiones • Comprobante SPEI Inmediato'}
             </span>
           </div>
-          <h1 className="font-headline-md text-2xl font-bold text-white tracking-tight leading-tight">
+          <h1 className="font-headline-md text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
             {isEn ? (
-              <>Pay Utilities in Mexico <span className="text-[#2ED5A4] font-bold">Direct from USA</span></>
+              <>Pay Utilities in Mexico <span className="text-emerald-700 dark:text-[#2ED5A4] font-bold">Direct from USA</span></>
             ) : (
-              <>Paga Servicios en México <span className="text-[#2ED5A4] font-bold">Directo desde USA</span></>
+              <>Paga Servicios en México <span className="text-emerald-700 dark:text-[#2ED5A4] font-bold">Directo desde USA</span></>
             )}
           </h1>
-          <p className="text-xs text-[#A6ADC8] leading-relaxed max-w-[360px]">
+          <p className="text-xs text-slate-500 dark:text-[#A6ADC8] leading-relaxed max-w-[360px]">
             {isEn
               ? 'Support family back home. Direct settlement with official SAT fiscal vouchers.'
               : 'Apoya a tu familia. Liquidación directa con comprobante fiscal oficial del SAT.'}
@@ -308,11 +308,11 @@ export function BillPayView({
       </div>
 
       {/* Search & Barcode Quick-Action Strip */}
-      <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-[#181825] shadow-xl border border-white/10">
+      <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-white dark:bg-[#181825] shadow-sm border border-slate-200/80 dark:border-white/10">
         <div className="relative flex items-center w-full">
-          <span className="material-symbols-outlined absolute left-3.5 text-[#9399B2] text-[20px]">search</span>
+          <span className="material-symbols-outlined absolute left-3.5 text-slate-400 dark:text-[#9399B2] text-[20px]">search</span>
           <input
-            className="w-full h-12 pl-11 pr-4 bg-[#14141F] rounded-xl text-sm text-white placeholder:text-[#9399B2] focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner transition-all border border-white/10"
+            className="w-full h-12 pl-11 pr-4 bg-slate-50 dark:bg-[#14141F] rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#9399B2] focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:focus:ring-[#2ED5A4] shadow-inner transition-all border border-slate-200/80 dark:border-white/10"
             id="provider-search"
             placeholder={isEn ? 'Search over 120 Mexican providers...' : 'Buscar entre más de 120 proveedores mexicanos...'}
             type="text"
@@ -325,12 +325,12 @@ export function BillPayView({
         <button
           type="button"
           onClick={() => setShowCameraScanner(true)}
-          className="group relative overflow-hidden flex items-center justify-between px-4 py-3.5 rounded-xl bg-[#1E1E2E] shadow-lg transition-transform active:scale-[0.98] border border-white/10 cursor-pointer text-left"
+          className="group relative overflow-hidden flex items-center justify-between px-4 py-3.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/80 dark:bg-[#1E1E2E] dark:hover:bg-[#252538] shadow-sm transition-transform active:scale-[0.98] border border-slate-200/80 dark:border-white/10 cursor-pointer text-left"
           id="scan-btn"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2ED5A4]/10 via-transparent to-[#2ED5A4]/5 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-emerald-500/5 pointer-events-none" />
           <div className="flex items-center gap-3 relative z-10">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 shadow-sm shrink-0">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-500/20 shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[22px]">qr_code_scanner</span>
               <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
@@ -338,15 +338,15 @@ export function BillPayView({
               </span>
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-sm font-bold text-white group-hover:text-[#2ED5A4] transition-colors">
+              <span className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-[#2ED5A4] transition-colors">
                 {isEn ? 'Scan Barcode / QR with Camera' : 'Escanear Código de Barras / QR con la Cámara'}
               </span>
-              <span className="text-[11px] text-[#A6ADC8]">
+              <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8]">
                 {isEn ? 'Auto-detects account & amount due' : 'Detecta contrato y monto a pagar automáticamente'}
               </span>
             </div>
           </div>
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] group-hover:bg-[#2ED5A4] group-hover:text-black transition-colors">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-[#2ED5A4]/15 text-emerald-700 dark:text-[#2ED5A4] group-hover:bg-emerald-600 group-hover:text-white transition-colors">
             <span className="material-symbols-outlined text-[18px]">photo_camera</span>
           </div>
         </button>
@@ -355,13 +355,13 @@ export function BillPayView({
       {/* 6 Essential Mexican Service Categories Grid (2x3) */}
       <div className="flex flex-col space-y-2.5">
         <div className="flex items-center justify-between px-1">
-          <span className="font-label-caps text-[10px] uppercase tracking-wider text-[#A6ADC8] font-bold">
+          <span className="font-label-caps text-[10px] uppercase tracking-wider text-slate-500 dark:text-[#A6ADC8] font-bold">
             {isEn ? 'Essential Categories' : 'Categorías Principales'}
           </span>
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="text-xs text-[#2ED5A4] flex items-center gap-1 cursor-pointer hover:underline bg-transparent border-0"
+            className="text-xs text-emerald-700 dark:text-[#2ED5A4] flex items-center gap-1 cursor-pointer hover:underline bg-transparent border-0 font-semibold"
           >
             {isEn ? 'View all (120+)' : 'Ver todos (120+)'} <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
           </button>
@@ -375,10 +375,10 @@ export function BillPayView({
                 key={serv.id}
                 type="button"
                 onClick={() => setServicioSeleccionado(serv)}
-                className={`flex flex-col items-start p-3.5 rounded-2xl transition-all text-left group relative overflow-hidden shadow-md active:scale-[0.98] cursor-pointer border ${
+                className={`flex flex-col items-start p-3.5 rounded-2xl transition-all text-left group relative overflow-hidden shadow-sm active:scale-[0.98] cursor-pointer border ${
                   isSelected
-                    ? 'bg-[#242638] border-[#2ED5A4] shadow-[0_0_15px_rgba(46,213,164,0.25)]'
-                    : 'bg-[#181825] hover:bg-[#1E1E2E] border-white/10'
+                    ? 'bg-emerald-50/90 dark:bg-[#242638] border-emerald-500 dark:border-[#2ED5A4] shadow-[0_2px_12px_rgba(5,150,105,0.15)] dark:shadow-[0_0_15px_rgba(46,213,164,0.25)]'
+                    : 'bg-white dark:bg-[#181825] hover:bg-slate-50 dark:hover:bg-[#1E1E2E] border-slate-200/80 dark:border-white/10'
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-3">
@@ -397,15 +397,15 @@ export function BillPayView({
                     </div>
                   </div>
                   {serv.badge && (
-                    <span className={`px-2 py-0.5 rounded-full font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 max-w-[70px] truncate ${serv.badgeClass || 'bg-emerald-500/20 text-[#2ED5A4]'}`}>
+                    <span className={`px-2 py-0.5 rounded-full font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 whitespace-nowrap ${serv.badgeClass || 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#2ED5A4]'}`}>
                       {serv.badge}
                     </span>
                   )}
                 </div>
-                <span className={`text-sm font-bold transition-colors truncate w-full ${isSelected ? 'text-[#2ED5A4]' : 'text-white group-hover:text-[#2ED5A4]'}`}>
+                <span className={`text-sm font-bold transition-colors truncate w-full ${isSelected ? 'text-emerald-800 dark:text-[#2ED5A4]' : 'text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-[#2ED5A4]'}`}>
                   {isEn ? serv.nombre : serv.nombre}
                 </span>
-                <span className="text-[11px] text-[#A6ADC8] truncate w-full mt-0.5">
+                <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8] truncate w-full mt-0.5">
                   {serv.subtitulo}
                 </span>
               </button>
@@ -417,23 +417,23 @@ export function BillPayView({
       {/* Active Bill Verification Demo Card */}
       <div className="flex flex-col space-y-2">
         <div className="flex items-center justify-between px-1">
-          <span className="font-label-caps text-[10px] uppercase tracking-wider text-[#A6ADC8] font-bold">
+          <span className="font-label-caps text-[10px] uppercase tracking-wider text-slate-500 dark:text-[#A6ADC8] font-bold">
             {isEn ? 'Pending Service Invoice' : 'Factura de Servicio Pendiente'}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs text-[#2ED5A4]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" /> {isEn ? 'Verified Link' : 'Vínculo Verificado'}
+          <span className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-[#2ED5A4] font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-[#2ED5A4] animate-pulse" /> {isEn ? 'Verified Link' : 'Vínculo Verificado'}
           </span>
         </div>
 
-        <div className="relative overflow-hidden rounded-3xl bg-[#181825] p-4 shadow-2xl flex flex-col space-y-4 border border-white/10">
+        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-[#181825] p-4 shadow-sm flex flex-col space-y-4 border border-slate-200/80 dark:border-white/10">
           {/* Ambient Glow Behind Due Date */}
-          <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
 
           {/* Card Top: Service & Beneficiary */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {/* Institutional Logo Capsule */}
-              <div className="w-12 h-12 rounded-2xl bg-white/10 p-1 flex items-center justify-center shadow-sm shrink-0 border border-white/10">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/10 p-1 flex items-center justify-center shadow-sm shrink-0 border border-slate-200/60 dark:border-white/10">
                 <div className={`w-full h-full rounded-xl ${activeService.logoBg} flex items-center justify-center ${activeService.logoColor} px-1 overflow-hidden shadow-sm`}>
                   <span className="text-[10px] font-black leading-none tracking-wider text-center uppercase truncate">
                     {activeService.logoText}
@@ -442,65 +442,65 @@ export function BillPayView({
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
                     {activeService.sampleTitular}
                   </span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-[#242638] text-[#A6ADC8] text-[9px] font-bold border border-white/10">
+                  <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-[#242638] text-slate-600 dark:text-[#A6ADC8] text-[9px] font-bold border border-slate-200/60 dark:border-white/10">
                     {activeService.sampleLocation}
                   </span>
                 </div>
-                <span className="text-[11px] text-[#A6ADC8]">
+                <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8]">
                   {activeService.empresa}
                 </span>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-[#242638] text-[#2ED5A4] text-xs font-semibold border border-white/10">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-[#242638] text-emerald-800 dark:text-[#2ED5A4] text-xs font-semibold border border-emerald-200/60 dark:border-white/10">
               {activeService.sampleDueDate}
             </span>
           </div>
 
           {/* Card Middle: Key Financial Data */}
-          <div className="p-3.5 rounded-2xl bg-[#14141F] flex flex-col space-y-2.5 border border-white/10">
+          <div className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#14141F] flex flex-col space-y-2.5 border border-slate-200/80 dark:border-white/10">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-[#A6ADC8]">{isEn ? 'Service Identifier' : 'Número de Servicio'}</span>
-              <span className="font-mono text-sm text-white font-bold">
+              <span className="text-xs text-slate-500 dark:text-[#A6ADC8] font-medium">{isEn ? 'Service Identifier' : 'Número de Servicio'}</span>
+              <span className="font-mono text-sm text-slate-900 dark:text-white font-bold">
                 {activeService.sampleContrato}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-[#A6ADC8]">{isEn ? 'Billing Cycle' : 'Ciclo de Facturación'}</span>
-              <span className="text-xs text-white">
+              <span className="text-xs text-slate-500 dark:text-[#A6ADC8] font-medium">{isEn ? 'Billing Cycle' : 'Ciclo de Facturación'}</span>
+              <span className="text-xs text-slate-800 dark:text-white font-medium">
                 {activeService.billingCycle}
               </span>
             </div>
-            <div className="h-px w-full bg-white/10" />
+            <div className="h-px w-full bg-slate-200/80 dark:bg-white/10" />
             <div className="flex flex-col space-y-1.5 pt-1 text-xs">
-              <div className="flex items-center justify-between text-[#A6ADC8]">
+              <div className="flex items-center justify-between text-slate-500 dark:text-[#A6ADC8]">
                 <span>{isEn ? 'Official Invoice Amount' : 'Monto Oficial del Recibo'}</span>
-                <span className="font-mono font-bold text-white">
+                <span className="font-mono font-bold text-slate-900 dark:text-white">
                   ${currentMXN.toLocaleString('en-US', { minimumFractionDigits: 2 })} MXN (${currentUSD.toFixed(2)} USD)
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[#A6ADC8]">
+              <div className="flex items-center justify-between text-slate-500 dark:text-[#A6ADC8]">
                 <span className="flex items-center gap-1">
                   <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
-                  <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-[#2ED5A4] text-[9px] font-bold">
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#2ED5A4] text-[9px] font-bold">
                     {isEn ? 'FEE' : 'TARIFA'}
                   </span>
                 </span>
-                <span className="font-mono font-bold text-[#2ED5A4]">+${KIN_SERVICE_FEE.toFixed(2)} USD</span>
+                <span className="font-mono font-bold text-emerald-700 dark:text-[#2ED5A4]">+${KIN_SERVICE_FEE.toFixed(2)} USD</span>
               </div>
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+              <div className="pt-2 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-white font-bold block">
+                  <span className="text-xs text-slate-900 dark:text-white font-bold block">
                     {isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}
                   </span>
-                  <span className="text-[10px] text-[#A6ADC8]">
+                  <span className="text-[10px] text-slate-500 dark:text-[#A6ADC8]">
                     {isEn ? 'Processed via Stripe Sandbox' : 'Procesado vía Stripe Sandbox'}
                   </span>
                 </div>
-                <span className="font-mono text-base font-black text-[#2ED5A4]">
-                  ${totalUSDToCharge.toFixed(2)} <span className="text-xs text-white">USD</span>
+                <span className="font-mono text-base font-black text-emerald-700 dark:text-[#2ED5A4]">
+                  ${totalUSDToCharge.toFixed(2)} <span className="text-xs text-slate-700 dark:text-white">USD</span>
                 </span>
               </div>
             </div>
@@ -509,15 +509,15 @@ export function BillPayView({
           {/* Trust Badge & SAT Stamp */}
           <div className="flex items-center justify-between pt-0.5 px-0.5">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#2ED5A4] text-[18px]">verified</span>
-              <span className="text-xs text-[#A6ADC8]">
+              <span className="material-symbols-outlined text-emerald-700 dark:text-[#2ED5A4] text-[18px]">verified</span>
+              <span className="text-xs text-slate-500 dark:text-[#A6ADC8]">
                 {isEn ? 'Official SAT CFDI tax receipt guaranteed' : 'Comprobante fiscal SAT CFDI garantizado'}
               </span>
             </div>
             <button
               type="button"
               onClick={() => showToast(isEn ? 'SAT CFDI Preview' : 'Vista Previa CFDI SAT', isEn ? 'CFDI 4.0 XML & PDF stored in ClientVault' : 'CFDI 4.0 XML y PDF almacenado en ClientVault')}
-              className="material-symbols-outlined text-[#9399B2] text-[18px] cursor-pointer hover:text-white bg-transparent border-0"
+              className="material-symbols-outlined text-slate-400 hover:text-slate-700 dark:text-[#9399B2] dark:hover:text-white text-[18px] cursor-pointer bg-transparent border-0"
               title={isEn ? 'View SAT CFDI' : 'Ver CFDI SAT'}
             >
               receipt_long

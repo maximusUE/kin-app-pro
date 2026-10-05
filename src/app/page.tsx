@@ -1863,24 +1863,24 @@ export default function MobileApp() {
   }
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#06070B] text-white flex justify-center selection:bg-[#7047EB]/30 selection:text-[#2ED5A4]">
+    <div className={`min-h-[100dvh] w-full ${theme === 'light' ? 'bg-[#F5F5F7] text-slate-900' : 'bg-[#06070B] text-white'} flex justify-center selection:bg-emerald-500/30 selection:text-emerald-700 transition-colors`}>
       {/* Centered Mobile Layout (Clean, Upright & Frameless) */}
-      <div className="w-full max-w-[412px] min-h-[100dvh] flex flex-col relative bg-[#06070B] pb-24">
+      <div className={`w-full max-w-[412px] min-h-[100dvh] flex flex-col relative ${theme === 'light' ? 'bg-[#F2F2F7] text-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.06)]' : 'bg-[#06070B] text-white'} pb-24 transition-colors`}>
         
         {/* Signature Bicolor Ambient Diffuse Glow (Dribbble Reference 2) */}
-        <div className="bicolor-atmosphere-glow" />
+        {theme === 'dark' && <div className="bicolor-atmosphere-glow" />}
 
         {/* ========================================================================= */}
         {/* TOP STATUS BAR & APP HEADER (STICKY HEADER AT THE VERY TOP)               */}
         {/* ========================================================================= */}
-        <div className="sticky top-0 z-30 bg-[#06070B]/95 backdrop-blur-md px-4 pt-1.5 pb-2 border-b border-white/5 flex-shrink-0">
-          <div className="flex items-center justify-between text-xs text-[#8E91A5] font-semibold mb-2 pt-1 px-1">
-            <span className="font-financial-mono text-white">9:41</span>
-            <div className="h-3.5 w-20 bg-[#121320] rounded-full mx-auto shadow-inner border border-white/5" />
+        <div className={`sticky top-0 z-30 ${theme === 'light' ? 'bg-white/95 border-slate-200/80 text-slate-900' : 'bg-[#06070B]/95 border-white/5 text-white'} backdrop-blur-md px-4 pt-1.5 pb-2 border-b flex-shrink-0 transition-colors`}>
+          <div className={`flex items-center justify-between text-xs ${theme === 'light' ? 'text-slate-500' : 'text-[#8E91A5]'} font-semibold mb-2 pt-1 px-1`}>
+            <span className={`font-financial-mono ${theme === 'light' ? 'text-slate-900 font-bold' : 'text-white'}`}>9:41</span>
+            <div className={`h-3.5 w-20 ${theme === 'light' ? 'bg-slate-200/80 border-slate-300/60' : 'bg-[#121320] border-white/5'} rounded-full mx-auto shadow-inner border`} />
             <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[13px] text-white">signal_cellular_alt</span>
-              <span className="font-financial-mono text-[10px] text-white">5G</span>
-              <span className="material-symbols-outlined text-[13px] text-white">battery_full</span>
+              <span className={`material-symbols-outlined text-[13px] ${theme === 'light' ? 'text-slate-800' : 'text-white'}`}>signal_cellular_alt</span>
+              <span className={`font-financial-mono text-[10px] ${theme === 'light' ? 'text-slate-800 font-bold' : 'text-white'}`}>5G</span>
+              <span className={`material-symbols-outlined text-[13px] ${theme === 'light' ? 'text-slate-800' : 'text-white'}`}>battery_full</span>
             </div>
           </div>
 

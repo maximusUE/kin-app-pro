@@ -1045,6 +1045,8 @@ html.light .bg-\[\#1F2133\],
 html.light .bg-\[\#1c1c1e\],
 html.light .bg-\[\#202236\],
 html.light .bg-\[\#222338\],
+html.light .bg-\[\#242638\],
+html.light .bg-\[\#14141F\],
 html.light .bg-\[\#262939\],
 html.light .bg-\[\#2B2C42\],
 html.light .bg-\[\#313244\],
@@ -1163,9 +1165,20 @@ html.light .bg-rose-600 * {
 
 /* 13. Bottom Navigation Dock in Light Mode */
 html.light .stitch-bottom-dock {
-  background-color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
   border-top: 1px solid #E2E8F0 !important;
   box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05) !important;
+}
+html.light .stitch-bottom-dock button {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+html.light .stitch-bottom-dock button:focus,
+html.light .stitch-bottom-dock button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 html.light .stitch-bottom-dock button span {
   color: #64748B !important;
