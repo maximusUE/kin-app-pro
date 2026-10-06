@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { CardCheckoutView } from './CardCheckoutView';
 import { BillCameraScannerModal, ScannedBillResult } from '../BillCameraScannerModal';
@@ -139,21 +140,21 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
 
 export const getCategoryIconTheme = (id: string, isSelected: boolean) => {
   if (isSelected) {
-    return 'bg-emerald-600 dark:bg-emerald-500 text-white font-bold shadow-md shadow-emerald-600/30';
+    return 'bg-emerald-600 dark:bg-emerald-500 text-white font-bold shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/20';
   }
   switch (id) {
     case 'electricidad':
-      return 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-500/20';
+      return 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-500/20';
     case 'telefono':
-      return 'bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-400 border border-blue-200/70 dark:border-blue-500/20';
+      return 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-500/20';
     case 'internet':
-      return 'bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-200/70 dark:border-purple-500/20';
+      return 'bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-200/60 dark:border-purple-500/20';
     case 'television':
-      return 'bg-indigo-100 dark:bg-indigo-500/15 text-indigo-800 dark:text-indigo-400 border border-indigo-200/70 dark:border-indigo-500/20';
+      return 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-500/20';
     case 'agua':
-      return 'bg-cyan-100 dark:bg-cyan-500/15 text-cyan-800 dark:text-cyan-400 border border-cyan-200/70 dark:border-cyan-500/20';
+      return 'bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-200/60 dark:border-sky-500/20';
     case 'gas':
-      return 'bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-200/70 dark:border-amber-500/20';
+      return 'bg-orange-50 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-200/60 dark:border-orange-500/20';
     default:
       return 'bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10';
   }
@@ -180,6 +181,12 @@ export function BillPayView({
   const [isSuccess, setIsSuccess] = useState(false);
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [isCardCheckoutOpen, setIsCardCheckoutOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showFeeBreakdownSheet, setShowFeeBreakdownSheet] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Tarifa transparente del servicio KIN (Ganancia de plataforma por liquidación)
   const KIN_SERVICE_FEE = 1.99;
@@ -375,26 +382,20 @@ export function BillPayView({
                 key={serv.id}
                 type="button"
                 onClick={() => setServicioSeleccionado(serv)}
-                className={`flex flex-col items-start p-3.5 rounded-2xl transition-all text-left group relative overflow-hidden shadow-sm active:scale-[0.98] cursor-pointer border ${
+                className={`flex flex-col items-start p-3.5 rounded-2xl transition-all text-left group relative overflow-hidden shadow-xs active:scale-[0.98] cursor-pointer border ${
                   isSelected
-                    ? 'bg-emerald-50/90 dark:bg-[#242638] border-emerald-500 dark:border-[#2ED5A4] shadow-[0_2px_12px_rgba(5,150,105,0.15)] dark:shadow-[0_0_15px_rgba(46,213,164,0.25)]'
+                    ? 'bg-emerald-50/90 dark:bg-[#242638] border-emerald-500 dark:border-[#2ED5A4] shadow-[0_4px_16px_rgba(5,150,105,0.15)] dark:shadow-[0_0_15px_rgba(46,213,164,0.25)]'
                     : 'bg-white dark:bg-[#181825] hover:bg-slate-50 dark:hover:bg-[#1E1E2E] border-slate-200/80 dark:border-white/10'
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-3">
-                  <div className="relative">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm shrink-0 overflow-hidden ${getCategoryIconTheme(
-                        serv.id,
-                        isSelected
-                      )}`}
-                    >
-                      <span className="material-symbols-outlined text-[24px]">{serv.icono}</span>
-                    </div>
-                    {/* Badge distintivo de la compañía */}
-                    <div className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md ${serv.logoBg} text-white text-[8px] font-black leading-none shadow-sm border border-white/20 uppercase tracking-tighter`}>
-                      {serv.logoText}
-                    </div>
+                  <div
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-xs shrink-0 transition-transform duration-200 group-hover:scale-105 active:scale-95 ${getCategoryIconTheme(
+                      serv.id,
+                      isSelected
+                    )}`}
+                  >
+                    <span className="material-symbols-outlined text-[24px]">{serv.icono}</span>
                   </div>
                   {serv.badge && (
                     <span className={`px-2 py-0.5 rounded-full font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 whitespace-nowrap ${serv.badgeClass || 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#2ED5A4]'}`}>
@@ -403,7 +404,7 @@ export function BillPayView({
                   )}
                 </div>
                 <span className={`text-sm font-bold transition-colors truncate w-full ${isSelected ? 'text-emerald-800 dark:text-[#2ED5A4]' : 'text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-[#2ED5A4]'}`}>
-                  {isEn ? serv.nombre : serv.nombre}
+                  {serv.nombre}
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8] truncate w-full mt-0.5">
                   {serv.subtitulo}
@@ -414,137 +415,219 @@ export function BillPayView({
         </div>
       </div>
 
-      {/* Active Bill Verification Demo Card */}
+      {/* Active Bill Discreet Summary Card (Estilo Apple Wallet — Sin Saturación) */}
       <div className="flex flex-col space-y-2">
         <div className="flex items-center justify-between px-1">
           <span className="font-label-caps text-[10px] uppercase tracking-wider text-slate-500 dark:text-[#A6ADC8] font-bold">
-            {isEn ? 'Pending Service Invoice' : 'Factura de Servicio Pendiente'}
+            {isEn ? 'Service Invoice to Pay' : 'Recibo a Pagar'}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-[#2ED5A4] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-[#2ED5A4] animate-pulse" /> {isEn ? 'Verified Link' : 'Vínculo Verificado'}
+          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 dark:text-[#2ED5A4] font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-[#2ED5A4] animate-pulse" />
+            {isEn ? 'Direct Settlement' : 'Liquidación Directa SPEI'}
           </span>
         </div>
 
-        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-[#181825] p-4 shadow-sm flex flex-col space-y-4 border border-slate-200/80 dark:border-white/10">
-          {/* Ambient Glow Behind Due Date */}
-          <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-
-          {/* Card Top: Service & Beneficiary */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              {/* Institutional Logo Capsule */}
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/10 p-1 flex items-center justify-center shadow-sm shrink-0 border border-slate-200/60 dark:border-white/10">
-                <div className={`w-full h-full rounded-xl ${activeService.logoBg} flex items-center justify-center ${activeService.logoColor} px-1 overflow-hidden shadow-sm`}>
-                  <span className="text-[10px] font-black leading-none tracking-wider text-center uppercase truncate">
-                    {activeService.logoText}
-                  </span>
-                </div>
+        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-[#181825] p-4 shadow-sm border border-slate-200/80 dark:border-white/10 space-y-3.5">
+          {/* Service Header: Beneficiary & Provider */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${getCategoryIconTheme(activeService.id, false)}`}>
+                <span className="material-symbols-outlined text-[22px]">{activeService.icono}</span>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">
+                  <span className="font-headline-md text-sm font-bold text-slate-900 dark:text-white truncate">
                     {activeService.sampleTitular}
                   </span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-[#242638] text-slate-600 dark:text-[#A6ADC8] text-[9px] font-bold border border-slate-200/60 dark:border-white/10">
+                  <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-[#A6ADC8] text-[9px] font-medium shrink-0">
                     {activeService.sampleLocation}
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8]">
-                  {activeService.empresa}
+                <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8] truncate">
+                  {activeService.nombre} • {activeService.empresa}
                 </span>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-[#242638] text-emerald-800 dark:text-[#2ED5A4] text-xs font-semibold border border-emerald-200/60 dark:border-white/10">
-              {activeService.sampleDueDate}
+
+            <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 text-[11px] font-medium shrink-0">
+              {activeService.billingCycle}
             </span>
           </div>
 
-          {/* Card Middle: Key Financial Data */}
-          <div className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#14141F] flex flex-col space-y-2.5 border border-slate-200/80 dark:border-white/10">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-500 dark:text-[#A6ADC8] font-medium">{isEn ? 'Service Identifier' : 'Número de Servicio'}</span>
-              <span className="font-mono text-sm text-slate-900 dark:text-white font-bold">
-                {activeService.sampleContrato}
+          {/* Discreet Amount Display (Claro, amigable, sin tablas que den miedo) */}
+          <div className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#14141F] border border-slate-200/70 dark:border-white/5 flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8] font-medium">
+                {isEn ? 'Official bill amount' : 'Monto oficial del recibo'}
               </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-500 dark:text-[#A6ADC8] font-medium">{isEn ? 'Billing Cycle' : 'Ciclo de Facturación'}</span>
-              <span className="text-xs text-slate-800 dark:text-white font-medium">
-                {activeService.billingCycle}
-              </span>
-            </div>
-            <div className="h-px w-full bg-slate-200/80 dark:bg-white/10" />
-            <div className="flex flex-col space-y-1.5 pt-1 text-xs">
-              <div className="flex items-center justify-between text-slate-500 dark:text-[#A6ADC8]">
-                <span>{isEn ? 'Official Invoice Amount' : 'Monto Oficial del Recibo'}</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">
-                  ${currentMXN.toLocaleString('en-US', { minimumFractionDigits: 2 })} MXN (${currentUSD.toFixed(2)} USD)
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="font-financial-mono text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  ${currentMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </span>
+                <span className="text-xs font-bold text-slate-500 dark:text-neutral-400">MXN</span>
               </div>
-              <div className="flex items-center justify-between text-slate-500 dark:text-[#A6ADC8]">
-                <span className="flex items-center gap-1">
-                  <span>{isEn ? 'KIN Service & Delivery Fee' : 'Cargo por Envío / Tarifa del Servicio KIN'}</span>
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#2ED5A4] text-[9px] font-bold">
+            </div>
+
+            <div className="text-right flex flex-col items-end">
+              <button
+                type="button"
+                onClick={() => setShowFeeBreakdownSheet(true)}
+                className="flex items-center gap-1 text-[11px] text-emerald-700 dark:text-[#2ED5A4] hover:underline font-semibold cursor-pointer group"
+                title={isEn ? "View transparent breakdown" : "Ver desglose transparente"}
+              >
+                <span>{isEn ? 'Total with fee :' : 'Total con tarifa :'}</span>
+                <span className="material-symbols-outlined text-[14px]">info</span>
+              </button>
+              <span className="font-financial-mono text-base font-extrabold text-emerald-700 dark:text-[#2ED5A4] mt-0.5">
+                ≈ ${totalUSDToCharge.toFixed(2)} USD
+              </span>
+            </div>
+          </div>
+
+          {/* Trust & SAT Footnote */}
+          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-[#A6ADC8] pt-0.5 px-0.5">
+            <span className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[15px] text-emerald-600 dark:text-[#2ED5A4]">check_circle</span>
+              <span>{isEn ? 'SAT CFDI tax receipt guaranteed' : 'Comprobante fiscal CFDI emitido por SAT'}</span>
+            </span>
+            <span className="text-[10px] text-slate-400 dark:text-[#9399B2] font-mono">
+              Contrato: {activeService.sampleContrato}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Spacer para holgura de scroll con la barra flotante */}
+      <div className="h-28 w-full pointer-events-none" aria-hidden="true" />
+
+      {/* ========================================================================= */}
+      {/* FLOATING BOTTOM ACTION BAR (ESTILO WESTERN UNION / APPLE PAY — IMAGEN 1)  */}
+      {/* ========================================================================= */}
+      {isMounted && typeof document !== 'undefined' && createPortal(
+        <div className="fixed bottom-[74px] left-1/2 -translate-x-1/2 w-full max-w-[412px] px-3.5 z-40 pointer-events-none">
+          <div className="w-full bg-white/95 dark:bg-[#080B11]/95 backdrop-blur-xl border border-slate-200/90 dark:border-white/15 rounded-2xl shadow-[0_12px_36px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.85)] px-4 py-2.5 flex items-center justify-between pointer-events-auto">
+            {/* Lado Izquierdo: Total a pagar con trigger informativo */}
+            <button
+              type="button"
+              onClick={() => setShowFeeBreakdownSheet(true)}
+              className="flex flex-col text-left group cursor-pointer active:scale-95 transition-transform"
+              title={isEn ? "View transparent fee breakdown" : "Ver desglose de servicio"}
+            >
+              <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-neutral-400 group-hover:text-emerald-600 dark:group-hover:text-primary transition-colors">
+                <span>{isEn ? 'Total you pay :' : 'Total a pagar :'}</span>
+                <span className="material-symbols-outlined text-[15px] text-emerald-600 dark:text-primary">info</span>
+              </div>
+              <div className="font-financial-mono text-[19px] font-black text-slate-900 dark:text-white tracking-tight flex items-baseline gap-1">
+                <span>${totalUSDToCharge.toFixed(2)}</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400 font-bold">USD</span>
+              </div>
+            </button>
+
+            {/* Lado Derecho: Botón Continuar / Pagar Servicio */}
+            <button
+              type="button"
+              onClick={() => setIsCardCheckoutOpen(true)}
+              className="h-12 px-6 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+              id="pay-trigger-btn"
+            >
+              <span>{isEn ? 'Pay Bill' : 'Pagar Servicio'}</span>
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ========================================================================= */}
+      {/* MINI-MODAL / BOTTOM-SHEET: DESGLOSE TRANSPARENTE SI EL CLIENTE LO DESEA    */}
+      {/* ========================================================================= */}
+      {isMounted && showFeeBreakdownSheet && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div
+            className="fixed inset-0"
+            onClick={() => setShowFeeBreakdownSheet(false)}
+            aria-hidden="true"
+          />
+          <div className="relative w-full max-w-[412px] bg-white dark:bg-[#0E131F] border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl z-10 space-y-4 animate-slide-up">
+            {/* Encabezado */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-white/10">
+              <div>
+                <h3 className="font-title-base text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>{isEn ? 'Bill Payment Breakdown' : 'Desglose de Pago de Servicio'}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-primary/20 text-emerald-800 dark:text-primary text-[10px] font-bold">
+                    {isEn ? 'Audited' : 'Oficial'}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">
+                  {isEn ? 'Transparent utility settlement via SPEI Banxico' : 'Liquidación transparente de servicios vía SPEI Banxico'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFeeBreakdownSheet(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Filas del desglose */}
+            <div className="space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Official Invoice Amount' : 'Monto Oficial del Recibo'}</span>
+                <span className="font-financial-mono font-bold text-slate-900 dark:text-white">${currentMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Base in USD' : 'Equivalente en Dólares'}</span>
+                <span className="font-financial-mono font-semibold text-slate-800 dark:text-white">${currentUSD.toFixed(2)} USD</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 dark:text-neutral-400 flex items-center gap-1.5">
+                  <span>{isEn ? 'KIN Service & Delivery Fee' : 'Tarifa del Servicio KIN'}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-primary/20 text-emerald-800 dark:text-primary text-[9px] font-bold">
                     {isEn ? 'FEE' : 'TARIFA'}
                   </span>
                 </span>
-                <span className="font-mono font-bold text-emerald-700 dark:text-[#2ED5A4]">+${KIN_SERVICE_FEE.toFixed(2)} USD</span>
+                <span className="font-financial-mono font-bold text-emerald-600 dark:text-primary">+${KIN_SERVICE_FEE.toFixed(2)} USD</span>
               </div>
-              <div className="pt-2 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-slate-900 dark:text-white font-bold block">
-                    {isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}
-                  </span>
-                  <span className="text-[10px] text-slate-500 dark:text-[#A6ADC8]">
-                    {isEn ? 'Processed via Stripe Sandbox' : 'Procesado vía Stripe Sandbox'}
-                  </span>
-                </div>
-                <span className="font-mono text-base font-black text-emerald-700 dark:text-[#2ED5A4]">
-                  ${totalUSDToCharge.toFixed(2)} <span className="text-xs text-slate-700 dark:text-white">USD</span>
-                </span>
-              </div>
-            </div>
-          </div>
 
-          {/* Trust Badge & SAT Stamp */}
-          <div className="flex items-center justify-between pt-0.5 px-0.5">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-emerald-700 dark:text-[#2ED5A4] text-[18px]">verified</span>
-              <span className="text-xs text-slate-500 dark:text-[#A6ADC8]">
-                {isEn ? 'Official SAT CFDI tax receipt guaranteed' : 'Comprobante fiscal SAT CFDI garantizado'}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Exchange Rate Guaranteed' : 'Tipo de Cambio Garantizado'}</span>
+                <span className="font-financial-mono font-semibold text-slate-800 dark:text-white">1 USD = {safeExchangeRate.toFixed(2)} MXN</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Provider & Contract' : 'Proveedor y Contrato'}</span>
+                <span className="font-mono text-slate-800 dark:text-white">{activeService.empresa} • {activeService.sampleContrato}</span>
+              </div>
+
+              <div className="pt-3 flex items-center justify-between border-t border-slate-200/80 dark:border-white/10">
+                <div>
+                  <span className="font-bold text-slate-900 dark:text-white block">{isEn ? 'Total to Charge Card' : 'Total a Cobrar en Tarjeta'}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-neutral-400">{isEn ? 'Includes all taxes and delivery fees' : 'Incluye tarifa de servicio KIN'}</span>
+                </div>
+                <span className="font-financial-mono text-base font-bold text-emerald-600 dark:text-primary">${totalUSDToCharge.toFixed(2)} USD</span>
+              </div>
             </div>
+
+            {/* Botón para proceder */}
             <button
               type="button"
-              onClick={() => showToast(isEn ? 'SAT CFDI Preview' : 'Vista Previa CFDI SAT', isEn ? 'CFDI 4.0 XML & PDF stored in ClientVault' : 'CFDI 4.0 XML y PDF almacenado en ClientVault')}
-              className="material-symbols-outlined text-slate-400 hover:text-slate-700 dark:text-[#9399B2] dark:hover:text-white text-[18px] cursor-pointer bg-transparent border-0"
-              title={isEn ? 'View SAT CFDI' : 'Ver CFDI SAT'}
+              onClick={() => {
+                setShowFeeBreakdownSheet(false);
+                setIsCardCheckoutOpen(true);
+              }}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all cursor-pointer shadow-md"
             >
-              receipt_long
+              <span>{isEn ? `Pay Bill • $${totalUSDToCharge.toFixed(2)} USD` : `Pagar Servicio • $${totalUSDToCharge.toFixed(2)} USD`}</span>
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Primary Floating Action Execution CTA */}
-      <div className="flex flex-col space-y-2 pt-1 pb-4">
-        <button
-          type="button"
-          onClick={() => setIsCardCheckoutOpen(true)}
-          className="w-full h-14 rounded-full bg-gradient-to-r from-[#2ED5A4] to-[#18A57E] text-slate-950 text-base font-bold flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(46,213,164,0.3)] transition-all active:scale-[0.98] cursor-pointer hover:brightness-110"
-          id="pay-trigger-btn"
-        >
-          <span className="material-symbols-outlined text-[20px] font-bold">credit_card</span>
-          <span>{isEn ? `Pay Bill with Card ($${totalUSDToCharge.toFixed(2)} USD)` : `Pagar Servicio con Tarjeta ($${totalUSDToCharge.toFixed(2)} USD)`}</span>
-          <span className="material-symbols-outlined text-[20px] font-bold">arrow_forward</span>
-        </button>
-        <div className="flex items-center justify-center gap-1.5 text-center">
-          <span className="material-symbols-outlined text-[14px] text-[#9399B2]">lock</span>
-          <span className="font-label-caps text-[10px] text-[#9399B2] uppercase tracking-wider font-semibold">
-            {isEn ? 'Secured with Stripe Sandbox & KIN SPEI Node • Protected by Banxico' : 'Asegurado con Stripe Sandbox y Nodo SPEI KIN • Protegido por Banxico'}
-          </span>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
 
       {/* Success Modal Dialogue */}
       {isSuccess && (
