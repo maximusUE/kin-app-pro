@@ -82,21 +82,43 @@ export function EnterpriseAuthScreen({
   const [authMode, setAuthMode] = useState<'login' | 'register'>(initialMode);
   const [method, setMethod] = useState<'phone' | 'email'>('phone');
   const [language, setLanguage] = useState<'es' | 'en'>('es');
+  // Theme state for adaptive Apple Light / Catppuccin Dark styling
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  // Hydrate theme from localStorage and document class
+  // Hydrate theme from URL query param, localStorage, or document class
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const queryTheme = params.get('theme');
       const savedTheme = localStorage.getItem('kin_theme');
       const isHtmlLight = document.documentElement.classList.contains('light');
-      if (savedTheme === 'light' || isHtmlLight) {
+
+      if (queryTheme === 'light' || (!queryTheme && (savedTheme === 'light' || isHtmlLight))) {
         setTheme('light');
-      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else if (queryTheme === 'dark') {
         setTheme('dark');
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+      } else {
+        setTheme(savedTheme === 'light' ? 'light' : 'dark');
       }
     }
   }, []);
   const isLight = theme === 'light';
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_theme', nextTheme);
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(nextTheme);
+      } catch (_) {}
+    }
+  };
 
   // Phone Stream State
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]);
@@ -456,6 +478,22 @@ export function EnterpriseAuthScreen({
                 <span className="text-[11px] font-medium">{language === 'es' ? 'App' : 'App'}</span>
               </button>
             )}
+
+            {/* Quick Theme Toggle Button */}
+            <button
+              type="button"
+              onClick={handleToggleTheme}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 border cursor-pointer shadow-sm ${
+                isLight
+                  ? 'bg-white hover:bg-slate-100 text-amber-600 border-slate-200 shadow-xs'
+                  : 'bg-white/10 hover:bg-white/20 text-amber-300 border-white/10'
+              }`}
+              title={isLight ? 'Cambiar a Modo Oscuro' : 'Cambiar a Modo Claro'}
+            >
+              <span className="material-symbols-outlined text-[17px]">
+                {isLight ? 'dark_mode' : 'light_mode'}
+              </span>
+            </button>
 
             {/* Bilingual Glassmorphic Switch */}
             <div className={`p-1 rounded-full border ${isLight ? 'bg-slate-200/70 border-slate-300/80' : 'bg-[#12131D]/90 border-white/10'} flex items-center shadow-inner`}>
