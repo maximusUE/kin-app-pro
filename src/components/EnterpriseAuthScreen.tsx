@@ -436,45 +436,45 @@ export function EnterpriseAuthScreen({
       )}
 
       {/* Main Container */}
-      <div className="w-full max-w-[420px] min-h-[100dvh] flex flex-col justify-between px-5 py-6 sm:py-8 relative z-10">
+      <div className="w-full max-w-[420px] min-h-[100dvh] flex flex-col justify-between px-4 sm:px-5 py-5 sm:py-8 relative z-10">
         {/* ========================================================================= */}
         {/* TOP BRAND BAR & BILINGUAL LANGUAGE PILL                                   */}
         {/* ========================================================================= */}
-        <div className="flex items-center justify-between pt-1 pb-4">
+        <div className="flex items-center justify-between pt-1 pb-4 gap-2">
           {/* Official KIN Logomark */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 flex items-center justify-center shadow-[0_4px_16px_rgba(16,185,129,0.3)] border border-emerald-400/40">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 flex items-center justify-center shadow-[0_4px_16px_rgba(16,185,129,0.3)] border border-emerald-400/40">
               <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
                 <path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className={`font-extrabold text-[20px] tracking-tight ${isLight ? 'text-slate-900' : 'bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent'}`}>
+                <span className={`font-extrabold text-[19px] sm:text-[20px] tracking-tight ${isLight ? 'text-slate-900' : 'bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent'}`}>
                   KIN
                 </span>
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full ${isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}`}>
+                <span className={`text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full ${isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}`}>
                   PRO
                 </span>
               </div>
-              <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'} font-medium tracking-wide`}>
+              <p className={`text-[9.5px] sm:text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'} font-medium tracking-wide truncate max-w-[140px] sm:max-w-none`}>
                 {t.tagline}
               </p>
             </div>
           </div>
 
           {/* Action Row: Optional Back Button + Bilingual Glassmorphic Switch */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             {onBack && (
               <button
                 type="button"
                 onClick={onBack}
-                className={`h-8 px-3 rounded-full ${isLight ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs' : 'bg-white/10 hover:bg-white/20 text-zinc-300 border-white/10'} text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 border cursor-pointer shadow-sm`}
+                className={`h-7 px-2.5 rounded-full ${isLight ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs' : 'bg-white/10 hover:bg-white/20 text-zinc-300 border-white/10'} text-xs font-semibold flex items-center gap-1 transition-all active:scale-95 border cursor-pointer shadow-sm`}
                 title={language === 'es' ? 'Volver a la App' : 'Back to App'}
               >
-                <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                <span className="material-symbols-outlined text-[15px]">arrow_back</span>
                 <span className="text-[11px] font-medium">{language === 'es' ? 'App' : 'App'}</span>
               </button>
             )}
@@ -483,24 +483,24 @@ export function EnterpriseAuthScreen({
             <button
               type="button"
               onClick={handleToggleTheme}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 border cursor-pointer shadow-sm ${
+              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 border cursor-pointer shadow-sm ${
                 isLight
                   ? 'bg-white hover:bg-slate-100 text-amber-600 border-slate-200 shadow-xs'
                   : 'bg-white/10 hover:bg-white/20 text-amber-300 border-white/10'
               }`}
               title={isLight ? 'Cambiar a Modo Oscuro' : 'Cambiar a Modo Claro'}
             >
-              <span className="material-symbols-outlined text-[17px]">
+              <span className="material-symbols-outlined text-[15px]">
                 {isLight ? 'dark_mode' : 'light_mode'}
               </span>
             </button>
 
             {/* Bilingual Glassmorphic Switch */}
-            <div className={`p-1 rounded-full border ${isLight ? 'bg-slate-200/70 border-slate-300/80' : 'bg-[#12131D]/90 border-white/10'} flex items-center shadow-inner`}>
+            <div className={`p-0.5 rounded-full border ${isLight ? 'bg-slate-200/70 border-slate-300/80' : 'bg-[#12131D]/90 border-white/10'} flex items-center shadow-inner`}>
               <button
                 type="button"
                 onClick={() => handleLanguageToggle('es')}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
+                className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition-all duration-200 ${
                   language === 'es'
                     ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
                     : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
@@ -511,7 +511,7 @@ export function EnterpriseAuthScreen({
               <button
                 type="button"
                 onClick={() => handleLanguageToggle('en')}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
+                className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition-all duration-200 ${
                   language === 'en'
                     ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
                     : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
@@ -753,7 +753,9 @@ export function EnterpriseAuthScreen({
                   {otpDigits.map((digit, idx) => (
                     <input
                       key={idx}
-                      ref={(el) => (otpInputRefs.current[idx] = el)}
+                      ref={(el) => {
+                        otpInputRefs.current[idx] = el;
+                      }}
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
