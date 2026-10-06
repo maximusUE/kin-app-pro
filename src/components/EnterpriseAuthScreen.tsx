@@ -33,6 +33,7 @@ export interface KinAuthUser {
 
 export interface EnterpriseAuthScreenProps {
   onLoginSuccess?: (userData: KinAuthUser) => void;
+  onBack?: () => void;
   initialMode?: 'login' | 'register';
 }
 
@@ -74,6 +75,7 @@ const COUNTRY_CODES = [
 
 export function EnterpriseAuthScreen({
   onLoginSuccess,
+  onBack,
   initialMode = 'login',
 }: EnterpriseAuthScreenProps) {
   // Mode & Language
@@ -420,30 +422,45 @@ export function EnterpriseAuthScreen({
             </div>
           </div>
 
-          {/* Bilingual Glassmorphic Switch */}
-          <div className="bg-[#12131D]/90 backdrop-blur-md p-1 rounded-full border border-white/10 flex items-center shadow-inner">
-            <button
-              type="button"
-              onClick={() => handleLanguageToggle('es')}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
-                language === 'es'
-                  ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              ES
-            </button>
-            <button
-              type="button"
-              onClick={() => handleLanguageToggle('en')}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
-                language === 'en'
-                  ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              EN
-            </button>
+          {/* Action Row: Optional Back Button + Bilingual Glassmorphic Switch */}
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="h-8 px-3 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 border border-white/10 cursor-pointer shadow-sm"
+                title={language === 'es' ? 'Volver a la App' : 'Back to App'}
+              >
+                <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                <span className="text-[11px] font-medium">{language === 'es' ? 'App' : 'App'}</span>
+              </button>
+            )}
+
+            {/* Bilingual Glassmorphic Switch */}
+            <div className="bg-[#12131D]/90 backdrop-blur-md p-1 rounded-full border border-white/10 flex items-center shadow-inner">
+              <button
+                type="button"
+                onClick={() => handleLanguageToggle('es')}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
+                  language === 'es'
+                    ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                ES
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLanguageToggle('en')}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
+                  language === 'en'
+                    ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+            </div>
           </div>
         </div>
 

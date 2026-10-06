@@ -1856,6 +1856,10 @@ export default function MobileApp() {
     return (
       <EnterpriseAuthScreen
         initialMode="login"
+        onBack={() => {
+          setIsAuthenticated(true);
+          router.push('/?view=dashboard');
+        }}
         onLoginSuccess={(userData) => {
           setIsAuthenticated(true);
           if (userData) {
@@ -1910,9 +1914,31 @@ export default function MobileApp() {
                   <KinLogo size={34} />
                 )}
                 <div className="flex flex-col leading-none">
-                  <span className="font-headline-md text-[17px] font-bold tracking-tight text-white">KIN</span>
+                  <span className={`font-headline-md text-[17px] font-bold tracking-tight ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>KIN</span>
                   <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>
                 </div>
+              </div>
+
+              {/* Acceso Directo Inmediato: Login / OAuth Screen */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAuthenticated(false);
+                    router.push('/login');
+                  }}
+                  className={`h-8 px-2.5 sm:px-3 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm ${
+                    theme === 'light'
+                      ? 'bg-slate-100 hover:bg-slate-200/80 text-slate-800 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+                      : 'bg-white/10 hover:bg-white/15 text-white/90 hover:text-white border border-white/10'
+                  }`}
+                  title={language === 'en' ? 'Direct Access to Login & OAuth Screen' : 'Acceso Directo a Pantalla de Login y OAuth'}
+                >
+                  <span className="material-symbols-outlined text-[15px] text-emerald-600 dark:text-emerald-400">login</span>
+                  <span className="font-title-base tracking-tight text-[11px] sm:text-xs">
+                    {language === 'en' ? 'Login' : 'Login'}
+                  </span>
+                </button>
               </div>
             </header>
           )}

@@ -428,6 +428,42 @@ export function ProfileView({
           </span>
         </div>
 
+        {/* Menu Row 0: Acceso Directo a Pantalla de Login / OAuth */}
+        <button
+          type="button"
+          aria-label={isEn ? 'Login & OAuth Screen' : 'Pantalla de Login y OAuth'}
+          className="anim-stagger-3 touch-press w-full p-4 mb-2.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent hover:bg-emerald-500/15 text-left transition-colors flex items-center justify-between group shadow-md cursor-pointer border border-emerald-500/20"
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.location.href = '/login';
+            }
+          }}
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-[#2ED5A4] border border-emerald-500/30 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
+              <span className="material-symbols-outlined text-[24px]">key</span>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-title-base text-title-base text-white truncate font-bold">
+                  {isEn ? 'Login & OAuth Portal' : 'Portal de Login & OAuth'}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] border border-emerald-500/30">
+                  {isEn ? 'Direct' : 'Directo'}
+                </span>
+              </div>
+              <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
+                {isEn ? 'Google, Apple, Phone & Password login flows' : 'Acceso con Google, Apple, Teléfono y Contraseña'}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-on-surface-variant">
+            <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-[#2ED5A4]">
+              open_in_new
+            </span>
+          </div>
+        </button>
+
         {/* Menu Row 1: Información Personal */}
         <button
           type="button"
