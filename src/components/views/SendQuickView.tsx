@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChevronLeftIcon, getBankLogoUrl } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 import { ContactAvatar } from '@/components/ContactAvatar';
 
 export interface SendQuickContactItem {
@@ -48,16 +49,19 @@ export function SendQuickView({
 
   return (
     <div className="animate-fade-in space-y-4 pb-28">
-      {/* Native Mobile Header: < | Send Quick | Info */}
+      {/* Native Mobile Header: < | KinLogo | Send Quick | Info */}
       <header className="flex items-center justify-between py-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="btn-circle"
-          title={isEn ? 'Back to home' : 'Volver a Home'}
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="btn-circle"
+            title={isEn ? 'Back to home' : 'Volver a Home'}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
         <div className="text-center">
           <div className="flex items-center justify-center gap-1.5">
             <span className="text-sm font-bold text-white tracking-wide">
@@ -265,17 +269,17 @@ export function SendQuickView({
           <span className="text-[10px] text-[#2ED5A4] font-semibold">1 USD = ${USD_TO_MXN_RATE.toFixed(2)} MXN</span>
         </div>
 
-        {/* 4 Chips de Monto Ergonómicos (Touch Targets de 52px) */}
+        {/* 4 Chips de Monto Ergonómicos - Regla Don César: Estilo Píldora Bandera USA */}
         <div className="grid grid-cols-4 gap-2 pt-1">
           {['25', '50', '100', '200'].map((val) => (
             <button
               key={val}
               type="button"
               onClick={() => setSendQuickAmount(val)}
-              className={`h-12 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center active:scale-95 ${
+              className={`h-11 rounded-full text-xs font-bold font-financial-mono transition-all cursor-pointer flex items-center justify-center active:scale-95 border ${
                 sendQuickAmount === val
-                  ? 'bg-[#2ED5A4] text-white shadow-md shadow-[#2ED5A4]/20 scale-[1.02]'
-                  : 'bg-[#202236] border border-white/5 text-white hover:bg-[#2B2C42]'
+                  ? 'bg-primary text-slate-950 font-black border-primary shadow-sm scale-105'
+                  : 'bg-surface-container border-white/10 text-white hover:bg-surface-bright shadow-xs'
               }`}
             >
               ${val}

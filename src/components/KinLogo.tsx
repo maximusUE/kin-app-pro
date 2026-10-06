@@ -10,49 +10,35 @@ interface KinLogoProps {
 
 /**
  * Official KIN Mobile Fintech App Logo Component
- * Extracted from official design assets in KIN_logo_app
+ * 3-Tier Isometric Emerald Layers Mark as loved by Don César (Screenshot 2)
  */
-export function KinLogo({ className = '', size = 32, showGlow = true }: KinLogoProps) {
+export function KinLogo({ className = '', size = 36, showGlow = true }: KinLogoProps) {
+  // Proportional icon size inside the rounded container (approx 55% of container size)
+  const iconSize = Math.round(size * 0.55);
+
   return (
     <div
-      className={`relative inline-flex items-center justify-center flex-shrink-0 ${className}`}
+      className={`relative inline-flex items-center justify-center flex-shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 shadow-[0_4px_16px_rgba(16,185,129,0.35)] border border-emerald-400/40 select-none ${className}`}
       style={{ width: size, height: size }}
     >
       {showGlow && (
         <div
-          className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-[#2ED5A4]/30 via-[#7047EB]/20 to-[#2ED5A4]/10 blur-sm pointer-events-none"
+          className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-emerald-500/30 via-teal-400/20 to-emerald-600/10 blur-sm pointer-events-none"
         />
       )}
       <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 120 120"
-        width={size}
-        height={size}
+        className="text-white relative z-10"
+        style={{ width: iconSize, height: iconSize }}
+        viewBox="0 0 24 24"
         fill="none"
-        className="relative z-10 w-full h-full drop-shadow-md"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
-        <defs>
-          <linearGradient id="kinGradComp" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#2ED5A4" />
-            <stop offset="100%" stopColor="#18A57E" />
-          </linearGradient>
-          <linearGradient id="purpleGlowComp" x1="0" y1="120" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#7047EB" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#2ED5A4" stopOpacity="0.1" />
-          </linearGradient>
-          <filter id="glowComp" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
-        <rect width="120" height="120" rx="30" fill="#121320" stroke="rgba(46,213,164,0.35)" strokeWidth="1.5" />
-        <rect width="120" height="120" rx="30" fill="url(#purpleGlowComp)" />
-        {/* K Monogram with liquidity forward arrows */}
-        <path d="M38 32V88" stroke="url(#kinGradComp)" strokeWidth="8" strokeLinecap="round" filter="url(#glowComp)" />
-        <path d="M78 36L46 60L78 84" stroke="url(#kinGradComp)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" filter="url(#glowComp)" />
-        <circle cx="46" cy="60" r="4.5" fill="#FFFFFF" />
-        <circle cx="78" cy="36" r="3.5" fill="#2ED5A4" />
-        <circle cx="78" cy="84" r="3.5" fill="#2ED5A4" />
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
       </svg>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChevronLeftIcon, CardOutlineIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface TxItem {
   id: string;
@@ -48,16 +49,19 @@ export function TransactionsView({
 
   return (
     <div className="animate-fade-in space-y-4">
-      {/* Header: < | Transactions | Total Movimientos Badge */}
+      {/* Header: < | KinLogo | Transactions | Total Movimientos Badge */}
       <header className="flex items-center justify-between py-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="btn-circle"
-          title={isEn ? "Back to Home" : "Volver al Home"}
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="btn-circle"
+            title={isEn ? "Back to Home" : "Volver al Home"}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
         <div className="text-center">
           <h1 className="text-base font-bold text-white tracking-wide">{isEn ? 'Transactions' : 'Movimientos'}</h1>
           <p className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1 mt-0.5">

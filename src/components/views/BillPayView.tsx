@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 import { CardCheckoutView } from './CardCheckoutView';
 import { BillCameraScannerModal, ScannedBillResult } from '../BillCameraScannerModal';
 import { ErrorBoundary } from '../ErrorBoundary';
@@ -291,13 +293,28 @@ export function BillPayView({
         <div className="absolute -top-6 -left-10 w-44 h-44 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -top-4 -right-10 w-48 h-48 bg-purple-600/10 dark:bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Context Header */}
-        <div className="relative flex flex-col space-y-1.5 z-10 pt-1">
-          <div className="inline-flex items-center gap-2 self-start px-2.5 py-1 rounded-full bg-white dark:bg-[#181825] text-emerald-700 dark:text-[#2ED5A4] border border-slate-200/80 dark:border-white/10 shadow-sm">
-            <span className="material-symbols-outlined text-[14px]">bolt</span>
-            <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
-              {isEn ? 'Zero Fees • Instant SPEI Receipt' : 'Sin Comisiones • Comprobante SPEI Inmediato'}
-            </span>
+        {/* Context Header: < | KinLogo | Status Pill */}
+        <div className="relative flex flex-col space-y-2 z-10 pt-1">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {onBack && (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="btn-circle"
+                  title={isEn ? "Back to Home" : "Volver a Inicio"}
+                >
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
+                </button>
+              )}
+              <KinLogo size={34} />
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-[#181825] text-emerald-700 dark:text-[#2ED5A4] border border-slate-200/80 dark:border-white/10 shadow-xs">
+              <span className="material-symbols-outlined text-[14px]">bolt</span>
+              <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+                {isEn ? 'Zero Fees • Banxico SPEI' : 'Sin Comisiones • SPEI'}
+              </span>
+            </div>
           </div>
           <h1 className="font-headline-md text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
             {isEn ? (
@@ -523,11 +540,11 @@ export function BillPayView({
               </div>
             </button>
 
-            {/* Lado Derecho: Botón Continuar / Pagar Servicio */}
+            {/* Lado Derecho: Botón Continuar / Pagar Servicio Estilo Píldora (Regla Don César) */}
             <button
               type="button"
               onClick={() => setIsCardCheckoutOpen(true)}
-              className="h-12 px-6 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+              className="h-12 px-7 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] border border-emerald-400/40 dark:border-primary/40 flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
               id="pay-trigger-btn"
             >
               <span>{isEn ? 'Pay Bill' : 'Pagar Servicio'}</span>
@@ -619,7 +636,7 @@ export function BillPayView({
                 setShowFeeBreakdownSheet(false);
                 setIsCardCheckoutOpen(true);
               }}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all cursor-pointer shadow-md"
+              className="w-full h-12 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all cursor-pointer border border-emerald-400/40 dark:border-primary/40 shadow-md"
             >
               <span>{isEn ? `Pay Bill • $${totalUSDToCharge.toFixed(2)} USD` : `Pagar Servicio • $${totalUSDToCharge.toFixed(2)} USD`}</span>
               <span className="material-symbols-outlined text-[18px]">arrow_forward</span>

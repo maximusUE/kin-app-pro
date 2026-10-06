@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 import { getStoredCards, saveStoredCards, SavedCardItem, INITIAL_SAVED_CARDS } from '@/lib/cards';
 
 export interface CardCheckoutViewProps {
@@ -475,11 +477,12 @@ export function CardCheckoutView({
               type="button"
               onClick={onBack}
               disabled={isProcessing}
-              className="w-9 h-9 rounded-xl bg-[#121622] hover:bg-[#1a2030] border border-white/10 flex items-center justify-center text-[#2ED5A4] cursor-pointer transition-all active:scale-95 disabled:opacity-40"
+              className="btn-circle disabled:opacity-40"
               title={isEn ? 'Back' : 'Regresar'}
             >
-              <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
             </button>
+            <KinLogo size={32} />
             <div>
               <h1 className="text-sm font-bold text-white leading-tight font-headline-md tracking-tight flex items-center gap-1.5">
                 <span>{title || (isEn ? 'Card Checkout' : 'Pago con Tarjeta')}</span>

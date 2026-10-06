@@ -11,6 +11,7 @@ import {
   DownloadIcon,
   ShareReceiptIcon,
 } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface SendSuccessData {
   id: string;
@@ -43,16 +44,19 @@ export function ReceiptView({ data, exchangeRate, onDone, language = 'es' }: Rec
 
   return (
     <div className="animate-fade-in space-y-4 py-1">
-      {/* Header: < | ⋮ */}
+      {/* Header: < | KinLogo | ⋮ */}
       <header className="flex items-center justify-between py-1">
-        <button
-          type="button"
-          onClick={onDone}
-          className="btn-circle"
-          title={isEn ? "Back to Home" : "Volver al Inicio"}
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onDone}
+            className="btn-circle"
+            title={isEn ? "Back to Home" : "Volver al Inicio"}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
 
         <div className="w-8" />
 

@@ -10,6 +10,7 @@ import {
   WaterDropIcon,
   FlameIcon,
 } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export const BILL_SERVICES = [
   { id: 'electricidad', name: 'Electricidad', Icon: LightningIcon },
@@ -76,16 +77,19 @@ export function BillsView({
 
   return (
     <div className="animate-fade-in space-y-4">
-      {/* Header: < | Bill Payments */}
+      {/* Header: < | KinLogo | Bill Payments */}
       <header className="flex items-center justify-between py-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="btn-circle"
-          title={isEn ? "Back" : "Volver"}
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="btn-circle"
+            title={isEn ? "Back" : "Volver"}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
         <h1 className="text-base font-bold text-white tracking-wide">
           {isEn ? 'Bill Payments' : 'Pago de Servicios'}
         </h1>

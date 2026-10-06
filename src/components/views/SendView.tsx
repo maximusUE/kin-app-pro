@@ -21,6 +21,7 @@ import {
   AnyAgentLogo,
   WhatsAppIcon,
 } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 import { ContactAvatar } from '@/components/ContactAvatar';
 import { MEXICO_STATES, MexicoState } from '@/data/mexicoLocations';
 import {
@@ -1073,16 +1074,19 @@ export function SendView({
 
   return (
     <div className="animate-fade-in space-y-4">
-      {/* Header: < | Send money | Historial */}
+      {/* Header: < | KinLogo | Send money | Historial */}
       <header className="flex items-center justify-between py-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="btn-circle"
-          title={isEn ? 'Back to home' : 'Volver al inicio'}
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="btn-circle"
+            title={isEn ? 'Back to home' : 'Volver al inicio'}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
 
         <div className="text-center">
           <h1 className="text-base font-black text-white tracking-wide">
@@ -1098,7 +1102,7 @@ export function SendView({
         <button
           type="button"
           onClick={onViewHistory}
-          className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-white/20 text-xs font-bold text-[#8E91A5] hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+          className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-white/20 text-xs font-bold text-[#8E91A5] hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           title={isEn ? 'View send history' : 'Ver historial de envíos'}
         >
           <DockAnalyticsIcon className="w-3.5 h-3.5" />
@@ -1182,31 +1186,31 @@ export function SendView({
           <p className="text-[11px] text-[#8E91A5] font-medium pt-0.5">
             {isEn ? 'Tap the amount to type with your phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
-          {/* Quick Amount Increment Pills */}
-          <div className="flex items-center gap-1.5 pt-1 overflow-x-auto scrollbar-none">
+          {/* Quick Amount Increment Pills - Regla Don César: Estilo Píldora Bandera USA */}
+          <div className="flex items-center gap-2 pt-1.5 overflow-x-auto scrollbar-none py-1">
             <button
-              className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
               onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 50).toFixed(0))}
               type="button"
             >
               +$50
             </button>
             <button
-              className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
               onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 100).toFixed(0))}
               type="button"
             >
               +$100
             </button>
             <button
-              className="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright cursor-pointer border border-white/5"
+              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
               onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 200).toFixed(0))}
               type="button"
             >
               +$200
             </button>
             <button
-              className="px-2.5 py-1 rounded-lg bg-surface-container text-primary font-financial-mono text-xs active:scale-95 transition-transform hover:bg-surface-bright font-bold cursor-pointer border border-primary/20"
+              className="px-3.5 py-1.5 rounded-full bg-primary/15 hover:bg-primary/25 text-primary font-financial-mono text-xs active:scale-95 transition-all font-bold cursor-pointer border border-primary/30 shadow-xs flex-shrink-0"
               onClick={() => setAmountValue('500')}
               type="button"
             >
@@ -2602,11 +2606,11 @@ export function SendView({
                     </div>
                   </button>
 
-                  {/* Lado Derecho: Botón Continuar de alto contraste (Verde KIN Esmeralda) */}
+                  {/* Lado Derecho: Botón Continuar de alto contraste Estilo Píldora (Regla Don César) */}
                   <button
                     type="button"
                     onClick={handleStartSendReview}
-                    className="h-12 px-6 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+                    className="h-12 px-7 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] border border-emerald-400/40 dark:border-primary/40 flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
                   >
                     <span>{isEn ? 'Continue' : 'Continuar'}</span>
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -2699,7 +2703,7 @@ export function SendView({
                       setShowFeeBreakdownSheet(false);
                       handleStartSendReview();
                     }}
-                    className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-[#18A57E] text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all cursor-pointer"
+                    className="w-full h-12 rounded-full bg-gradient-to-r from-primary to-[#18A57E] text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all cursor-pointer border border-primary/40 shadow-md"
                   >
                     <span>{isEn ? `Continue • $${currentTotalUSD.toFixed(2)} USD` : `Continuar • $${currentTotalUSD.toFixed(2)} USD`}</span>
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -2736,10 +2740,10 @@ export function SendView({
                 <button
                   type="button"
                   onClick={() => setIsCashPickupSheetOpen(false)}
-                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95"
+                  className="btn-circle"
                   title={isEn ? 'Back' : 'Regresar'}
                 >
-                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
                 </button>
                 <div>
                   <h3
@@ -2998,10 +3002,10 @@ export function SendView({
                 <button
                   type="button"
                   onClick={() => setIsFormStateModalOpen(false)}
-                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95"
+                  className="btn-circle"
                   title={isEn ? 'Back' : 'Regresar'}
                 >
-                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
                 </button>
                 <div>
                   <h3 className="font-title-base text-sm font-bold text-white leading-tight">
@@ -3114,10 +3118,10 @@ export function SendView({
                 <button
                   type="button"
                   onClick={() => setIsFormCityModalOpen(false)}
-                  className="w-9 h-9 rounded-xl bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-primary border border-white/10 cursor-pointer transition-colors active:scale-95 shrink-0"
+                  className="btn-circle shrink-0"
                   title={isEn ? 'Back' : 'Regresar'}
                 >
-                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
                 </button>
                 <div className="min-w-0">
                   <h3 className="font-title-base text-sm font-bold text-white leading-tight truncate">
@@ -3299,10 +3303,10 @@ export function SendView({
                 <button
                   type="button"
                   onClick={() => setIsImportContactModalOpen(false)}
-                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-200 border border-white/10 cursor-pointer transition-colors active:scale-95 shrink-0"
+                  className="btn-circle shrink-0"
                   title={isEn ? 'Back' : 'Regresar'}
                 >
-                  <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
                 </button>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">

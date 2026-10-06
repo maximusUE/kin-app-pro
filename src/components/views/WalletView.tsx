@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChevronLeftIcon, SettingsGearIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 interface WalletViewProps {
   onBack: () => void;
@@ -34,16 +35,19 @@ export function WalletView({
 
   return (
     <div className="animate-fade-in space-y-4">
-      {/* Header: < | My Wallet | Settings */}
+      {/* Header: < | KinLogo | My Wallet | Settings */}
       <header className="flex items-center justify-between py-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="btn-circle"
-          title={isEn ? "Back to Home" : "Volver a Home"}
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="btn-circle"
+            title={isEn ? "Back to Home" : "Volver a Home"}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
         <div className="text-center">
           <h1 className="text-base font-bold text-white tracking-wide">
             {isEn ? 'My Wallet' : 'Mi Billetera'}

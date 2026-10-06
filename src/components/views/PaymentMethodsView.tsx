@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface SavedCardItem {
   id: string;
@@ -139,16 +141,19 @@ export function PaymentMethodsView({
 
     return (
       <div className="flex flex-col w-full min-h-[90vh] pb-32 select-none relative animate-fade-in text-slate-100">
-        {/* Barra Superior de Navegación de Pantalla */}
+        {/* Barra Superior de Navegación de Pantalla: < | KinLogo */}
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 shrink-0">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all cursor-pointer border border-white/10 active:scale-95"
-          >
-            <span className="material-symbols-outlined text-[19px]">arrow_back</span>
-            <span className="text-xs font-bold">{isEn ? 'Back to Profile' : 'Volver al Perfil'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onBack}
+              className="btn-circle"
+              title={isEn ? 'Back to Profile' : 'Volver al Perfil'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
+          </div>
 
           <div className="text-right">
             <span className="text-[10px] text-[#2ED5A4] font-bold uppercase tracking-wider block">
@@ -337,19 +342,22 @@ export function PaymentMethodsView({
   if (currentScreen === 'add-card') {
     return (
       <div className="flex flex-col w-full min-h-[90vh] pb-32 select-none relative animate-fade-in text-slate-100">
-        {/* Barra Superior de Navegación */}
+        {/* Barra Superior de Navegación: < | KinLogo */}
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              setCurrentScreen('list');
-              setFormError(null);
-            }}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all cursor-pointer border border-white/10 active:scale-95"
-          >
-            <span className="material-symbols-outlined text-[19px]">arrow_back</span>
-            <span className="text-xs font-bold">{isEn ? 'Back to Cards' : 'Volver a Tarjetas'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentScreen('list');
+                setFormError(null);
+              }}
+              className="btn-circle"
+              title={isEn ? 'Back to Cards' : 'Volver a Tarjetas'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
+          </div>
 
           <span className="font-title-base text-sm font-bold text-white">
             {isEn ? 'Add Card' : 'Nueva Tarjeta'}
@@ -513,11 +521,11 @@ export function PaymentMethodsView({
             </span>
           </label>
 
-          {/* Botón CTA Grande */}
+          {/* Botón CTA Grande Estilo Píldora (Regla Don César) */}
           <button
             type="submit"
             disabled={isProcessing}
-            className="w-full h-14 rounded-2xl bg-[#2ED5A4] hover:bg-[#28c094] text-slate-950 font-bold text-sm shadow-[0_8px_24px_rgba(46,213,164,0.25)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-4"
+            className="w-full h-14 rounded-full bg-[#2ED5A4] hover:bg-[#28c094] text-slate-950 font-bold text-sm shadow-[0_8px_24px_rgba(46,213,164,0.25)] border border-[#2ED5A4]/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-4"
           >
             <span className="material-symbols-outlined text-[20px]">lock</span>
             <span>
@@ -537,14 +545,17 @@ export function PaymentMethodsView({
   return (
     <div className="flex flex-col w-full min-h-[90vh] pb-32 select-none relative animate-fade-in text-slate-100">
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 shrink-0">
-        <button
-          type="button"
-          onClick={() => setCurrentScreen('list')}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all cursor-pointer border border-white/10 active:scale-95"
-        >
-          <span className="material-symbols-outlined text-[19px]">arrow_back</span>
-          <span className="text-xs font-bold">{isEn ? 'Back' : 'Volver'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCurrentScreen('list')}
+            className="btn-circle"
+            title={isEn ? 'Back' : 'Volver'}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
 
         <span className="font-title-base text-sm font-bold text-white">
           {isEn ? 'Bank Account' : 'Cuenta Bancaria'}

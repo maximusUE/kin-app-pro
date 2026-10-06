@@ -30,6 +30,7 @@ import {
   AirplaneIcon,
   ArrowRightIcon,
   ChevronRightIcon,
+  ChevronLeftIcon,
   DockHomeIcon,
   DockCardIcon,
   DockSendSparkleIcon,
@@ -1925,18 +1926,17 @@ export default function MobileApp() {
           {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay' || activeTab === 'profile') && !sendSuccessData && (
             <header className="flex items-center justify-between gap-2 mb-1 px-0.5">
               <div className="flex items-center gap-2">
-                {activeTab === 'profile' ? (
+                {activeTab !== 'home' && (
                   <button
                     type="button"
                     onClick={() => setActiveTab('home')}
-                    className="w-9 h-9 rounded-xl bg-surface-container-high border border-white/10 flex items-center justify-center text-[#2ED5A4] hover:bg-surface-container cursor-pointer transition-colors shadow-sm"
-                    title="Volver a Inicio"
+                    className="btn-circle"
+                    title={language === 'en' ? 'Back to home' : 'Volver al inicio'}
                   >
-                    <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                    <ChevronLeftIcon className="w-5 h-5 text-white" />
                   </button>
-                ) : (
-                  <KinLogo size={34} />
                 )}
+                <KinLogo size={34} />
                 <div className="flex flex-col leading-none">
                   <span className={`font-headline-md text-[17px] font-bold tracking-tight ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>KIN</span>
                   <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>
