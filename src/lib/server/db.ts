@@ -249,10 +249,6 @@ export function findUserByEmailOrPhone(identifier: string): UserProfile | undefi
 }
 
 export const LEGACY_ID_MAP: Record<string, string> = {
-  'user-1789863039309': 'user_jose_eligio',
-  'user-1789925173232': 'user_maricela_fernandez',
-  'user-1789928316890': 'user_jaime_gutierrez',
-  'user-1789928551412': 'user_manuel_gomez',
   'user-001': 'user_cesar_ugalde',
 };
 export const USER_FALLBACK_MAP = LEGACY_ID_MAP;
@@ -431,34 +427,13 @@ export function getUserContacts(userId: string): ContactRecord[] {
 }
 
 /**
- * Red de Familiares KIN registrados en el ecosistema
+ * Red de Familiares KIN registrados en el ecosistema para el usuario
  */
-export function getFamilyNetwork(excludeUserId?: string): ContactRecord[] {
+export function getFamilyNetwork(userId?: string): ContactRecord[] {
+  if (!userId) return [];
   const db = loadDatabase();
-  const canonicalExclude = excludeUserId ? (USER_FALLBACK_MAP[excludeUserId] || excludeUserId) : '';
-
-  return db.users
-    .filter((u) => u.id !== canonicalExclude && (USER_FALLBACK_MAP[u.id] || u.id) !== canonicalExclude)
-    .map((u) => {
-      const isMex = u.country.toLowerCase().includes('mex') || u.phone.startsWith('+52') || u.phone.startsWith('01152');
-      return {
-        id: `fam-${u.id}`,
-        userId: canonicalExclude || 'user-001',
-        name: `${u.firstName} ${u.lastName}`.trim(),
-        fullName: `${u.firstName} ${u.lastName}`.trim(),
-        avatar: '',
-        role: 'Familiar KIN',
-        country: isMex ? 'Mexico' : 'Estados Unidos',
-        bank: isMex ? 'BBVA México' : 'Red Banxico SPEI',
-        photoUrl: (u.avatar && !u.avatar.includes('images.unsplash.com')) ? u.avatar : '',
-        phone: u.phone || '',
-        street: u.city ? `Av. Juárez, ${u.city}` : 'Av. Reforma',
-        houseNumber: '104',
-        state: u.state || 'San Antonio',
-        zipCode: u.zip || '78201',
-        isFamily: true,
-      };
-    });
+  const canonicalId = USER_FALLBACK_MAP[userId] || userId;
+  return db.contacts.filter((c) => (c.userId === canonicalId || c.userId === userId) && c.isFamily);
 }
 
 export function createContact(params: {

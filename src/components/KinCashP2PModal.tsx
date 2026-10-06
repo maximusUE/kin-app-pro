@@ -33,63 +33,7 @@ export interface ContactItem {
   isFamily?: boolean;
 }
 
-export const KIN_FAMILY_MEMBERS: ContactItem[] = [
-  {
-    id: 'fam-user_jose_eligio',
-    name: 'Jose Eligio',
-    fullName: 'Jose Eligio',
-    avatar: '',
-    role: 'Familiar KIN',
-    country: 'Mexico',
-    bank: 'Banxico SPEI Directo',
-    photoUrl: '',
-    phone: '+1 3472486386',
-  },
-  {
-    id: 'fam-user_maricela_fernandez',
-    name: 'Maricela Fernandez',
-    fullName: 'Maricela Fernandez',
-    avatar: '',
-    role: 'Familiar KIN',
-    country: 'Mexico',
-    bank: 'BBVA Bancomer',
-    photoUrl: '',
-    phone: '+1 0115212345678',
-  },
-  {
-    id: 'fam-user_jaime_gutierrez',
-    name: 'Jaime Gutierrez',
-    fullName: 'Jaime Gutierrez',
-    avatar: '',
-    role: 'Familiar KIN',
-    country: 'Mexico',
-    bank: 'Santander México',
-    photoUrl: '',
-    phone: '+1 3479876543',
-  },
-  {
-    id: 'fam-user_manuel_gomez',
-    name: 'Manuel Gomez',
-    fullName: 'Manuel Gomez',
-    avatar: '',
-    role: 'Familiar KIN',
-    country: 'Mexico',
-    bank: 'Banorte',
-    photoUrl: '',
-    phone: '+1 2345678910',
-  },
-  {
-    id: 'fam-user-001',
-    name: 'César Urrutia',
-    fullName: 'César Urrutia',
-    avatar: '',
-    role: 'Familiar KIN',
-    country: 'Estados Unidos',
-    bank: 'KIN Global Network',
-    photoUrl: '',
-    phone: '+1 (555) 349-2810',
-  },
-];
+export const KIN_FAMILY_MEMBERS: ContactItem[] = [];
 
 // Helper para exportar y agregar a los contactos reales del celular
 export function exportContactVCard(name: string, phone: string) {
@@ -193,7 +137,7 @@ export function KinCashP2PModal({
         if (saved) return saved;
       } catch (_) {}
     }
-    return 'Groceries & medicine for the week';
+    return '';
   });
 
   const [showContactPicker, setShowContactPicker] = useState(false);
@@ -274,38 +218,18 @@ export function KinCashP2PModal({
     });
   }, [familyNetwork, userId]);
 
-  // Sincronizar contacto inicial de forma segura solo si NO hay ningún contacto seleccionado ni borrador existente
+  // Sincronizar contacto inicial: Clean Slate (NO auto-asignar ningún contacto a usuarios nuevos)
   const initialContactAssignedRef = useRef(false);
   useEffect(() => {
     if (initialContactAssignedRef.current) return;
-    if (!selectedContact) {
-      let saved: string | null = null;
-      if (typeof window !== 'undefined') {
-        try {
-          saved = localStorage.getItem('kin_draft_kincash_contact');
-        } catch (_) {}
-      }
-      if (!saved) {
-        if (contacts.length > 0) {
-          setSelectedContact(contacts[0]);
-          initialContactAssignedRef.current = true;
-        } else if (familyList.length > 0) {
-          setSelectedContact(familyList[0]);
-          initialContactAssignedRef.current = true;
-        }
-      } else {
-        initialContactAssignedRef.current = true;
-      }
-    } else {
-      initialContactAssignedRef.current = true;
-    }
-  }, [contacts, familyList, selectedContact]);
+    initialContactAssignedRef.current = true;
+  }, []);
 
   // Función para limpiar borrador manualmente (Botón ✕ Limpiar / Nuevo envío)
   const handleClearDraft = () => {
     setSelectedContact(null);
     setCurrentAmount('0');
-    setConceptNote('Groceries & medicine for the week');
+    setConceptNote('');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('kin_draft_kincash_contact');
       localStorage.removeItem('kin_draft_kincash_amount');
@@ -313,7 +237,7 @@ export function KinCashP2PModal({
     }
     onDraftContactChange?.(null);
     onDraftAmountChange?.('0');
-    onDraftNoteChange?.('Groceries & medicine for the week');
+    onDraftNoteChange?.('');
     onClearDraft?.();
   };
 

@@ -503,7 +503,31 @@ export default function MobileApp() {
       }
     }
 
-    // 2. Prioridad de sincronización:
+    // 2. Prioridad de sincronización y aislamiento estricto de usuario (Clean Slate):
+    if (savedUser && queryUserId && savedUser.id !== queryUserId) {
+      const draftKeys = [
+        'kin_draft_kincash_contact',
+        'kin_draft_kincash_amount',
+        'kin_draft_kincash_note',
+        'kin_draft_send_recipient',
+        'kin_draft_send_amount',
+        'kin_draft_send_delivery',
+        'kin_draft_send_store',
+        'kin_draft_send_pickup_location',
+        'kin_draft_send_payment_method',
+        'kin_draft_send_pickup_state',
+      ];
+      draftKeys.forEach((k) => {
+        try {
+          localStorage.removeItem(k);
+        } catch (_) {}
+      });
+      setKinCashDraftContact(null);
+      setKinCashDraftAmount('0');
+      setKinCashDraftNote('');
+      setSelectedAvatar(null);
+    }
+
     if (queryUserId) {
       // Si la URL pide un usuario específico y coincide con localStorage, cargarlo inmediatamente para 0ms latency
       if (savedUser && savedUser.id === queryUserId) {
@@ -924,16 +948,16 @@ export default function MobileApp() {
   const [isUpdatingContactPhoto, setIsUpdatingContactPhoto] = useState(false);
   const [smartContactQuery, setSmartContactQuery] = useState('');
 
-  // KIN Cash P2P Unbreakable Persistent Draft state
+  // KIN Cash P2P Persistent Draft state
   const [kinCashDraftContact, setKinCashDraftContact] = useState<ContactItem | null>(null);
   const [kinCashDraftAmount, setKinCashDraftAmount] = useState<string>('0');
-  const [kinCashDraftNote, setKinCashDraftNote] = useState<string>('Groceries & medicine for the week');
+  const [kinCashDraftNote, setKinCashDraftNote] = useState<string>('');
 
   // Limpiar borrador de KIN Cash
   const handleClearKinCashDraft = () => {
     setKinCashDraftContact(null);
     setKinCashDraftAmount('0');
-    setKinCashDraftNote('Groceries & medicine for the week');
+    setKinCashDraftNote('');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('kin_draft_kincash_contact');
       localStorage.removeItem('kin_draft_kincash_amount');

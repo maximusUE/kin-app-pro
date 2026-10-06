@@ -209,11 +209,25 @@ export function EnterpriseAuthScreen({
     if (typeof window !== 'undefined') {
       localStorage.setItem('kin_active_user', JSON.stringify(user));
       sessionStorage.setItem('kin_auth', 'true');
+      // Clean Slate: Resetear y purgar borradores anteriores para que la app inicie 100% limpia
+      const draftKeysToPurge = [
+        'kin_draft_kincash_contact',
+        'kin_draft_kincash_amount',
+        'kin_draft_kincash_note',
+        'kin_draft_send_recipient',
+        'kin_draft_send_amount',
+        'kin_draft_send_delivery',
+        'kin_draft_send_store',
+        'kin_draft_send_pickup_location',
+        'kin_draft_send_payment_method',
+        'kin_draft_send_pickup_state',
+      ];
+      draftKeysToPurge.forEach((k) => localStorage.removeItem(k));
     }
     toast.success(
       language === 'es'
-        ? `¡Bienvenido de nuevo, ${user.firstName || user.name}!`
-        : `Welcome back, ${user.firstName || user.name}!`
+        ? (authMode === 'register' ? `¡Cuenta creada con éxito, ${user.firstName || user.name}!` : `¡Bienvenido de nuevo, ${user.firstName || user.name}!`)
+        : (authMode === 'register' ? `Account created successfully, ${user.firstName || user.name}!` : `Welcome back, ${user.firstName || user.name}!`)
     );
     onLoginSuccess?.(user);
   };
