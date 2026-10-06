@@ -30,7 +30,6 @@ import {
   AirplaneIcon,
   ArrowRightIcon,
   ChevronRightIcon,
-  ChevronLeftIcon,
   DockHomeIcon,
   DockCardIcon,
   DockSendSparkleIcon,
