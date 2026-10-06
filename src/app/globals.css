@@ -1166,6 +1166,15 @@ html.light .bg-rose-600 * {
   color: #FFFFFF !important;
 }
 
+/* Apple Sign-In Button: Must ALWAYS retain crisp white text & fill in Light Mode */
+html.light .apple-signin-btn,
+html.light .apple-signin-btn *,
+.apple-signin-btn,
+.apple-signin-btn * {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
+}
+
 /* KIN Obsidian Debit Card & Preserved Dark Cards: Keep White & Gold Elements */
 html.light .kin-vault-card,
 html.light .kin-vault-card .text-white,

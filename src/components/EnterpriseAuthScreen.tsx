@@ -82,6 +82,21 @@ export function EnterpriseAuthScreen({
   const [authMode, setAuthMode] = useState<'login' | 'register'>(initialMode);
   const [method, setMethod] = useState<'phone' | 'email'>('phone');
   const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  // Hydrate theme from localStorage and document class
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('kin_theme');
+      const isHtmlLight = document.documentElement.classList.contains('light');
+      if (savedTheme === 'light' || isHtmlLight) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    }
+  }, []);
+  const isLight = theme === 'light';
 
   // Phone Stream State
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]);
@@ -387,10 +402,16 @@ export function EnterpriseAuthScreen({
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#06070B] text-white flex justify-center selection:bg-emerald-500/30 selection:text-emerald-300 relative overflow-x-hidden">
+    <div className={`min-h-[100dvh] w-full ${isLight ? 'bg-[#F8F9FA] text-slate-900' : 'bg-[#06070B] text-white'} flex justify-center selection:bg-emerald-500/30 selection:text-emerald-700 relative overflow-x-hidden transition-colors`}>
       {/* Background Ambient Glows (Tier-1 Depth) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[350px] bg-gradient-to-b from-emerald-600/15 via-emerald-800/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] h-[300px] bg-gradient-to-t from-emerald-950/20 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+      {!isLight ? (
+        <>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[350px] bg-gradient-to-b from-emerald-600/15 via-emerald-800/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] h-[300px] bg-gradient-to-t from-emerald-950/20 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+        </>
+      ) : (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-gradient-to-b from-emerald-500/8 via-teal-500/3 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+      )}
 
       {/* Main Container */}
       <div className="w-full max-w-[420px] min-h-[100dvh] flex flex-col justify-between px-5 py-6 sm:py-8 relative z-10">
@@ -400,7 +421,7 @@ export function EnterpriseAuthScreen({
         <div className="flex items-center justify-between pt-1 pb-4">
           {/* Official KIN Logomark */}
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-950 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.35)] border border-emerald-400/40">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 flex items-center justify-center shadow-[0_4px_16px_rgba(16,185,129,0.3)] border border-emerald-400/40">
               <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
@@ -409,14 +430,14 @@ export function EnterpriseAuthScreen({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-[20px] tracking-tight bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent">
+                <span className={`font-extrabold text-[20px] tracking-tight ${isLight ? 'text-slate-900' : 'bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent'}`}>
                   KIN
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full ${isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}`}>
                   PRO
                 </span>
               </div>
-              <p className="text-[10px] text-zinc-400 font-medium tracking-wide">
+              <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'} font-medium tracking-wide`}>
                 {t.tagline}
               </p>
             </div>
@@ -428,7 +449,7 @@ export function EnterpriseAuthScreen({
               <button
                 type="button"
                 onClick={onBack}
-                className="h-8 px-3 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 border border-white/10 cursor-pointer shadow-sm"
+                className={`h-8 px-3 rounded-full ${isLight ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs' : 'bg-white/10 hover:bg-white/20 text-zinc-300 border-white/10'} text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 border cursor-pointer shadow-sm`}
                 title={language === 'es' ? 'Volver a la App' : 'Back to App'}
               >
                 <span className="material-symbols-outlined text-[16px]">arrow_back</span>
@@ -437,14 +458,14 @@ export function EnterpriseAuthScreen({
             )}
 
             {/* Bilingual Glassmorphic Switch */}
-            <div className="bg-[#12131D]/90 backdrop-blur-md p-1 rounded-full border border-white/10 flex items-center shadow-inner">
+            <div className={`p-1 rounded-full border ${isLight ? 'bg-slate-200/70 border-slate-300/80' : 'bg-[#12131D]/90 border-white/10'} flex items-center shadow-inner`}>
               <button
                 type="button"
                 onClick={() => handleLanguageToggle('es')}
                 className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
                   language === 'es'
                     ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
-                    : 'text-zinc-400 hover:text-white'
+                    : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 ES
@@ -455,7 +476,7 @@ export function EnterpriseAuthScreen({
                 className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
                   language === 'en'
                     ? 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.4)]'
-                    : 'text-zinc-400 hover:text-white'
+                    : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 EN
@@ -468,10 +489,10 @@ export function EnterpriseAuthScreen({
         {/* HERO TITLE & SUBTITLE                                                     */}
         {/* ========================================================================= */}
         <div className="my-3">
-          <h1 className="text-2xl sm:text-[26px] font-black tracking-tight text-white">
+          <h1 className={`text-2xl sm:text-[26px] font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
             {authMode === 'login' ? t.welcomeBack : t.createAccount}
           </h1>
-          <p className="text-xs sm:text-[13px] text-zinc-400 mt-1.5 leading-relaxed">
+          <p className={`text-xs sm:text-[13px] ${isLight ? 'text-slate-600' : 'text-zinc-400'} mt-1.5 leading-relaxed`}>
             {authMode === 'login' ? t.heroSubLogin : t.heroSubRegister}
           </p>
         </div>
@@ -480,31 +501,36 @@ export function EnterpriseAuthScreen({
         {/* TIER-1 FEDERATED SOCIAL IDENTITY (APPLE & GOOGLE OAUTH)                   */}
         {/* ========================================================================= */}
         <div className="space-y-2.5 my-3">
-          {/* Apple ID Button */}
+          {/* Apple ID Button — Guaranteed Solid Black with Crisp White Text */}
           <button
             type="button"
             disabled={oauthLoading !== null}
             onClick={() => handleSocialOAuth('apple')}
-            className="w-full h-[52px] rounded-2xl bg-black hover:bg-zinc-900 border border-white/20 hover:border-white/35 text-white font-semibold text-[15px] flex items-center justify-center gap-3 shadow-[0_4px_16px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all duration-150 disabled:opacity-60"
+            className="apple-signin-btn w-full h-[52px] rounded-2xl bg-black hover:bg-neutral-900 border border-black text-white font-semibold text-[15px] flex items-center justify-center gap-3 shadow-[0_4px_16px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer"
+            style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
           >
             {oauthLoading === 'apple' ? (
               <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 170 170">
+                <svg className="w-5 h-5" style={{ fill: '#FFFFFF' }} viewBox="0 0 170 170">
                   <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.7-11.64-13.98-5.64-8.7-10.1-18.7-13.37-30.01-3.26-11.31-4.9-22.18-4.9-32.61 0-14.13 3.69-26.08 11.08-35.85 7.39-9.77 16.54-14.75 27.45-14.95 4.8 0 10.3 1.25 16.52 3.75 6.22 2.5 10.37 3.82 12.45 3.97 1.83-.15 6.07-1.47 12.74-3.97 6.66-2.5 12.02-3.66 16.08-3.48 12.19.64 21.94 4.84 29.25 12.61-10.66 6.44-15.88 15.22-15.66 26.33.22 8.7 3.63 16.09 10.23 22.18 6.6 6.09 14.59 9.68 23.97 10.77-2.17 6.3-4.67 12.44-7.5 18.42m-33.8-109.84c.1-4.56-1.52-9.13-4.87-13.7-3.35-4.57-7.66-7.88-12.93-9.93-.11 4.56 1.48 9.07 4.77 13.53 3.29 4.46 7.63 7.82 13.03 10.1" />
                 </svg>
-                <span>{t.appleBtn}</span>
+                <span style={{ color: '#FFFFFF' }}>{t.appleBtn}</span>
               </>
             )}
           </button>
 
-          {/* Google Button */}
+          {/* Google Button — Official Google Identity card */}
           <button
             type="button"
             disabled={oauthLoading !== null}
             onClick={() => handleSocialOAuth('google')}
-            className="w-full h-[52px] rounded-2xl bg-[#12131F] hover:bg-[#181A2A] border border-white/10 hover:border-white/25 text-white font-semibold text-[15px] flex items-center justify-center gap-3 shadow-[0_4px_16px_rgba(0,0,0,0.3)] active:scale-[0.98] transition-all duration-150 disabled:opacity-60"
+            className={`w-full h-[52px] rounded-2xl ${
+              isLight
+                ? 'bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                : 'bg-[#12131F] hover:bg-[#181A2A] border border-white/10 text-white shadow-[0_4px_16px_rgba(0,0,0,0.3)]'
+            } font-semibold text-[15px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer`}
           >
             {oauthLoading === 'google' ? (
               <div className="w-5 h-5 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
@@ -526,13 +552,17 @@ export function EnterpriseAuthScreen({
             type="button"
             disabled={oauthLoading !== null}
             onClick={() => handleSocialOAuth('faceid')}
-            className="w-full h-[50px] rounded-2xl bg-gradient-to-r from-emerald-950/60 via-emerald-900/40 to-emerald-950/60 border border-emerald-500/35 hover:border-emerald-400/60 text-emerald-300 font-semibold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_0_20px_rgba(16,185,129,0.12)] active:scale-[0.98] transition-all duration-150 disabled:opacity-60"
+            className={`w-full h-[50px] rounded-2xl ${
+              isLight
+                ? 'bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300/80 text-emerald-800 shadow-xs'
+                : 'bg-gradient-to-r from-emerald-950/60 via-emerald-900/40 to-emerald-950/60 border border-emerald-500/35 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
+            } font-semibold text-[14px] flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer`}
           >
             {oauthLoading === 'faceid' ? (
               <div className="w-5 h-5 border-2 border-emerald-400/20 border-t-emerald-400 rounded-full animate-spin" />
             ) : (
               <>
-                <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className={`w-5 h-5 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M7 3H5a2 2 0 0 0-2 2v2" />
                   <path d="M17 3h2a2 2 0 0 1 2 2v2" />
                   <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
@@ -552,10 +582,10 @@ export function EnterpriseAuthScreen({
         {/* ========================================================================= */}
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10" />
+            <div className={`w-full border-t ${isLight ? 'border-slate-200' : 'border-white/10'}`} />
           </div>
           <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-            <span className="bg-[#06070B] px-3 text-zinc-400">
+            <span className={`${isLight ? 'bg-[#F8F9FA] text-slate-500' : 'bg-[#06070B] text-zinc-400'} px-3`}>
               {t.orDivider}
             </span>
           </div>
@@ -564,17 +594,21 @@ export function EnterpriseAuthScreen({
         {/* ========================================================================= */}
         {/* AUTH METHOD SELECTOR (PHONE SMS VS EMAIL)                                 */}
         {/* ========================================================================= */}
-        <div className="bg-[#12131D]/80 backdrop-blur-md p-1 rounded-2xl border border-white/10 flex items-center mb-4">
+        <div className={`p-1 rounded-2xl border ${isLight ? 'bg-slate-200/70 border-slate-300/80' : 'bg-[#12131D]/80 border-white/10'} flex items-center mb-4`}>
           <button
             type="button"
             onClick={() => {
               setMethod('phone');
               setIsOtpSent(false);
             }}
-            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-[13px] font-bold transition-all duration-200 ${
+            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-[13px] font-bold transition-all duration-200 cursor-pointer ${
               method === 'phone'
-                ? 'bg-emerald-600 text-white shadow-[0_2px_12px_rgba(5,150,105,0.35)]'
-                : 'text-zinc-400 hover:text-white'
+                ? isLight
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'bg-emerald-600 text-white shadow-[0_2px_12px_rgba(5,150,105,0.35)]'
+                : isLight
+                  ? 'text-slate-600 hover:text-slate-900'
+                  : 'text-zinc-400 hover:text-white'
             }`}
           >
             {t.tabPhone}
@@ -582,10 +616,14 @@ export function EnterpriseAuthScreen({
           <button
             type="button"
             onClick={() => setMethod('email')}
-            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-[13px] font-bold transition-all duration-200 ${
+            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-[13px] font-bold transition-all duration-200 cursor-pointer ${
               method === 'email'
-                ? 'bg-emerald-600 text-white shadow-[0_2px_12px_rgba(5,150,105,0.35)]'
-                : 'text-zinc-400 hover:text-white'
+                ? isLight
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'bg-emerald-600 text-white shadow-[0_2px_12px_rgba(5,150,105,0.35)]'
+                : isLight
+                  ? 'text-slate-600 hover:text-slate-900'
+                  : 'text-zinc-400 hover:text-white'
             }`}
           >
             {t.tabEmail}
@@ -600,7 +638,7 @@ export function EnterpriseAuthScreen({
             {!isOtpSent ? (
               <>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1.5`}>
                     {t.phoneLabel}
                   </label>
                   <div className="flex items-center gap-2">
@@ -616,15 +654,19 @@ export function EnterpriseAuthScreen({
                             setFormattedPhone('');
                           }
                         }}
-                        className="h-[52px] px-3 pr-7 rounded-2xl bg-[#12131D] border border-white/10 text-white text-sm font-semibold appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+                        className={`h-[52px] px-3 pr-7 rounded-2xl ${
+                          isLight
+                            ? 'bg-white border-slate-300 text-slate-900 shadow-xs'
+                            : 'bg-[#12131D] border-white/10 text-white'
+                        } border text-sm font-semibold appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer`}
                       >
                         {COUNTRY_CODES.map((c) => (
-                          <option key={c.name} value={c.name} className="bg-[#12131D] text-white">
+                          <option key={c.name} value={c.name} className={isLight ? 'bg-white text-slate-900' : 'bg-[#12131D] text-white'}>
                             {c.flag} {c.code}
                           </option>
                         ))}
                       </select>
-                      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                      <div className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>
                         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <polyline points="6 9 12 15 18 9" />
                         </svg>
@@ -637,7 +679,11 @@ export function EnterpriseAuthScreen({
                       value={formattedPhone}
                       onChange={(e) => handlePhoneChange(e.target.value)}
                       placeholder={selectedCountry.mask}
-                      className="flex-1 h-[52px] px-4 rounded-2xl bg-[#12131D] border border-white/10 text-white text-[16px] font-medium tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder:text-zinc-600"
+                      className={`flex-1 h-[52px] px-4 rounded-2xl ${
+                        isLight
+                          ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                          : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-600 focus:border-emerald-500'
+                      } border text-[16px] font-medium tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all`}
                     />
                   </div>
                 </div>
@@ -646,7 +692,7 @@ export function EnterpriseAuthScreen({
                   type="button"
                   disabled={isLoading || rawPhone.length < selectedCountry.len}
                   onClick={handleSendOtp}
-                  className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(16,185,129,0.35)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(5,150,105,0.3)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -659,7 +705,7 @@ export function EnterpriseAuthScreen({
               /* OTP 6-Digit Screen */
               <div className="space-y-4 pt-1">
                 <div className="text-center">
-                  <p className="text-xs text-zinc-400">
+                  <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
                     {t.otpSubtitle(`${selectedCountry.code} ${formattedPhone}`)}
                   </p>
                 </div>
@@ -677,7 +723,11 @@ export function EnterpriseAuthScreen({
                       value={digit}
                       onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className="w-12 h-14 sm:w-13 sm:h-16 text-center text-xl sm:text-2xl font-black rounded-xl bg-[#141523] border border-white/15 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 text-emerald-400 focus:outline-none transition-all"
+                      className={`w-12 h-14 sm:w-13 sm:h-16 text-center text-xl sm:text-2xl font-black rounded-xl ${
+                        isLight
+                          ? 'bg-white border-slate-300 text-emerald-700 focus:border-emerald-600 shadow-xs'
+                          : 'bg-[#141523] border-white/15 text-emerald-400 focus:border-emerald-400'
+                      } border focus:ring-2 focus:ring-emerald-500/40 focus:outline-none transition-all`}
                     />
                   ))}
                 </div>
@@ -687,7 +737,7 @@ export function EnterpriseAuthScreen({
                   type="button"
                   disabled={isLoading || otpDigits.some((d) => !d)}
                   onClick={() => handleVerifyOtp(otpDigits.join(''))}
-                  className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(16,185,129,0.35)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40"
+                  className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-600 to-emerald-500 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(5,150,105,0.3)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -704,18 +754,18 @@ export function EnterpriseAuthScreen({
                       setIsOtpSent(false);
                       setOtpDigits(['', '', '', '', '', '']);
                     }}
-                    className="text-zinc-400 hover:text-white transition-colors"
+                    className={`${isLight ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'} transition-colors cursor-pointer`}
                   >
                     ← {t.changePhone}
                   </button>
 
                   {resendCooldown > 0 ? (
-                    <span className="text-zinc-400">{t.resendIn(resendCooldown)}</span>
+                    <span className={isLight ? 'text-slate-500' : 'text-zinc-400'}>{t.resendIn(resendCooldown)}</span>
                   ) : (
                     <button
                       type="button"
                       onClick={handleSendOtp}
-                      className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+                      className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold transition-colors cursor-pointer"
                     >
                       {t.resendNow}
                     </button>
@@ -734,7 +784,7 @@ export function EnterpriseAuthScreen({
             {authMode === 'register' && (
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">
+                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
                     {t.firstNameLabel}
                   </label>
                   <input
@@ -743,11 +793,15 @@ export function EnterpriseAuthScreen({
                     onChange={(e) => setFirstName(e.target.value)}
                     required
                     placeholder="Ej. Juan"
-                    className="w-full h-[48px] px-3.5 rounded-2xl bg-[#12131D] border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                    className={`w-full h-[48px] px-3.5 rounded-2xl ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                        : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+                    } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">
+                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
                     {t.lastNameLabel}
                   </label>
                   <input
@@ -756,14 +810,18 @@ export function EnterpriseAuthScreen({
                     onChange={(e) => setLastName(e.target.value)}
                     required
                     placeholder="Ej. Pérez"
-                    className="w-full h-[48px] px-3.5 rounded-2xl bg-[#12131D] border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                    className={`w-full h-[48px] px-3.5 rounded-2xl ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                        : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+                    } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 mb-1">
+              <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
                 {t.emailLabel}
               </label>
               <input
@@ -772,13 +830,17 @@ export function EnterpriseAuthScreen({
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="tu.correo@ejemplo.com"
-                className="w-full h-[50px] px-4 rounded-2xl bg-[#12131D] border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className={`w-full h-[50px] px-4 rounded-2xl ${
+                  isLight
+                    ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                    : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+                } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold text-zinc-400">
+                <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
                   {t.passwordLabel}
                 </label>
                 {authMode === 'login' && (
@@ -791,7 +853,7 @@ export function EnterpriseAuthScreen({
                           : 'Reset link sent to your email'
                       )
                     }
-                    className="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors"
+                    className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline transition-colors cursor-pointer"
                   >
                     {t.forgotPassword}
                   </button>
@@ -804,12 +866,16 @@ export function EnterpriseAuthScreen({
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full h-[50px] px-4 pr-11 rounded-2xl bg-[#12131D] border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className={`w-full h-[50px] px-4 pr-11 rounded-2xl ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                      : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+                  } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                  className={`absolute right-3.5 top-1/2 -translate-y-1/2 ${isLight ? 'text-slate-400 hover:text-slate-700' : 'text-zinc-400 hover:text-white'} cursor-pointer`}
                 >
                   {showPassword ? (
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -832,9 +898,9 @@ export function EnterpriseAuthScreen({
                 type="checkbox"
                 checked={rememberDevice}
                 onChange={(e) => setRememberDevice(e.target.checked)}
-                className="w-4 h-4 rounded border-white/20 bg-[#12131D] text-emerald-500 focus:ring-emerald-500"
+                className="w-4 h-4 rounded border-slate-300 bg-white text-emerald-600 focus:ring-emerald-500"
               />
-              <label htmlFor="remember" className="text-xs text-zinc-400 cursor-pointer">
+              <label htmlFor="remember" className={`text-xs ${isLight ? 'text-slate-600' : 'text-zinc-400'} cursor-pointer`}>
                 {t.rememberMe}
               </label>
             </div>
@@ -842,7 +908,7 @@ export function EnterpriseAuthScreen({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(16,185,129,0.35)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40"
+              className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(5,150,105,0.3)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40 cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -857,7 +923,7 @@ export function EnterpriseAuthScreen({
         {/* TOGGLE LOGIN / REGISTER MODES                                             */}
         {/* ========================================================================= */}
         <div className="text-center my-3">
-          <p className="text-xs text-zinc-400">
+          <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
             {authMode === 'login' ? t.noAccount : t.hasAccount}{' '}
             <button
               type="button"
@@ -865,7 +931,7 @@ export function EnterpriseAuthScreen({
                 setAuthMode(authMode === 'login' ? 'register' : 'login');
                 setIsOtpSent(false);
               }}
-              className="text-emerald-400 hover:text-emerald-300 font-bold underline transition-colors ml-1"
+              className="text-emerald-600 dark:text-emerald-400 hover:underline font-bold transition-colors ml-1 cursor-pointer"
             >
               {authMode === 'login' ? t.signUpLink : t.signInLink}
             </button>
@@ -879,7 +945,11 @@ export function EnterpriseAuthScreen({
           <button
             type="button"
             onClick={() => persistSessionAndNotify(DON_CESAR_ACCOUNT)}
-            className="w-full py-2.5 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+            className={`w-full py-2.5 px-3 rounded-xl ${
+              isLight
+                ? 'bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 shadow-xs'
+                : 'bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-300'
+            } text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer`}
           >
             <span>{t.fastPass}</span>
           </button>
@@ -888,14 +958,14 @@ export function EnterpriseAuthScreen({
         {/* ========================================================================= */}
         {/* INSTITUTIONAL TRUST & REGULATORY BADGES                                   */}
         {/* ========================================================================= */}
-        <div className="pt-3 border-t border-white/5 text-center space-y-1.5">
-          <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-zinc-400">
-            <svg className="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <div className={`pt-3 border-t ${isLight ? 'border-slate-200' : 'border-white/5'} text-center space-y-1.5`}>
+          <div className={`flex items-center justify-center gap-1.5 text-[11px] font-semibold ${isLight ? 'text-slate-700' : 'text-zinc-400'}`}>
+            <svg className={`w-3.5 h-3.5 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
             <span>{t.securityTitle}</span>
           </div>
-          <p className="text-[10px] text-zinc-400 leading-tight">
+          <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'} leading-tight`}>
             {t.securitySub}
           </p>
         </div>
