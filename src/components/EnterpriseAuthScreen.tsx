@@ -233,7 +233,7 @@ export function EnterpriseAuthScreen({
         : 'Join the most fair and transparent financial platform for the Latino community in the US.',
     appleBtn: language === 'es' ? 'Continuar con Apple' : 'Continue with Apple',
     googleBtn: language === 'es' ? 'Continuar con Google' : 'Continue with Google',
-    orDivider: language === 'es' ? 'O CON TU CORREO ELECTRÓNICO' : 'OR WITH YOUR EMAIL',
+    orDivider: language === 'es' ? 'O CONTINUAR CON' : 'OR CONTINUE WITH',
     firstNameLabel: language === 'es' ? 'Nombre(s)' : 'First Name',
     lastNameLabel: language === 'es' ? 'Apellido(s)' : 'Last Name',
     emailLabel: language === 'es' ? 'Correo Electrónico' : 'Email Address',
@@ -369,29 +369,164 @@ export function EnterpriseAuthScreen({
         </div>
 
         {/* ========================================================================= */}
-        {/* TIER-1 FEDERATED SOCIAL IDENTITY (APPLE & GOOGLE OAUTH)                   */}
+        {/* 1. DIRECT EMAIL & PASSWORD FORM (FIRST)                                    */}
         {/* ========================================================================= */}
-        <div className="space-y-2.5 my-3">
-          {/* Apple ID Button — Guaranteed Solid Black with Crisp White Text */}
+        <form onSubmit={handleEmailSubmit} className="space-y-3.5 my-2">
+          {authMode === 'register' && (
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
+                  {t.firstNameLabel}
+                </label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  placeholder="Ej. Juan"
+                  className={`w-full h-[48px] px-3.5 rounded-2xl ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                      : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+                  } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+                />
+              </div>
+              <div>
+                <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
+                  {t.lastNameLabel}
+                </label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  placeholder="Ej. Pérez"
+                  className={`w-full h-[48px] px-3.5 rounded-2xl ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                      : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+                  } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
+              {t.emailLabel}
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="tu.correo@ejemplo.com"
+              className={`w-full h-[50px] px-4 rounded-2xl ${
+                isLight
+                  ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                  : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+              } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
+                {t.passwordLabel}
+              </label>
+              {authMode === 'login' && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    toast.info(
+                      language === 'es'
+                        ? 'Enlace de restablecimiento enviado a tu correo'
+                        : 'Reset link sent to your email'
+                    )
+                  }
+                  className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline transition-colors cursor-pointer"
+                >
+                  {t.forgotPassword}
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className={`w-full h-[50px] px-4 pr-11 rounded-2xl ${
+                  isLight
+                    ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
+                    : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
+                } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={`absolute right-3.5 top-1/2 -translate-y-1/2 ${isLight ? 'text-slate-400 hover:text-slate-700' : 'text-zinc-400 hover:text-white'} cursor-pointer`}
+              >
+                {showPassword ? (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-0.5">
+            <input
+              id="remember"
+              type="checkbox"
+              checked={rememberDevice}
+              onChange={(e) => setRememberDevice(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 bg-white text-emerald-600 focus:ring-emerald-500"
+            />
+            <label htmlFor="remember" className={`text-xs ${isLight ? 'text-slate-600' : 'text-zinc-400'} cursor-pointer`}>
+              {t.rememberMe}
+            </label>
+          </div>
+
           <button
-            type="button"
-            disabled={oauthLoading !== null}
-            onClick={() => handleSocialOAuth('apple')}
-            className="apple-signin-btn w-full h-[52px] rounded-2xl bg-black hover:bg-neutral-900 border border-black text-white font-semibold text-[15px] flex items-center justify-center gap-3 shadow-[0_4px_16px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer"
-            style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(5,150,105,0.3)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40 cursor-pointer"
           >
-            {oauthLoading === 'apple' ? (
+            {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
-              <>
-                <svg className="w-5 h-5" style={{ fill: '#FFFFFF' }} viewBox="0 0 170 170">
-                  <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.7-11.64-13.98-5.64-8.7-10.1-18.7-13.37-30.01-3.26-11.31-4.9-22.18-4.9-32.61 0-14.13 3.69-26.08 11.08-35.85 7.39-9.77 16.54-14.75 27.45-14.95 4.8 0 10.3 1.25 16.52 3.75 6.22 2.5 10.37 3.82 12.45 3.97 1.83-.15 6.07-1.47 12.74-3.97 6.66-2.5 12.02-3.66 16.08-3.48 12.19.64 21.94 4.84 29.25 12.61-10.66 6.44-15.88 15.22-15.66 26.33.22 8.7 3.63 16.09 10.23 22.18 6.6 6.09 14.59 9.68 23.97 10.77-2.17 6.3-4.67 12.44-7.5 18.42m-33.8-109.84c.1-4.56-1.52-9.13-4.87-13.7-3.35-4.57-7.66-7.88-12.93-9.93-.11 4.56 1.48 9.07 4.77 13.53 3.29 4.46 7.63 7.82 13.03 10.1" />
-                </svg>
-                <span style={{ color: '#FFFFFF' }}>{t.appleBtn}</span>
-              </>
+              <span>{authMode === 'login' ? t.submitLogin : t.submitRegister}</span>
             )}
           </button>
+        </form>
 
+        {/* ========================================================================= */}
+        {/* 2. DELICATE DIVIDER                                                       */}
+        {/* ========================================================================= */}
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className={`w-full border-t ${isLight ? 'border-slate-200' : 'border-white/10'}`} />
+          </div>
+          <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+            <span className={`${isLight ? 'bg-[#F8F9FA] text-slate-500' : 'bg-[#06070B] text-zinc-400'} px-3`}>
+              {t.orDivider}
+            </span>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* 3. FEDERATED SOCIAL PROVIDERS: GOOGLE FIRST, THEN APPLE AT THE END         */}
+        {/* ========================================================================= */}
+        <div className="space-y-2.5 my-2">
           {/* Google Button — Official Google Identity card */}
           <button
             type="button"
@@ -418,163 +553,26 @@ export function EnterpriseAuthScreen({
             )}
           </button>
 
-
-        </div>
-
-        {/* ========================================================================= */}
-        {/* DELICATE DIVIDER                                                          */}
-        {/* ========================================================================= */}
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className={`w-full border-t ${isLight ? 'border-slate-200' : 'border-white/10'}`} />
-          </div>
-          <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-            <span className={`${isLight ? 'bg-[#F8F9FA] text-slate-500' : 'bg-[#06070B] text-zinc-400'} px-3`}>
-              {t.orDivider}
-            </span>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* DIRECT EMAIL & PASSWORD STREAM (ACTIVE FIREBASE PROVIDER)                  */}
-        {/* ========================================================================= */}
-        <form onSubmit={handleEmailSubmit} className="space-y-3.5">
-            {authMode === 'register' && (
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
-                    {t.firstNameLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                    placeholder="Ej. Juan"
-                    className={`w-full h-[48px] px-3.5 rounded-2xl ${
-                      isLight
-                        ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
-                        : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
-                    } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
-                  />
-                </div>
-                <div>
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
-                    {t.lastNameLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                    placeholder="Ej. Pérez"
-                    className={`w-full h-[48px] px-3.5 rounded-2xl ${
-                      isLight
-                        ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
-                        : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
-                    } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
-                  />
-                </div>
-              </div>
+          {/* Apple ID Button — Guaranteed Solid Black with Crisp White Text (AT THE END) */}
+          <button
+            type="button"
+            disabled={oauthLoading !== null}
+            onClick={() => handleSocialOAuth('apple')}
+            className="apple-signin-btn w-full h-[52px] rounded-2xl bg-black hover:bg-neutral-900 border border-black text-white font-semibold text-[15px] flex items-center justify-center gap-3 shadow-[0_4px_16px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer"
+            style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
+          >
+            {oauthLoading === 'apple' ? (
+              <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <svg className="w-5 h-5" style={{ fill: '#FFFFFF' }} viewBox="0 0 170 170">
+                  <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.7-11.64-13.98-5.64-8.7-10.1-18.7-13.37-30.01-3.26-11.31-4.9-22.18-4.9-32.61 0-14.13 3.69-26.08 11.08-35.85 7.39-9.77 16.54-14.75 27.45-14.95 4.8 0 10.3 1.25 16.52 3.75 6.22 2.5 10.37 3.82 12.45 3.97 1.83-.15 6.07-1.47 12.74-3.97 6.66-2.5 12.02-3.66 16.08-3.48 12.19.64 21.94 4.84 29.25 12.61-10.66 6.44-15.88 15.22-15.66 26.33.22 8.7 3.63 16.09 10.23 22.18 6.6 6.09 14.59 9.68 23.97 10.77-2.17 6.3-4.67 12.44-7.5 18.42m-33.8-109.84c.1-4.56-1.52-9.13-4.87-13.7-3.35-4.57-7.66-7.88-12.93-9.93-.11 4.56 1.48 9.07 4.77 13.53 3.29 4.46 7.63 7.82 13.03 10.1" />
+                </svg>
+                <span style={{ color: '#FFFFFF' }}>{t.appleBtn}</span>
+              </>
             )}
-
-            <div>
-              <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'} mb-1`}>
-                {t.emailLabel}
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="tu.correo@ejemplo.com"
-                className={`w-full h-[50px] px-4 rounded-2xl ${
-                  isLight
-                    ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
-                    : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
-                } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
-                  {t.passwordLabel}
-                </label>
-                {authMode === 'login' && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      toast.info(
-                        language === 'es'
-                          ? 'Enlace de restablecimiento enviado a tu correo'
-                          : 'Reset link sent to your email'
-                      )
-                    }
-                    className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline transition-colors cursor-pointer"
-                  >
-                    {t.forgotPassword}
-                  </button>
-                )}
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className={`w-full h-[50px] px-4 pr-11 rounded-2xl ${
-                    isLight
-                      ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 shadow-xs'
-                      : 'bg-[#12131D] border-white/10 text-white placeholder:text-zinc-500'
-                  } border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute right-3.5 top-1/2 -translate-y-1/2 ${isLight ? 'text-slate-400 hover:text-slate-700' : 'text-zinc-400 hover:text-white'} cursor-pointer`}
-                >
-                  {showPassword ? (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-0.5">
-              <input
-                id="remember"
-                type="checkbox"
-                checked={rememberDevice}
-                onChange={(e) => setRememberDevice(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 bg-white text-emerald-600 focus:ring-emerald-500"
-              />
-              <label htmlFor="remember" className={`text-xs ${isLight ? 'text-slate-600' : 'text-zinc-400'} cursor-pointer`}>
-                {t.rememberMe}
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(5,150,105,0.3)] active:scale-[0.98] transition-all duration-150 disabled:opacity-40 cursor-pointer"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              ) : (
-                <span>{authMode === 'login' ? t.submitLogin : t.submitRegister}</span>
-              )}
-            </button>
-          </form>
+          </button>
+        </div>
 
         {/* ========================================================================= */}
         {/* TOGGLE LOGIN / REGISTER MODES                                             */}
