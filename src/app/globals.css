@@ -1346,3 +1346,36 @@ html.light ::-webkit-scrollbar-thumb:hover {
   transform: scale(0.975);
   transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1);
 }
+
+/* ========================================================================= */
+/* 21. APPLE SAN FRANCISCO TYPOGRAPHY & TABULAR NUMERICS FOUNDATIONS         */
+/* ========================================================================= */
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
+}
+
+/* Apple Financial Monospace & Tabular Figures (Apple Card / Apple Pay standard) */
+.font-financial-mono,
+[class*="font-financial-mono"],
+.tabular-nums {
+  font-family: "SF Mono", "ui-monospace", "SF Pro Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace !important;
+  font-variant-numeric: tabular-nums lining-nums !important;
+  -webkit-font-feature-settings: "tnum" 1, "lnum" 1 !important;
+  font-feature-settings: "tnum" 1, "lnum" 1 !important;
+}
+
+/* Apple Display & Headings Tight Optical Tracking */
+h1, h2, h3, .font-headline-lg, .font-headline-md, .font-display-hero {
+  letter-spacing: -0.025em;
+  font-feature-settings: "kern" 1;
+}
+
+/* Apple Micro-Caps / Badges Optical Spacing */
+.font-label-caps, [class*="font-label-caps"] {
+  letter-spacing: 0.055em;
+}
+
