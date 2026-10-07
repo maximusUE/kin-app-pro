@@ -14,6 +14,8 @@ import { KinLogo } from './KinLogo';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 import { ContactAvatar } from './ContactAvatar';
 import { WhatsAppContactsModal } from './WhatsAppContactsModal';
+import { KinAirDropWaveModal } from './animations/KinAirDropWaveModal';
+import { KinQrModal } from './modals/KinQrModal';
 
 export interface ContactItem {
   id: string;
@@ -142,6 +144,13 @@ export function KinCashP2PModal({
 
   const [showContactPicker, setShowContactPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [showAirDropModal, setShowAirDropModal] = useState(false);
+  const [pendingSuccessData, setPendingSuccessData] = useState<{
+    recipient: string;
+    amountMXN: number;
+    contact?: ContactItem | null;
+  } | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -359,39 +368,52 @@ export function KinCashP2PModal({
         return;
       }
 
-      // Éxito: Snap al final y disparo KIN Cash P2P
+      // Éxito: Snap al final y disparo KIN Cash P2P con Onda Ultrasónica AirDrop
       setSlideX(maxDist);
       setIsDispatched(true);
-      setStatusMessage('¡Envío KIN Cash Exitoso! 🚀');
+      setStatusMessage(isEn ? 'Ultrasonic Transfer in progress... 🚀' : '¡Transferencia Ultrasónica en curso! 🚀');
 
       const recipientLabel = selectedContact
         ? (selectedContact.fullName || selectedContact.name)
         : searchQuery.trim() || 'Destinatario KIN Cash';
 
-      if (onP2PSuccess) {
-        onP2PSuccess(recipientLabel, numAmount * exchangeRate, selectedContact);
-      }
+      setPendingSuccessData({
+        recipient: recipientLabel,
+        amountMXN: numAmount * exchangeRate,
+        contact: selectedContact,
+      });
 
-      // Purgar borrador de forma automática tras envío confirmado
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('kin_draft_kincash_contact');
-        localStorage.removeItem('kin_draft_kincash_amount');
-        localStorage.removeItem('kin_draft_kincash_note');
-      }
-      setCurrentAmount('0');
-      onDraftAmountChange?.('0');
-
-      setTimeout(() => {
-        setIsDispatched(false);
-        setSlideX(0);
-        setStatusMessage(null);
-        if (!isScreen && onClose) {
-          onClose();
-        }
-      }, 500);
+      // Activar animación cinemática estilo Apple AirDrop NameDrop
+      setShowAirDropModal(true);
     } else {
       // Regreso suave elástico
       setSlideX(0);
+    }
+  };
+
+  const handleAirDropComplete = () => {
+    setShowAirDropModal(false);
+    if (pendingSuccessData && onP2PSuccess) {
+      onP2PSuccess(
+        pendingSuccessData.recipient,
+        pendingSuccessData.amountMXN,
+        pendingSuccessData.contact
+      );
+    }
+
+    // Purgar borrador de forma automática tras envío confirmado
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kin_draft_kincash_contact');
+      localStorage.removeItem('kin_draft_kincash_amount');
+      localStorage.removeItem('kin_draft_kincash_note');
+    }
+    setCurrentAmount('0');
+    onDraftAmountChange?.('0');
+    setIsDispatched(false);
+    setSlideX(0);
+    setStatusMessage(null);
+    if (!isScreen && onClose) {
+      onClose();
     }
   };
 
@@ -422,12 +444,12 @@ export function KinCashP2PModal({
       {/* 1. Sub-header & Value Prop Banner */}
       <div className="flex items-start justify-between gap-3 bg-surface-container-high/60 backdrop-blur-md p-4 rounded-xl shadow-lg relative overflow-hidden border border-white/5">
         <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-primary shadow-[0_0_16px_rgba(87,242,191,0.25)]">
             <span className="material-symbols-outlined text-[22px]">swap_horiz</span>
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-title-base text-title-base text-white">KIN Cash Express</span>
               <span className="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-caps text-[10px] tracking-wider uppercase font-bold">
                 {isEn ? 'Zero-Fee' : 'Sin Comisión'}
@@ -440,6 +462,17 @@ export function KinCashP2PModal({
             </p>
           </div>
         </div>
+
+        {/* Botón QR Dinámico 2026 */}
+        <button
+          type="button"
+          onClick={() => setShowQrModal(true)}
+          className="shrink-0 px-3 py-1.5 rounded-full bg-primary/15 hover:bg-primary/25 border border-primary/30 text-primary font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
+          title={isEn ? 'Open QR Code Pay & Scanner' : 'Abrir Código QR y Escáner'}
+        >
+          <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
+          <span className="font-title-base text-[11px] font-bold">{isEn ? 'QR' : 'QR'}</span>
+        </button>
       </div>
 
       {/* 2. Recipient Picker Module */}
@@ -788,6 +821,47 @@ export function KinCashP2PModal({
           }
         }}
       />
+
+      {/* 2026 ULTRASONIC AIRDROP WAVE TRANSFER OVERLAY */}
+      <KinAirDropWaveModal
+        isOpen={showAirDropModal}
+        senderName="César Ugalde"
+        recipientName={selectedContact ? (selectedContact.fullName || selectedContact.name) : 'Destinatario'}
+        recipientAvatar={selectedContact?.avatar}
+        recipientPhotoUrl={selectedContact?.photoUrl}
+        amountUSD={numAmount}
+        amountMXN={Number(mxnEquivalent)}
+        onComplete={handleAirDropComplete}
+        language={language}
+      />
+
+      {/* 2026 DYNAMIC KIN QR GENERATOR & SCANNER MODAL */}
+      <KinQrModal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        userId={userId}
+        userName="César Ugalde"
+        onQrScanned={(data) => {
+          const match = contacts.find(
+            (c) => c.name.toLowerCase().includes(data.recipientName.toLowerCase())
+          ) || {
+            id: `qr-${Date.now()}`,
+            name: data.recipientName,
+            fullName: data.recipientName,
+            role: 'Familiar KIN',
+            avatar: '⚡',
+            bank: 'KIN Cash P2P',
+            country: 'Mexico',
+            photoUrl: '',
+            phone: '55 1234 5678',
+          };
+          setSelectedContact(match);
+          if (data.amount) {
+            setCurrentAmount(data.amount.toString());
+          }
+        }}
+        language={language}
+      />
     </div>
   );
 
@@ -826,9 +900,10 @@ export function KinCashP2PModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
+              className="btn-circle"
+              title={isEn ? 'Close' : 'Cerrar'}
             >
-              <CloseIcon className="w-4 h-4" />
+              <CloseIcon className="w-4 h-4 text-white" />
             </button>
           </div>
         </header>
