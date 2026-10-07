@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeftIcon, CopyIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export function KinPinRevealModal({
   onClose,
   language = 'es',
 }: KinPinRevealModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
   const [isPinVisible, setIsPinVisible] = useState<boolean>(false);
@@ -23,6 +25,10 @@ export function KinPinRevealModal({
   const [newPin, setNewPin] = useState<string>('');
   const [currentPin, setCurrentPin] = useState<string>('4892');
   const isEn = language === 'en';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,7 +46,7 @@ export function KinPinRevealModal({
     }
   }, [isOpen, isEn]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleCopyPin = () => {
     navigator.clipboard.writeText(currentPin);
@@ -63,7 +69,7 @@ export function KinPinRevealModal({
     );
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-[420px] bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] text-white space-y-4 my-auto">
         {/* Universal Don César Header: < | KinLogo | Security Badge */}
@@ -220,6 +226,7 @@ export function KinPinRevealModal({
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

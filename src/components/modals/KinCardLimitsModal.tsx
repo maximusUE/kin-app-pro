@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeftIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export function KinCardLimitsModal({
   onClose,
   language = 'es',
 }: KinCardLimitsModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [purchaseLimit, setPurchaseLimit] = useState<number>(2500);
   const [atmLimit, setAtmLimit] = useState<number>(500);
   const [intlEnabled, setIntlEnabled] = useState<boolean>(true);
@@ -25,7 +27,11 @@ export function KinCardLimitsModal({
 
   const isEn = language === 'en';
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleSave = () => {
     toast.success(
@@ -36,7 +42,7 @@ export function KinCardLimitsModal({
     onClose();
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] text-white space-y-4 my-auto">
         {/* Universal Don César Header: < | KinLogo | Limits Badge */}
@@ -276,6 +282,7 @@ export function KinCardLimitsModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

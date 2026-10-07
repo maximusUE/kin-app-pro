@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeftIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { toast } from 'sonner';
@@ -18,10 +19,15 @@ export function AppleWalletPassModal({
   userName,
   language = 'es',
 }: AppleWalletPassModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<'idle' | 'adding' | 'added'>('idle');
   const isEn = language === 'en';
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleAddToAppleWallet = () => {
     if (status === 'added') {
@@ -48,7 +54,7 @@ export function AppleWalletPassModal({
     );
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-[420px] bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] text-white space-y-4 my-auto">
         {/* Universal Don César Header: < | KinLogo | Apple Wallet Badge */}
@@ -207,6 +213,7 @@ export function AppleWalletPassModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

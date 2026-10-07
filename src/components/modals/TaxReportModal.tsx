@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeftIcon, DownloadIcon, WhatsAppIcon, CopyIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { toast } from 'sonner';
@@ -20,10 +21,15 @@ export function TaxReportModal({
   userEmail,
   language = 'es',
 }: TaxReportModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [selectedYear, setSelectedYear] = useState<'2025' | '2026'>('2025');
   const isEn = language === 'en';
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const taxFolio = `KIN-TAX-${selectedYear}-98412`;
   const totalSentUSD = 4250.0;
@@ -65,7 +71,7 @@ export function TaxReportModal({
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-[420px] max-h-[92vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 pb-10 shadow-[0_24px_50px_rgba(0,0,0,0.95)] text-white space-y-4 my-auto">
         {/* Universal Don César Header: < | KinLogo | IRS/SAT Badge */}
@@ -213,6 +219,7 @@ export function TaxReportModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
