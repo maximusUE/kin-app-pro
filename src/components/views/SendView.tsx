@@ -877,6 +877,7 @@ export function SendView({
   const [bankPhone, setBankPhone] = React.useState('');
   const [bankErrors, setBankErrors] = React.useState<Record<string, string>>({});
   const [bankSuccessFeedback, setBankSuccessFeedback] = React.useState<string | null>(null);
+  const [showComparisonCard, setShowComparisonCard] = React.useState(false);
 
   // Detección automática en tiempo real de banco por los primeros 3 dígitos
   const detectedBank = React.useMemo(() => {
@@ -1265,6 +1266,82 @@ export function SendView({
                 ? 'Zero hidden FX spread • Complete amount delivered'
                 : 'Sin comisiones ocultas • Monto completo entregado'}
             </span>
+          </div>
+        </div>
+
+        {/* 2026 LIVE ETA & TRANSPARENCY CARD */}
+        <div className="flex flex-col space-y-2 pt-0.5">
+          {/* Dynamic Live Delivery ETA Badge */}
+          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-xs">
+            <div className="flex items-center gap-1.5 text-on-surface-variant font-medium">
+              <span className="material-symbols-outlined text-[16px] text-primary">schedule</span>
+              <span>{isEn ? 'Estimated Delivery:' : 'Entrega Estimada:'}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-primary font-bold">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span>
+                {deliveryMethod === 'bank'
+                  ? (isEn ? 'Instant via SPEI (< 2s)' : 'Instantáneo vía SPEI (< 2s)')
+                  : deliveryMethod === 'cash'
+                  ? (isEn ? 'Today in store (24/7)' : 'Hoy en sucursal (24/7)')
+                  : (isEn ? 'Instant P2P Transfer' : 'Instantáneo P2P')}
+              </span>
+            </div>
+          </div>
+
+          {/* Collapsible Transparent Fee Comparison Button & Card */}
+          <div className="rounded-xl bg-surface-container/80 border border-white/5 overflow-hidden transition-all">
+            <button
+              type="button"
+              onClick={() => setShowComparisonCard((prev) => !prev)}
+              className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px]">balance</span>
+                <span className="font-title-base text-xs font-bold text-on-surface">
+                  {isEn ? 'Compare KIN vs Western Union & MoneyGram' : 'Comparar KIN vs Western Union y MoneyGram'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-[11px] text-primary font-bold">
+                <span>{isEn ? 'Save ~$6.50+' : 'Ahorra ~$6.50+'}</span>
+                <span className={`material-symbols-outlined text-[16px] transition-transform ${showComparisonCard ? 'rotate-180' : ''}`}>
+                  expand_more
+                </span>
+              </div>
+            </button>
+
+            {showComparisonCard && (
+              <div className="p-3 pt-1 border-t border-white/5 space-y-2 text-xs animate-fade-in">
+                <div className="grid grid-cols-3 gap-1.5 text-center pt-1">
+                  {/* KIN */}
+                  <div className="p-2 rounded-lg bg-primary/10 border border-primary/30 flex flex-col items-center">
+                    <span className="font-bold text-primary text-[11px]">KIN Global</span>
+                    <span className="font-financial-mono text-xs font-black text-white mt-0.5">$1.99</span>
+                    <span className="text-[10px] text-primary font-semibold mt-0.5">{isEn ? '100% Guaranteed' : 'Sin comisiones ocultas'}</span>
+                  </div>
+                  {/* Western Union */}
+                  <div className="p-2 rounded-lg bg-surface-container-high/40 border border-white/5 flex flex-col items-center opacity-80">
+                    <span className="font-semibold text-slate-300 text-[11px]">Western Union</span>
+                    <span className="font-financial-mono text-xs font-bold text-slate-400 mt-0.5">~$8.50</span>
+                    <span className="text-[10px] text-slate-500 mt-0.5">{isEn ? '+ Spread FX 2-3%' : '+ Spread FX 2-3%'}</span>
+                  </div>
+                  {/* MoneyGram */}
+                  <div className="p-2 rounded-lg bg-surface-container-high/40 border border-white/5 flex flex-col items-center opacity-80">
+                    <span className="font-semibold text-slate-300 text-[11px]">MoneyGram</span>
+                    <span className="font-financial-mono text-xs font-bold text-slate-400 mt-0.5">~$6.99</span>
+                    <span className="text-[10px] text-slate-500 mt-0.5">{isEn ? '+ Margen oculto' : '+ Margen oculto'}</span>
+                  </div>
+                </div>
+                <p className="text-[10px] text-center text-primary/90 font-medium">
+                  {isEn
+                    ? '✓ Tu familia en México recibe más pesos por cada dólar enviado.'
+                    : '✓ Tu familia en México recibe más pesos por cada dólar enviado.'}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

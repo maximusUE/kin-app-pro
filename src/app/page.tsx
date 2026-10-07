@@ -87,6 +87,8 @@ import { KinCashP2PModal, KIN_FAMILY_MEMBERS, exportContactVCard } from '@/compo
 import { ClientVaultModal } from '@/components/ClientVaultModal';
 import { AppSettingsModal, ToggleSwitch } from '@/components/AppSettingsModal';
 import { KinLogo } from '@/components/KinLogo';
+import { MobileHeader } from '@/components/layout/MobileHeader';
+import { MobileBottomDock } from '@/components/layout/MobileBottomDock';
 import { EnterpriseAuthScreen } from '@/components/EnterpriseAuthScreen';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 import { ContactAvatar } from '@/components/ContactAvatar';
@@ -1911,61 +1913,17 @@ export default function MobileApp() {
         {/* ========================================================================= */}
         {/* TOP STATUS BAR & APP HEADER (STICKY HEADER AT THE VERY TOP)               */}
         {/* ========================================================================= */}
-        <div className={`sticky top-0 z-30 ${theme === 'light' ? 'bg-white/95 border-slate-200/80 text-slate-900' : 'bg-[#06070B]/95 border-white/5 text-white'} backdrop-blur-md px-4 pt-1.5 pb-2 border-b flex-shrink-0 transition-colors`}>
-          <div className={`flex items-center justify-between text-xs ${theme === 'light' ? 'text-slate-500' : 'text-[#8E91A5]'} font-semibold mb-2 pt-1 px-1`}>
-            <span className={`font-financial-mono ${theme === 'light' ? 'text-slate-900 font-bold' : 'text-white'}`}>9:41</span>
-            <div className={`h-3.5 w-20 ${theme === 'light' ? 'bg-slate-200/80 border-slate-300/60' : 'bg-[#121320] border-white/5'} rounded-full mx-auto shadow-inner border`} />
-            <div className="flex items-center gap-1.5">
-              <span className={`material-symbols-outlined text-[13px] ${theme === 'light' ? 'text-slate-800' : 'text-white'}`}>signal_cellular_alt</span>
-              <span className={`font-financial-mono text-[10px] ${theme === 'light' ? 'text-slate-800 font-bold' : 'text-white'}`}>5G</span>
-              <span className={`material-symbols-outlined text-[13px] ${theme === 'light' ? 'text-slate-800' : 'text-white'}`}>battery_full</span>
-            </div>
-          </div>
-
-          {(activeTab === 'home' || activeTab === 'kin-cash') && !sendSuccessData && (
-            <header className="flex items-center justify-between gap-2 mb-1 px-0.5">
-              <div className="flex items-center gap-2">
-                {activeTab !== 'home' && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('home')}
-                    className="btn-circle"
-                    title={language === 'en' ? 'Back to home' : 'Volver al inicio'}
-                  >
-                    <ChevronLeftIcon className="w-5 h-5 text-white" />
-                  </button>
-                )}
-                <KinLogo size={34} />
-                <div className="flex flex-col leading-none">
-                  <span className={`font-headline-md text-[17px] font-bold tracking-tight ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>KIN</span>
-                  <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">Global</span>
-                </div>
-              </div>
-
-              {/* Acceso Directo Inmediato: Login / OAuth Screen */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAuthenticated(false);
-                    router.push('/login');
-                  }}
-                  className={`h-8 px-2.5 sm:px-3 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm ${
-                    theme === 'light'
-                      ? 'bg-slate-100 hover:bg-slate-200/80 text-slate-800 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
-                      : 'bg-white/10 hover:bg-white/15 text-white/90 hover:text-white border border-white/10'
-                  }`}
-                  title={language === 'en' ? 'Direct Access to Login & OAuth Screen' : 'Acceso Directo a Pantalla de Login y OAuth'}
-                >
-                  <span className="material-symbols-outlined text-[15px] text-emerald-600 dark:text-emerald-400">login</span>
-                  <span className="font-title-base tracking-tight text-[11px] sm:text-xs">
-                    {language === 'en' ? 'Login' : 'Login'}
-                  </span>
-                </button>
-              </div>
-            </header>
-          )}
-        </div>
+        <MobileHeader
+          theme={theme}
+          activeTab={activeTab}
+          sendSuccessData={sendSuccessData}
+          language={language}
+          onBackToHome={() => setActiveTab('home')}
+          onLoginClick={() => {
+            setIsAuthenticated(false);
+            router.push('/login');
+          }}
+        />
 
         {/* SCREEN CONTENT BODY */}
         <main className="flex-1 px-4 py-2 pb-24 relative">
@@ -2294,125 +2252,22 @@ export default function MobileApp() {
         </main>
 
         {/* ========================================================================= */}
-        {/* STITCH MASTER BOTTOM DOCK (5 TABS: HOME, SEND, KIN CASH, BILL PAY, VAULT) */}
+        {/* STITCH MASTER BOTTOM DOCK (5 TABS: HOME, SEND, KIN CASH, BILL PAY, PROFILE) */}
         {/* ========================================================================= */}
-        {!sendSuccessData && activeTab !== 'send-quick' && (
-          <nav
-            className="stitch-bottom-dock"
-            style={{ backgroundColor: theme === 'light' ? '#FFFFFF' : '#181825', opacity: 1 }}
-            data-active-classes="text-primary font-bold scale-105"
-          >
-            <div className="h-16 w-full flex items-center justify-around px-2">
-              {/* 1. Home */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('home');
-                  setShowKinCashModal(false);
-                  setShowBillPayModal(false);
-                  setShowVaultModal(false);
-                }}
-                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                  activeTab === 'home' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                    ? 'text-primary font-bold scale-105'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-                title={language === 'en' ? 'Home' : 'Inicio'}
-              >
-                <span className="material-symbols-outlined text-[24px]">home</span>
-                <span className="font-label-caps text-[10px] tracking-tight">
-                  {language === 'en' ? 'Home' : 'Inicio'}
-                </span>
-              </button>
-
-              {/* 2. Send */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('send');
-                  setShowKinCashModal(false);
-                  setShowBillPayModal(false);
-                  setShowVaultModal(false);
-                }}
-                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                  activeTab === 'send' && !showKinCashModal && !showBillPayModal && !showVaultModal
-                    ? 'text-primary font-bold scale-105'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-                title={language === 'en' ? 'Send' : 'Enviar'}
-              >
-                <span className="material-symbols-outlined text-[24px]">send</span>
-                <span className="font-label-caps text-[10px] tracking-tight">
-                  {language === 'en' ? 'Send' : 'Enviar'}
-                </span>
-              </button>
-
-              {/* 3. Kin Cash */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('kin-cash');
-                  setShowKinCashModal(false);
-                  setShowBillPayModal(false);
-                  setShowVaultModal(false);
-                }}
-                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                  activeTab === 'kin-cash'
-                    ? 'text-primary font-bold scale-105'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-                title="Kin Cash"
-              >
-                <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                <span className="font-label-caps text-[10px] tracking-tight">Kin Cash</span>
-              </button>
-
-              {/* 4. Bill Pay */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('bill-pay');
-                  setShowBillPayModal(false);
-                  setShowKinCashModal(false);
-                  setShowVaultModal(false);
-                }}
-                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                  activeTab === 'bill-pay'
-                    ? 'text-primary font-bold scale-105'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-                title={language === 'en' ? 'Bill Pay' : 'Servicios'}
-              >
-                <span className="material-symbols-outlined text-[24px]">receipt_long</span>
-                <span className="font-label-caps text-[10px] tracking-tight">
-                  {language === 'en' ? 'Bill Pay' : 'Servicios'}
-                </span>
-              </button>
-
-              {/* 5. Profile */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('profile');
-                  setShowKinCashModal(false);
-                  setShowBillPayModal(false);
-                  setShowVaultModal(false);
-                }}
-                className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all cursor-pointer ${
-                  activeTab === 'profile'
-                    ? 'text-primary font-bold scale-105'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-                title={language === 'en' ? 'Profile' : 'Perfil'}
-              >
-                <span className="material-symbols-outlined text-[24px]">person</span>
-                <span className="font-label-caps text-[10px] tracking-tight">
-                  {language === 'en' ? 'Profile' : 'Perfil'}
-                </span>
-              </button>
-            </div>
-          </nav>
-        )}
+        <MobileBottomDock
+          activeTab={
+            showKinCashModal || showBillPayModal || showVaultModal ? '' : activeTab
+          }
+          onSelectTab={(tab) => {
+            if (tab) setActiveTab(tab);
+            setShowKinCashModal(false);
+            setShowBillPayModal(false);
+            setShowVaultModal(false);
+          }}
+          language={language}
+          theme={theme}
+          isVisible={!sendSuccessData && activeTab !== 'send-quick'}
+        />
 
       </div>
 
