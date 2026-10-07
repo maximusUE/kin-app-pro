@@ -48,7 +48,7 @@ export function MexicanBillReceiptModal({
     setMounted(true);
   }, []);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted || !data) return null;
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
