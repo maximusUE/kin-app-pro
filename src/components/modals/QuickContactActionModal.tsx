@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ContactAvatar } from '@/components/ContactAvatar';
-import { CloseIcon, getBankLogoUrl } from '@/components/Icons';
+import { ChevronLeftIcon, getBankLogoUrl } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface QuickContactTarget {
   contact: {
@@ -35,7 +37,7 @@ export interface QuickContactActionModalProps {
 export function QuickContactActionModal({
   target,
   onClose,
-  language,
+  language = 'es',
   contactsCount,
   onSendMoney,
   onSendKinCash,
@@ -44,121 +46,144 @@ export function QuickContactActionModal({
   onMoveRight,
   onDeleteContact,
 }: QuickContactActionModalProps) {
-  if (!target) return null;
+  const [mounted, setMounted] = useState(false);
+  const isEn = language === 'en';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!target || !mounted) return null;
 
   const { contact, index } = target;
 
-  return (
+  return createPortal(
     <div
-      className="modal-backdrop animate-fade-in"
+      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="quick-contact-title"
     >
       <div
-        className="modal-card space-y-4 max-h-[85vh] overflow-y-auto flex flex-col"
+        className="relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] flex flex-col space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle for mobile ergonomical bottom-sheet feel */}
-        <div className="w-12 h-1.5 rounded-full bg-outline-variant/40 mx-auto -mt-1 mb-1 sm:hidden" />
-
-        {/* Header con Avatar & Datos del Beneficiario */}
-        <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-outline-variant/40 flex-shrink-0">
-              <ContactAvatar
-                photoUrl={contact.photoUrl}
-                name={contact.name}
-                className="w-full h-full rounded-2xl"
-                iconSize="text-[28px]"
-              />
-              {getBankLogoUrl(contact.bank) && (
-                <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-md bg-white p-0.5 flex items-center justify-center shadow-xs">
-                  <img
-                    src={getBankLogoUrl(contact.bank)!}
-                    alt={contact.bank}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h3 id="quick-contact-title" className="text-sm font-bold text-on-surface truncate font-title-base">
-                {contact.fullName || contact.name}
-              </h3>
-              <p className="text-[11px] text-primary font-mono truncate">
-                {contact.phone || 'Destinatario KIN'}
-              </p>
-              <p className="text-[10px] text-on-surface-variant truncate">
-                {contact.bank || 'Red Bancaria SPEI / Efectivo'}
-              </p>
-            </div>
+        {/* Universal Don César Header: < | KinLogo | Contact Badge */}
+        <header className="flex items-center justify-between pb-1">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-circle"
+              title={isEn ? 'Back' : 'Volver'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-surface-container-high/80 hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all cursor-pointer active:scale-[0.95]"
-            aria-label={language === 'en' ? 'Close' : 'Cerrar'}
-          >
-            <CloseIcon className="w-4 h-4" />
-          </button>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">contacts</span>
+            <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+              {isEn ? 'Frequent Contact' : 'Contacto Frecuente'}
+            </span>
+          </div>
+        </header>
+
+        {/* Contact Profile Snippet Card */}
+        <div className="p-4 rounded-2xl bg-[#141624] border border-white/5 flex items-center gap-3.5">
+          <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-lg border border-white/10 flex-shrink-0">
+            <ContactAvatar
+              photoUrl={contact.photoUrl}
+              name={contact.name}
+              className="w-full h-full rounded-2xl"
+              iconSize="text-[30px]"
+            />
+            {getBankLogoUrl(contact.bank) && (
+              <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-md bg-white p-0.5 flex items-center justify-center shadow-xs">
+                <img
+                  src={getBankLogoUrl(contact.bank)!}
+                  alt={contact.bank}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 id="quick-contact-title" className="text-base font-bold text-white truncate font-title-base">
+              {contact.fullName || contact.name}
+            </h3>
+            <p className="text-xs text-[#2ED5A4] font-mono truncate">
+              {contact.phone || 'Destinatario KIN'}
+            </p>
+            <p className="text-[11px] text-slate-400 truncate">
+              {contact.bank || 'Red Bancaria SPEI / Efectivo'}
+            </p>
+          </div>
         </div>
 
-        {/* Opciones de Acción Ergonómicas (Touch targets de 52px con Apple HIG & Material 3) */}
+        {/* Action Buttons */}
         <div className="space-y-2.5">
-          {/* Acción 1: Enviar Dinero Ahora */}
+          {/* Action 1: Enviar Dinero Ahora */}
           <button
             type="button"
-            onClick={() => onSendMoney(contact)}
-            className="w-full h-[52px] px-4 rounded-2xl bg-gradient-to-r from-primary to-[#26BC90] hover:brightness-110 text-on-primary font-bold text-sm flex items-center justify-between shadow-lg shadow-primary/20 cursor-pointer active:scale-[0.97] transition-transform duration-150 ease-out"
+            onClick={() => {
+              onSendMoney(contact);
+              onClose();
+            }}
+            className="w-full h-[52px] px-4 rounded-2xl bg-gradient-to-r from-[#2ED5A4] to-[#26BC90] hover:brightness-110 text-[#06070B] font-black text-xs sm:text-sm flex items-center justify-between shadow-lg shadow-[#2ED5A4]/20 cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out"
           >
             <div className="flex items-center gap-2.5">
               <span className="material-symbols-outlined text-[22px]">send_money</span>
-              <span>{language === 'en' ? 'Send Money Now (SPEI / Cash)' : 'Enviar Dinero Ahora (SPEI / Efectivo)'}</span>
+              <span>{isEn ? 'Send Money Now (SPEI / Cash)' : 'Enviar Dinero Ahora (SPEI / Efectivo)'}</span>
             </div>
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </button>
 
-          {/* Acción 2: Enviar por KIN CASH P2P */}
+          {/* Action 2: Enviar por KIN CASH P2P */}
           <button
             type="button"
-            onClick={() => onSendKinCash(contact)}
-            className="w-full h-[52px] px-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-on-surface font-bold text-sm flex items-center justify-between cursor-pointer active:scale-[0.97] transition-transform duration-150 ease-out"
+            onClick={() => {
+              onSendKinCash(contact);
+              onClose();
+            }}
+            className="w-full h-[52px] px-4 rounded-2xl bg-[#141624] hover:bg-[#1A1C2E] border border-white/10 text-white font-bold text-xs sm:text-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out"
           >
             <div className="flex items-center gap-2.5">
-              <span className="material-symbols-outlined text-secondary text-[22px]">bolt</span>
-              <span>{language === 'en' ? 'Transfer with Instant KIN CASH' : 'Transferir con KIN CASH Instantáneo'}</span>
+              <span className="material-symbols-outlined text-[#7047EB] text-[22px]">bolt</span>
+              <span>{isEn ? 'Transfer with Instant KIN CASH' : 'Transferir con KIN CASH Instantáneo'}</span>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-[10px] font-black">
+            <span className="px-2 py-0.5 rounded-full bg-[#7047EB]/20 text-[#A78BFA] text-[10px] font-black border border-[#7047EB]/30">
               $0 FEE
             </span>
           </button>
 
-          {/* Acción 3: Editar Foto / Cambiar Avatar */}
+          {/* Action 3: Editar Foto / Cambiar Avatar */}
           <button
             type="button"
-            onClick={() => onEditPhoto(contact)}
-            className="w-full h-[52px] px-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-on-surface font-medium text-sm flex items-center justify-between cursor-pointer active:scale-[0.97] transition-transform duration-150 ease-out"
+            onClick={() => {
+              onEditPhoto(contact);
+              onClose();
+            }}
+            className="w-full h-[50px] px-4 rounded-2xl bg-[#141624] hover:bg-[#1A1C2E] border border-white/10 text-white font-medium text-xs sm:text-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out"
           >
             <div className="flex items-center gap-2.5">
-              <span className="material-symbols-outlined text-primary text-[22px]">add_a_photo</span>
-              <span>{language === 'en' ? 'Edit Contact Photo / Avatar' : 'Editar Foto / Avatar del Contacto'}</span>
+              <span className="material-symbols-outlined text-[#2ED5A4] text-[20px]">add_a_photo</span>
+              <span>{isEn ? 'Edit Contact Photo / Avatar' : 'Editar Foto / Avatar del Contacto'}</span>
             </div>
-            <span className="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
+            <span className="material-symbols-outlined text-slate-400 text-[18px]">chevron_right</span>
           </button>
 
-          {/* Acción 4: Reordenar / Mover de posición en el carrusel */}
-          <div className="p-3 rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-2">
+          {/* Action 4: Reordenar / Mover de posición en el carrusel */}
+          <div className="p-3 rounded-2xl bg-[#141624]/60 border border-white/5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-on-surface-variant flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-primary">swap_horiz</span>
-                <span>{language === 'en' ? 'Move position in carousel' : 'Mover posición en el carrusel'}</span>
+              <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[15px] text-[#2ED5A4]">swap_horiz</span>
+                <span>{isEn ? 'Position in carousel' : 'Posición en carrusel'}</span>
               </span>
-              <span className="text-[10px] text-primary font-bold">
-                {language === 'en'
-                  ? `Position #${index + 1} of ${contactsCount}`
-                  : `Posición #${index + 1} de ${contactsCount}`}
+              <span className="text-[10px] text-[#2ED5A4] font-bold font-mono">
+                #{index + 1} / {contactsCount}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -166,39 +191,43 @@ export function QuickContactActionModal({
                 type="button"
                 disabled={index === 0}
                 onClick={() => onMoveLeft(index)}
-                className="h-11 rounded-xl bg-surface-container hover:bg-surface-container-high disabled:opacity-30 text-xs font-bold text-on-surface flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-outline-variant/30 disabled:cursor-not-allowed active:scale-[0.97]"
+                className="h-10 rounded-xl bg-[#141624] hover:bg-[#1A1C2E] disabled:opacity-30 text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/10 disabled:cursor-not-allowed active:scale-[0.97]"
               >
-                <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                <span>{language === 'en' ? 'Move Left' : 'Mover Izquierda'}</span>
+                <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                <span>{isEn ? 'Move Left' : 'Mover Izquierda'}</span>
               </button>
               <button
                 type="button"
                 disabled={index === contactsCount - 1}
                 onClick={() => onMoveRight(index)}
-                className="h-11 rounded-xl bg-surface-container hover:bg-surface-container-high disabled:opacity-30 text-xs font-bold text-on-surface flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-outline-variant/30 disabled:cursor-not-allowed active:scale-[0.97]"
+                className="h-10 rounded-xl bg-[#141624] hover:bg-[#1A1C2E] disabled:opacity-30 text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/10 disabled:cursor-not-allowed active:scale-[0.97]"
               >
-                <span>{language === 'en' ? 'Move Right' : 'Mover Derecha'}</span>
-                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                <span>{isEn ? 'Move Right' : 'Mover Derecha'}</span>
+                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </button>
             </div>
           </div>
 
-          {/* Acción 5: Eliminar contacto (Alerta Destructiva Sutil) */}
+          {/* Action 5: Eliminar contacto */}
           <button
             type="button"
-            onClick={() => onDeleteContact(contact)}
-            className="w-full h-[52px] px-4 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 dark:text-rose-400 font-bold text-sm flex items-center justify-between cursor-pointer active:scale-[0.97] transition-transform duration-150 ease-out"
+            onClick={() => {
+              onDeleteContact(contact);
+              onClose();
+            }}
+            className="w-full h-[48px] px-4 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 font-bold text-xs sm:text-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out"
           >
             <div className="flex items-center gap-2.5">
-              <span className="material-symbols-outlined text-[22px]">delete</span>
-              <span>{language === 'en' ? 'Remove from Quick Send' : 'Eliminar de Envíos Rápidos'}</span>
+              <span className="material-symbols-outlined text-[20px]">delete</span>
+              <span>{isEn ? 'Remove from Quick Send' : 'Eliminar de Envíos Rápidos'}</span>
             </div>
-            <span className="text-[10px] uppercase font-bold text-rose-500 dark:text-rose-400 bg-rose-500/20 px-2 py-0.5 rounded-full">
-              {language === 'en' ? 'Remove' : 'Quitar'}
+            <span className="text-[10px] uppercase font-bold text-rose-400 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30">
+              {isEn ? 'Remove' : 'Quitar'}
             </span>
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

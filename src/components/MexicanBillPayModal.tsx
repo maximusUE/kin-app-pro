@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { BillPayView, SERVICIOS_MEXICO, ServiceDefinition, getCategoryIconTheme } from './views/BillPayView';
 
 export { SERVICIOS_MEXICO, getCategoryIconTheme };
@@ -25,6 +26,12 @@ export function MexicanBillPayModal({
   exchangeRate = 20.45,
   language = 'es',
 }: MexicanBillPayModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!isOpen && !isScreen) return null;
 
   const content = (
@@ -41,11 +48,14 @@ export function MexicanBillPayModal({
     return content;
   }
 
-  return (
-    <div className="fixed inset-0 z-50 bg-[#06070B] text-white flex justify-center selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4] overflow-y-auto">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[200] bg-[#06070B] text-white flex justify-center selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4] overflow-y-auto animate-fade-in">
       <div className="w-full max-w-[412px] flex flex-col relative min-h-screen pb-24 px-4 bg-[#06070B] pt-2">
         {content}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { KinLogo } from '@/components/KinLogo';
 
 export interface KinAirDropWaveModalProps {
@@ -32,7 +33,12 @@ export function KinAirDropWaveModal({
   onComplete,
   language = 'es',
 }: KinAirDropWaveModalProps) {
+  const [mounted, setMounted] = useState(false);
   const isEn = language === 'en';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -52,7 +58,7 @@ export function KinAirDropWaveModal({
     return () => clearTimeout(timer);
   }, [isOpen, onComplete]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const senderInitials = (senderName || 'Cesar Ugalde')
     .split(' ')
@@ -70,8 +76,8 @@ export function KinAirDropWaveModal({
     .join('')
     .toUpperCase();
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in select-none">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in select-none">
       <div className="relative w-full max-w-[380px] flex flex-col items-center justify-center p-6 text-center overflow-hidden">
         
         {/* Signature Glowing Ultrasonic Waves */}
@@ -153,7 +159,8 @@ export function KinAirDropWaveModal({
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

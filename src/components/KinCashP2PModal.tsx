@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  ChevronLeftIcon,
   CloseIcon,
   SearchIcon,
   ChevronRightIcon,
@@ -870,14 +871,16 @@ export function KinCashP2PModal({
     return content;
   }
 
+  if (!mounted) return null;
+
   // Si se usa como modal de pantalla completa tradicional
-  return (
-    <div className="fixed inset-0 z-50 bg-[#06070B] text-white flex justify-center selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4] overflow-y-auto animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] bg-[#06070B] text-white flex justify-center selection:bg-[#2ED5A4]/30 selection:text-[#2ED5A4] overflow-y-auto animate-fade-in">
       <div className="w-full max-w-[400px] flex flex-col relative min-h-screen pb-24 px-4">
         {/* Glow de fondo atmosférico */}
         <div className="bicolor-atmosphere-glow" />
 
-        {/* Modal Top Header with Close */}
+        {/* Modal Top Header with Universal Don César Standard */}
         <header className="sticky top-0 z-40 bg-[#06070B]/90 backdrop-blur-xl pt-2 pb-2.5 -mx-4 px-4 border-b border-white/5 mb-4">
           <div className="flex items-center justify-between text-[11px] font-semibold text-[#8E91A5] mb-2 px-1">
             <span className="font-mono text-white">9:41</span>
@@ -891,25 +894,29 @@ export function KinCashP2PModal({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <KinLogo size={28} />
-              <div className="flex flex-col leading-none">
-                <span className="font-headline-md text-sm font-bold tracking-tight text-white">KIN</span>
-                <span className="font-label-caps text-[8px] uppercase tracking-widest text-primary">Global</span>
-              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-circle"
+                title={isEn ? 'Back' : 'Volver'}
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
+              </button>
+              <KinLogo size={34} />
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-circle"
-              title={isEn ? 'Close' : 'Cerrar'}
-            >
-              <CloseIcon className="w-4 h-4 text-white" />
-            </button>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+              <span className="material-symbols-outlined text-[13px]">bolt</span>
+              <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+                {isEn ? 'Instant P2P' : 'P2P Instantáneo'}
+              </span>
+            </div>
           </div>
         </header>
 
         {content}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

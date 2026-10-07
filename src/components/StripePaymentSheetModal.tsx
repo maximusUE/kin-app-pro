@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface SavedCardItem {
   id: string;
@@ -45,6 +48,7 @@ export function StripePaymentSheetModal({
   language = 'es',
   userId = 'user-001',
 }: StripePaymentSheetModalProps) {
+  const [mounted, setMounted] = useState(false);
   const isEn = language === 'en';
 
   // Sub-view navigation: 'main' | 'add-card' | 'add-bank'
@@ -61,7 +65,11 @@ export function StripePaymentSheetModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   // Detect card brand dynamically
   const detectBrand = (num: string): 'visa' | 'mastercard' | 'amex' | 'generic' => {
@@ -138,49 +146,54 @@ export function StripePaymentSheetModal({
     }, 600);
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto transition-all duration-300 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="w-full max-w-[420px] max-h-[92vh] overflow-y-auto scrollbar-none rounded-t-3xl sm:rounded-3xl bg-[#0B0F17]/95 border-t sm:border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.95)] p-5 sm:p-6 relative animate-scale-in flex flex-col text-slate-100"
+        className="relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] flex flex-col space-y-4 my-auto text-white"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Apple-style Grab Handle */}
-        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4 shrink-0 sm:hidden" />
-
         {/* ========================================================================= */}
-        {/* SUBVIEW 1: VISTA PRINCIPAL DE MÉTODOS DE PAGO (APPLE WALLET GRADE)        */}
+        {/* SUBVIEW 1: VISTA PRINCIPAL DE MÉTODOS DE PAGO                             */}
         {/* ========================================================================= */}
         {view === 'main' && (
-          <div className="flex flex-col space-y-5">
-            {/* Header de la Bóveda */}
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#2ED5A4] animate-pulse" />
-                  <h2 className="font-title-base text-lg sm:text-xl font-bold text-white tracking-tight">
-                    {isEn ? 'Payment Methods' : 'Métodos de Pago'}
-                  </h2>
-                </div>
-                <p className="font-caption-sm text-xs text-slate-400 mt-1">
-                  {isEn
-                    ? 'Encrypted funds for instant SPEI & remittance transfers'
-                    : 'Fondos cifrados para envíos de remesas instantáneos'}
-                </p>
+          <div className="flex flex-col space-y-4">
+            {/* Universal Don César Header: < | KinLogo | PCI-DSS Badge */}
+            <header className="flex items-center justify-between pb-1 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-circle"
+                  title={isEn ? 'Back' : 'Volver'}
+                >
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
+                </button>
+                <KinLogo size={34} />
               </div>
 
-              <button
-                type="button"
-                aria-label="Cerrar"
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/10 active:scale-90"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+                <span className="material-symbols-outlined text-[13px]">credit_card</span>
+                <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+                  {isEn ? 'PCI-DSS Vault' : 'Bóveda PCI-DSS'}
+                </span>
+              </div>
+            </header>
+
+            {/* Title */}
+            <div className="text-center pt-1">
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                {isEn ? 'Payment Methods' : 'Métodos de Pago'}
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {isEn
+                  ? 'Encrypted funds for instant SPEI & remittance transfers'
+                  : 'Fondos cifrados para envíos de remesas instantáneos'}
+              </p>
             </div>
 
             {/* Wallets Express Checkout (Apple Pay & Stripe Link) */}
@@ -393,32 +406,39 @@ export function StripePaymentSheetModal({
         {/* ========================================================================= */}
         {view === 'add-card' && (
           <form onSubmit={handleFormSubmit} className="flex flex-col space-y-4 animate-fade-in">
-            {/* Header con botón atrás */}
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => {
-                  setView('main');
-                  setFormError(null);
-                }}
-                className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-                <span className="font-semibold text-xs">{isEn ? 'Back' : 'Atrás'}</span>
-              </button>
+            {/* Universal Don César Header: < | KinLogo | Nueva Tarjeta */}
+            <header className="flex items-center justify-between pb-1 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setView('main');
+                    setFormError(null);
+                  }}
+                  className="btn-circle"
+                  title={isEn ? 'Back' : 'Volver'}
+                >
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
+                </button>
+                <KinLogo size={34} />
+              </div>
 
-              <h2 className="font-title-base text-sm sm:text-base font-bold text-white tracking-tight">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+                <span className="material-symbols-outlined text-[13px]">add_card</span>
+                <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+                  {isEn ? 'Add Card' : 'Nueva Tarjeta'}
+                </span>
+              </div>
+            </header>
+
+            {/* Title */}
+            <div className="text-center pt-1">
+              <h2 className="text-base font-bold text-white tracking-tight">
                 {isEn ? 'Add New Card' : 'Agregar Nueva Tarjeta'}
               </h2>
-
-              <button
-                type="button"
-                aria-label="Cerrar"
-                onClick={onClose}
-                className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px]">close</span>
-              </button>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {isEn ? 'Encrypted zero-knowledge card enrollment' : 'Bóveda cifrada compatible con Visa, Mastercard y AMEX'}
+              </p>
             </div>
 
             {formError && (
@@ -577,25 +597,36 @@ export function StripePaymentSheetModal({
         {/* ========================================================================= */}
         {view === 'add-bank' && (
           <div className="flex flex-col space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => setView('main')}
-                className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-                <span className="font-semibold text-xs">{isEn ? 'Back' : 'Atrás'}</span>
-              </button>
-              <h2 className="font-title-base text-sm sm:text-base font-bold text-white">
+            {/* Universal Don César Header: < | KinLogo | Banco */}
+            <header className="flex items-center justify-between pb-1 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setView('main')}
+                  className="btn-circle"
+                  title={isEn ? 'Back' : 'Volver'}
+                >
+                  <ChevronLeftIcon className="w-5 h-5 text-white" />
+                </button>
+                <KinLogo size={34} />
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400">
+                <span className="material-symbols-outlined text-[13px]">account_balance</span>
+                <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+                  ACH / SPEI
+                </span>
+              </div>
+            </header>
+
+            {/* Title */}
+            <div className="text-center pt-1">
+              <h2 className="text-base font-bold text-white tracking-tight">
                 {isEn ? 'Link Bank Account' : 'Vincular Cuenta Bancaria'}
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px]">close</span>
-              </button>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {isEn ? 'Direct bank debit with zero processing fees' : 'Rieles directos Banxico SPEI y ACH de bajo costo'}
+              </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs flex items-center gap-3">
@@ -645,6 +676,7 @@ export function StripePaymentSheetModal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

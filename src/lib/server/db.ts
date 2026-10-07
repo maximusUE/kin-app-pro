@@ -65,6 +65,7 @@ export interface UserProfile {
     selectedStore?: string;
     updatedAt?: string;
   } | null;
+  paymentMethods?: any[];
 }
 
 export interface TransactionRecord {

@@ -24,6 +24,7 @@ import {
 import { KinLogo } from '@/components/KinLogo';
 import { ContactAvatar } from '@/components/ContactAvatar';
 import { MEXICO_STATES, MexicoState } from '@/data/mexicoLocations';
+import type { SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
 import {
   validarCLABE,
   detectarBancoPorCLABE,
@@ -2722,9 +2723,10 @@ export function SendView({
                     <button
                       type="button"
                       onClick={() => setShowFeeBreakdownSheet(false)}
-                      className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                      className="btn-circle"
+                      title={isEn ? 'Close' : 'Cerrar'}
                     >
-                      <span className="material-symbols-outlined text-[18px]">close</span>
+                      <ChevronLeftIcon className="w-5 h-5 text-white" />
                     </button>
                   </div>
 
@@ -2838,10 +2840,10 @@ export function SendView({
               <button
                 type="button"
                 onClick={() => setIsCashPickupSheetOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90"
+                className="btn-circle"
                 title={isEn ? 'Close' : 'Cerrar'}
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
               </button>
             </div>
 
@@ -3096,9 +3098,10 @@ export function SendView({
               <button
                 type="button"
                 onClick={() => setIsFormStateModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90"
+                className="btn-circle"
+                title={isEn ? 'Close' : 'Cerrar'}
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
               </button>
             </div>
 
@@ -3212,9 +3215,10 @@ export function SendView({
               <button
                 type="button"
                 onClick={() => setIsFormCityModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90 shrink-0"
+                className="btn-circle shrink-0"
+                title={isEn ? 'Close' : 'Cerrar'}
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
               </button>
             </div>
 
@@ -3400,9 +3404,10 @@ export function SendView({
               <button
                 type="button"
                 onClick={() => setIsImportContactModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white border border-white/10 cursor-pointer transition-colors active:scale-90 shrink-0"
+                className="btn-circle shrink-0"
+                title={isEn ? 'Close' : 'Cerrar'}
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
               </button>
             </div>
 

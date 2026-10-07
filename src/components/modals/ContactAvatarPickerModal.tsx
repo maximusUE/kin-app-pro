@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ContactAvatar } from '@/components/ContactAvatar';
-import { CloseIcon } from '@/components/Icons';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface ContactAvatarPickerModalProps {
   target: {
@@ -25,13 +27,20 @@ export function ContactAvatarPickerModal({
   onClose,
   onSave,
   isUpdating,
-  language,
+  language = 'es',
 }: ContactAvatarPickerModalProps) {
-  if (!target) return null;
+  const [mounted, setMounted] = useState(false);
+  const isEn = language === 'en';
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!target || !mounted) return null;
+
+  return createPortal(
     <div
-      className="modal-backdrop animate-fade-in"
+      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
       onClick={() => {
         if (!isUpdating) onClose();
       }}
@@ -40,65 +49,70 @@ export function ContactAvatarPickerModal({
       aria-labelledby="contact-avatar-title"
     >
       <div
-        className="modal-card space-y-4 max-h-[85vh] overflow-y-auto flex flex-col"
+        className="relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] flex flex-col space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle for mobile */}
-        <div className="w-12 h-1.5 rounded-full bg-outline-variant/40 mx-auto -mt-1 mb-1 sm:hidden" />
-
-        {/* Header del modal */}
-        <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[20px]">account_circle</span>
-            </div>
-            <div>
-              <h3 id="contact-avatar-title" className="text-sm font-bold text-on-surface font-title-base">
-                {language === 'en' ? `Photo of ${target.name}` : `Foto de ${target.name}`}
-              </h3>
-              <p className="text-[10px] text-on-surface-variant">
-                {language === 'en'
-                  ? 'Customize the picture or keep a clean silhouette'
-                  : 'Personaliza la imagen o mantén una silueta limpia'}
-              </p>
-            </div>
+        {/* Universal Don César Header: < | KinLogo | Badge */}
+        <header className="flex items-center justify-between pb-1">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isUpdating}
+              className="btn-circle disabled:opacity-40"
+              title={isEn ? 'Back' : 'Volver'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-surface-container-high/80 hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all cursor-pointer active:scale-[0.95]"
-            aria-label={language === 'en' ? 'Close' : 'Cerrar'}
-          >
-            <CloseIcon className="w-4 h-4" />
-          </button>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">photo_camera</span>
+            <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+              {isEn ? 'Official Avatar' : 'Avatar Oficial'}
+            </span>
+          </div>
+        </header>
+
+        {/* Title */}
+        <div className="text-center pt-1">
+          <h3 id="contact-avatar-title" className="text-lg font-bold text-white tracking-tight">
+            {isEn ? `Photo for ${target.name}` : `Foto para ${target.name}`}
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {isEn
+              ? 'Customize the contact picture or keep a clean verified silhouette'
+              : 'Personaliza la imagen del contacto o mantén una silueta limpia'}
+          </p>
         </div>
 
-        {/* Vista previa en vivo del avatar */}
-        <div className="flex flex-col items-center justify-center py-2 space-y-2">
-          <div className="relative w-20 h-20 rounded-3xl overflow-hidden border-2 border-primary/40 shadow-xl bg-surface-container-high">
+        {/* Live Preview Ring */}
+        <div className="flex flex-col items-center justify-center py-3">
+          <div className="relative w-24 h-24 rounded-3xl overflow-hidden border-2 border-[#2ED5A4]/50 shadow-[0_0_25px_rgba(46,213,164,0.25)] bg-[#141624]">
             <ContactAvatar
               photoUrl={photoInput}
               name={target.name}
               className="w-full h-full rounded-3xl"
-              iconSize="text-[44px]"
+              iconSize="text-[48px]"
             />
           </div>
-          <span className="text-[11px] text-on-surface-variant font-medium">
+          <span className="text-xs text-slate-400 font-medium mt-2">
             {photoInput
-              ? language === 'en' ? 'Photo preview' : 'Vista previa de la foto'
-              : language === 'en' ? 'Clean silhouette active' : 'Silueta de usuario limpia activa'}
+              ? isEn ? 'Photo preview active' : 'Vista previa de la foto'
+              : isEn ? 'Clean silhouette active' : 'Silueta de usuario limpia activa'}
           </span>
         </div>
 
-        {/* Opción 1: Subir imagen desde galería / cámara del celular */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-primary text-[18px]">photo_camera</span>
-            <span>{language === 'en' ? 'Upload photo from device' : 'Subir foto desde tu dispositivo'}</span>
+        {/* Option 1: File Upload */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-white flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[#2ED5A4] text-[18px]">photo_camera</span>
+            <span>{isEn ? 'Upload from Device' : 'Subir foto desde tu dispositivo'}</span>
           </label>
-          <label className="w-full h-[52px] rounded-2xl bg-surface-container hover:bg-surface-container-high border border-dashed border-primary/50 flex items-center justify-center gap-2 text-primary font-bold text-xs cursor-pointer transition-all active:scale-[0.98]">
+          <label className="w-full h-[52px] rounded-2xl bg-[#141624] hover:bg-[#1A1C2E] border border-dashed border-[#2ED5A4]/50 flex items-center justify-center gap-2 text-[#2ED5A4] font-bold text-xs cursor-pointer transition-all active:scale-[0.98]">
             <span className="material-symbols-outlined text-[20px]">upload</span>
-            <span>{language === 'en' ? 'Choose file (Camera / Gallery)' : 'Elegir archivo (Cámara / Galería)'}</span>
+            <span>{isEn ? 'Choose file (Camera / Gallery)' : 'Elegir archivo (Cámara / Galería)'}</span>
             <input
               type="file"
               accept="image/*"
@@ -118,64 +132,65 @@ export function ContactAvatarPickerModal({
           </label>
         </div>
 
-        {/* Opción 2: Pegar enlace URL de imagen */}
+        {/* Option 2: Image URL */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-primary text-[18px]">link</span>
-            <span>{language === 'en' ? 'Or paste image URL' : 'O pegar URL de imagen'}</span>
+          <label className="text-xs font-bold text-white flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[#2ED5A4] text-[18px]">link</span>
+            <span>{isEn ? 'Or paste image URL' : 'O pegar URL de imagen'}</span>
           </label>
           <input
             type="url"
             value={photoInput}
             onChange={(e) => onPhotoInputChange(e.target.value)}
             placeholder="https://ejemplo.com/foto.jpg"
-            className="w-full h-[48px] px-3.5 rounded-xl bg-surface-container-low text-sm text-on-surface placeholder:text-on-surface-variant/40 border border-outline-variant/40 focus:border-primary focus:outline-none transition-all"
+            className="w-full h-[48px] px-3.5 rounded-xl bg-[#141624] text-xs text-white placeholder:text-slate-500 border border-white/10 focus:border-[#2ED5A4] focus:outline-none transition-all"
           />
         </div>
 
-        {/* Opción 3: Restablecer a silueta limpia sin foto */}
+        {/* Option 3: Reset */}
         {photoInput && (
           <button
             type="button"
             onClick={() => onPhotoInputChange('')}
-            className="w-full py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-xs font-semibold text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.97]"
+            className="w-full py-2.5 rounded-xl bg-[#141624]/60 hover:bg-[#141624] text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98] border border-white/5"
           >
             <span className="material-symbols-outlined text-[16px]">no_accounts</span>
             <span>
-              {language === 'en'
+              {isEn
                 ? 'Remove photo and use Clean Silhouette'
                 : 'Quitar foto y usar Silueta Limpia'}
             </span>
           </button>
         )}
 
-        {/* Botones de acción */}
-        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-outline-variant/30">
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
           <button
             type="button"
             onClick={onClose}
             disabled={isUpdating}
-            className="h-[48px] rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs transition-all cursor-pointer active:scale-[0.97]"
+            className="h-[48px] rounded-2xl bg-[#141624] hover:bg-[#1A1C2E] border border-white/10 text-white font-bold text-xs transition-all cursor-pointer active:scale-[0.98] disabled:opacity-40"
           >
-            {language === 'en' ? 'Cancel' : 'Cancelar'}
+            {isEn ? 'Cancel' : 'Cancelar'}
           </button>
           <button
             type="button"
             disabled={isUpdating}
             onClick={() => onSave(target, photoInput)}
-            className="h-[48px] rounded-full bg-primary hover:bg-[#26BC90] text-on-primary font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-primary/20 transition-all cursor-pointer active:scale-[0.97]"
+            className="h-[48px] rounded-2xl bg-gradient-to-r from-[#2ED5A4] to-[#26BC90] hover:brightness-110 text-[#06070B] font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-[#2ED5A4]/20 transition-all cursor-pointer active:scale-[0.98] disabled:opacity-40"
           >
             {isUpdating ? (
-              <span className="animate-spin text-sm">⏳</span>
+              <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
             ) : (
               <>
-                <span>{language === 'en' ? 'Save Photo' : 'Guardar Foto'}</span>
+                <span>{isEn ? 'Save Photo' : 'Guardar Foto'}</span>
                 <span className="material-symbols-outlined text-[16px]">check</span>
               </>
             )}
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

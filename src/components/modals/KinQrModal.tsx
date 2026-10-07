@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeftIcon, CopyIcon, ShareReceiptIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 
@@ -27,13 +28,18 @@ export function KinQrModal({
   onQrScanned,
   language = 'es',
 }: KinQrModalProps) {
+  const [mounted, setMounted] = useState(false);
   const isEn = language === 'en';
   const [activeMode, setActiveMode] = useState<'my_qr' | 'scan'>('my_qr');
   const [chargeAmount, setChargeAmount] = useState<string>('');
   const [copiedFeedback, setCopiedFeedback] = useState(false);
   const [isScanningSimulation, setIsScanningSimulation] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const kinHandle = `$${(userId || 'cesar_ugalde').replace(/^user_/, '').replace(/^user-/, '')}`;
   const qrPayload = `kin://pay?to=${userId}&handle=${kinHandle}${chargeAmount ? `&amount=${chargeAmount}` : ''}`;
@@ -81,9 +87,9 @@ export function KinQrModal({
     }, 900);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in select-none">
-      <div className="relative w-full max-w-[396px] bg-[#0E131F] border border-white/10 rounded-3xl p-5 shadow-2xl text-white space-y-4 max-h-[92dvh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in select-none">
+      <div className="relative w-full max-w-[420px] bg-[#0E131F] border border-white/10 rounded-3xl p-5 shadow-[0_24px_50px_rgba(0,0,0,0.95)] text-white space-y-4 max-h-[92dvh] overflow-y-auto">
         
         {/* Cabecera Oficial Unificada (Regla de Oro Don César) */}
         <div className="flex items-center justify-between pb-2 border-b border-white/10">
@@ -388,7 +394,8 @@ export function KinQrModal({
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

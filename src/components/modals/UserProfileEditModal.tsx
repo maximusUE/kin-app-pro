@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
-import { CameraIcon, CloseIcon, CheckCircleIcon, LanguageIcon } from '@/components/Icons';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { CameraIcon, ChevronLeftIcon, CheckCircleIcon, LanguageIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 
 export const DEFAULT_AVATARS = [
@@ -63,83 +65,92 @@ export function UserProfileEditModal({
   setCustomAvatarInput,
   onSave,
 }: UserProfileEditModalProps) {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+  const isEn = draftLanguage === 'en';
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
     <div
-      className="modal-backdrop animate-fade-in"
+      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="user-profile-title"
     >
       <div
-        className="modal-card space-y-4 max-h-[85vh] overflow-y-auto no-scrollbar flex flex-col"
+        className="relative w-full max-w-[440px] max-h-[90vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] flex flex-col space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle for mobile */}
-        <div className="w-12 h-1.5 rounded-full bg-outline-variant/40 mx-auto -mt-1 mb-1 sm:hidden" />
-
-        {/* Header del modal */}
-        <div className="flex items-center justify-between pb-2 border-b border-outline-variant/30 flex-shrink-0">
+        {/* Universal Don César Header: < | KinLogo | Profile Badge */}
+        <header className="flex items-center justify-between pb-1 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-primary">
-              <CameraIcon className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 id="user-profile-title" className="text-sm font-bold text-on-surface">
-                {draftLanguage === 'en' ? 'Edit Profile & Settings' : 'Editar Perfil & Datos'}
-              </h3>
-              <p className="text-[11px] text-on-surface-variant">
-                {draftLanguage === 'en'
-                  ? 'Update contact info, photo & app language'
-                  : 'Actualiza tu información de contacto, foto e idioma'}
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-circle"
+              title={isEn ? 'Back' : 'Volver'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-full text-on-surface-variant hover:text-on-surface cursor-pointer active:scale-[0.95] transition-all"
-            title={draftLanguage === 'en' ? 'Close without saving' : 'Cerrar sin guardar'}
-          >
-            <CloseIcon className="w-5 h-5" />
-          </button>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">badge</span>
+            <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+              {isEn ? 'Official Profile' : 'Perfil Oficial'}
+            </span>
+          </div>
+        </header>
+
+        {/* Title */}
+        <div className="text-center pt-1">
+          <h3 id="user-profile-title" className="text-lg font-bold text-white tracking-tight">
+            {isEn ? 'Edit Profile & Settings' : 'Editar Perfil & Datos'}
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {isEn
+              ? 'Update contact info, photo & app language'
+              : 'Actualiza tu información de contacto, foto e idioma'}
+          </p>
         </div>
 
-        {/* SECCIÓN PREMIER: SELECTOR DE IDIOMA DEL CLIENTE (BILINGÜE ES / EN) */}
-        <div className="p-3.5 rounded-2xl bg-surface-container-low border border-primary/25 shadow-xs space-y-2.5">
+        {/* SECCIÓN PREMIER: SELECTOR DE IDIOMA (BILINGÜE ES / EN) */}
+        <div className="p-3.5 rounded-2xl bg-[#141624] border border-emerald-500/20 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary">
-                <LanguageIcon className="w-4 h-4 text-primary" />
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-[#2ED5A4]">
+                <LanguageIcon className="w-4 h-4 text-[#2ED5A4]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-on-surface block">
-                  {draftLanguage === 'en' ? 'App Language' : 'Idioma de la Aplicación'}
+                <span className="text-xs font-bold text-white block">
+                  {isEn ? 'App Language' : 'Idioma de la Aplicación'}
                 </span>
-                <span className="text-[10px] text-on-surface-variant">
-                  {draftLanguage === 'en' ? 'Interface & notifications language' : 'Idioma para interfaz y avisos'}
+                <span className="text-[10px] text-slate-400">
+                  {isEn ? 'Interface & notifications language' : 'Idioma para interfaz y avisos'}
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/15 text-primary border border-primary/30">
-              {draftLanguage === 'en' ? 'EN Active' : 'ES Activo'}
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-[#2ED5A4] border border-emerald-500/30">
+              {isEn ? 'EN Active' : 'ES Activo'}
             </span>
           </div>
 
-          {/* Segmented Touch Targets (min 48-52px de altura para ergonomía móvil HIG) */}
           <div className="grid grid-cols-2 gap-2 pt-0.5">
             <button
               type="button"
               onClick={() => setDraftLanguage('es')}
-              className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
+              className={`h-11 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
                 draftLanguage === 'es'
-                  ? 'bg-primary text-on-primary border-primary shadow-md shadow-primary/20 font-black'
-                  : 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-outline-variant hover:text-on-surface font-semibold'
+                  ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black'
+                  : 'bg-[#0E131F] text-slate-400 border-white/10 hover:border-white/20 hover:text-white font-semibold'
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
               <span>Español</span>
               {draftLanguage === 'es' && <span className="text-sm font-black">✓</span>}
             </button>
@@ -147,234 +158,202 @@ export function UserProfileEditModal({
             <button
               type="button"
               onClick={() => setDraftLanguage('en')}
-              className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
+              className={`h-11 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
                 draftLanguage === 'en'
-                  ? 'bg-primary text-on-primary border-primary shadow-md shadow-primary/20 font-black'
-                  : 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-outline-variant hover:text-on-surface font-semibold'
+                  ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black'
+                  : 'bg-[#0E131F] text-slate-400 border-white/10 hover:border-white/20 hover:text-white font-semibold'
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
               <span>English</span>
               {draftLanguage === 'en' && <span className="text-sm font-black">✓</span>}
             </button>
           </div>
-
-          <p className="text-[10px] text-on-surface-variant text-center">
-            {draftLanguage === 'en'
-              ? 'The application, notifications and SPEI receipts will display in English.'
-              : 'Toda la interfaz, notificaciones y comprobantes SPEI se mostrarán en español.'}
-          </p>
         </div>
 
-        {/* SECCIÓN PREMIER 2: BILLETERA & MONEDA BASE (USA USD 🇺🇸 / MÉXICO MXN 🇲🇽) */}
-        <div className="p-3.5 rounded-2xl bg-surface-container-low border border-primary/25 shadow-xs space-y-2.5">
+        {/* SECCIÓN PREMIER 2: MONEDA BASE (USA USD / MÉXICO MXN) */}
+        <div className="p-3.5 rounded-2xl bg-[#141624] border border-white/5 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-[#2ED5A4]">
                 <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               </div>
               <div>
-                <span className="text-xs font-bold text-on-surface block">
-                  {draftLanguage === 'en' ? 'Default Account Currency' : 'Moneda Base de la Cuenta'}
+                <span className="text-xs font-bold text-white block">
+                  {isEn ? 'Default Account Currency' : 'Moneda Base de la Cuenta'}
                 </span>
-                <span className="text-[10px] text-on-surface-variant">
-                  {draftLanguage === 'en' ? 'Select primary balance & region mode' : 'Selecciona tu moneda principal y región'}
+                <span className="text-[10px] text-slate-400">
+                  {isEn ? 'Primary balance & region mode' : 'Selecciona tu moneda principal y región'}
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/15 text-primary border border-primary/30">
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-[#2ED5A4] border border-emerald-500/30">
               {draftCurrencyPref === 'USD' ? '🇺🇸 USD Activo' : '🇲🇽 MXN Activo'}
             </span>
           </div>
 
-          {/* Segmented Control 2 Opciones */}
           <div className="grid grid-cols-2 gap-2 pt-0.5">
             <button
               type="button"
               onClick={() => setDraftCurrencyPref('USD')}
-              className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
+              className={`h-11 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
                 draftCurrencyPref === 'USD'
-                  ? 'bg-primary text-on-primary border-primary shadow-md shadow-primary/20 font-black'
-                  : 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-outline-variant hover:text-on-surface font-semibold'
+                  ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black'
+                  : 'bg-[#0E131F] text-slate-400 border-white/10 hover:border-white/20 hover:text-white font-semibold'
               }`}
             >
               <span className="text-base">🇺🇸</span>
-              <span>{draftLanguage === 'en' ? 'US Dollars (USD)' : 'Dólares (USD)'}</span>
+              <span>USD</span>
               {draftCurrencyPref === 'USD' && <span className="text-sm font-black">✓</span>}
             </button>
 
             <button
               type="button"
               onClick={() => setDraftCurrencyPref('MXN')}
-              className={`h-12 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
+              className={`h-11 px-3 rounded-xl border text-xs flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
                 draftCurrencyPref === 'MXN'
-                  ? 'bg-primary text-on-primary border-primary shadow-md shadow-primary/20 font-black'
-                  : 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-outline-variant hover:text-on-surface font-semibold'
+                  ? 'bg-[#2ED5A4] text-[#06070B] border-[#2ED5A4] shadow-md shadow-[#2ED5A4]/20 font-black'
+                  : 'bg-[#0E131F] text-slate-400 border-white/10 hover:border-white/20 hover:text-white font-semibold'
               }`}
             >
               <span className="text-base">🇲🇽</span>
-              <span>{draftLanguage === 'en' ? 'Mexican Pesos (MXN)' : 'Pesos (MXN)'}</span>
+              <span>MXN</span>
               {draftCurrencyPref === 'MXN' && <span className="text-sm font-black">✓</span>}
             </button>
           </div>
-
-          <p className="text-[10px] text-on-surface-variant text-center">
-            {draftCurrencyPref === 'USD'
-              ? draftLanguage === 'en'
-                ? 'Configured for US residents: Send money to Mexico and domestic USD transfers.'
-                : 'Configurado para residentes en EE. UU.: Envíos a México y transferencias en dólares.'
-              : draftLanguage === 'en'
-                ? 'Configured for Mexico residents & travelers: KIN CASH in pesos and local SPEI withdrawals.'
-                : 'Configurado para residentes en México y viajeros: KIN CASH en pesos y retiros locales SPEI.'}
-          </p>
         </div>
 
-        {/* Nombre y Apellido (2 Columnas) */}
+        {/* Nombre y Apellido */}
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <label className="text-xs font-semibold text-on-surface-variant block mb-1 px-0.5">
-              {draftLanguage === 'en' ? 'First Name(s):' : 'Nombre(s):'}
+            <label className="text-xs font-semibold text-slate-400 block mb-1 px-0.5">
+              {isEn ? 'First Name(s):' : 'Nombre(s):'}
             </label>
-            <div className="auth-input-group">
-              <input
-                type="text"
-                autoCapitalize="words"
-                autoCorrect="off"
-                spellCheck={false}
-                value={draftFirstName}
-                onChange={(e) => setDraftFirstName(capitalizeWords(e.target.value))}
-                placeholder={draftLanguage === 'en' ? 'First Name' : 'Nombre'}
-                className="auth-input-field capitalize"
-                style={{ paddingLeft: '14px' }}
-              />
-            </div>
+            <input
+              type="text"
+              autoCapitalize="words"
+              value={draftFirstName}
+              onChange={(e) => setDraftFirstName(capitalizeWords(e.target.value))}
+              placeholder={isEn ? 'First Name' : 'Nombre'}
+              className="w-full h-11 px-3 rounded-xl bg-[#141624] text-xs text-white placeholder:text-slate-500 border border-white/10 focus:border-[#2ED5A4] focus:outline-none transition-all"
+            />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-on-surface-variant block mb-1 px-0.5">
-              {draftLanguage === 'en' ? 'Last Name(s):' : 'Apellido(s):'}
+            <label className="text-xs font-semibold text-slate-400 block mb-1 px-0.5">
+              {isEn ? 'Last Name(s):' : 'Apellido(s):'}
             </label>
-            <div className="auth-input-group">
-              <input
-                type="text"
-                autoCapitalize="words"
-                autoCorrect="off"
-                spellCheck={false}
-                value={draftLastName}
-                onChange={(e) => setDraftLastName(capitalizeWords(e.target.value))}
-                placeholder={draftLanguage === 'en' ? 'Last Name' : 'Apellido'}
-                className="auth-input-field capitalize"
-                style={{ paddingLeft: '14px' }}
-              />
-            </div>
+            <input
+              type="text"
+              autoCapitalize="words"
+              value={draftLastName}
+              onChange={(e) => setDraftLastName(capitalizeWords(e.target.value))}
+              placeholder={isEn ? 'Last Name' : 'Apellido'}
+              className="w-full h-11 px-3 rounded-xl bg-[#141624] text-xs text-white placeholder:text-slate-500 border border-white/10 focus:border-[#2ED5A4] focus:outline-none transition-all"
+            />
           </div>
         </div>
 
         {/* Correo Electrónico Registrado */}
         <div>
-          <label className="text-xs font-semibold text-on-surface-variant block mb-1 px-0.5">
-            {draftLanguage === 'en' ? 'Registered Email:' : 'Correo Electrónico Registrado:'}
+          <label className="text-xs font-semibold text-slate-400 block mb-1 px-0.5">
+            {isEn ? 'Registered Email:' : 'Correo Electrónico:'}
           </label>
-          <div className="auth-input-group">
-            <input
-              type="email"
-              value={draftEmail}
-              onChange={(e) => setDraftEmail(e.target.value)}
-              placeholder={draftLanguage === 'en' ? 'your@email.com' : 'tu@correo.com'}
-              className="auth-input-field"
-              style={{ paddingLeft: '14px' }}
-            />
-          </div>
+          <input
+            type="email"
+            value={draftEmail}
+            onChange={(e) => setDraftEmail(e.target.value)}
+            placeholder={isEn ? 'your@email.com' : 'tu@correo.com'}
+            className="w-full h-11 px-3 rounded-xl bg-[#141624] text-xs text-white placeholder:text-slate-500 border border-white/10 focus:border-[#2ED5A4] focus:outline-none transition-all"
+          />
         </div>
 
         {/* Teléfono Móvil */}
         <div>
-          <label className="text-xs font-semibold text-on-surface-variant block mb-1 px-0.5">
-            {draftLanguage === 'en' ? 'Mobile Phone (with country code):' : 'Teléfono Móvil (con lada):'}
+          <label className="text-xs font-semibold text-slate-400 block mb-1 px-0.5">
+            {isEn ? 'Mobile Phone:' : 'Teléfono Móvil:'}
           </label>
-          <div className="auth-input-group">
+          <input
+            type="tel"
+            value={draftPhone}
+            onChange={(e) => setDraftPhone(e.target.value)}
+            placeholder="+1 (555) 000-0000"
+            className="w-full h-11 px-3 rounded-xl bg-[#141624] text-xs text-white placeholder:text-slate-500 border border-white/10 focus:border-[#2ED5A4] focus:outline-none transition-all"
+          />
+        </div>
+
+        {/* Ciudad y Estado */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <div>
+            <label className="text-xs font-semibold text-slate-400 block mb-1 px-0.5">
+              {isEn ? 'City:' : 'Ciudad:'}
+            </label>
             <input
-              type="tel"
-              value={draftPhone}
-              onChange={(e) => setDraftPhone(e.target.value)}
-              placeholder="+1 (555) 000-0000"
-              className="auth-input-field"
-              style={{ paddingLeft: '14px' }}
+              type="text"
+              autoCapitalize="words"
+              value={draftCity}
+              onChange={(e) => setDraftCity(capitalizeWords(e.target.value))}
+              placeholder={isEn ? 'City' : 'Ciudad'}
+              className="w-full h-11 px-3 rounded-xl bg-[#141624] text-xs text-white placeholder:text-slate-500 border border-white/10 focus:border-[#2ED5A4] focus:outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-400 block mb-1 px-0.5">
+              {isEn ? 'State:' : 'Estado:'}
+            </label>
+            <input
+              type="text"
+              autoCapitalize="words"
+              value={draftState}
+              onChange={(e) => setDraftState(capitalizeWords(e.target.value))}
+              placeholder={isEn ? 'State' : 'Estado'}
+              className="w-full h-11 px-3 rounded-xl bg-[#141624] text-xs text-white placeholder:text-slate-500 border border-white/10 focus:border-[#2ED5A4] focus:outline-none transition-all"
             />
           </div>
         </div>
 
-        {/* Ciudad y Estado (2 Columnas) */}
-        <div className="grid grid-cols-2 gap-2.5">
-          <div>
-            <label className="text-xs font-semibold text-on-surface-variant block mb-1 px-0.5">
-              {draftLanguage === 'en' ? 'City:' : 'Ciudad:'}
-            </label>
-            <div className="auth-input-group">
-              <input
-                type="text"
-                autoCapitalize="words"
-                autoCorrect="off"
-                spellCheck={false}
-                value={draftCity}
-                onChange={(e) => setDraftCity(capitalizeWords(e.target.value))}
-                placeholder={draftLanguage === 'en' ? 'City' : 'Ciudad'}
-                className="auth-input-field capitalize"
-                style={{ paddingLeft: '14px' }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-on-surface-variant block mb-1 px-0.5">
-              {draftLanguage === 'en' ? 'State:' : 'Estado:'}
-            </label>
-            <div className="auth-input-group">
-              <input
-                type="text"
-                autoCapitalize="words"
-                autoCorrect="off"
-                spellCheck={false}
-                value={draftState}
-                onChange={(e) => setDraftState(capitalizeWords(e.target.value))}
-                placeholder={draftLanguage === 'en' ? 'State' : 'Estado'}
-                className="auth-input-field capitalize"
-                style={{ paddingLeft: '14px' }}
-              />
-            </div>
+        {/* Galería de Avatares Predefinidos */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-400 block px-0.5">
+            {isEn ? 'Choose Avatar:' : 'Selecciona un Avatar:'}
+          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {DEFAULT_AVATARS.map((url, idx) => {
+              const isSelected = draftAvatar === url;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setDraftAvatar(url)}
+                  className={`flex flex-col items-center p-1 rounded-2xl border transition-all cursor-pointer active:scale-[0.95] ${
+                    isSelected
+                      ? 'border-[#2ED5A4] bg-[#2ED5A4]/15 shadow-sm shadow-[#2ED5A4]/20'
+                      : 'border-white/10 bg-[#141624] hover:border-white/20'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl overflow-hidden relative">
+                    <img
+                      src={url}
+                      alt={`Avatar ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {isSelected && (
+                      <div className="absolute inset-0 bg-[#2ED5A4]/30 flex items-center justify-center">
+                        <CheckCircleIcon className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Opción Sin Foto / Dejar Recuadro Vacío */}
+        {/* Subir foto de la galería */}
         <div>
-          <label className="text-xs font-semibold text-on-surface-variant block mb-1.5 px-0.5">
-            {draftLanguage === 'en' ? 'Profile photo options:' : 'Opciones de foto de perfil:'}
-          </label>
-          <button
-            type="button"
-            onClick={() => {
-              setDraftAvatar('');
-              setCustomAvatarInput('');
-            }}
-            className={`w-full py-2.5 px-3 rounded-2xl border text-xs font-semibold flex items-center justify-center gap-2 transition-transform duration-150 ease-out cursor-pointer active:scale-[0.97] ${
-              !draftAvatar
-                ? 'border-primary bg-primary/15 text-primary shadow-xs'
-                : 'border-outline-variant/40 bg-surface-container text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[17px]">no_accounts</span>
-            <span>{draftLanguage === 'en' ? 'No profile photo (Empty frame)' : 'Sin foto de perfil (Recuadro vacío)'}</span>
-          </button>
-        </div>
-
-        {/* Subir foto de la galería / dispositivo del cliente */}
-        <div>
-          <label className="text-xs font-semibold text-on-surface-variant block mb-1.5 px-0.5">
-            {draftLanguage === 'en' ? 'Or upload from your device gallery:' : 'O subir desde la galería de tu dispositivo:'}
-          </label>
-          <label className="w-full h-11 rounded-2xl bg-surface-container border border-outline-variant/40 hover:border-primary flex items-center justify-center gap-2 text-xs font-bold text-on-surface cursor-pointer transition-colors shadow-xs active:scale-[0.98]">
-            <CameraIcon className="w-4 h-4 text-primary" />
-            <span>{draftLanguage === 'en' ? 'Choose photo from gallery' : 'Elegir foto de mi galería'}</span>
+          <label className="w-full h-11 rounded-2xl bg-[#141624] border border-dashed border-white/20 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-slate-300 hover:text-white cursor-pointer transition-colors active:scale-[0.98]">
+            <CameraIcon className="w-4 h-4 text-[#2ED5A4]" />
+            <span>{isEn ? 'Upload custom picture from gallery' : 'Subir foto desde galería'}</span>
             <input
               type="file"
               accept="image/*"
@@ -395,86 +374,17 @@ export function UserProfileEditModal({
           </label>
         </div>
 
-        {/* Galería de Avatares Predefinidos */}
-        <div>
-          <label className="text-xs font-semibold text-on-surface-variant block mb-2 px-0.5">
-            {draftLanguage === 'en' ? 'Or select a predefined avatar:' : 'O selecciona uno de los avatares predefinidos:'}
-          </label>
-          <div className="grid grid-cols-3 gap-2.5">
-            {DEFAULT_AVATARS.map((url, idx) => {
-              const isSelected = draftAvatar === url;
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setDraftAvatar(url)}
-                  className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl border transition-all cursor-pointer active:scale-[0.95] ${
-                    isSelected
-                      ? 'border-primary bg-primary/10 shadow-xs'
-                      : 'border-outline-variant/30 bg-surface-container hover:border-outline-variant'
-                  }`}
-                >
-                  <div className="w-12 h-12 rounded-full overflow-hidden relative border border-outline-variant/40">
-                    <img
-                      src={url}
-                      alt={`Avatar ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    {isSelected && (
-                      <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                        <CheckCircleIcon className="w-5 h-5 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-on-surface font-medium">
-                    {draftLanguage === 'en' ? `Option ${idx + 1}` : `Opción ${idx + 1}`}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* O ingresar URL personalizada */}
-        <div>
-          <label className="text-xs font-semibold text-on-surface-variant block mb-1 px-0.5">
-            {draftLanguage === 'en' ? 'Or enter custom image URL:' : 'O ingresa la URL de tu imagen:'}
-          </label>
-          <div className="flex gap-2">
-            <div className="auth-input-group flex-1">
-              <input
-                type="url"
-                placeholder="https://..."
-                value={customAvatarInput}
-                onChange={(e) => setCustomAvatarInput(e.target.value)}
-                className="auth-input-field"
-                style={{ paddingLeft: '14px' }}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (customAvatarInput.trim()) {
-                  setDraftAvatar(customAvatarInput.trim());
-                  setCustomAvatarInput('');
-                }
-              }}
-              className="px-4 rounded-2xl bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-container-highest border border-outline-variant/40 cursor-pointer active:scale-[0.97]"
-            >
-              {draftLanguage === 'en' ? 'Apply' : 'Usar'}
-            </button>
-          </div>
-        </div>
-
-        {/* Botón Guardar */}
+        {/* Botón Guardar Cambios */}
         <button
           type="button"
           onClick={onSave}
-          className="auth-btn-cta active mt-3 active:scale-[0.98] transition-transform"
+          className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-[#2ED5A4] to-[#26BC90] hover:brightness-110 text-[#06070B] font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#2ED5A4]/20 cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out mt-2"
         >
-          {draftLanguage === 'en' ? 'Save Changes' : 'Guardar'}
+          <span>{isEn ? 'Save Changes' : 'Guardar Cambios'}</span>
+          <span className="material-symbols-outlined text-[18px]">check</span>
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChevronLeftIcon,
   CloseIcon,
@@ -43,11 +44,16 @@ export function TransactionDetailModal({
   USD_TO_MXN_RATE,
   language,
 }: TransactionDetailModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [copiedRef, setCopiedRef] = useState(false);
   const [copiedPin, setCopiedPin] = useState(false);
   const [showCepModal, setShowCepModal] = useState(false);
 
-  if (!transaction) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!transaction || !mounted) return null;
 
   const amountUSD = Math.abs(transaction.amount);
   const amountMXN =
@@ -109,21 +115,18 @@ export function TransactionDetailModal({
     cadenaOriginal: `||1.1|${refId}|${amountMXN}|STP|BBVA|2026-10-06||`,
   };
 
-  return (
+  return createPortal(
     <div
-      className="modal-backdrop animate-fade-in"
+      className="fixed inset-0 z-[200] bg-[radial-gradient(circle_at_center,_rgba(46,213,164,0.12)_0%,_rgba(14,19,31,0.92)_55%,_rgba(6,7,11,0.98)_100%)] backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="transaction-detail-title"
     >
       <div
-        className="modal-card space-y-4 max-h-[92vh] flex flex-col overflow-hidden"
+        className="relative w-full max-w-[460px] max-h-[92vh] bg-[#0E131F] border border-white/10 ring-1 ring-emerald-500/20 rounded-3xl p-5 sm:p-6 shadow-[0_24px_70px_rgba(0,0,0,0.9),_0_0_40px_rgba(46,213,164,0.08)] text-white space-y-4 my-auto flex flex-col overflow-hidden animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Mobile drag handle */}
-        <div className="w-12 h-1.5 rounded-full bg-outline-variant/40 mx-auto -mt-1 mb-1 sm:hidden" />
-
         {/* Header del Comprobante (Regla Don César: < | KinLogo | Status) */}
         <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3 flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -395,6 +398,7 @@ export function TransactionDetailModal({
         data={cepData}
         language={language}
       />
-    </div>
+    </div>,
+    document.body
   );
 }

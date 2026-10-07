@@ -1,7 +1,8 @@
 // src/components/modals/CashPickupLocationModal.tsx
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   MEXICO_STATES,
   MexicoState,
@@ -10,7 +11,6 @@ import {
 } from '@/data/mexicoLocations';
 import {
   ChevronLeftIcon,
-  CloseIcon,
   OxxoLogo,
   BodegaAurreraLogo,
   ElektraLogo,
@@ -19,6 +19,7 @@ import {
   BansefiLogo,
   AnyAgentLogo,
 } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface SelectedPickupLocation {
   state: string;
@@ -61,9 +62,14 @@ export function CashPickupLocationModal({
     currentSelection?.city || ''
   );
 
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const isEn = language === 'en';
 
@@ -159,81 +165,56 @@ export function CashPickupLocationModal({
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="modal-backdrop animate-fade-in"
+      className="fixed inset-0 z-[200] bg-[radial-gradient(circle_at_center,_rgba(46,213,164,0.12)_0%,_rgba(14,19,31,0.92)_55%,_rgba(6,7,11,0.98)_100%)] backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="cash-pickup-title"
     >
       <div
-        className="modal-card space-y-3.5 max-h-[88vh] overflow-hidden flex flex-col"
+        className="relative w-full max-w-[460px] max-h-[92vh] bg-[#0E131F] border border-white/10 ring-1 ring-emerald-500/20 rounded-3xl p-5 sm:p-6 shadow-[0_24px_70px_rgba(0,0,0,0.9),_0_0_40px_rgba(46,213,164,0.08)] text-white space-y-3.5 my-auto flex flex-col overflow-hidden animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Barra superior de navegación y retroceso */}
-        <div className="flex items-center justify-between pb-2 border-b border-outline-variant/30 flex-shrink-0">
+        {/* Universal Don César Header: < | KinLogo | Badge */}
+        <header className="flex items-center justify-between pb-1 flex-shrink-0">
           <div className="flex items-center gap-2">
-            {step !== 'state' ? (
-              <button
-                type="button"
-                onClick={handleGoBack}
-                className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface cursor-pointer transition-all border border-outline-variant/30 active:scale-[0.95]"
-                title={isEn ? 'Go back' : 'Regresar'}
-              >
-                <ChevronLeftIcon className="w-4 h-4 text-on-surface" />
-              </button>
-            ) : (
-              <div className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-[18px]">location_on</span>
-              </div>
-            )}
-
-            <div>
-              <h3
-                id="cash-pickup-title"
-                className="text-sm font-bold text-on-surface leading-tight font-title-base flex items-center gap-1.5"
-              >
-                <span>
-                  {step === 'state' &&
-                    (isEn ? 'Select State in Mexico' : '1. Selecciona Estado en México')}
-                  {step === 'city' &&
-                    (isEn
-                      ? `Select City in ${selectedState?.name}`
-                      : `2. Municipio en ${selectedState?.name}`)}
-                  {step === 'branch' &&
-                    (isEn
-                      ? `Pickup Branch in ${selectedCity}`
-                      : `3. Sucursal de Retiro en ${selectedCity}`)}
-                </span>
-                <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[9px] font-bold">
-                  {step === 'state' ? 'Paso 1/3' : step === 'city' ? 'Paso 2/3' : 'Paso 3/3'}
-                </span>
-              </h3>
-              <p className="text-[10px] text-on-surface-variant">
-                {step === 'state' &&
-                  (isEn
-                    ? '32 States • Over 40,000 official payout locations'
-                    : '32 Estados • Más de 40,000 sucursales con retiro inmediato')}
-                {step === 'city' &&
-                  (isEn
-                    ? 'Choose the town where your family will pick up cash'
-                    : 'Elige la ciudad donde tu familiar recogerá el dinero')}
-                {step === 'branch' &&
-                  (isEn
-                    ? 'Pick an OXXO, Elektra, BanCoppel or any store'
-                    : 'Elige OXXO, Elektra, BanCoppel o retiro en cualquier tienda')}
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={handleGoBack}
+              className="btn-circle"
+              title={isEn ? 'Back' : 'Volver'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all cursor-pointer border border-outline-variant/20 active:scale-[0.95]"
-          >
-            <CloseIcon className="w-4 h-4" />
-          </button>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">store</span>
+            <span className="font-label-caps text-[9px] uppercase tracking-wider font-bold">
+              {step === 'state'
+                ? (isEn ? 'Step 1/3: State' : 'Paso 1/3: Estado')
+                : step === 'city'
+                ? (isEn ? 'Step 2/3: City' : 'Paso 2/3: Municipio')
+                : (isEn ? 'Step 3/3: Branch' : 'Paso 3/3: Sucursal')}
+            </span>
+          </div>
+        </header>
+
+        {/* Title & Subtitle */}
+        <div className="text-left pt-0.5 flex-shrink-0">
+          <h2 id="cash-pickup-title" className="text-lg font-bold text-white tracking-tight font-title-base">
+            {step === 'state' && (isEn ? 'Select State in Mexico' : 'Selecciona Estado en México')}
+            {step === 'city' && (isEn ? `Select City in ${selectedState?.name}` : `Municipio en ${selectedState?.name}`)}
+            {step === 'branch' && (isEn ? `Pickup Branch in ${selectedCity}` : `Sucursal de Retiro en ${selectedCity}`)}
+          </h2>
+          <p className="text-xs text-[#8E91A5]">
+            {step === 'state' && (isEn ? '32 States • Over 40,000 official payout locations' : '32 Estados • Más de 40,000 sucursales autorizadas')}
+            {step === 'city' && (isEn ? 'Choose the town where your family will pick up cash' : 'Elige la ciudad donde tu familiar recogerá el dinero')}
+            {step === 'branch' && (isEn ? 'Pick OXXO, Elektra, BanCoppel or local partner' : 'Elige OXXO, Elektra, BanCoppel o ventanilla local')}
+          </p>
         </div>
 
         {/* Breadcrumb visual de ruta activa */}
@@ -565,6 +546,7 @@ export function CashPickupLocationModal({
           <span>{isEn ? 'Withdrawal with KIN PIN code' : 'Cobro con Clave PIN KIN'}</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

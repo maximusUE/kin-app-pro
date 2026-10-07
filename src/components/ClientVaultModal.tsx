@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 interface ClientVaultModalProps {
   isOpen: boolean;
@@ -22,6 +25,8 @@ const INITIAL_DOCS: VaultItem[] = [
 ];
 
 export function ClientVaultModal({ isOpen, onClose }: ClientVaultModalProps) {
+  const [mounted, setMounted] = useState(false);
+
   // Zero-Trust Control States
   const [biometricsEnabled, setBiometricsEnabled] = useState(true);
   const [pinEnabled, setPinEnabled] = useState(true);
@@ -38,7 +43,11 @@ export function ClientVaultModal({ isOpen, onClose }: ClientVaultModalProps) {
   const [encryptStatus, setEncryptStatus] = useState<string | null>(null);
   const [exportedCert, setExportedCert] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   // Active controls count
   const activeControlsCount = [
@@ -91,42 +100,45 @@ export function ClientVaultModal({ isOpen, onClose }: ClientVaultModalProps) {
     setTimeout(() => setExportedCert(false), 3000);
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-all duration-300 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[400px] max-h-[86vh] overflow-y-auto scrollbar-none rounded-3xl bg-[#06070B] border border-white/10 text-on-surface shadow-2xl relative p-5 pb-8 space-y-4 my-auto animate-scale-in"
+        className="relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] flex flex-col space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-
-        {/* Modal Top Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <div className="inline-flex items-center gap-1 text-primary">
-              <span className="material-symbols-outlined text-[16px]">verified_user</span>
-              <span className="font-label-caps text-[10px] uppercase tracking-wider">Zero-Knowledge Enclave</span>
-            </div>
-            <h1 className="font-headline-md text-xl font-bold text-white tracking-tight">ClientVault &amp; Security</h1>
-          </div>
+        {/* Universal Don César Header: < | KinLogo | Zero-Knowledge Badge */}
+        <header className="flex items-center justify-between pb-1 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="relative w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center shadow-lg">
-              <span className="material-symbols-outlined text-primary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                shield_lock
-              </span>
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full animate-ping opacity-75" />
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full" />
-            </div>
             <button
+              type="button"
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high border border-white/10 text-on-surface flex items-center justify-center transition-colors cursor-pointer"
-              title="Cerrar Bóveda"
-              aria-label="Cerrar Bóveda"
+              className="btn-circle"
+              title="Volver"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
             </button>
+            <KinLogo size={34} />
           </div>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">shield_lock</span>
+            <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+              Zero-Knowledge Vault
+            </span>
+          </div>
+        </header>
+
+        {/* Title */}
+        <div className="text-center pt-1">
+          <h2 className="text-xl font-black text-white tracking-tight">
+            ClientVault &amp; Seguridad
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Cifrado de grado militar AES-GCM-256 en Secure Enclave
+          </p>
         </div>
 
         {/* Tier 3 Certified Hero Card */}
@@ -502,6 +514,7 @@ export function ClientVaultModal({ isOpen, onClose }: ClientVaultModalProps) {
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

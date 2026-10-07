@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
-import { CloseIcon, SearchIcon, PlusIcon, CheckCircleIcon } from './Icons';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ChevronLeftIcon, CloseIcon, SearchIcon, PlusIcon, CheckCircleIcon } from './Icons';
+import { KinLogo } from './KinLogo';
 import { ContactAvatar } from './ContactAvatar';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 import type { ContactItem } from './KinCashP2PModal';
@@ -71,8 +73,13 @@ export function WhatsAppContactsModal({
   const [directPhone, setDirectPhone] = useState('');
   const [directBank, setDirectBank] = useState('BBVA Bancomer');
 
+  const [mounted, setMounted] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const vcfInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Importar archivo de contactos (.vcf de iPhone/Android)
   const handleVcfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -257,62 +264,71 @@ export function WhatsAppContactsModal({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-[radial-gradient(circle_at_center,_rgba(46,213,164,0.12)_0%,_rgba(14,19,31,0.92)_55%,_rgba(6,7,11,0.98)_100%)] backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-[#0D0F18] border border-white/10 rounded-[28px] sm:rounded-[32px] h-[88vh] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl relative animate-scale-in"
+        className="relative w-full max-w-[440px] max-h-[90vh] bg-[#0E131F] border border-white/10 ring-1 ring-emerald-500/20 rounded-3xl flex flex-col overflow-hidden shadow-[0_24px_70px_rgba(0,0,0,0.9),_0_0_40px_rgba(46,213,164,0.08)] animate-scale-in text-white my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ===================================================================== */}
-        {/* 1. HEADER NATIVO WHATSAPP iOS                                         */}
+        {/* 1. UNIVERSAL DON CÉSAR HEADER: < | KinLogo | Red Banxico SPEI         */}
         {/* ===================================================================== */}
-        <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5 border-b border-white/5 flex-shrink-0 bg-[#0D0F18]">
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center text-white/90 hover:text-white transition-all cursor-pointer active:scale-90"
-            title={isEn ? 'Close' : 'Cerrar'}
-          >
-            <CloseIcon className="w-4 h-4" />
-          </button>
-
-          <div className="text-center">
-            <h2 className="text-base font-bold text-white leading-tight font-title-base">
-              {isEn ? 'New Transfer' : 'Nuevo Envío'}
-            </h2>
-            <p className="text-[11px] text-[#8E91A5] font-medium">
-              {isEn ? `${filteredContacts.length} contacts available` : `${filteredContacts.length} contactos disponibles`}
-            </p>
+        <header className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/10 flex-shrink-0 bg-[#0E131F]">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-circle"
+              title={isEn ? 'Back' : 'Volver'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
           </div>
 
-          <div className="w-8" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">send</span>
+            <span className="font-label-caps text-[9px] uppercase tracking-wider font-bold">
+              {isEn ? 'SPEI Network' : 'Red Banxico SPEI'}
+            </span>
+          </div>
+        </header>
+
+        {/* Title & Subtitle */}
+        <div className="px-5 pt-3 pb-1 text-left flex-shrink-0">
+          <h2 className="text-lg font-bold text-white tracking-tight font-title-base">
+            {isEn ? 'New Transfer' : 'Nuevo Envío'}
+          </h2>
+          <p className="text-xs text-[#8E91A5]">
+            {isEn ? `${filteredContacts.length} contacts available in directory` : `${filteredContacts.length} contactos disponibles en agenda`}
+          </p>
         </div>
 
         {/* Feedback Banner */}
         {feedback && (
-          <div className="mx-4 mt-2 p-2.5 rounded-xl bg-primary/15 border border-primary/30 text-primary text-xs font-semibold flex items-center gap-2 animate-fade-in flex-shrink-0">
+          <div className="mx-5 mt-2 p-2.5 rounded-xl bg-primary/15 border border-primary/30 text-primary text-xs font-semibold flex items-center gap-2 animate-fade-in flex-shrink-0">
             <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
             <span className="flex-1 truncate">{feedback}</span>
           </div>
         )}
 
         {/* ===================================================================== */}
-        {/* 2. BARRA DE BÚSQUEDA SUPERIOR (ESTILO WHATSAPP iOS)                   */}
+        {/* 2. BARRA DE BÚSQUEDA SUPERIOR                                         */}
         {/* ===================================================================== */}
-        <div className="px-4 py-2.5 flex-shrink-0 bg-[#0D0F18]">
-          <div className="relative flex items-center w-full h-[44px] rounded-full bg-[#1C1F2E] border border-white/10 px-3.5 focus-within:border-primary transition-all">
-            <SearchIcon className="w-4 h-4 text-[#8E91A5] mr-2 flex-shrink-0" />
+        <div className="px-5 py-2.5 flex-shrink-0 bg-[#0E131F]">
+          <div className="relative flex items-center w-full h-[46px] rounded-2xl bg-[#141824] border border-white/10 px-3.5 focus-within:border-[#2ED5A4]/60 focus-within:ring-1 focus-within:ring-[#2ED5A4]/40 transition-all">
+            <SearchIcon className="w-4 h-4 text-[#8E91A5] mr-2.5 flex-shrink-0" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isEn ? 'Search by name, phone or @handle...' : 'Buscar por nombre, número o @usuario...'}
-              className="w-full bg-transparent text-sm text-white placeholder-[#8E91A5]/60 focus:outline-none"
+              className="w-full bg-transparent text-xs text-white placeholder-[#8E91A5]/60 focus:outline-none"
               autoFocus
             />
             {searchQuery && (
@@ -381,30 +397,30 @@ export function WhatsAppContactsModal({
               </form>
             )}
 
-            {/* TARJETA DE ACCIONES RÁPIDAS (EXACTA A WHATSAPP SCREENSHOT 2) */}
+            {/* TARJETA DE ACCIONES RÁPIDAS */}
             {!searchQuery && !showDirectPhoneInput && (
-              <div className="rounded-2xl bg-[#141624] border border-white/5 divide-y divide-white/5 overflow-hidden shadow-sm">
+              <div className="space-y-2">
                 {/* 1. Acceso a contactos del teléfono */}
                 <button
                   type="button"
                   onClick={handleOpenNativePhoneBook}
                   disabled={isPickingFromPhone}
-                  className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer group active:bg-white/10"
+                  className="touch-press w-full p-3.5 rounded-2xl bg-[#141824] hover:bg-[#1A2030] border border-white/10 hover:border-[#2ED5A4]/40 flex items-center justify-between text-left transition-all cursor-pointer group shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                       <span className="material-symbols-outlined text-[20px]">contacts</span>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
+                      <p className="text-xs font-bold text-white group-hover:text-[#2ED5A4] transition-colors">
                         {isEn ? 'Access phone contacts' : 'Acceder a contactos del teléfono'}
                       </p>
-                      <p className="text-[10px] text-[#8E91A5]">
+                      <p className="text-[11px] text-[#8E91A5] mt-0.5">
                         {isEn ? 'Open contacts directory from your mobile' : 'Abre la libreta de contactos de tu celular'}
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-primary px-2 py-0.5 rounded-md bg-primary/10">
+                  <span className="text-[11px] font-bold text-[#2ED5A4] px-2.5 py-1 rounded-lg bg-[#2ED5A4]/10 border border-[#2ED5A4]/20 shrink-0">
                     {isEn ? 'Open' : 'Abrir'}
                   </span>
                 </button>
@@ -413,22 +429,22 @@ export function WhatsAppContactsModal({
                 <button
                   type="button"
                   onClick={() => setShowDirectPhoneInput(true)}
-                  className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer group active:bg-white/10"
+                  className="touch-press w-full p-3.5 rounded-2xl bg-[#141824] hover:bg-[#1A2030] border border-white/10 hover:border-[#2ED5A4]/40 flex items-center justify-between text-left transition-all cursor-pointer group shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 text-[#8E91A5] flex items-center justify-center group-hover:text-white transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-[#8E91A5] group-hover:text-white flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                       <span className="material-symbols-outlined text-[20px]">dialpad</span>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
+                      <p className="text-xs font-bold text-white group-hover:text-[#2ED5A4] transition-colors">
                         {isEn ? 'Send via phone or CLABE' : 'Enviar por número o CLABE'}
                       </p>
-                      <p className="text-[10px] text-[#8E91A5]">
+                      <p className="text-[11px] text-[#8E91A5] mt-0.5">
                         {isEn ? 'Enter phone number or SPEI account directly' : 'Escribe el teléfono o cuenta SPEI directamente'}
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-[#8E91A5] text-[18px]">
+                  <span className="material-symbols-outlined text-[#8E91A5] group-hover:text-white text-[18px]">
                     chevron_right
                   </span>
                 </button>
@@ -437,22 +453,22 @@ export function WhatsAppContactsModal({
                 <button
                   type="button"
                   onClick={() => setShowDirectPhoneInput(true)}
-                  className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer group active:bg-white/10"
+                  className="touch-press w-full p-3.5 rounded-2xl bg-[#141824] hover:bg-[#1A2030] border border-white/10 hover:border-[#2ED5A4]/40 flex items-center justify-between text-left transition-all cursor-pointer group shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 text-[#8E91A5] flex items-center justify-center group-hover:text-white transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-[#8E91A5] group-hover:text-white flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                       <span className="material-symbols-outlined text-[20px]">person_add</span>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
+                      <p className="text-xs font-bold text-white group-hover:text-[#2ED5A4] transition-colors">
                         {isEn ? 'New contact' : 'Nuevo contacto'}
                       </p>
-                      <p className="text-[10px] text-[#8E91A5]">
+                      <p className="text-[11px] text-[#8E91A5] mt-0.5">
                         {isEn ? 'Register a new beneficiary' : 'Registrar un nuevo beneficiario'}
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-[#8E91A5] text-[18px]">
+                  <span className="material-symbols-outlined text-[#8E91A5] group-hover:text-white text-[18px]">
                     chevron_right
                   </span>
                 </button>
@@ -461,22 +477,22 @@ export function WhatsAppContactsModal({
                 <button
                   type="button"
                   onClick={() => vcfInputRef.current?.click()}
-                  className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer group active:bg-white/10"
+                  className="touch-press w-full p-3.5 rounded-2xl bg-[#141824] hover:bg-[#1A2030] border border-white/10 hover:border-[#2ED5A4]/40 flex items-center justify-between text-left transition-all cursor-pointer group shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                       <span className="material-symbols-outlined text-[20px]">file_upload</span>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white group-hover:text-primary transition-colors">
+                      <p className="text-xs font-bold text-white group-hover:text-[#2ED5A4] transition-colors">
                         {isEn ? 'Import directory (.vcf iPhone/Android)' : 'Importar libreta (.vcf de iPhone/Android)'}
                       </p>
-                      <p className="text-[10px] text-[#8E91A5]">
+                      <p className="text-[11px] text-[#8E91A5] mt-0.5">
                         {isEn ? 'Load all contacts in 1 tap from file' : 'Carga todos tus contactos en 1 toque desde archivo'}
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-primary text-[18px]">
+                  <span className="material-symbols-outlined text-[#2ED5A4] text-[18px]">
                     upload
                   </span>
                 </button>
@@ -806,6 +822,7 @@ export function WhatsAppContactsModal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

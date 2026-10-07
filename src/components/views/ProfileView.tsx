@@ -939,12 +939,20 @@ export function ProfileView({
           setDraftAddress2(data.address2);
           setDraftZip(data.zip);
           setDraftCity(data.city);
-          setDraftState(data.state);
           const full = `${data.firstName} ${data.lastName}`.trim();
-          setSavedFullName(full);
-          if (data.phone) setSavedPhone(data.phone);
+          if (onUpdateProfile) {
+            onUpdateProfile({
+              firstName: data.firstName,
+              lastName: data.lastName,
+              phone: data.phone,
+              address1: data.address1,
+              address2: data.address2,
+              city: data.city,
+              state: data.state,
+              zip: data.zip,
+            });
+          }
           const fullAddr = [data.address1, data.city, data.state].filter(Boolean).join(', ');
-          if (fullAddr) setSavedAddress(fullAddr);
           if (typeof window !== 'undefined') {
             localStorage.setItem('kin_user_name', full);
             if (data.phone) localStorage.setItem('kin_user_phone', data.phone);

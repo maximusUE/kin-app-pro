@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
-import { ChevronLeftIcon, CloseIcon, ShieldCheckIcon } from '@/components/Icons';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ChevronLeftIcon, ShieldCheckIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 import { ContactAvatar } from '@/components/ContactAvatar';
 import { capitalizeWords } from '@/lib/utils/capitalize';
 import { SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
@@ -57,62 +59,65 @@ export function SendReviewModal({
   cashPickupStores,
   pickupLocation,
 }: SendReviewModalProps) {
-  if (!isOpen || !selectedAvatar) return null;
+  const [mounted, setMounted] = useState(false);
+  const isEn = language === 'en';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted || !selectedAvatar) return null;
 
   const baseAmount = parseFloat(amountValue) || 50;
   const kinServiceFee = 1.99;
   const totalUSD = baseAmount + kinServiceFee;
   const totalMXN = baseAmount * USD_TO_MXN_RATE;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[160] bg-[#06070B] text-white flex flex-col items-center justify-start overflow-y-auto selection:bg-primary/30 selection:text-primary animate-fade-in p-3 sm:p-8"
+      className="fixed inset-0 z-[200] bg-[radial-gradient(circle_at_center,_rgba(46,213,164,0.12)_0%,_rgba(14,19,31,0.92)_55%,_rgba(6,7,11,0.98)_100%)] backdrop-blur-xl text-white flex items-center justify-center overflow-y-auto animate-fade-in p-3 sm:p-4"
       onClick={() => !isExecutingPayment && onClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="send-review-title"
     >
       <div
-        className="w-full max-w-2xl bg-[#0B0F17] border border-white/10 rounded-3xl p-5 sm:p-7 shadow-[0_24px_80px_rgba(0,0,0,0.9)] space-y-4 my-auto flex flex-col text-slate-100"
+        className="w-full max-w-[460px] max-h-[92vh] bg-[#0E131F] border border-white/10 ring-1 ring-emerald-500/20 rounded-3xl p-5 sm:p-6 shadow-[0_24px_70px_rgba(0,0,0,0.9),_0_0_40px_rgba(46,213,164,0.08)] space-y-4 my-auto flex flex-col text-slate-100 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Mobile drag handle for bottom sheet feel */}
-        <div className="w-12 h-1.5 rounded-full bg-outline-variant/40 mx-auto -mt-1 mb-1 sm:hidden" />
-
-        {/* Header del Dashboard de Desglose */}
-        <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
+        {/* Universal Don César Header: < | KinLogo | Badge */}
+        <header className="flex items-center justify-between pb-1 flex-shrink-0">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
               disabled={isExecutingPayment}
-              className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface cursor-pointer transition-all disabled:opacity-40 active:scale-[0.95]"
-              title={language === 'en' ? 'Back' : 'Volver'}
+              className="btn-circle"
+              title={isEn ? 'Back' : 'Volver'}
             >
-              <ChevronLeftIcon className="w-4 h-4 text-on-surface" />
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
             </button>
-            <div>
-              <h3 id="send-review-title" className="text-sm font-bold text-on-surface leading-tight font-title-base flex items-center gap-1.5">
-                <span>{language === 'en' ? 'Transfer Breakdown' : 'Desglose de Envío'}</span>
-                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
-                  {language === 'en' ? '100% Transparent' : '100% Transparente'}
-                </span>
-              </h3>
-              <p className="text-[10px] text-on-surface-variant">
-                {language === 'en'
-                  ? 'Review all details before authorizing debit'
-                  : 'Revisa todos los datos antes de autorizar el débito'}
-              </p>
-            </div>
+            <KinLogo size={34} />
           </div>
-          <button
-            type="button"
-            onClick={() => !isExecutingPayment && onClose()}
-            disabled={isExecutingPayment}
-            className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all cursor-pointer disabled:opacity-40 active:scale-[0.95]"
-          >
-            <CloseIcon className="w-4 h-4" />
-          </button>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">verified_user</span>
+            <span className="font-label-caps text-[9px] uppercase tracking-wider font-bold">
+              {isEn ? 'SPEI Guaranteed' : 'SPEI Garantizado'}
+            </span>
+          </div>
+        </header>
+
+        {/* Hero Title & Subtitle */}
+        <div className="text-left pt-0.5 flex-shrink-0">
+          <h2 id="send-review-title" className="text-lg font-bold text-white tracking-tight font-title-base">
+            {isEn ? 'Transfer Breakdown' : 'Desglose de Envío'}
+          </h2>
+          <p className="text-xs text-[#8E91A5]">
+            {isEn
+              ? 'Review all details before authorizing debit'
+              : 'Revisa todos los datos antes de autorizar el débito'}
+          </p>
         </div>
 
         {/* Cuerpo con Scroll Ergonómico */}
@@ -369,6 +374,7 @@ export function SendReviewModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

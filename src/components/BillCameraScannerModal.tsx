@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { CloseIcon } from './Icons';
+import { createPortal } from 'react-dom';
+import { ChevronLeftIcon } from './Icons';
+import { KinLogo } from './KinLogo';
 
 export interface ScannedBillResult {
   serviceId?: string;
@@ -26,6 +28,7 @@ export function BillCameraScannerModal({
   onScanSuccess,
   targetServiceName = 'CFE',
 }: BillCameraScannerModalProps) {
+  const [mounted, setMounted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,6 +39,10 @@ export function BillCameraScannerModal({
   const [supportsTorch, setSupportsTorch] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Iniciar la cámara trasera del teléfono al abrir el modal
   useEffect(() => {
@@ -181,10 +188,10 @@ export function BillCameraScannerModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/95 text-white flex flex-col justify-between animate-fade-in select-none">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] bg-black/95 text-white flex flex-col justify-between animate-fade-in select-none">
       {/* Canvas oculto para capturas */}
       <canvas ref={canvasRef} className="hidden" />
 
@@ -198,27 +205,27 @@ export function BillCameraScannerModal({
         className="hidden"
       />
 
-      {/* Top Header con Cerrar y Linterna */}
-      <header className="relative z-30 flex items-center justify-between p-4 pt-6 bg-gradient-to-b from-black/80 to-transparent">
-        <button
-          type="button"
-          onClick={() => {
-            stopCamera();
-            onClose();
-          }}
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-all cursor-pointer border border-white/10"
-          title="Cerrar escáner"
-        >
-          <CloseIcon className="w-5 h-5" />
-        </button>
+      {/* Universal Don César Header: < | KinLogo | Badge & Torch */}
+      <header className="relative z-30 flex items-center justify-between p-4 pt-6 bg-gradient-to-b from-black/90 via-black/60 to-transparent">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              stopCamera();
+              onClose();
+            }}
+            className="btn-circle"
+            title="Volver"
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
 
-        <div className="flex flex-col items-center">
-          <span className="font-headline-md text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
-            Escáner de Recibos
-          </span>
-          <span className="text-[10px] text-primary font-medium tracking-wide">
-            {targetServiceName} • Código de Barras / QR
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+          <span className="material-symbols-outlined text-[13px]">qr_code_scanner</span>
+          <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+            {targetServiceName} • SAT / CFE
           </span>
         </div>
 
@@ -228,7 +235,7 @@ export function BillCameraScannerModal({
             onClick={toggleTorch}
             className={`w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center active:scale-95 transition-all cursor-pointer border ${
               torchOn
-                ? 'bg-primary text-[#002116] border-primary shadow-glow-mint'
+                ? 'bg-[#2ED5A4] text-[#002116] border-[#2ED5A4] shadow-[0_0_15px_rgba(46,213,164,0.4)]'
                 : 'bg-white/10 text-white border-white/10 hover:bg-white/20'
             }`}
             title="Activar linterna"
@@ -356,6 +363,7 @@ export function BillCameraScannerModal({
           </button>
         </div>
       </footer>
-    </div>
+    </div>,
+    document.body
   );
 }

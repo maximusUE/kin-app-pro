@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import {
-  CloseIcon,
+  ChevronLeftIcon,
   SettingsGearIcon,
   ShieldCheckIcon,
   LockIcon,
@@ -16,6 +17,7 @@ import {
   PhoneIcon,
   CheckCircleIcon as CheckIcon,
 } from './Icons';
+import { KinLogo } from './KinLogo';
 
 interface AppSettingsModalProps {
   isOpen: boolean;
@@ -90,8 +92,13 @@ export function AppSettingsModal({
   const [currentPin, setCurrentPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [pinFeedback, setPinFeedback] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleDownloadStatement = () => {
     setDownloadSuccess(true);
@@ -115,36 +122,45 @@ export function AppSettingsModal({
 
   const isEn = language === 'en';
 
-  return (
-    <div className="modal-backdrop animate-fade-in" onClick={onClose}>
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in text-white"
+      onClick={onClose}
+    >
       <div
-        className="modal-card space-y-4 max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto scrollbar-none bg-[#0E131F] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] flex flex-col space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '420px' }}
       >
-        {/* Header de Configuración */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 flex items-center justify-center text-[#2ED5A4] shadow-sm">
-              <SettingsGearIcon className="w-5 h-5 text-[#2ED5A4]" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-white leading-tight">
-                {isEn ? 'Settings & Preferences' : 'Configuración & Preferencias'}
-              </h2>
-              <p className="text-[10px] text-[#8E91A5]">
-                {isEn ? 'KIN Mobile system settings' : 'Ajustes del sistema KIN Mobile'}
-              </p>
-            </div>
+        {/* Universal Don César Header: < | KinLogo | Preferences Badge */}
+        <header className="flex items-center justify-between pb-1 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-circle"
+              title={isEn ? 'Back' : 'Volver'}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#8E91A5] hover:text-white transition-all cursor-pointer"
-            title={isEn ? 'Close settings' : 'Cerrar configuración'}
-          >
-            <CloseIcon className="w-4 h-4" />
-          </button>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">settings</span>
+            <span className="font-label-caps text-[10px] uppercase tracking-wider font-bold">
+              {isEn ? 'Preferences' : 'Preferencias'}
+            </span>
+          </div>
+        </header>
+
+        {/* Title */}
+        <div className="text-center pt-1">
+          <h2 className="text-lg font-bold text-white tracking-tight">
+            {isEn ? 'Settings & Preferences' : 'Configuración & Preferencias'}
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {isEn ? 'KIN Mobile security and system preferences' : 'Ajustes del sistema y seguridad KIN Mobile'}
+          </p>
         </div>
 
         {/* Selector de Categorías (Pills de Navegación) */}
@@ -619,6 +635,7 @@ export function AppSettingsModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

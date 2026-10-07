@@ -198,19 +198,21 @@ const BILL_SERVICES = [
 export interface ContactItem {
   id: string;
   name: string;
-  fullName: string;
-  avatar: string;
-  role: string;
-  country: string;
-  bank: string;
-  photoUrl: string;
+  fullName?: string;
+  avatar?: string;
+  role?: string;
+  country?: string;
+  bank?: string;
+  photoUrl?: string;
   clabe?: string;
   phone?: string;
   street?: string;       // calle
   houseNumber?: string;  // número de casa/exterior
+  city?: string;         // ciudad
   state?: string;        // estado
   zipCode?: string;      // código postal
   isFamily?: boolean;
+  [key: string]: any;
 }
 
 // Avatares disponibles para personalización de perfil
@@ -228,7 +230,7 @@ interface TransactionItem {
   category: string;
   time: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | string;
   iconType?: 'send' | 'luz' | 'internet' | 'phone' | 'bank' | 'wallet' | 'card' | 'bill';
   dateGroup?: 'Hoy' | 'Ayer' | 'Esta semana' | 'Anteriores';
   refNumber?: string;
@@ -237,6 +239,8 @@ interface TransactionItem {
   claveRastreoBanxico?: string;
   claveRetiroEfectivo?: string;
   pickupStore?: string;
+  pickupCity?: string;
+  pickupState?: string;
   bancoDestino?: string;
   cuentaBeneficiario?: string;
   nombreBeneficiario?: string;
@@ -244,6 +248,7 @@ interface TransactionItem {
   paymentMethod?: string;
   feeUSD?: number;
   createdAt?: string;
+  [key: string]: any;
 }
 
 // Estado limpio inicial (Clean Slate): sin transacciones ficticias
@@ -1423,6 +1428,9 @@ export default function MobileApp() {
         city: 'Cuernavaca',
         street: 'Av. Plan de Ayala 100',
         bank: 'Bodega Aurrera',
+        role: 'Beneficiario',
+        avatar: '',
+        photoUrl: '',
       });
     }
 
@@ -1960,14 +1968,14 @@ export default function MobileApp() {
             setShowContactModal={setShowContactModal}
             isContactEditMode={isContactEditMode}
             setIsContactEditMode={setIsContactEditMode}
-            setQuickContactActionTarget={setQuickContactActionTarget}
+            setQuickContactActionTarget={(target) => setQuickContactActionTarget(target as any)}
             handleDeleteContact={handleDeleteContact}
             setEditingContactAvatarTarget={setEditingContactAvatarTarget}
             setEditingContactPhotoInput={setEditingContactPhotoInput}
             dashboardFilter={dashboardFilter}
             setDashboardFilter={setDashboardFilter}
             filteredDashboardTransactions={filteredDashboardTransactions}
-            setSelectedTransactionDetail={setSelectedTransactionDetail}
+            setSelectedTransactionDetail={(tx) => setSelectedTransactionDetail(tx as any)}
           />
         )}
 
@@ -2079,7 +2087,7 @@ export default function MobileApp() {
               }}
               contactsList={contactsList}
               onSelectContact={(contact) => {
-                setSelectedAvatar(contact);
+                setSelectedAvatar(contact as any);
                 if (contact.state && contact.city) {
                   setPickupLocation({
                     state: contact.state,
@@ -2099,8 +2107,8 @@ export default function MobileApp() {
                 }
               }}
               onAddContact={(newContact) => {
-                setContactsList((prev) => [newContact, ...prev.filter((c) => c.id !== newContact.id)]);
-                setSelectedAvatar(newContact);
+                setContactsList((prev) => [newContact as any, ...prev.filter((c) => c.id !== newContact.id)]);
+                setSelectedAvatar(newContact as any);
                 if (newContact.state && newContact.city) {
                   setPickupLocation({
                     state: newContact.state,
@@ -2149,7 +2157,7 @@ export default function MobileApp() {
             currencyPref={currencyPref}
             language={language}
             USD_TO_MXN_RATE={USD_TO_MXN_RATE}
-            onSelectTransaction={setSelectedTransactionDetail}
+            onSelectTransaction={(tx) => setSelectedTransactionDetail(tx as any)}
             renderTransactionIcon={renderTransactionIcon}
           />
         )}
@@ -2418,17 +2426,17 @@ export default function MobileApp() {
         language={language}
         contactsCount={contactsList.length}
         onSendMoney={(contact) => {
-          setSelectedAvatar(contact);
+          setSelectedAvatar(contact as any);
           setQuickContactActionTarget(null);
           setActiveTab('send');
         }}
         onSendKinCash={(contact) => {
-          setKinCashDraftContact(contact);
+          setKinCashDraftContact(contact as any);
           setQuickContactActionTarget(null);
           setActiveTab('kin-cash');
         }}
         onEditPhoto={(contact) => {
-          setEditingContactAvatarTarget(contact);
+          setEditingContactAvatarTarget(contact as any);
           setEditingContactPhotoInput(contact.photoUrl || '');
           setQuickContactActionTarget(null);
         }}
