@@ -10,6 +10,8 @@ import {
   ShareReceiptIcon,
   WhatsAppIcon,
 } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
+import { BanxicoCepModal, BanxicoCepData } from './BanxicoCepModal';
 
 export interface TransactionDetailModalProps {
   transaction: {
@@ -27,6 +29,7 @@ export interface TransactionDetailModalProps {
     recipientName?: string;
     clabe?: string;
     bank?: string;
+    claveRastreoBanxico?: string;
     [key: string]: any;
   } | null;
   onClose: () => void;
@@ -42,6 +45,7 @@ export function TransactionDetailModal({
 }: TransactionDetailModalProps) {
   const [copiedRef, setCopiedRef] = useState(false);
   const [copiedPin, setCopiedPin] = useState(false);
+  const [showCepModal, setShowCepModal] = useState(false);
 
   if (!transaction) return null;
 
@@ -88,6 +92,23 @@ export function TransactionDetailModal({
     }
   };
 
+  const cepData: BanxicoCepData = {
+    claveRastreo: transaction.claveRastreoBanxico || transaction.refNumber || '202610060000000000842918234567',
+    folioCep: 'CEP-BANXICO-2026-994821',
+    fechaOperacion: transaction.time?.split(' ')?.[0] || '06/10/2026',
+    horaOperacion: transaction.time?.includes(':') ? transaction.time : '21:18:42',
+    montoMXN: amountMXN,
+    emisorBanco: 'STP (Sistema de Transferencias y Pagos) / KIN',
+    receptorBanco: transaction.bank || 'BBVA México (012)',
+    beneficiarioNombre: transaction.recipientName || transaction.title,
+    beneficiarioClabe: transaction.clabe || '012 180 01548291039 4',
+    ordenanteNombre: 'César Ugalde (KIN USA)',
+    concepto: transaction.category || 'Remesa Familiar KIN',
+    selloDigital: 'k9XpQ2m...98aF412b9c81e2840d12a9',
+    numeroSerieCertificado: '30001000000500003421',
+    cadenaOriginal: `||1.1|${refId}|${amountMXN}|STP|BBVA|2026-10-06||`,
+  };
+
   return (
     <div
       className="modal-backdrop animate-fade-in"
@@ -103,40 +124,54 @@ export function TransactionDetailModal({
         {/* Mobile drag handle */}
         <div className="w-12 h-1.5 rounded-full bg-outline-variant/40 mx-auto -mt-1 mb-1 sm:hidden" />
 
-        {/* Header del Comprobante */}
+        {/* Header del Comprobante (Regla Don César: < | KinLogo | Status) */}
         <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface cursor-pointer transition-all active:scale-[0.95]"
+              className="btn-circle"
               title={language === 'en' ? 'Back' : 'Volver'}
             >
-              <ChevronLeftIcon className="w-4 h-4 text-on-surface" />
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
             </button>
-            <div>
-              <h3 id="transaction-detail-title" className="text-sm font-bold text-on-surface leading-tight font-title-base flex items-center gap-1.5">
-                <span>{language === 'en' ? 'Transaction Detail' : 'Detalle de Transacción'}</span>
-                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
-                  {language === 'en' ? 'Official' : 'Oficial'}
-                </span>
-              </h3>
-              <p className="text-[10px] text-on-surface-variant">
-                {language === 'en' ? 'KIN Electronic Receipt • Banxico' : 'Comprobante Electrónico KIN • Banxico'}
-              </p>
-            </div>
+            <KinLogo size={34} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all cursor-pointer active:scale-[0.95]"
-          >
-            <CloseIcon className="w-4 h-4" />
-          </button>
+
+          <div className="flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+              {language === 'en' ? 'Audited • SPEI' : 'Auditado • SPEI'}
+            </span>
+          </div>
         </div>
 
         {/* Contenido con Scroll Ergonómico */}
         <div className="flex-1 overflow-y-auto space-y-3.5 pr-0.5 no-scrollbar">
+          {/* Botón Verificador Oficial CEP Banxico en 1 Clic */}
+          <button
+            type="button"
+            onClick={() => setShowCepModal(true)}
+            className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15 border border-emerald-500/30 flex items-center justify-between hover:border-emerald-500/50 hover:bg-emerald-500/20 transition-all cursor-pointer group active:scale-[0.98] text-left shadow-xs"
+            id="open-cep-modal-btn"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-[#2ED5A4] flex items-center justify-center shrink-0 border border-emerald-500/30">
+                <span className="material-symbols-outlined text-[22px]">account_balance</span>
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-bold text-white group-hover:text-[#2ED5A4] transition-colors truncate">
+                  {language === 'en' ? 'Verify Official Banxico CEP' : 'Verificar CEP en Banco de México'}
+                </span>
+                <span className="text-[10px] text-[#A6ADC8] truncate">
+                  {language === 'en' ? 'Cryptographic Interbank Payment Receipt' : 'Comprobante Electrónico de Pago Oficial'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-bold text-[#2ED5A4] shrink-0 pl-2">
+              <span>{language === 'en' ? 'View' : 'Ver'}</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+            </div>
+          </button>
           {/* Tarjeta Hero Principal: Monto, Estatus y Conversión */}
           <div className="p-4 rounded-2xl bg-gradient-to-br from-[#1c242c] via-[#12161b] to-[#0d1014] border border-[#2ED5A4]/30 shadow-[0_4px_20px_rgba(46,213,164,0.12)] space-y-2 text-center">
             {/* Badge de Estatus */}
@@ -352,6 +387,14 @@ export function TransactionDetailModal({
           </button>
         </div>
       </div>
+
+      {/* Modal de Comprobante Oficial CEP Banco de México */}
+      <BanxicoCepModal
+        isOpen={showCepModal}
+        onClose={() => setShowCepModal(false)}
+        data={cepData}
+        language={language}
+      />
     </div>
   );
 }

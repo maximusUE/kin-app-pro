@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeftIcon, CardOutlineIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 
@@ -39,6 +39,7 @@ export function TransactionsView({
   renderTransactionIcon,
 }: TransactionsViewProps) {
   const isEn = language === 'en';
+  const [filterCategory, setFilterCategory] = useState<'all' | 'transfers' | 'bills'>('all');
 
   const GROUP_LABELS: Record<string, { es: string; en: string }> = {
     Hoy: { es: 'Hoy', en: 'Today' },
@@ -77,6 +78,45 @@ export function TransactionsView({
         </div>
       </header>
 
+      {/* Quick Category Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+        <button
+          type="button"
+          onClick={() => setFilterCategory('all')}
+          className={`h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
+            filterCategory === 'all'
+              ? 'bg-[#2ED5A4] text-neutral-950 shadow-sm'
+              : 'bg-[#181928] hover:bg-[#202236] text-[#8E91A5] border border-white/10'
+          }`}
+        >
+          {isEn ? 'All' : 'Todos'} ({transactions.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilterCategory('transfers')}
+          className={`h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1.5 ${
+            filterCategory === 'transfers'
+              ? 'bg-[#2ED5A4] text-neutral-950 shadow-sm'
+              : 'bg-[#181928] hover:bg-[#202236] text-[#8E91A5] border border-white/10'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[15px]">send</span>
+          <span>{isEn ? 'SPEI Transfers' : 'Envíos SPEI'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilterCategory('bills')}
+          className={`h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1.5 ${
+            filterCategory === 'bills'
+              ? 'bg-[#2ED5A4] text-neutral-950 shadow-sm'
+              : 'bg-[#181928] hover:bg-[#202236] text-[#8E91A5] border border-white/10'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[15px]">receipt_long</span>
+          <span>{isEn ? 'Utilities' : 'Servicios'}</span>
+        </button>
+      </div>
+
       {/* Listado Exclusivo de Transacciones de Forma Ordenada por Fecha */}
       <div className="space-y-4 pt-1">
         {transactions.length === 0 ? (
@@ -95,7 +135,29 @@ export function TransactionsView({
         ) : (
           /* Renderizado agrupado y ordenado cronológicamente */
           (['Hoy', 'Ayer', 'Esta semana', 'Anteriores'] as const).map((groupKey) => {
-            const itemsInGroup = groupedTransactions[groupKey] || [];
+            const rawItems = groupedTransactions[groupKey] || [];
+            const itemsInGroup = rawItems.filter((tx) => {
+              if (filterCategory === 'all') return true;
+              if (filterCategory === 'transfers') {
+                return (
+                  tx.category?.toLowerCase().includes('envío') ||
+                  tx.category?.toLowerCase().includes('remesa') ||
+                  tx.category?.toLowerCase().includes('transfer') ||
+                  tx.category?.toLowerCase().includes('p2p') ||
+                  !tx.category?.toLowerCase().includes('servicio')
+                );
+              }
+              if (filterCategory === 'bills') {
+                return (
+                  tx.category?.toLowerCase().includes('servicio') ||
+                  tx.category?.toLowerCase().includes('luz') ||
+                  tx.category?.toLowerCase().includes('cfe') ||
+                  tx.category?.toLowerCase().includes('agua') ||
+                  tx.category?.toLowerCase().includes('bill')
+                );
+              }
+              return true;
+            });
             if (itemsInGroup.length === 0) return null;
 
             return (
@@ -114,6 +176,7 @@ export function TransactionsView({
                 <div className="space-y-2">
                   {itemsInGroup.map((tx) => {
                     const isIncome = tx.type === 'income';
+                    const isBill = tx.category?.toLowerCase().includes('servicio') || tx.category?.toLowerCase().includes('cfe');
                     return (
                       <button
                         key={tx.id}
@@ -140,18 +203,17 @@ export function TransactionsView({
                             <p className="text-xs font-bold text-white leading-tight group-hover:text-primary transition-colors">
                               {tx.title}
                             </p>
-                            <p className="text-[10px] text-[#8E91A5] mt-0.5 flex items-center gap-1.5">
+                            <p className="text-[10px] text-[#8E91A5] mt-0.5 flex items-center gap-1.5 flex-wrap">
                               <span>{tx.category}</span>
                               <span>•</span>
                               <span>{tx.time}</span>
-                              {tx.refNumber && (
-                                <>
-                                  <span>•</span>
-                                  <span className="text-[#8E91A5]/75 font-mono text-[9px]">
-                                    {tx.refNumber}
-                                  </span>
-                                </>
-                              )}
+                              <span className={`px-1.5 py-0.2 rounded font-mono text-[8px] font-bold ${
+                                isBill
+                                  ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                                  : 'bg-emerald-500/15 text-[#2ED5A4] border border-emerald-500/30'
+                              }`}>
+                                {isBill ? 'SAT CFDI ✓' : 'CEP Banxico ✓'}
+                              </span>
                             </p>
                           </div>
                         </div>

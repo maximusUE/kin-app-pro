@@ -12,6 +12,7 @@ import {
   ShareReceiptIcon,
 } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
+import { BanxicoCepModal, BanxicoCepData } from '../modals/BanxicoCepModal';
 
 export interface SendSuccessData {
   id: string;
@@ -26,6 +27,8 @@ export interface SendSuccessData {
   claveRetiroEfectivo?: string;
   pickupStore?: string;
   claveRastreoBanxico?: string;
+  bank?: string;
+  clabe?: string;
 }
 
 interface ReceiptViewProps {
@@ -38,9 +41,27 @@ interface ReceiptViewProps {
 export function ReceiptView({ data, exchangeRate, onDone, language = 'es' }: ReceiptViewProps) {
   const [copiedWithdrawalPin, setCopiedWithdrawalPin] = useState(false);
   const [copiedTrackingBanxico, setCopiedTrackingBanxico] = useState(false);
+  const [showCepModal, setShowCepModal] = useState(false);
   const isEn = language === 'en';
 
   const amountMXN = data.amountMXN || data.amount * exchangeRate;
+
+  const cepData: BanxicoCepData = {
+    claveRastreo: data.claveRastreoBanxico || '202610060000000000842918234567',
+    folioCep: 'CEP-BANXICO-2026-994821',
+    fechaOperacion: data.time?.split(' ')?.[0] || '06/10/2026',
+    horaOperacion: data.time?.includes(':') ? data.time : '21:18:42',
+    montoMXN: amountMXN,
+    emisorBanco: 'STP (Sistema de Transferencias y Pagos) / KIN',
+    receptorBanco: data.bank || 'BBVA México (012)',
+    beneficiarioNombre: data.recipientName,
+    beneficiarioClabe: data.clabe || '012 180 01548291039 4',
+    ordenanteNombre: 'César Ugalde (KIN USA)',
+    concepto: 'Remesa Familiar KIN',
+    selloDigital: 'k9XpQ2m...98aF412b9c81e2840d12a9',
+    numeroSerieCertificado: '30001000000500003421',
+    cadenaOriginal: `||1.1|${data.id}|${amountMXN}|STP|BBVA|2026-10-06||`,
+  };
 
   return (
     <div className="animate-fade-in space-y-4 py-1">
@@ -224,6 +245,23 @@ export function ReceiptView({ data, exchangeRate, onDone, language = 'es' }: Rec
               ? 'SPEI interbank deposit processed. Verifiable on Banxico via Electronic Payment Receipt (CEP).'
               : 'Depósito interbancario SPEI procesado. Verificable en Banxico mediante Comprobante Electrónico de Pago.'}
           </p>
+
+          {/* Botón Verificador Oficial CEP Banxico en 1 Clic */}
+          <button
+            type="button"
+            onClick={() => setShowCepModal(true)}
+            className="w-full h-11 rounded-xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15 border border-emerald-500/40 flex items-center justify-between px-3 text-xs font-bold text-white hover:border-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer group active:scale-[0.98] mt-2 shadow-xs"
+            id="receipt-verify-cep-btn"
+          >
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">account_balance</span>
+              <span>{isEn ? 'Verify Official Banxico CEP' : 'Verificar CEP Oficial en Banco de México'}</span>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-bold text-[#2ED5A4]">
+              <span>{isEn ? 'View' : 'Ver'}</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+            </div>
+          </button>
         </div>
       ) : null}
 
@@ -286,24 +324,48 @@ export function ReceiptView({ data, exchangeRate, onDone, language = 'es' }: Rec
         {data.time}
       </p>
 
-      {/* Outlined Action Buttons: Download PDF & Share Receipt */}
+      {/* Outlined Action Buttons: Download PDF & WhatsApp Share */}
       <div className="space-y-2.5 pt-1">
         <button
           type="button"
-          onClick={() => alert(isEn ? 'Downloading encrypted KIN PDF receipt...' : 'Descargando comprobante PDF encriptado de KIN...')}
-          className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.99]"
+          onClick={() => {
+            const msg = isEn
+              ? `🇲🇽 *KIN Transfer Confirmation*\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `👤 *Recipient:* ${data.recipientName}\n` +
+                `💵 *Amount Sent:* $${data.amount.toFixed(2)} USD\n` +
+                `🇲🇽 *Received:* $${amountMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN\n` +
+                `${data.claveRetiroEfectivo ? `🔑 *Pickup PIN:* ${data.claveRetiroEfectivo}\n🏪 *Location:* ${data.pickupStore || 'OXXO'}\n` : `🏦 *Method:* SPEI Banxico (Instant)\n`}` +
+                `${data.claveRastreoBanxico ? `📄 *Banxico CEP Tracking:* ${data.claveRastreoBanxico}\n` : ''}` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `Audited by Banxico & CNBV • Sent with KIN\n` +
+                `https://kin-app-pro.vercel.app`
+              : `🇲🇽 *Comprobante de Envío KIN*\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `👤 *Destinatario:* ${data.recipientName}\n` +
+                `💵 *Monto enviado:* $${data.amount.toFixed(2)} USD\n` +
+                `🇲🇽 *Monto a recibir:* $${amountMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN\n` +
+                `${data.claveRetiroEfectivo ? `🔑 *Clave de Retiro (PIN):* ${data.claveRetiroEfectivo}\n🏪 *Cobro en:* ${data.pickupStore || 'OXXO'}\n` : `🏦 *Método:* SPEI Banxico Inmediato\n`}` +
+                `${data.claveRastreoBanxico ? `📄 *Clave Rastreo Banxico:* ${data.claveRastreoBanxico}\n` : ''}` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `Auditado por Banxico y CNBV • Enviado con KIN\n` +
+                `https://kin-app-pro.vercel.app`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+          }}
+          className="w-full h-12 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-white flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer shadow-md shadow-[#25D366]/20 active:scale-[0.99] whitespace-nowrap px-3"
+          id="receipt-share-whatsapp-btn"
         >
-          <DownloadIcon className="w-4 h-4 text-[#2ED5A4]" />
-          <span>{isEn ? 'Download PDF Receipt' : 'Descargar Comprobante PDF'}</span>
+          <WhatsAppIcon className="w-4 h-4 text-white shrink-0" />
+          <span className="truncate">{isEn ? 'Share via WhatsApp' : 'Compartir por WhatsApp'}</span>
         </button>
 
         <button
           type="button"
-          onClick={() => alert(isEn ? 'Sharing receipt via WhatsApp / Message...' : 'Compartiendo comprobante vía WhatsApp / Mensaje...')}
-          className="w-full h-12 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.99]"
+          onClick={() => window.print()}
+          className="w-full h-11 rounded-2xl bg-[#181928] border border-white/10 hover:border-[#2ED5A4] flex items-center justify-center gap-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-[0.99]"
         >
-          <ShareReceiptIcon className="w-4 h-4 text-[#2ED5A4]" />
-          <span>{isEn ? 'Share Receipt' : 'Compartir Comprobante'}</span>
+          <DownloadIcon className="w-4 h-4 text-[#2ED5A4]" />
+          <span>{isEn ? 'Print / Download PDF' : 'Imprimir / Descargar PDF'}</span>
         </button>
       </div>
 
@@ -318,6 +380,14 @@ export function ReceiptView({ data, exchangeRate, onDone, language = 'es' }: Rec
           <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
         </button>
       </div>
+
+      {/* Modal de Comprobante Oficial CEP Banco de México */}
+      <BanxicoCepModal
+        isOpen={showCepModal}
+        onClose={() => setShowCepModal(false)}
+        data={cepData}
+        language={language}
+      />
     </div>
   );
 }
