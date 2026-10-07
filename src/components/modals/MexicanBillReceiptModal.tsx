@@ -283,12 +283,12 @@ export function MexicanBillReceiptModal({
           <button
             type="button"
             onClick={handleShareWhatsApp}
-            className="w-full h-12 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white font-headline-md text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-[0_4px_18px_rgba(37,211,102,0.4)] transition-all cursor-pointer active:scale-95 px-3 whitespace-nowrap"
+            className="w-full h-12 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white font-headline-md text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-[0_4px_18px_rgba(37,211,102,0.4)] transition-all cursor-pointer active:scale-95 px-4 whitespace-nowrap"
             id="share-whatsapp-receipt-btn"
           >
             <WhatsAppIcon className="w-5 h-5 text-white shrink-0" />
-            <span className="truncate">
-              {isEn ? 'Share Receipt via WhatsApp' : 'Compartir Comprobante por WhatsApp'}
+            <span>
+              {isEn ? 'Share via WhatsApp' : 'Compartir por WhatsApp'}
             </span>
           </button>
 
