@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { ChevronLeftIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { getStoredCards, saveStoredCards, SavedCardItem, INITIAL_SAVED_CARDS } from '@/lib/cards';
+import { MexicanBillReceiptModal, MexicanBillReceiptData } from '../modals/MexicanBillReceiptModal';
 
 export interface CardCheckoutViewProps {
   onBack: () => void;
@@ -149,6 +150,7 @@ export function CardCheckoutView({
   } | null>(null);
 
   const [copiedFolio, setCopiedFolio] = useState(false);
+  const [showSatPreviewModal, setShowSatPreviewModal] = useState(false);
 
   // Load cards on mount
   useEffect(() => {
@@ -591,6 +593,24 @@ export function CardCheckoutView({
                   ${totalUSD.toFixed(2)} <span className="text-xs text-white">USD</span>
                 </span>
               </div>
+
+              {/* Acceso Directo de Visualización: Comprobante Oficial SAT CFDI 4.0 */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSatPreviewModal(true)}
+                  className="w-full py-2.5 px-3.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-[#2ED5A4] flex items-center justify-between text-xs font-semibold transition-all cursor-pointer group active:scale-[0.98]"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">verified</span>
+                    <span>{isEn ? 'Preview Official SAT CFDI 4.0 Receipt' : 'Ver Comprobante Oficial Timbrado SAT (CFDI 4.0)'}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
+                    <span>{isEn ? 'Preview' : 'Ver Muestra'}</span>
+                    <span className="material-symbols-outlined text-[15px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -915,6 +935,32 @@ export function CardCheckoutView({
           </div>
 
         </main>
+
+        {/* Modal Oficial de Comprobante Timbrado SAT CFDI 4.0 (Nativo Don César) */}
+        <MexicanBillReceiptModal
+          isOpen={showSatPreviewModal}
+          onClose={() => setShowSatPreviewModal(false)}
+          data={{
+            serviceName: conceptTitle || 'CFE Suministrador de Servicios Básicos',
+            serviceCategory: metadata?.serviceId || 'cfe',
+            companyName: metadata?.empresa || 'Comisión Federal de Electricidad',
+            accountHolder: metadata?.titular || 'César Ugalde Soto',
+            location: 'San Juan del Río, QRO',
+            contractNumber: metadata?.contrato || '938471928471',
+            billingCycle: 'Bimestral Vigente',
+            amountMXN: calculatedMXN,
+            amountUSD: amountBaseUSD,
+            feeUSD: feeUSD,
+            totalUSD: totalUSD,
+            exchangeRate: exchangeRate,
+            satUuid: '8F9B7721-3D4E-4A1B-9021-CFDI20268841',
+            banxicoTracking: '20261006883910482910482910',
+            timestamp: new Date().toISOString(),
+            cardBrand: (paymentMode === 'saved' ? activeCard?.brand : (newCardNumber.startsWith('5') ? 'Mastercard' : 'Visa')) || 'Visa',
+            cardLast4: (paymentMode === 'saved' ? activeCard?.last4 : (newCardNumber.slice(-4) || '4242')) || '4242',
+          }}
+          language={language}
+        />
       </div>
     </div>
   );

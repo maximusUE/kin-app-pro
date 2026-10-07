@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeftIcon, CopyIcon, WhatsAppIcon, DownloadIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { toast } from 'sonner';
@@ -36,10 +37,15 @@ export function BanxicoCepModal({
   data,
   language = 'es',
 }: BanxicoCepModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const isEn = language === 'en';
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -81,8 +87,8 @@ export function BanxicoCepModal({
     window.print();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-[420px] bg-[#0A0E17] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.9)] text-white space-y-4 my-auto">
         {/* Universal Don César Header: < | KinLogo | Banxico Badge */}
         <header className="flex items-center justify-between pb-1">
@@ -304,6 +310,7 @@ export function BanxicoCepModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
