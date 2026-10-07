@@ -88,7 +88,7 @@ export function BanxicoCepModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-[420px] bg-[#0A0E17] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.9)] text-white space-y-4 my-auto">
         {/* Universal Don César Header: < | KinLogo | Banxico Badge */}
         <header className="flex items-center justify-between pb-1">
