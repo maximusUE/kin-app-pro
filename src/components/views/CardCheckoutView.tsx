@@ -598,6 +598,7 @@ export function CardCheckoutView({
               <div className="pt-2">
                 <button
                   type="button"
+                  id="preview-sat-cfdi-btn"
                   onClick={() => setShowSatPreviewModal(true)}
                   className="w-full py-2.5 px-3.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-[#2ED5A4] flex items-center justify-between text-xs font-semibold transition-all cursor-pointer group active:scale-[0.98]"
                 >
@@ -931,6 +932,19 @@ export function CardCheckoutView({
               <span>
                 {isEn ? 'Protected by Stripe Sandbox & Banxico SPEI' : 'Protegido por Stripe Sandbox y Normativa SPEI de Banco de México'}
               </span>
+            </div>
+
+            {/* Acceso Rápido Inferior: Ver Comprobante Timbrado SAT */}
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                id="preview-sat-cfdi-bottom-btn"
+                onClick={() => setShowSatPreviewModal(true)}
+                className="text-xs text-[#2ED5A4] hover:underline font-semibold flex items-center justify-center gap-1.5 mx-auto py-1.5 px-3 rounded-full hover:bg-emerald-500/10 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                <span>{isEn ? 'Preview Official SAT CFDI 4.0 Receipt' : 'Ver Ejemplo de Comprobante Oficial SAT (CFDI 4.0)'}</span>
+              </button>
             </div>
           </div>
 
