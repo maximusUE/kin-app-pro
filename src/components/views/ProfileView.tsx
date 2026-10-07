@@ -98,9 +98,13 @@ export function ProfileView({
   // Acceso nativo a fotos y cámara del dispositivo
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [currentAvatar, setCurrentAvatar] = useState<string | null>(userAvatar);
+  const [avatarError, setAvatarError] = useState<boolean>(false);
 
   useEffect(() => {
-    if (userAvatar) setCurrentAvatar(userAvatar);
+    if (userAvatar) {
+      setCurrentAvatar(userAvatar);
+      setAvatarError(false);
+    }
   }, [userAvatar]);
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -322,14 +326,18 @@ export function ProfileView({
     }, 1200);
   };
 
-  // Avatar URL fallback to stitch original
-  const defaultStitchAvatar =
-    'https://lh3.googleusercontent.com/aida/AEtjO1XgfG4wJ22AeyGZa6zxTOh6Jyo20b27o3fM67TfAmBcD2zke2Fk2YO19J9j1d1vfNAB74v-fD8hligRjbEFIVm3iq9fy8yBO3oLJHvGUIay7BRQTN9iRekVzBNrFPzPyKvDNF6s9xjkCWj_SXvlkelM_YGOwkvZ_WOxhKe-DyaVKApVN9NtjREGVxp_9dorOv0eH-vwJVbAuWSjtjv8HOoYl9lVcWIQ0LJXWPH0aLGzV51M6lfcmRnHAyM';
-
-  const displayAvatar = currentAvatar || userAvatar || defaultStitchAvatar;
+  const hasCustomAvatar = Boolean(
+    (currentAvatar || userAvatar) &&
+    (currentAvatar || userAvatar)!.trim().length > 0 &&
+    !(currentAvatar || userAvatar)!.includes('images.unsplash.com') &&
+    !(currentAvatar || userAvatar)!.includes('lh3.googleusercontent.com') &&
+    !avatarError
+  );
+  const displayAvatar = hasCustomAvatar ? (currentAvatar || userAvatar)! : '';
   const displayName = `${draftFirstName} ${draftLastName}`.trim() || userName || 'Usuario KIN';
   const displayEmail = userEmail || '';
   const displayPhone = draftPhone || userPhone || '';
+  const initials = `${draftFirstName?.[0] || displayName?.[0] || 'C'}${draftLastName?.[0] || (displayName.split(' ')[1]?.[0] || 'U')}`.toUpperCase();
 
   if (isPaymentMethodsViewActive) {
     return (
@@ -404,12 +412,19 @@ export function ProfileView({
               title={isEn ? 'Tap to choose photo or take picture' : 'Toca para elegir foto o abrir la cámara'}
             >
               {/* Glowing Avatar Frame */}
-              <div className="relative w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-[#2ED5A4] via-[#2ED5A4]/80 to-[#7047EB] shadow-[0_0_24px_rgba(46,213,164,0.35)] group-hover:scale-105 active:scale-95 transition-transform">
-                <img
-                  alt={`Avatar de ${displayName}`}
-                  className="w-full h-full rounded-full object-cover bg-surface-container-lowest"
-                  src={displayAvatar}
-                />
+              <div className="relative w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-[#2ED5A4] via-[#2ED5A4]/80 to-[#7047EB] shadow-[0_0_24px_rgba(46,213,164,0.35)] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center">
+                {hasCustomAvatar ? (
+                  <img
+                    alt={`Avatar de ${displayName}`}
+                    className="w-full h-full rounded-full object-cover bg-surface-container-lowest"
+                    src={displayAvatar}
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-[#181928] flex items-center justify-center text-white font-black text-2xl tracking-wider select-none border border-white/10 shadow-inner">
+                    {initials}
+                  </div>
+                )}
               </div>
 
               {/* Edit Badge on Avatar - Acceso directo a Cámara / Fotos */}
