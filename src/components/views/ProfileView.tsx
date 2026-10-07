@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { ToggleSwitch } from '@/components/AppSettingsModal';
 import { PaymentMethodsView, SavedCardItem } from '@/components/views/PaymentMethodsView';
 import { FxControlModal } from '@/components/FxControlModal';
+import { ChevronLeftIcon, SettingsGearIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface ProfileViewProps {
   onBack: () => void;
@@ -343,7 +345,39 @@ export function ProfileView({
   }
 
   return (
-    <div className="flex flex-col w-full pb-8 select-none relative animate-fade-in">
+    <div className="flex flex-col w-full pb-8 select-none relative animate-fade-in space-y-4">
+      {/* Header: < | KinLogo | Mi Perfil | Settings */}
+      <header className="flex items-center justify-between py-1">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="btn-circle"
+            title={isEn ? "Back to Home" : "Volver a Inicio"}
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-white" />
+          </button>
+          <KinLogo size={34} />
+        </div>
+        <div className="text-center">
+          <h1 className="text-base font-bold text-white tracking-wide">
+            {isEn ? 'My Profile' : 'Mi Perfil'}
+          </h1>
+          <span className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
+            {userKycTier || 'Tier 1'}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          className="btn-circle"
+          title={isEn ? "Settings & Preferences" : "Configuración & Ajustes"}
+        >
+          <SettingsGearIcon className="w-5 h-5 text-white" />
+        </button>
+      </header>
+
       {/* Ambient Backdrop Halo Glows */}
       <div className="relative w-full">
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-64 h-32 bg-[#2ED5A4]/10 rounded-full blur-3xl pointer-events-none" />

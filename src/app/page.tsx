@@ -1922,7 +1922,7 @@ export default function MobileApp() {
             </div>
           </div>
 
-          {(activeTab === 'home' || activeTab === 'kin-cash' || activeTab === 'bill-pay' || activeTab === 'profile') && !sendSuccessData && (
+          {(activeTab === 'home' || activeTab === 'kin-cash') && !sendSuccessData && (
             <header className="flex items-center justify-between gap-2 mb-1 px-0.5">
               <div className="flex items-center gap-2">
                 {activeTab !== 'home' && (

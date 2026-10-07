@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 
 export interface KinAuthUser {
   id: string;
@@ -288,15 +290,19 @@ export function EnterpriseAuthScreen({
         {/* TOP BRAND BAR & BILINGUAL LANGUAGE PILL                                   */}
         {/* ========================================================================= */}
         <div className="flex items-center justify-between pt-1 pb-4 gap-2">
-          {/* Official KIN Logomark */}
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 flex items-center justify-center shadow-[0_4px_16px_rgba(16,185,129,0.3)] border border-emerald-400/40">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
+          {/* Official KIN Logomark & Back Action */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="btn-circle"
+                title={language === 'es' ? 'Volver a la App' : 'Back to App'}
+              >
+                <ChevronLeftIcon className={`w-5 h-5 ${isLight ? 'text-slate-800' : 'text-white'}`} />
+              </button>
+            )}
+            <KinLogo size={36} />
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className={`font-extrabold text-[19px] sm:text-[20px] tracking-tight ${isLight ? 'text-slate-900' : 'bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent'}`}>
@@ -312,19 +318,8 @@ export function EnterpriseAuthScreen({
             </div>
           </div>
 
-          {/* Action Row: Optional Back Button + Bilingual Glassmorphic Switch */}
+          {/* Action Row: Theme Toggle + Bilingual Glassmorphic Switch */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {onBack && (
-              <button
-                type="button"
-                onClick={onBack}
-                className={`h-7 px-2.5 rounded-full ${isLight ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs' : 'bg-white/10 hover:bg-white/20 text-zinc-300 border-white/10'} text-xs font-semibold flex items-center gap-1 transition-all active:scale-95 border cursor-pointer shadow-sm`}
-                title={language === 'es' ? 'Volver a la App' : 'Back to App'}
-              >
-                <span className="material-symbols-outlined text-[15px]">arrow_back</span>
-                <span className="text-[11px] font-medium">{language === 'es' ? 'App' : 'App'}</span>
-              </button>
-            )}
 
             {/* Quick Theme Toggle Button */}
             <button
