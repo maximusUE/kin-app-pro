@@ -1,8 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeftIcon, SettingsGearIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
+import { AppleWalletPassModal } from '@/components/modals/AppleWalletPassModal';
+import { KinPinRevealModal } from '@/components/modals/KinPinRevealModal';
+import { KinCardLimitsModal } from '@/components/modals/KinCardLimitsModal';
 
 interface WalletViewProps {
   onBack: () => void;
@@ -32,6 +35,10 @@ export function WalletView({
   setShowCardDetails,
 }: WalletViewProps) {
   const isEn = language === 'en';
+
+  const [showPinModal, setShowPinModal] = useState<boolean>(false);
+  const [showLimitsModal, setShowLimitsModal] = useState<boolean>(false);
+  const [showAppleWalletModal, setShowAppleWalletModal] = useState<boolean>(false);
 
   return (
     <div className="animate-fade-in space-y-4">
@@ -187,10 +194,10 @@ export function WalletView({
           </span>
         </button>
 
-        {/* Ver PIN */}
+        {/* Ver PIN (Abre Modal Biométrico) */}
         <button
           type="button"
-          onClick={() => alert(isEn ? 'Your ATM PIN is: 4892 (Encrypted with FaceID)' : 'Tu PIN de cajero es: 4892 (Encriptado con FaceID)')}
+          onClick={() => setShowPinModal(true)}
           className="p-3 rounded-2xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 text-slate-700 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer shadow-sm"
         >
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#202236] flex items-center justify-center text-slate-800 dark:text-white text-sm">
@@ -201,10 +208,10 @@ export function WalletView({
           </span>
         </button>
 
-        {/* Límite */}
+        {/* Límites (Abre Modal de Control de Gastos) */}
         <button
           type="button"
-          onClick={() => alert(isEn ? 'Current daily limit: $5,000.00 USD' : 'Límite diario actual: $5,000.00 USD')}
+          onClick={() => setShowLimitsModal(true)}
           className="p-3 rounded-2xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 text-slate-700 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/15 transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer shadow-sm"
         >
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#202236] flex items-center justify-center text-slate-800 dark:text-white text-sm">
@@ -215,6 +222,35 @@ export function WalletView({
           </span>
         </button>
       </div>
+
+      {/* Apple & Google Wallet Digital Pass Trigger (2026 Mobile Flagship Standard) */}
+      <button
+        type="button"
+        onClick={() => setShowAppleWalletModal(true)}
+        className="w-full p-3.5 rounded-2xl bg-black hover:bg-zinc-900 border border-white/15 flex items-center justify-between text-left transition-all group shadow-md cursor-pointer"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 text-white" viewBox="0 0 170 170" fill="currentColor">
+              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.67-7.81-11.96-14.34-6.42-9.82-11.37-21.2-14.86-34.12-3.48-12.93-5.23-24.96-5.23-36.1 0-16.74 4.54-30.43 13.62-41.07 9.08-10.63 20.31-16.08 33.68-16.34 5.37 0 11.05 1.34 17.06 4.02 6.01 2.68 9.97 4.07 11.89 4.17 1.48 0 5.63-1.47 12.45-4.41 6.82-2.94 12.4-4.22 16.73-3.84 13.06 1.07 23.36 6.08 30.89 15.02-11.45 6.94-17.06 16.59-16.84 28.94.22 9.69 3.99 17.75 11.32 24.18 7.33 6.43 15.84 10.15 25.53 11.16-2.39 7.08-5.48 14.67-9.28 22.77zM119.22 33.15c0-7.39 2.67-14.4 8.01-21.03 5.34-6.63 11.99-10.99 19.95-13.08.33 1.09.49 2.07.49 2.94 0 7.39-2.78 14.51-8.34 21.36-5.56 6.85-12.3 11.16-20.22 12.93a19.7 19.7 0 0 1 .11-3.12z" />
+            </svg>
+          </div>
+          <div>
+            <span className="text-xs font-bold text-white block">
+              {isEn ? 'Add to Apple Wallet' : 'Agregar a Apple Wallet'}
+            </span>
+            <span className="text-[10px] text-slate-400">
+              {isEn ? 'Compatible with Apple Pay & Google Pay' : 'Compatible con Apple Pay & Google Pay'}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 text-[#2ED5A4] text-xs font-bold">
+          <span>{isEn ? 'Add' : 'Agregar'}</span>
+          <span className="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">
+            chevron_right
+          </span>
+        </div>
+      </button>
 
       {/* Desglose de Balances (USD & MXN) */}
       <div className="p-4 rounded-3xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 space-y-3 shadow-sm">
@@ -262,6 +298,26 @@ export function WalletView({
           </div>
         </div>
       </div>
+
+      {/* Modales Interactivos de Step 6 */}
+      <AppleWalletPassModal
+        isOpen={showAppleWalletModal}
+        onClose={() => setShowAppleWalletModal(false)}
+        userName={userName}
+        language={language}
+      />
+
+      <KinPinRevealModal
+        isOpen={showPinModal}
+        onClose={() => setShowPinModal(false)}
+        language={language}
+      />
+
+      <KinCardLimitsModal
+        isOpen={showLimitsModal}
+        onClose={() => setShowLimitsModal(false)}
+        language={language}
+      />
     </div>
   );
 }

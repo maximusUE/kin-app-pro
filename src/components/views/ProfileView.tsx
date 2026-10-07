@@ -6,6 +6,8 @@ import { PaymentMethodsView, SavedCardItem } from '@/components/views/PaymentMet
 import { FxControlModal } from '@/components/FxControlModal';
 import { ChevronLeftIcon, SettingsGearIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
+import { KycUpgradeModal } from '@/components/modals/KycUpgradeModal';
+import { TaxReportModal } from '@/components/modals/TaxReportModal';
 
 export interface ProfileViewProps {
   onBack: () => void;
@@ -139,6 +141,8 @@ export function ProfileView({
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const [securityModalOpen, setSecurityModalOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [kycUpgradeModalOpen, setKycUpgradeModalOpen] = useState(false);
+  const [taxReportModalOpen, setTaxReportModalOpen] = useState(false);
 
   // Floating Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -466,6 +470,51 @@ export function ProfileView({
         </div>
 
         {/* ========================================================================= */}
+        {/* KYC TIER PROGRESS & LIMIT METER (2026 HIGH-HIERARCHY STANDARD)            */}
+        {/* ========================================================================= */}
+        <div className="anim-stagger-2 mb-4 p-4 rounded-2xl bg-gradient-to-br from-[#1C1D2F] via-[#141524] to-[#0E0F1A] border border-[#2ED5A4]/25 shadow-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-[#2ED5A4] border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[18px]">verified</span>
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-white truncate">
+                    {userKycTier || 'Nivel 1 — Básico'}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-[#2ED5A4] font-bold border border-emerald-500/30">
+                    {isEn ? '$1,000/day' : '$1,000/día'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 block mt-0.5">
+                  {isEn ? 'Next: Tier 2 ($3,000 USD/day)' : 'Siguiente: Nivel 2 ($3,000 USD/día)'}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setKycUpgradeModalOpen(true)}
+              className="text-xs font-bold text-[#2ED5A4] hover:text-[#57f2bf] px-3 py-1.5 rounded-xl bg-[#2ED5A4]/15 hover:bg-[#2ED5A4]/25 border border-[#2ED5A4]/30 transition-all cursor-pointer shrink-0"
+            >
+              {isEn ? 'Upgrade' : 'Subir Nivel'}
+            </button>
+          </div>
+
+          {/* Progress Bar & Indicators */}
+          <div className="space-y-1">
+            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
+              <div className="h-full bg-gradient-to-r from-emerald-500 to-[#2ED5A4] rounded-full transition-all duration-500 w-[35%]" />
+            </div>
+            <div className="flex items-center justify-between text-[9px] text-slate-400 font-medium">
+              <span>Nivel 1 ($1k)</span>
+              <span>Nivel 2 ($3k)</span>
+              <span>Nivel 3 ($10k)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
         {/* SECTION 2: CONFIGURACIÓN GENERAL (INTERACTIVE MENU ROWS)                  */}
         {/* ========================================================================= */}
         <div className="anim-stagger-3 flex items-center justify-between px-1 mb-2">
@@ -566,6 +615,38 @@ export function ProfileView({
             </span>
             <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-on-surface-variant">
               chevron_right
+            </span>
+          </div>
+        </button>
+
+        {/* Menu Row: Certificado Fiscal Anual 1099 / SAT */}
+        <button
+          type="button"
+          aria-label={isEn ? 'Annual Tax Certificate' : 'Certificado Fiscal Anual'}
+          className="anim-stagger-3 touch-press w-full p-4 mb-2.5 rounded-2xl bg-surface-container-low hover:bg-surface-container text-left transition-colors flex items-center justify-between group shadow-md cursor-pointer border border-white/5"
+          onClick={() => setTaxReportModalOpen(true)}
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shrink-0">
+              <span className="material-symbols-outlined text-[24px]">policy</span>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-title-base text-title-base text-white truncate font-bold">
+                  {isEn ? 'Annual Tax Certificate' : 'Certificado Fiscal Anual'}
+                </span>
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold text-[9px] border border-amber-500/30">
+                  IRS • SAT
+                </span>
+              </div>
+              <span className="font-caption-sm text-caption-sm text-on-surface-variant truncate">
+                {isEn ? 'Form 1099 statement & CPA remittance export' : 'Comprobante 1099 y desglose fiscal de remesas'}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-on-surface-variant">
+            <span className="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform text-[#2ED5A4]">
+              download
             </span>
           </div>
         </button>
@@ -1380,6 +1461,23 @@ export function ProfileView({
         onRateUpdated={(newRate) => {
           onExchangeRateUpdated?.(newRate);
         }}
+        language={language}
+      />
+
+      {/* Modal de Nivel de Verificación KYC */}
+      <KycUpgradeModal
+        isOpen={kycUpgradeModalOpen}
+        onClose={() => setKycUpgradeModalOpen(false)}
+        currentTier={userKycTier}
+        language={language}
+      />
+
+      {/* Modal de Certificado Fiscal Anual 1099 & SAT */}
+      <TaxReportModal
+        isOpen={taxReportModalOpen}
+        onClose={() => setTaxReportModalOpen(false)}
+        userName={userName}
+        userEmail={userEmail}
         language={language}
       />
     </div>
