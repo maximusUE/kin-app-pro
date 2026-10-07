@@ -2004,6 +2004,7 @@ export default function MobileApp() {
         {activeTab === 'bill-pay' && (
           <ErrorBoundary fallbackTitle={language === 'en' ? 'Bill Pay' : 'Pago de Servicios'}>
             <BillPayView
+              onBack={() => setActiveTab('home')}
               onPaymentSuccess={handleBillPaymentSuccess}
               selectedServiceId={selectedBillServiceId}
               exchangeRate={USD_TO_MXN_RATE}

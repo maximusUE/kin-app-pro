@@ -8,6 +8,7 @@ import { KinLogo } from '@/components/KinLogo';
 import { CardCheckoutView } from './CardCheckoutView';
 import { BillCameraScannerModal, ScannedBillResult } from '../BillCameraScannerModal';
 import { ErrorBoundary } from '../ErrorBoundary';
+import { MexicanBillReceiptModal, MexicanBillReceiptData } from '../modals/MexicanBillReceiptModal';
 
 export interface ServiceDefinition {
   id: string;
@@ -23,6 +24,9 @@ export interface ServiceDefinition {
   sampleContrato: string;
   sampleMXN: number;
   sampleDueDate: string;
+  dueDaysNotice?: number;
+  isUrgent?: boolean;
+  reconnectionFeeMXN?: number;
   logoBg: string;
   logoText: string;
   logoColor: string;
@@ -43,7 +47,10 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleLocation: 'Jalisco',
     sampleContrato: '0182 9384 7162',
     sampleMXN: 842.00,
-    sampleDueDate: 'Vence en 5 días',
+    sampleDueDate: 'Vence en 3 días',
+    dueDaysNotice: 3,
+    isUrgent: true,
+    reconnectionFeeMXN: 180,
     logoBg: 'bg-emerald-600',
     logoText: 'CFE',
     logoColor: 'text-white',
@@ -63,6 +70,8 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: '33 1948 2019',
     sampleMXN: 389.00,
     sampleDueDate: 'Vence en 8 días',
+    dueDaysNotice: 8,
+    isUrgent: false,
     logoBg: 'bg-blue-600',
     logoText: 'TELMEX',
     logoColor: 'text-white',
@@ -82,6 +91,8 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: 'TP-8841920',
     sampleMXN: 629.00,
     sampleDueDate: 'Vence en 12 días',
+    dueDaysNotice: 12,
+    isUrgent: false,
     logoBg: 'bg-purple-600',
     logoText: 'TOTAL',
     logoColor: 'text-white',
@@ -99,6 +110,8 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: 'SKY-40912-MX',
     sampleMXN: 450.00,
     sampleDueDate: 'Vence en 14 días',
+    dueDaysNotice: 14,
+    isUrgent: false,
     logoBg: 'bg-indigo-600',
     logoText: 'SKY',
     logoColor: 'text-white',
@@ -116,6 +129,8 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: 'SIAPA-993201',
     sampleMXN: 285.00,
     sampleDueDate: 'Vence en 20 días',
+    dueDaysNotice: 20,
+    isUrgent: false,
     logoBg: 'bg-cyan-600',
     logoText: 'SIAPA',
     logoColor: 'text-white',
@@ -133,6 +148,8 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
     sampleContrato: 'NAT-552019-JAL',
     sampleMXN: 520.00,
     sampleDueDate: 'Vence en 15 días',
+    dueDaysNotice: 15,
+    isUrgent: false,
     logoBg: 'bg-amber-600',
     logoText: 'GAS',
     logoColor: 'text-white',
@@ -185,6 +202,9 @@ export function BillPayView({
   const [isCardCheckoutOpen, setIsCardCheckoutOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showFeeBreakdownSheet, setShowFeeBreakdownSheet] = useState(false);
+  const [whatsAppReminderActive, setWhatsAppReminderActive] = useState(false);
+  const [receiptModalData, setReceiptModalData] = useState<MexicanBillReceiptData | null>(null);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -217,6 +237,30 @@ export function BillPayView({
   const currentUSD = +(currentMXN / safeExchangeRate).toFixed(2);
   const totalUSDToCharge = +(currentUSD + KIN_SERVICE_FEE).toFixed(2);
 
+  const handleOpenDemoReceipt = () => {
+    const data: MexicanBillReceiptData = {
+      serviceName: activeService.nombre,
+      serviceCategory: activeService.id,
+      companyName: activeService.empresa,
+      accountHolder: activeService.sampleTitular,
+      location: activeService.sampleLocation,
+      contractNumber: activeService.sampleContrato,
+      billingCycle: activeService.billingCycle,
+      amountMXN: currentMXN,
+      amountUSD: currentUSD,
+      feeUSD: KIN_SERVICE_FEE,
+      totalUSD: totalUSDToCharge,
+      exchangeRate: safeExchangeRate,
+      satUuid: '8F9B2A1C-3D4E-5F6A-7B8C-9D0E1F2A3B4C',
+      banxicoTracking: '202610060000000000842918234567',
+      timestamp: new Date().toISOString(),
+      cardBrand: 'Visa',
+      cardLast4: '4242',
+    };
+    setReceiptModalData(data);
+    setIsReceiptModalOpen(true);
+  };
+
   // Flujo Dedicado de Pago con Tarjeta (Pantalla Completa Nativa, Cero Modales)
   if (isCardCheckoutOpen) {
     return (
@@ -237,8 +281,31 @@ export function BillPayView({
             contrato: activeService.sampleContrato,
             titular: activeService.sampleTitular,
           }}
-          onPaymentSuccess={() => {
+          onPaymentSuccess={(result) => {
             setIsCardCheckoutOpen(false);
+            const satUuid = result?.satUuid || `8F9B${Math.floor(1000 + Math.random() * 9000)}-3D4E-4A1B-${Math.floor(1000 + Math.random() * 9000)}-CFDI2026`;
+            const banxicoTracking = result?.banxicoTracking || `20261006${Math.floor(1000000000000000 + Math.random() * 9000000000000000)}`;
+            const receiptData: MexicanBillReceiptData = {
+              serviceName: activeService.nombre,
+              serviceCategory: activeService.id,
+              companyName: activeService.empresa,
+              accountHolder: activeService.sampleTitular,
+              location: activeService.sampleLocation,
+              contractNumber: activeService.sampleContrato,
+              billingCycle: activeService.billingCycle,
+              amountMXN: currentMXN,
+              amountUSD: currentUSD,
+              feeUSD: KIN_SERVICE_FEE,
+              totalUSD: totalUSDToCharge,
+              exchangeRate: safeExchangeRate,
+              satUuid,
+              banxicoTracking,
+              timestamp: new Date().toISOString(),
+              cardBrand: result?.cardBrand || 'Visa',
+              cardLast4: result?.cardLast4 || '4242',
+            };
+            setReceiptModalData(receiptData);
+            setIsReceiptModalOpen(true);
             setIsSuccess(true);
             if (onPaymentSuccess) {
               onPaymentSuccess(activeService.nombre, currentMXN);
@@ -297,16 +364,14 @@ export function BillPayView({
         <div className="relative flex flex-col space-y-2 z-10 pt-1">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              {onBack && (
-                <button
-                  type="button"
-                  onClick={onBack}
-                  className="btn-circle"
-                  title={isEn ? "Back to Home" : "Volver a Inicio"}
-                >
-                  <ChevronLeftIcon className="w-5 h-5 text-white" />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={onBack || (() => { if (typeof window !== 'undefined') window.history.back(); })}
+                className="btn-circle"
+                title={isEn ? "Back to Home" : "Volver a Inicio"}
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-white" />
+              </button>
               <KinLogo size={34} />
             </div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-[#181825] text-emerald-700 dark:text-[#2ED5A4] border border-slate-200/80 dark:border-white/10 shadow-xs">
@@ -328,6 +393,64 @@ export function BillPayView({
               ? 'Support family back home. Direct settlement with official SAT fiscal vouchers.'
               : 'Apoya a tu familia. Liquidación directa con comprobante fiscal oficial del SAT.'}
           </p>
+
+          {/* Banner de Alerta de Corte Inminente / Recordatorio Automático (2026 High Hierarchy) */}
+          {activeService.isUrgent && (
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-500/30 p-3.5 shadow-sm space-y-2.5 mt-2">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+                  <span className="material-symbols-outlined text-[22px] animate-pulse">warning</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-headline-md text-xs font-bold text-amber-300">
+                      {isEn ? 'Imminent Disconnection Warning!' : '¡Aviso de Corte Inminente CFE!'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-300 text-[9px] font-bold uppercase tracking-wider border border-amber-500/30">
+                      {isEn ? 'Due in 3 days' : 'Vence en 3 días'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amber-200/90 leading-tight mt-1">
+                    {isEn
+                      ? 'Pay today to prevent electricity disconnection in Mexico and avoid the $180 MXN CFE reconnection charge.'
+                      : 'Paga hoy para evitar corte de suministro en México y cargos de reconexión de CFE ($180 MXN).'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Interactive WhatsApp Reminder Toggle */}
+              <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between">
+                <span className="text-[10px] text-amber-200/80 font-medium flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[14px]">notifications_active</span>
+                  {isEn ? 'Automatic WhatsApp cutoff alert' : 'Aviso automático a WhatsApp 24h antes'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextState = !whatsAppReminderActive;
+                    setWhatsAppReminderActive(nextState);
+                    if (nextState) {
+                      toast.success(
+                        isEn ? 'WhatsApp Reminder Activated! 🔔' : '¡Recordatorio Activado! 🔔',
+                        {
+                          description: isEn
+                            ? 'We will notify your family 24 hours before CFE disconnection.'
+                            : 'Avisaremos a tu WhatsApp 24 horas antes del corte oficial de CFE.',
+                        }
+                      );
+                    }
+                  }}
+                  className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    whatsAppReminderActive
+                      ? 'bg-emerald-500 text-neutral-950 shadow-sm'
+                      : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30'
+                  }`}
+                >
+                  <span>{whatsAppReminderActive ? (isEn ? 'Active ✓' : 'Activado ✓') : (isEn ? 'Activate Reminder' : 'Activar Recordatorio')}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -414,11 +537,19 @@ export function BillPayView({
                   >
                     <span className="material-symbols-outlined text-[24px]">{serv.icono}</span>
                   </div>
-                  {serv.badge && (
-                    <span className={`px-2 py-0.5 rounded-full font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 whitespace-nowrap ${serv.badgeClass || 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#2ED5A4]'}`}>
-                      {serv.badge}
-                    </span>
-                  )}
+                  <div className="flex flex-col items-end gap-1">
+                    {serv.badge && (
+                      <span className={`px-2 py-0.5 rounded-full font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 whitespace-nowrap ${serv.badgeClass || 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#2ED5A4]'}`}>
+                        {serv.badge}
+                      </span>
+                    )}
+                    {serv.isUrgent && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-500 dark:text-amber-300 font-label-caps text-[8px] font-bold uppercase tracking-tight flex items-center gap-1 border border-amber-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-ping" />
+                        {serv.sampleDueDate}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <span className={`text-sm font-bold transition-colors truncate w-full ${isSelected ? 'text-emerald-800 dark:text-[#2ED5A4]' : 'text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-[#2ED5A4]'}`}>
                   {serv.nombre}
@@ -501,12 +632,17 @@ export function BillPayView({
             </div>
           </div>
 
-          {/* Trust & SAT Footnote */}
+          {/* Trust & SAT Footnote with 1-Tap Receipt & WhatsApp trigger */}
           <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-[#A6ADC8] pt-0.5 px-0.5">
-            <span className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[15px] text-emerald-600 dark:text-[#2ED5A4]">check_circle</span>
-              <span>{isEn ? 'SAT CFDI tax receipt guaranteed' : 'Comprobante fiscal CFDI emitido por SAT'}</span>
-            </span>
+            <button
+              type="button"
+              onClick={handleOpenDemoReceipt}
+              className="flex items-center gap-1.5 text-emerald-700 dark:text-[#2ED5A4] hover:underline font-semibold cursor-pointer group"
+              title={isEn ? "Preview official SAT CFDI stamped receipt & WhatsApp" : "Ver comprobante fiscal oficial SAT y WhatsApp"}
+            >
+              <span className="material-symbols-outlined text-[15px]">verified</span>
+              <span>{isEn ? 'Preview SAT Receipt & WhatsApp' : 'Comprobante SAT & WhatsApp'}</span>
+            </button>
             <span className="text-[10px] text-slate-400 dark:text-[#9399B2] font-mono">
               Contrato: {activeService.sampleContrato}
             </span>
@@ -685,13 +821,30 @@ export function BillPayView({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsSuccess(false)}
-              className="w-full h-12 rounded-full bg-[#2ED5A4] text-black font-bold text-sm hover:brightness-110 transition-all shadow-md cursor-pointer active:scale-95"
-            >
-              {isEn ? 'Done / Back to Bills' : 'Listo / Volver a Facturas'}
-            </button>
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!receiptModalData) {
+                    handleOpenDemoReceipt();
+                  } else {
+                    setIsReceiptModalOpen(true);
+                  }
+                }}
+                className="w-full h-12 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white font-headline-md text-sm font-bold shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all"
+              >
+                <span className="material-symbols-outlined text-[20px]">share</span>
+                <span>{isEn ? 'Share SAT CFDI via WhatsApp' : 'Compartir SAT CFDI por WhatsApp'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsSuccess(false)}
+                className="w-full h-11 rounded-full bg-white/10 hover:bg-white/15 text-white font-medium text-xs hover:brightness-110 transition-all cursor-pointer active:scale-95"
+              >
+                {isEn ? 'Done / Back to Bills' : 'Listo / Volver a Facturas'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -703,6 +856,19 @@ export function BillPayView({
         onScanSuccess={handleScanSuccess}
         targetServiceName={activeService.nombre}
       />
+
+      {/* Modal de Comprobante Fiscal SAT Oficial con WhatsApp 1-Tap */}
+      {receiptModalData && (
+        <MexicanBillReceiptModal
+          isOpen={isReceiptModalOpen}
+          onClose={() => {
+            setIsReceiptModalOpen(false);
+            setIsSuccess(false);
+          }}
+          data={receiptModalData}
+          language={language}
+        />
+      )}
     </div>
   );
 }
