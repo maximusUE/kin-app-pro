@@ -79,7 +79,7 @@ export function MobileBottomDock({
               key={item.id}
               type="button"
               onClick={() => handleTabClick(item.id)}
-              className={`flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer select-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-14 h-14 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer select-none ${
                 isActive
                   ? 'text-primary font-bold scale-105 drop-shadow-[0_0_8px_rgba(46,213,164,0.35)]'
                   : isLight
@@ -90,14 +90,14 @@ export function MobileBottomDock({
               aria-current={isActive ? 'page' : undefined}
             >
               <span
-                className={`material-symbols-outlined text-[24px] transition-transform ${
+                className={`material-symbols-outlined text-[24px] w-6 h-6 flex items-center justify-center shrink-0 transition-transform ${
                   isActive ? 'scale-110' : ''
                 }`}
                 style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
               >
                 {item.icon}
               </span>
-              <span className="font-label-caps text-[10px] tracking-tight">
+              <span className="font-label-caps text-[10px] tracking-tight whitespace-nowrap truncate max-w-[52px] text-center">
                 {isEn ? item.label.en : item.label.es}
               </span>
             </button>
