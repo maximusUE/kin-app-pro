@@ -680,11 +680,11 @@ export function BillPayView({
             <button
               type="button"
               onClick={() => setIsCardCheckoutOpen(true)}
-              className="h-12 px-7 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] border border-emerald-400/40 dark:border-primary/40 flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+              className="h-11 px-5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-primary dark:to-[#18A57E] text-white dark:text-neutral-950 font-headline-md text-xs sm:text-sm font-bold shadow-[0_6px_20px_rgba(5,150,105,0.3)] dark:shadow-[0_6px_20px_rgba(46,213,164,0.35)] border border-emerald-400/40 dark:border-primary/40 flex items-center gap-2 hover:brightness-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               id="pay-trigger-btn"
             >
               <span>{isEn ? 'Pay Bill' : 'Pagar Servicio'}</span>
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </button>
           </div>
         </div>,
