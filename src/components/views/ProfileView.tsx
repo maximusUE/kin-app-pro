@@ -8,6 +8,10 @@ import { ChevronLeftIcon, SettingsGearIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { KycUpgradeModal } from '@/components/modals/KycUpgradeModal';
 import { TaxReportModal } from '@/components/modals/TaxReportModal';
+import { PersonalInformationModal } from '@/components/modals/PersonalInformationModal';
+import { LanguageSelectionModal } from '@/components/modals/LanguageSelectionModal';
+import { PrivacySecurityModal } from '@/components/modals/PrivacySecurityModal';
+import { KinSupportModal } from '@/components/modals/KinSupportModal';
 
 export interface ProfileViewProps {
   onBack: () => void;
@@ -912,546 +916,74 @@ export function ProfileView({
       </div>
 
       {/* ========================================================================= */}
-      {/* MODAL 1: INFORMACIÓN PERSONAL (EDIT PROFILE MODAL)                        */}
+      {/* MODAL 1: INFORMACIÓN PERSONAL (DON CÉSAR NATIVE 2026)                     */}
       {/* ========================================================================= */}
-      {editProfileModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
-          onClick={() => setEditProfileModalOpen(false)}
-        >
-          <div
-            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="font-headline-md text-headline-md text-white">
-                  {isEn ? 'Personal Information' : 'Información Personal'}
-                </h2>
-                <p className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {isEn ? 'Update your personal details & registered address' : 'Actualiza tus datos personales y dirección registrada'}
-                </p>
-              </div>
-              <button
-                type="button"
-                aria-label="Cerrar modal"
-                className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
-                onClick={() => setEditProfileModalOpen(false)}
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
-
-            <form className="space-y-3.5" onSubmit={handleSaveProfileForm}>
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                    {isEn ? 'First Name' : 'Nombre'}
-                  </label>
-                  <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">
-                      person
-                    </span>
-                    <input
-                      className="w-full h-11 pl-9 pr-3 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                      type="text"
-                      required
-                      value={draftFirstName}
-                      onChange={(e) => setDraftFirstName(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                    {isEn ? 'Last Name' : 'Apellido'}
-                  </label>
-                  <div className="relative flex items-center">
-                    <input
-                      className="w-full h-11 px-3.5 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                      type="text"
-                      required
-                      value={draftLastName}
-                      onChange={(e) => setDraftLastName(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                  {isEn ? 'Phone Number' : 'Número Telefónico'}
-                </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px]">
-                    call
-                  </span>
-                  <input
-                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-financial-mono text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                    type="tel"
-                    value={draftPhone}
-                    onChange={(e) => setDraftPhone(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                  {isEn ? 'Address 1' : 'Dirección 1'}
-                </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px]">
-                    home
-                  </span>
-                  <input
-                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                    type="text"
-                    placeholder={isEn ? 'Optional street address' : 'Dirección (calle y número)'}
-                    value={draftAddress1}
-                    onChange={(e) => setDraftAddress1(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                  {isEn ? 'Address 2 (Optional)' : 'Dirección 2 (Opcional)'}
-                </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px]">
-                    apartment
-                  </span>
-                  <input
-                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                    type="text"
-                    placeholder={isEn ? 'Apt, Suite, Unit (optional)' : 'Apto, Suite, Edificio (opcional)'}
-                    value={draftAddress2}
-                    onChange={(e) => setDraftAddress2(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                    {isEn ? 'Postal Code / ZIP' : 'Código Postal'}
-                  </label>
-                  <input
-                    className="w-full h-11 px-3.5 rounded-xl bg-surface-container-low text-white font-financial-mono text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                    type="text"
-                    placeholder={isEn ? 'ZIP code' : 'Código Postal'}
-                    value={draftZip}
-                    onChange={(e) => setDraftZip(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                    {isEn ? 'City' : 'Ciudad'}
-                  </label>
-                  <input
-                    className="w-full h-11 px-3.5 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                    type="text"
-                    placeholder={isEn ? 'City' : 'Ciudad'}
-                    value={draftCity}
-                    onChange={(e) => setDraftCity(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider">
-                  {isEn ? 'State' : 'Estado'}
-                </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px]">
-                    map
-                  </span>
-                  <input
-                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-white font-body-base text-caption-sm focus:outline-none focus:ring-1 focus:ring-[#2ED5A4] shadow-inner border border-white/5"
-                    type="text"
-                    placeholder={isEn ? 'State or province' : 'Estado o provincia'}
-                    value={draftState}
-                    onChange={(e) => setDraftState(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 flex gap-2">
-                <button
-                  className="touch-press w-full h-13 rounded-full bg-[#2ED5A4] text-[#003828] font-title-base text-title-base font-bold shadow-[0_8px_24px_rgba(46,213,164,0.35)] flex items-center justify-center cursor-pointer hover:brightness-105 active:scale-[0.98] transition-all"
-                  type="submit"
-                >
-                  <span>{isEn ? 'Save Changes' : 'Guardar Cambios'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <PersonalInformationModal
+        isOpen={editProfileModalOpen}
+        onClose={() => setEditProfileModalOpen(false)}
+        initialData={{
+          firstName: draftFirstName,
+          lastName: draftLastName,
+          phone: draftPhone,
+          address1: draftAddress1,
+          address2: draftAddress2,
+          zip: draftZip,
+          city: draftCity,
+          state: draftState,
+        }}
+        onSave={(data) => {
+          setDraftFirstName(data.firstName);
+          setDraftLastName(data.lastName);
+          setDraftPhone(data.phone);
+          setDraftAddress1(data.address1);
+          setDraftAddress2(data.address2);
+          setDraftZip(data.zip);
+          setDraftCity(data.city);
+          setDraftState(data.state);
+          const full = `${data.firstName} ${data.lastName}`.trim();
+          setSavedFullName(full);
+          if (data.phone) setSavedPhone(data.phone);
+          const fullAddr = [data.address1, data.city, data.state].filter(Boolean).join(', ');
+          if (fullAddr) setSavedAddress(fullAddr);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('kin_user_name', full);
+            if (data.phone) localStorage.setItem('kin_user_phone', data.phone);
+            if (fullAddr) localStorage.setItem('kin_user_address', fullAddr);
+          }
+        }}
+        language={language}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL 3: IDIOMA / LANGUAGE SELECTOR                                       */}
       {/* ========================================================================= */}
-      {languageModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
-          onClick={() => setLanguageModalOpen(false)}
-        >
-          <div
-            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="font-headline-md text-headline-md text-white">Idioma / Language</h2>
-                <p className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {isEn ? 'Select your preferred interface language' : 'Selecciona el idioma preferido de la app'}
-                </p>
-              </div>
-              <button
-                type="button"
-                aria-label="Cerrar modal"
-                className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
-                onClick={() => setLanguageModalOpen(false)}
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
-
-            <div className="space-y-3 mb-5">
-              {/* Spanish Option */}
-              <div
-                className={`touch-press p-4 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
-                  language === 'es' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-80'
-                }`}
-                onClick={() => handleSelectLanguage('es')}
-              >
-                <div className="flex flex-col pr-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-title-base text-[16px] text-white font-bold">Español</span>
-                    {language === 'es' && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4]">
-                        {isEn ? 'Active' : 'Activo'}
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-caption-sm text-caption-sm text-on-surface-variant mt-0.5">
-                    {isEn ? 'Spanish interface & notifications' : 'Interfaz y notificaciones en español'}
-                  </span>
-                </div>
-                <ToggleSwitch
-                  enabled={language === 'es'}
-                  onToggle={() => handleSelectLanguage('es')}
-                  title="Español"
-                />
-              </div>
-
-              {/* English Option */}
-              <div
-                className={`touch-press p-4 rounded-2xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm border transition-all ${
-                  language === 'en' ? 'border-[#2ED5A4]/40 bg-surface-container' : 'border-white/5 opacity-80'
-                }`}
-                onClick={() => handleSelectLanguage('en')}
-              >
-                <div className="flex flex-col pr-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-title-base text-[16px] text-white font-bold">English</span>
-                    {language === 'en' && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2ED5A4]/20 text-[#2ED5A4]">
-                        {isEn ? 'Active' : 'Activo'}
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-caption-sm text-caption-sm text-on-surface-variant mt-0.5">
-                    {isEn ? 'English interface & notifications' : 'Interfaz y notificaciones en inglés'}
-                  </span>
-                </div>
-                <ToggleSwitch
-                  enabled={language === 'en'}
-                  onToggle={() => handleSelectLanguage('en')}
-                  title="English"
-                />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="touch-press w-full h-12 rounded-full bg-surface-container-highest text-white font-title-base text-[14px] font-bold cursor-pointer hover:bg-surface-bright transition-colors"
-              onClick={() => setLanguageModalOpen(false)}
-            >
-              {isEn ? 'Confirm Selection' : 'Confirmar Selección'}
-            </button>
-          </div>
-        </div>
-      )}
-
-
+      <LanguageSelectionModal
+        isOpen={languageModalOpen}
+        onClose={() => setLanguageModalOpen(false)}
+        currentLanguage={language}
+        onSelectLanguage={(newLang) => handleSelectLanguage(newLang)}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL 5: PRIVACIDAD & SEGURIDAD DETAIL DRAWER                             */}
       {/* ========================================================================= */}
-      {securityModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
-          onClick={() => setSecurityModalOpen(false)}
-        >
-          <div
-            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="font-headline-md text-headline-md text-white">
-                  {isEn ? 'Privacy & Security' : 'Privacidad & Seguridad'}
-                </h2>
-                <p className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {isEn ? 'Zero-Knowledge Vault & Biometrics' : 'Bóveda Zero-Knowledge y Biometría'}
-                </p>
-              </div>
-              <button
-                type="button"
-                aria-label="Cerrar modal"
-                className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
-                onClick={() => setSecurityModalOpen(false)}
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
-
-            <div className="space-y-3 mb-4">
-              {/* Item 1: PIN Transaccional SPEI */}
-              <div className="p-3.5 rounded-2xl bg-surface-container-low flex items-center justify-between border border-white/5">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#2ED5A4] text-[22px]">pin</span>
-                  <div>
-                    <span className="font-title-base text-[14px] text-white font-bold block">
-                      {isEn ? 'SPEI Transfer PIN' : 'PIN Transaccional SPEI'}
-                    </span>
-                    <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                      {isEn ? '6 digits required for withdrawals > $1,000 USD' : '6 dígitos requeridos para retiros > $1,000 USD'}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="px-2.5 py-1 rounded-lg bg-surface-container-high text-[#2ED5A4] font-caption-sm text-[11px] font-bold cursor-pointer"
-                  onClick={() => notifyToast(isEn ? 'PIN reset link sent to your registered email' : 'Solicitud para cambiar PIN enviada al correo', 'pin')}
-                >
-                  {isEn ? 'Change' : 'Cambiar'}
-                </button>
-              </div>
-
-              {/* Item 2: Documentos KYC */}
-              <div className="p-3.5 rounded-2xl bg-surface-container-low flex items-center justify-between border border-white/5">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#ccbdff] text-[22px]">badge</span>
-                  <div>
-                    <span className="font-title-base text-[14px] text-white font-bold block">
-                      {isEn ? 'Official ID (INE / Passport)' : 'Identidad Oficial (INE / Pasaporte)'}
-                    </span>
-                    <span className="font-caption-sm text-[11px] text-[#2ED5A4]">
-                      {isEn ? 'Validated by CNBV & FinCEN (Gemini Vision)' : 'Validado con éxito por CNBV & FinCEN'}
-                    </span>
-                  </div>
-                </div>
-                <span
-                  className="material-symbols-outlined text-[#2ED5A4] text-[20px]"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  verified
-                </span>
-              </div>
-
-              {/* Item 3: ClientVault AES-256 */}
-              <div className="p-3.5 rounded-2xl bg-surface-container-low flex items-center justify-between border border-white/5">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#2ED5A4] text-[22px]">shield_lock</span>
-                  <div>
-                    <span className="font-title-base text-[14px] text-white font-bold block">
-                      ClientVault AES-GCM-256
-                    </span>
-                    <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                      {isEn ? 'Zero-Knowledge offline cryptographic keys' : 'Bóveda Cero Conocimiento cifrada local'}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSecurityModalOpen(false);
-                    onOpenVault();
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] font-caption-sm text-[11px] font-bold cursor-pointer"
-                >
-                  {isEn ? 'Open' : 'Abrir'}
-                </button>
-              </div>
-
-              {/* Item 4: Sesiones Activas */}
-              <div className="p-3.5 rounded-2xl bg-surface-container-low flex items-center justify-between border border-white/5">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-on-surface-variant text-[22px]">devices</span>
-                  <div>
-                    <span className="font-title-base text-[14px] text-white font-bold block">
-                      {isEn ? 'Linked Devices' : 'Dispositivos Vinculados'}
-                    </span>
-                    <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                      iPhone 15 Pro (Nueva York, US) • {isEn ? 'Current' : 'Actual'}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="px-2 py-1 rounded-lg bg-error-container/30 text-[#ffb4ab] font-caption-sm text-[10px] font-bold cursor-pointer"
-                  onClick={() => notifyToast(isEn ? 'All remote sessions closed' : 'Otras sesiones remotas cerradas', 'devices')}
-                >
-                  {isEn ? 'Revoke others' : 'Cerrar otras'}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="touch-press w-full h-12 rounded-full bg-[#2ED5A4] text-[#003828] font-title-base text-[14px] font-bold shadow-md cursor-pointer"
-              onClick={() => setSecurityModalOpen(false)}
-            >
-              {isEn ? 'Understood and Protected' : 'Entendido y Protegido'}
-            </button>
-          </div>
-        </div>
-      )}
+      <PrivacySecurityModal
+        isOpen={securityModalOpen}
+        onClose={() => setSecurityModalOpen(false)}
+        onOpenVault={onOpenVault}
+        language={language}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL 6: AYUDA & SOPORTE 24/7 (CENTRO DE AYUDA KIN)                       */}
       {/* ========================================================================= */}
-      {supportModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-4 pb-20 px-3 sm:px-4 overflow-y-auto transition-all duration-300 animate-fade-in"
-          onClick={() => setSupportModalOpen(false)}
-        >
-          <div
-            className="w-full max-w-[390px] max-h-[88vh] overflow-y-auto scrollbar-none rounded-3xl bg-surface-container border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.95)] p-5 relative animate-scale-in flex flex-col mt-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="font-headline-md text-headline-md text-white">
-                  {isEn ? 'KIN Help Center' : 'Centro de Ayuda KIN'}
-                </h2>
-                <p className="font-caption-sm text-caption-sm text-on-surface-variant">
-                  {isEn ? 'Live bilingual assistance in English & Spanish 24/7' : 'Asistencia en vivo en inglés y español 24/7'}
-                </p>
-              </div>
-              <button
-                type="button"
-                aria-label="Cerrar modal"
-                className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:text-white cursor-pointer"
-                onClick={() => setSupportModalOpen(false)}
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
+      <KinSupportModal
+        isOpen={supportModalOpen}
+        onClose={() => setSupportModalOpen(false)}
+        userClientId={userClientId}
+        language={language}
+      />
 
-            <div className="space-y-2.5 mb-5">
-              {/* Live Chat */}
-              <button
-                type="button"
-                className="touch-press w-full p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between text-left transition-colors cursor-pointer border border-white/5"
-                onClick={() => {
-                  setSupportModalOpen(false);
-                  notifyToast(
-                    isEn ? 'Connecting with KIN live concierge agent...' : 'Conectando con agente KIN 24/7 vía Chat...',
-                    'chat'
-                  );
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#2ED5A4]/20 text-[#2ED5A4] flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[22px]">chat</span>
-                  </div>
-                  <div>
-                    <span className="font-title-base text-[14px] text-white font-bold block">
-                      {isEn ? 'Live Chat' : 'Chat en Vivo'}
-                    </span>
-                    <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                      {isEn ? 'Average wait time: < 45 sec' : 'Tiempo de espera promedio: < 45 seg'}
-                    </span>
-                  </div>
-                </div>
-                <span className="font-caption-sm text-[11px] px-2 py-0.5 rounded-full bg-[#2ED5A4]/10 text-[#2ED5A4] font-bold">
-                  {isEn ? 'Available' : 'Disponible'}
-                </span>
-              </button>
-
-              {/* WhatsApp Oficial */}
-              <button
-                type="button"
-                className="touch-press w-full p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between text-left transition-colors cursor-pointer border border-white/5"
-                onClick={() => {
-                  setSupportModalOpen(false);
-                  const msg = encodeURIComponent(`Hola soporte KIN, requiero asistencia con mi cuenta ID ${userClientId || 'KIN-US-892401'}`);
-                  window.open(`https://wa.me/18005466624?text=${msg}`, '_blank');
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#2ED5A4]/20 text-[#2ED5A4] flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[22px]">forum</span>
-                  </div>
-                  <div>
-                    <span className="font-title-base text-[14px] text-white font-bold block">
-                      {isEn ? 'Verified Official WhatsApp' : 'WhatsApp Oficial Verificado'}
-                    </span>
-                    <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                      +1 (800) 546-6624 (Banxico / KIN)
-                    </span>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined text-[20px] text-on-surface-variant">open_in_new</span>
-              </button>
-
-              {/* FAQ Base de Conocimiento */}
-              <button
-                type="button"
-                className="touch-press w-full p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between text-left transition-colors cursor-pointer border border-white/5"
-                onClick={() => {
-                  setSupportModalOpen(false);
-                  notifyToast(
-                    isEn ? 'Opening SPEI knowledge base and CEP receipt lookup' : 'Abriendo preguntas frecuentes y rastreo CEP',
-                    'help_outline'
-                  );
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-surface-container-high text-[#ccbdff] flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[22px]">help_outline</span>
-                  </div>
-                  <div>
-                    <span className="font-title-base text-[14px] text-white font-bold block">
-                      {isEn ? 'SPEI FAQ & Help Docs' : 'Preguntas Frecuentes SPEI'}
-                    </span>
-                    <span className="font-caption-sm text-[11px] text-on-surface-variant">
-                      {isEn ? 'CEP receipt tracking, daily limits & FX' : 'Rastreo de folio CEP, límites y tipo de cambio'}
-                    </span>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined text-[20px] text-on-surface-variant">chevron_right</span>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              className="touch-press w-full h-12 rounded-full bg-surface-container-highest text-white font-title-base text-[14px] font-bold cursor-pointer hover:bg-surface-bright transition-colors"
-              onClick={() => setSupportModalOpen(false)}
-            >
-              {isEn ? 'Close' : 'Cerrar'}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Modal de Control de Tipo de Cambio & Tesorería */}
       <FxControlModal

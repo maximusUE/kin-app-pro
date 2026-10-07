@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ChevronLeftIcon } from '@/components/Icons';
+import { KinLogo } from '@/components/KinLogo';
 import { toast } from 'sonner';
 
 export interface FxControlModalProps {
@@ -18,6 +21,7 @@ export function FxControlModal({
   onRateUpdated,
   language = 'es',
 }: FxControlModalProps) {
+  const [mounted, setMounted] = useState(false);
   const isEn = language === 'en';
 
   // Estados del Mercado y Configuración de Margen
@@ -49,7 +53,11 @@ export function FxControlModal({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   // Cálculos matemáticos en tiempo real
   const spreadPerDollar = spotRate * (marginPercent / 100);
@@ -137,36 +145,41 @@ export function FxControlModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-start justify-center pt-2 sm:pt-6 pb-20 px-3 sm:px-4 overflow-y-auto animate-fade-in">
-      <div className="w-full max-w-[460px] rounded-3xl bg-[#10121D] border border-white/10 p-5 shadow-2xl flex flex-col gap-5 text-white my-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#2ED5A4]/20 to-primary/30 border border-[#2ED5A4]/40 flex items-center justify-center text-[#2ED5A4] shadow-[0_0_15px_rgba(46,213,164,0.3)]">
-              <span className="material-symbols-outlined text-[22px]">currency_exchange</span>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-white tracking-tight">
-                  {isEn ? 'FX Market & Margin Control' : 'Tesorería & Tipo de Cambio'}
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-primary/20 text-primary border border-primary/30">
-                  Admin
-                </span>
-              </div>
-              <p className="text-[11px] text-on-surface-variant">
-                {isEn ? 'Configure your profit spread & live rates' : 'Configura tu margen de ganancia y tasa en vivo'}
-              </p>
-            </div>
+  return createPortal(
+    <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
+      <div className="relative w-full max-w-[440px] max-h-[92vh] overflow-y-auto scrollbar-none rounded-3xl bg-[#0E131F] border border-white/10 p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] text-white space-y-4 my-auto">
+        {/* Universal Don César Header: < | KinLogo | Badge */}
+        <header className="flex items-center justify-between pb-1">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-circle"
+              title={isEn ? "Back" : "Volver"}
+            >
+              <ChevronLeftIcon className="w-5 h-5 text-white" />
+            </button>
+            <KinLogo size={34} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-outline hover:text-white transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[18px]">close</span>
-          </button>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[13px]">account_balance</span>
+            <span className="font-label-caps text-[9px] uppercase tracking-wider font-bold">
+              {isEn ? 'Institutional Treasury' : 'Tesorería KIN'}
+            </span>
+          </div>
+        </header>
+
+        {/* Hero Title & Subtitle */}
+        <div className="text-left pt-1">
+          <h2 className="text-lg font-bold text-white tracking-tight">
+            {isEn ? 'FX Market & Margin Control' : 'Tesorería & Tipo de Cambio'}
+          </h2>
+          <p className="text-xs text-[#A6ADC8] mt-0.5">
+            {isEn
+              ? 'Configure real-time profit spread, Banxico spot rate & promo tiers'
+              : 'Configura tu margen de ganancia en vivo, tasa spot y promociones'}
+          </p>
         </div>
 
         {/* 1. Mercado en Vivo (Interbank Spot Rate) */}
@@ -407,6 +420,7 @@ export function FxControlModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
