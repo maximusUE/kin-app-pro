@@ -878,7 +878,6 @@ export function SendView({
   const [bankPhone, setBankPhone] = React.useState('');
   const [bankErrors, setBankErrors] = React.useState<Record<string, string>>({});
   const [bankSuccessFeedback, setBankSuccessFeedback] = React.useState<string | null>(null);
-  const [showComparisonCard, setShowComparisonCard] = React.useState(false);
 
   // Detección automática en tiempo real de banco por los primeros 3 dígitos
   const detectedBank = React.useMemo(() => {
@@ -1112,31 +1111,6 @@ export function SendView({
         </button>
       </header>
 
-      {/* Corridor Routing & Lock Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-surface-container border border-white/10 p-3.5 shadow-md">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="flex items-center -space-x-1.5 shrink-0">
-              <span className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-xs shadow-sm">🇺🇸</span>
-              <span className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-xs shadow-sm">🇲🇽</span>
-            </div>
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-title-base text-xs text-white font-bold truncate">USA ➔ México</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-[#2ED5A4]/15 text-[#2ED5A4] font-label-caps text-[9px] uppercase font-bold border border-[#2ED5A4]/30">SPEI</span>
-              </div>
-              <span className="font-caption-sm text-[10px] text-on-surface-variant">
-                {isEn ? 'Instant Direct Remittance' : 'Envío Directo Inmediato SPEI'}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-highest border border-white/10 shrink-0">
-            <span className="material-symbols-outlined text-[#2ED5A4] text-[13px] animate-spin" style={{ animationDuration: '6s' }}>timer</span>
-            <span className="font-financial-mono text-xs text-[#2ED5A4] font-bold">14:59</span>
-          </div>
-        </div>
-      </div>
-
       {/* STITCH DUAL LIVE EXCHANGE CALCULATOR */}
       <div className="relative flex flex-col space-y-2">
         {/* You Send Card */}
@@ -1291,58 +1265,6 @@ export function SendView({
                   : (isEn ? 'Instant P2P Transfer' : 'Instantáneo P2P')}
               </span>
             </div>
-          </div>
-
-          {/* Collapsible Transparent Fee Comparison Button & Card */}
-          <div className="rounded-xl bg-surface-container/80 border border-white/5 overflow-hidden transition-all">
-            <button
-              type="button"
-              onClick={() => setShowComparisonCard((prev) => !prev)}
-              className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[18px]">balance</span>
-                <span className="font-title-base text-xs font-bold text-on-surface">
-                  {isEn ? 'Compare KIN vs Western Union & MoneyGram' : 'Comparar KIN vs Western Union y MoneyGram'}
-                </span>
-              </div>
-              <div className="flex items-center gap-1 text-[11px] text-primary font-bold">
-                <span>{isEn ? 'Save ~$6.50+' : 'Ahorra ~$6.50+'}</span>
-                <span className={`material-symbols-outlined text-[16px] transition-transform ${showComparisonCard ? 'rotate-180' : ''}`}>
-                  expand_more
-                </span>
-              </div>
-            </button>
-
-            {showComparisonCard && (
-              <div className="p-3 pt-1 border-t border-white/5 space-y-2 text-xs animate-fade-in">
-                <div className="grid grid-cols-3 gap-1.5 text-center pt-1">
-                  {/* KIN */}
-                  <div className="p-2 rounded-lg bg-primary/10 border border-primary/30 flex flex-col items-center">
-                    <span className="font-bold text-primary text-[11px]">KIN Global</span>
-                    <span className="font-financial-mono text-xs font-black text-white mt-0.5">$1.99</span>
-                    <span className="text-[10px] text-primary font-semibold mt-0.5">{isEn ? '100% Guaranteed' : 'Sin comisiones ocultas'}</span>
-                  </div>
-                  {/* Western Union */}
-                  <div className="p-2 rounded-lg bg-surface-container-high/40 border border-white/5 flex flex-col items-center opacity-80">
-                    <span className="font-semibold text-slate-300 text-[11px]">Western Union</span>
-                    <span className="font-financial-mono text-xs font-bold text-slate-400 mt-0.5">~$8.50</span>
-                    <span className="text-[10px] text-slate-500 mt-0.5">{isEn ? '+ Spread FX 2-3%' : '+ Spread FX 2-3%'}</span>
-                  </div>
-                  {/* MoneyGram */}
-                  <div className="p-2 rounded-lg bg-surface-container-high/40 border border-white/5 flex flex-col items-center opacity-80">
-                    <span className="font-semibold text-slate-300 text-[11px]">MoneyGram</span>
-                    <span className="font-financial-mono text-xs font-bold text-slate-400 mt-0.5">~$6.99</span>
-                    <span className="text-[10px] text-slate-500 mt-0.5">{isEn ? '+ Margen oculto' : '+ Margen oculto'}</span>
-                  </div>
-                </div>
-                <p className="text-[10px] text-center text-primary/90 font-medium">
-                  {isEn
-                    ? '✓ Tu familia en México recibe más pesos por cada dólar enviado.'
-                    : '✓ Tu familia en México recibe más pesos por cada dólar enviado.'}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -1586,29 +1508,7 @@ export function SendView({
                     </span>
                   </div>
                 </div>
-              ) : (
-                <div
-                  onClick={onSelectAvatarClick}
-                  className="p-3.5 rounded-2xl bg-surface-container border border-dashed border-primary/30 hover:border-primary/60 transition-all cursor-pointer flex items-center justify-between group shadow-sm active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-[22px]">contacts</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">
-                        {isEn ? 'Select Saved Recipient' : 'Seleccionar Destinatario Frecuente'}
-                      </p>
-                      <p className="text-[11px] text-on-surface-variant truncate">
-                        {isEn ? 'Tap to choose from your frequent list' : 'Toca para elegir de tu lista de contactos'}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold shrink-0">
-                    {isEn ? 'Choose' : 'Elegir'}
-                  </span>
-                </div>
-              )}
+              ) : null}
             </div>
           )}
 
@@ -1998,29 +1898,7 @@ export function SendView({
                     </span>
                   </div>
                 </div>
-              ) : (
-                <div
-                  onClick={onSelectAvatarClick}
-                  className="p-3.5 rounded-2xl bg-surface-container border border-dashed border-primary/30 hover:border-primary/60 transition-all cursor-pointer flex items-center justify-between group shadow-sm active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-[22px]">account_balance</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">
-                        {isEn ? 'Select Saved Bank Account' : 'Seleccionar Destinatario Frecuente'}
-                      </p>
-                      <p className="text-[11px] text-on-surface-variant truncate">
-                        {isEn ? 'Tap to choose from your frequent list' : 'Toca para elegir de tu lista de contactos'}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold shrink-0">
-                    {isEn ? 'Choose' : 'Elegir'}
-                  </span>
-                </div>
-              )}
+              ) : null}
             </div>
           )}
 
@@ -2426,29 +2304,7 @@ export function SendView({
                     </span>
                   </div>
                 </div>
-              ) : (
-                <div
-                  onClick={onSelectAvatarClick}
-                  className="p-3.5 rounded-2xl bg-surface-container border border-dashed border-primary/30 hover:border-primary/60 transition-all cursor-pointer flex items-center justify-between group shadow-sm active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-[22px]">smartphone</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-title-base text-xs font-bold text-white truncate">
-                        {isEn ? 'Select Saved Wallet' : 'Seleccionar Destinatario Frecuente'}
-                      </p>
-                      <p className="text-[11px] text-on-surface-variant truncate">
-                        {isEn ? 'Tap to choose from your frequent list' : 'Toca para elegir de tu lista de contactos'}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold shrink-0">
-                    {isEn ? 'Choose' : 'Elegir'}
-                  </span>
-                </div>
-              )}
+              ) : null}
             </div>
           )}
 
