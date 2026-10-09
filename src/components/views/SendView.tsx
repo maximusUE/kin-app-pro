@@ -1114,24 +1114,24 @@ export function SendView({
       {/* STITCH DUAL LIVE EXCHANGE CALCULATOR */}
       <div className="relative flex flex-col space-y-2">
         {/* You Send Card */}
-        <div className="rounded-2xl bg-surface-container-high p-4 shadow-md flex flex-col space-y-3 border border-white/5">
+        <div className="rounded-2xl bg-white dark:bg-surface-container-high p-4 shadow-sm flex flex-col space-y-3 border border-slate-200/80 dark:border-white/5">
           <div className="flex items-center justify-between">
-            <label className="font-caption-sm text-xs uppercase text-on-surface-variant font-semibold" htmlFor="send-amount-input">
+            <label className="font-caption-sm text-xs uppercase text-slate-500 dark:text-on-surface-variant font-semibold" htmlFor="send-amount-input">
               {isEn ? 'You Send' : 'Tú Envías'}
             </label>
-            <span className="font-caption-sm text-xs text-primary flex items-center gap-1 font-bold">
+            <span className="font-caption-sm text-xs text-emerald-600 dark:text-primary flex items-center gap-1 font-bold">
               <span className="material-symbols-outlined text-[13px]">check_circle</span> {isEn ? 'No markup rate' : 'Sin sobreprecio'}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 min-w-0 flex-1 relative">
-              <span className="font-financial-mono text-3xl text-primary font-bold tracking-tight select-none">$</span>
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 min-w-0 flex-1 h-14 px-4.5 rounded-full bg-slate-50 dark:bg-surface-container border border-slate-200/90 dark:border-white/10 shadow-xs focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+              <span className="font-financial-mono text-2xl sm:text-3xl text-emerald-600 dark:text-primary font-black select-none shrink-0">$</span>
               <input
                 aria-label="Send amount in USD"
                 type="text"
                 inputMode="decimal"
                 pattern="[0-9]*[.,]?[0-9]*"
-                className="w-full bg-transparent font-financial-mono text-3xl text-on-surface font-bold focus:outline-none placeholder:text-outline/40 border-b border-primary/30 focus:border-primary transition-colors py-1 cursor-text"
+                className="w-full bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 font-financial-mono text-2xl sm:text-3xl text-slate-900 dark:text-white font-black placeholder:text-slate-400 dark:placeholder:text-white/20 py-0 cursor-text shadow-none"
                 id="send-amount-input"
                 placeholder="0"
                 value={amountValue === '0' || !amountValue ? '' : amountValue}
@@ -1147,46 +1147,46 @@ export function SendView({
                 <button
                   type="button"
                   onClick={() => setAmountValue('0')}
-                  className="text-on-surface-variant hover:text-white text-xs px-2 py-1 rounded-full bg-surface-container-highest border border-white/10 shrink-0 cursor-pointer active:scale-95"
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white text-xs shrink-0 cursor-pointer active:scale-90 transition-all ml-1"
                   title={isEn ? 'Clear to zero' : 'Borrar a cero'}
                 >
                   ✕
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container shrink-0 shadow-inner border border-white/5">
-              <span className="text-base">🇺🇸</span>
-              <span className="font-title-base text-xs text-on-surface font-bold">USD</span>
+            <div className="h-14 px-4.5 rounded-full bg-white dark:bg-surface-container border border-slate-200/90 dark:border-white/10 shadow-sm flex items-center gap-2 shrink-0 select-none">
+              <span className="text-xl">🇺🇸</span>
+              <span className="font-title-base text-xs sm:text-sm text-slate-900 dark:text-white font-black tracking-wide">USD</span>
             </div>
           </div>
-          <p className="text-[11px] text-[#8E91A5] font-medium pt-0.5">
+          <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium pt-0.5">
             {isEn ? 'Tap the amount to type with your phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
           {/* Quick Amount Increment Pills - Regla Don César: Estilo Píldora Bandera USA */}
-          <div className="flex items-center gap-2 pt-1.5 overflow-x-auto scrollbar-none py-1">
+          <div className="flex items-center gap-2 pt-1 overflow-x-auto scrollbar-none py-1">
             <button
-              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
+              className="h-9 px-4 rounded-full bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-bright text-slate-800 dark:text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center justify-center shrink-0"
               onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 50).toFixed(0))}
               type="button"
             >
               +$50
             </button>
             <button
-              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
+              className="h-9 px-4 rounded-full bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-bright text-slate-800 dark:text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center justify-center shrink-0"
               onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 100).toFixed(0))}
               type="button"
             >
               +$100
             </button>
             <button
-              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
+              className="h-9 px-4 rounded-full bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-bright text-slate-800 dark:text-on-surface font-financial-mono text-xs font-bold active:scale-95 transition-all cursor-pointer border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center justify-center shrink-0"
               onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 200).toFixed(0))}
               type="button"
             >
               +$200
             </button>
             <button
-              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs active:scale-95 transition-all font-bold cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
+              className="h-9 px-4 rounded-full bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-bright text-slate-800 dark:text-on-surface font-financial-mono text-xs active:scale-95 transition-all font-bold cursor-pointer border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center justify-center shrink-0"
               onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 500).toFixed(0))}
               type="button"
             >
@@ -1197,46 +1197,46 @@ export function SendView({
 
         {/* Animated Swap / Ticker Node */}
         <div className="relative z-10 flex items-center justify-center -my-2.5">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1F2133] shadow-lg border border-primary/30 max-w-[95%]">
-            <span className="material-symbols-outlined text-primary text-[15px] shrink-0">swap_vert</span>
-            <span className="font-financial-mono text-xs text-on-surface whitespace-nowrap">
-              1 USD = <span className="text-primary font-bold">{USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#1F2133] shadow-md border border-slate-200/80 dark:border-primary/30 max-w-[95%]">
+            <span className="material-symbols-outlined text-emerald-600 dark:text-primary text-[15px] shrink-0">swap_vert</span>
+            <span className="font-financial-mono text-xs text-slate-800 dark:text-on-surface whitespace-nowrap">
+              1 USD = <span className="text-emerald-600 dark:text-primary font-bold">{USD_TO_MXN_RATE.toFixed(2)} MXN</span>
             </span>
-            <span className="text-on-surface-variant font-caption-sm">•</span>
-            <span className="font-label-caps text-[10px] text-primary font-black uppercase tracking-wider text-center">
+            <span className="text-slate-400 dark:text-on-surface-variant font-caption-sm">•</span>
+            <span className="font-label-caps text-[10px] text-emerald-600 dark:text-primary font-black uppercase tracking-wider text-center">
               {isEn ? '$0 Fee on First Transfer' : 'Sin Comisión en tu Primer Envío'}
             </span>
           </div>
         </div>
 
         {/* Receiver Gets Card */}
-        <div className="rounded-2xl bg-surface-container p-4 shadow-md flex flex-col space-y-2 border border-white/5">
+        <div className="rounded-2xl bg-white dark:bg-surface-container p-4 shadow-sm flex flex-col space-y-3 border border-slate-200/80 dark:border-white/5">
           <div className="flex items-center justify-between">
-            <span className="font-caption-sm text-xs uppercase text-on-surface-variant font-semibold">
+            <span className="font-caption-sm text-xs uppercase text-slate-500 dark:text-on-surface-variant font-semibold">
               {isEn ? 'Receiver Gets (Guaranteed)' : 'El destinatario recibe (Garantizado)'}
             </span>
-            <span className="font-caption-sm text-xs text-on-surface-variant font-medium">
+            <span className="font-caption-sm text-xs text-slate-500 dark:text-on-surface-variant font-medium">
               {isEn ? 'Instant pickup' : 'Disponibilidad inmediata'}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-baseline min-w-0 flex-1 overflow-hidden">
-              <span className="font-financial-mono text-2xl text-primary font-bold tracking-tight">$</span>
-              <span className="font-financial-mono text-2xl text-primary font-bold tracking-tight truncate">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 min-w-0 flex-1 h-14 px-4.5 rounded-full bg-slate-50 dark:bg-surface-container-high border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
+              <span className="font-financial-mono text-2xl sm:text-3xl text-emerald-600 dark:text-primary font-black select-none shrink-0">$</span>
+              <span className="font-financial-mono text-2xl sm:text-3xl text-slate-900 dark:text-white font-black tracking-tight truncate">
                 {((parseFloat(amountValue) || 0) * USD_TO_MXN_RATE).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high shrink-0 shadow-inner border border-white/5">
-              <span className="text-base">🇲🇽</span>
-              <span className="font-title-base text-xs text-on-surface font-bold">MXN</span>
+            <div className="h-14 px-4.5 rounded-full bg-white dark:bg-surface-container border border-slate-200/90 dark:border-white/10 shadow-sm flex items-center gap-2 shrink-0 select-none">
+              <span className="text-xl">🇲🇽</span>
+              <span className="font-title-base text-xs sm:text-sm text-slate-900 dark:text-white font-black tracking-wide">MXN</span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 pt-0.5">
-            <span className="material-symbols-outlined text-primary text-[14px]">verified</span>
-            <span className="font-caption-sm text-[11px] text-on-surface-variant">
+            <span className="material-symbols-outlined text-emerald-600 dark:text-primary text-[14px]">verified</span>
+            <span className="font-caption-sm text-[11px] text-slate-500 dark:text-on-surface-variant">
               {isEn
                 ? 'Zero hidden FX spread • Complete amount delivered'
                 : 'Sin comisiones ocultas • Monto completo entregado'}

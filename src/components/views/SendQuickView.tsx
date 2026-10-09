@@ -501,10 +501,10 @@ export function SendQuickView({
           {isEn ? 'Quick Send Amount' : 'Monto del Envío Rápido'}
         </span>
 
-        {/* Display Gigante del Monto (Acceso directo al teclado numérico nativo del celular) */}
+        {/* Display Gigante del Monto - Regla Don César: Cápsula Fija en Forma de Óvalo con Estilo Bandera USA */}
         <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center gap-1.5 relative">
-            <span className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-[#2ED5A4] select-none">$</span>
+          <div className="w-full max-w-[340px] h-14 rounded-full bg-white dark:bg-surface-container-high border border-slate-200/90 dark:border-white/10 shadow-sm px-4 flex items-center justify-between focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+            <span className="font-financial-mono text-2xl sm:text-3xl font-black text-emerald-600 dark:text-[#2ED5A4] select-none mr-1.5 shrink-0">$</span>
             <input
               type="text"
               inputMode="decimal"
@@ -517,22 +517,25 @@ export function SendQuickView({
                 if (parts[1] && parts[1].length > 2) return;
                 setSendQuickAmount(val === '' ? '0' : val);
               }}
-              className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white bg-transparent text-center focus:outline-none min-w-[120px] max-w-[220px] tracking-tight border-b-2 border-emerald-500/40 focus:border-emerald-500 dark:border-[#2ED5A4]/40 dark:focus:border-[#2ED5A4] transition-all py-1 font-financial-mono cursor-text"
+              className="w-full bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 text-center font-financial-mono text-2xl sm:text-3xl text-slate-900 dark:text-white font-black placeholder:text-slate-400 dark:placeholder:text-white/20 py-0 cursor-text shadow-none"
               placeholder="0"
             />
-            <span className="text-sm font-bold text-emerald-600 dark:text-[#2ED5A4] tracking-wide shrink-0">USD</span>
             {sendQuickAmount !== '0' && sendQuickAmount !== '' && (
               <button
                 type="button"
                 onClick={() => setSendQuickAmount('0')}
-                className="ml-1 text-slate-500 hover:text-slate-900 dark:text-on-surface-variant dark:hover:text-white text-xs px-2.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-surface-container-high border border-slate-200 dark:border-white/10 shrink-0 cursor-pointer active:scale-95 transition-all"
+                className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white text-xs shrink-0 cursor-pointer active:scale-90 transition-all mr-1.5"
                 title={isEn ? 'Clear to zero' : 'Borrar a cero'}
               >
                 ✕
               </button>
             )}
+            <div className="h-10 px-3.5 rounded-full bg-slate-100 dark:bg-surface-container border border-slate-200/80 dark:border-white/10 flex items-center gap-1.5 shrink-0 select-none shadow-xs">
+              <span className="text-base">🇺🇸</span>
+              <span className="font-title-base text-xs font-black text-slate-900 dark:text-white">USD</span>
+            </div>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium text-center mt-1">
+          <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium text-center mt-2">
             {isEn ? 'Tap the amount to type with your phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
         </div>
@@ -550,17 +553,17 @@ export function SendQuickView({
           <span className="text-[10px] text-emerald-600 dark:text-[#2ED5A4] font-semibold">1 USD = ${USD_TO_MXN_RATE.toFixed(2)} MXN</span>
         </div>
 
-        {/* 4 Chips de Monto Ergonómicos */}
+        {/* 4 Chips de Monto Ergonómicos - Regla Don César: Estilo Píldora Bandera USA */}
         <div className="grid grid-cols-4 gap-2 pt-1">
           {['25', '50', '100', '200'].map((val) => (
             <button
               key={val}
               type="button"
               onClick={() => setSendQuickAmount(val)}
-              className={`h-11 rounded-full text-xs font-bold font-financial-mono transition-all cursor-pointer flex items-center justify-center active:scale-95 border ${
+              className={`h-10 rounded-full text-xs font-bold font-financial-mono transition-all cursor-pointer flex items-center justify-center active:scale-95 border ${
                 sendQuickAmount === val
-                  ? 'bg-emerald-500 text-slate-950 font-black border-emerald-500 shadow-sm scale-105'
-                  : 'bg-slate-100 hover:bg-slate-200/80 dark:bg-surface-container dark:hover:bg-surface-bright border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-white shadow-xs'
+                  ? 'bg-emerald-600 text-white font-black border-emerald-600 shadow-sm scale-105'
+                  : 'bg-white hover:bg-slate-50 dark:bg-surface-container dark:hover:bg-surface-bright border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-white shadow-xs'
               }`}
             >
               ${val}

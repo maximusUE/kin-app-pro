@@ -632,10 +632,10 @@ export function KinCashP2PModal({
           </span>
         </div>
 
-        {/* Amount Hero Input (Acceso directo al teclado numérico nativo del celular) */}
-        <div className="flex flex-col items-center justify-center my-2">
-          <div className="flex items-center justify-center gap-1.5 relative">
-            <span className="font-display-hero text-headline-lg text-primary font-bold leading-none select-none">$</span>
+        {/* Amount Hero Input - Regla Don César: Cápsula Fija en Forma de Óvalo con Estilo Bandera USA */}
+        <div className="flex flex-col items-center justify-center my-2 w-full px-2">
+          <div className="w-full max-w-[340px] h-14 rounded-full bg-white dark:bg-surface-container-high border border-slate-200/90 dark:border-white/10 shadow-sm px-4 flex items-center justify-between focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+            <span className="font-financial-mono text-2xl sm:text-3xl text-emerald-600 dark:text-primary font-black select-none shrink-0 mr-1.5">$</span>
             <input
               type="text"
               inputMode="decimal"
@@ -649,50 +649,54 @@ export function KinCashP2PModal({
                 if (parts[1] && parts[1].length > 2) return;
                 setCurrentAmount(val === '' ? '0' : val);
               }}
-              className="font-headline-lg text-[48px] sm:text-[54px] text-white font-bold leading-none tracking-tight bg-transparent text-center focus:outline-none min-w-[130px] max-w-[240px] border-b-2 border-primary/40 focus:border-primary transition-all placeholder:text-white/20 font-financial-mono py-1 cursor-text"
+              className="w-full bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 text-center font-financial-mono text-2xl sm:text-3xl text-slate-900 dark:text-white font-black placeholder:text-slate-400 dark:placeholder:text-white/20 py-0 cursor-text shadow-none"
             />
             {currentAmount !== '0' && (
               <button
                 type="button"
                 onClick={clearAmount}
-                className="ml-1 text-on-surface-variant hover:text-white text-xs px-2.5 py-1.5 rounded-full bg-surface-container-high border border-white/10 cursor-pointer active:scale-90 transition-all"
+                className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white text-xs shrink-0 cursor-pointer active:scale-90 transition-all mr-1.5"
                 title={isEn ? 'Clear amount to zero' : 'Borrar monto a cero'}
               >
-                {isEn ? 'Clear' : 'Borrar'}
+                ✕
               </button>
             )}
+            <div className="h-10 px-3.5 rounded-full bg-slate-100 dark:bg-surface-container border border-slate-200/80 dark:border-white/10 flex items-center gap-1.5 shrink-0 select-none shadow-xs">
+              <span className="text-base">🇺🇸</span>
+              <span className="font-title-base text-xs font-black text-slate-900 dark:text-white">USD</span>
+            </div>
           </div>
-          <p className="text-[11px] text-[#8E91A5] font-medium text-center mt-1">
+          <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium text-center mt-2">
             {isEn ? 'Tap amount to type with phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
         </div>
 
         {/* Live FX & Fee Guarantee */}
-        <div className="flex items-center gap-2 mt-1 px-3 py-1 rounded-full bg-surface-container-high/80 backdrop-blur-sm border border-white/5">
-          <span className="material-symbols-outlined text-primary text-[15px] animate-pulse">bolt</span>
-          <span className="font-financial-mono text-caption-sm text-primary font-bold">
+        <div className="flex items-center gap-2 mt-1 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-surface-container-high/80 backdrop-blur-sm border border-slate-200/80 dark:border-white/5">
+          <span className="material-symbols-outlined text-emerald-600 dark:text-primary text-[15px] animate-pulse">bolt</span>
+          <span className="font-financial-mono text-caption-sm text-emerald-600 dark:text-primary font-bold">
             ≈ ${Number(mxnEquivalent).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
           </span>
-          <span className="text-outline text-[12px]">•</span>
-          <span className="font-caption-sm text-caption-sm text-white font-medium">
+          <span className="text-slate-300 dark:text-outline text-[12px]">•</span>
+          <span className="font-caption-sm text-caption-sm text-slate-700 dark:text-white font-medium">
             {isEn ? 'Zero Fees' : 'Sin Comisión'}
           </span>
         </div>
 
         {/* Transfer Concept Note Chip (Editable & Explicitly Optional) */}
-        <div className="mt-3 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-all cursor-pointer shadow-sm border border-white/5">
+        <div className="mt-3 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-surface-container text-slate-800 dark:text-on-surface hover:bg-slate-50 dark:hover:bg-surface-container-high transition-all cursor-pointer shadow-xs border border-slate-200/80 dark:border-white/5">
           <span className="text-[14px]">🛒</span>
           <input
-            className="bg-transparent border-none text-white font-caption-sm text-caption-sm focus:outline-none w-52 text-center truncate placeholder:text-white/40"
+            className="bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 text-slate-900 dark:text-white font-caption-sm text-caption-sm w-48 text-center truncate placeholder:text-slate-400 dark:placeholder:text-white/40 shadow-none"
             placeholder={isEn ? 'Payment note (Optional)...' : 'Concepto de pago (Opcional)...'}
             type="text"
             value={conceptNote}
             onChange={(e) => setConceptNote(e.target.value)}
           />
-          <span className="px-2 py-0.5 rounded-full bg-white/10 text-[9px] font-bold text-on-surface-variant uppercase tracking-wider shrink-0 select-none">
+          <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-[9px] font-bold text-slate-600 dark:text-on-surface-variant uppercase tracking-wider shrink-0 select-none border border-slate-200/60 dark:border-transparent">
             {isEn ? 'Optional' : 'Opcional'}
           </span>
-          <span className="material-symbols-outlined text-on-surface-variant text-[14px]">edit</span>
+          <span className="material-symbols-outlined text-slate-400 dark:text-on-surface-variant text-[14px]">edit</span>
         </div>
 
         {/* Quick Amount Chips */}
@@ -702,10 +706,10 @@ export function KinCashP2PModal({
               key={amt}
               type="button"
               onClick={() => setCurrentAmount(amt)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border active:scale-95 ${
+              className={`h-9 px-4 rounded-full text-xs font-financial-mono font-bold transition-all cursor-pointer border active:scale-95 flex items-center justify-center ${
                 currentAmount === amt
-                  ? 'bg-primary text-on-primary border-primary shadow-sm scale-105'
-                  : 'bg-surface-container text-on-surface border-outline/20 hover:border-primary/40'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm scale-105'
+                  : 'bg-white dark:bg-surface-container text-slate-800 dark:text-on-surface border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 shadow-xs'
               }`}
             >
               ${amt}
@@ -714,7 +718,7 @@ export function KinCashP2PModal({
           <button
             type="button"
             onClick={clearAmount}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline/20 cursor-pointer active:scale-95"
+            className="h-9 w-9 rounded-full text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-on-surface-variant dark:hover:text-white bg-slate-100 dark:bg-surface-container-high border border-slate-200/80 dark:border-white/10 cursor-pointer active:scale-95 flex items-center justify-center shadow-xs"
             title={isEn ? 'Clear to zero' : 'Borrar a cero'}
           >
             C

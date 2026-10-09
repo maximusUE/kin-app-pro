@@ -1279,6 +1279,31 @@ html.light div.relative input {
   border-color: #CBD5E1 !important;
   color: #0F172A !important;
 }
+/* Exenciones para inputs transparentes, minimalistas y dentro de cápsulas ovaladas */
+html.light input.bg-transparent,
+html.light input.border-0,
+html.light input.border-none,
+html.light .rounded-full input,
+html.light input#send-amount-input,
+html.light .pill-input,
+html.light .pill-input input {
+  background-color: transparent !important;
+  border: none !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+html.light input.bg-transparent:focus,
+html.light input.border-0:focus,
+html.light input.border-none:focus,
+html.light .rounded-full input:focus,
+html.light input#send-amount-input:focus,
+html.light .pill-input:focus,
+html.light .pill-input input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
 html.light input:-webkit-autofill,
 html.light input:-webkit-autofill:hover, 
 html.light input:-webkit-autofill:focus {
