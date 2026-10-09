@@ -159,8 +159,23 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
   const [hideBalance, setHideBalance] = useState<boolean>(false);
 
   // Language & Theme
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [language, setLanguageState] = useState<'es' | 'en'>('en');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  const setLanguage = (lang: 'es' | 'en') => {
+    setLanguageState(lang);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_language', lang);
+        const active = localStorage.getItem('kin_active_user');
+        if (active) {
+          const parsed = JSON.parse(active);
+          parsed.language = lang;
+          localStorage.setItem('kin_active_user', JSON.stringify(parsed));
+        }
+      } catch (_) {}
+    }
+  };
 
   // Contacts
   const [contactsList, setContactsList] = useState<ContactItem[]>([]);
@@ -215,8 +230,11 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
       pushNotificationsEnabled: userData.pushNotificationsEnabled ?? true,
     });
 
-    if (userData.language === 'es' || userData.language === 'en') {
-      setLanguage(userData.language);
+    const localSavedLang = typeof window !== 'undefined' ? (localStorage.getItem('kin_language') as 'es' | 'en' | null) : null;
+    if (localSavedLang === 'es' || localSavedLang === 'en') {
+      setLanguageState(localSavedLang);
+    } else if (userData.language === 'es' || userData.language === 'en') {
+      setLanguageState(userData.language);
     }
     if (userData.currencyPref === 'USD' || userData.currencyPref === 'MXN') {
       setCurrencyPref(userData.currencyPref);

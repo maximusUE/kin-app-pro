@@ -308,7 +308,17 @@ export function ProfileView({
 
   const handleSelectLanguage = (newLang: 'es' | 'en') => {
     setLanguage(newLang);
-    if (typeof window !== 'undefined') localStorage.setItem('kin_language', newLang);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_language', newLang);
+        const active = localStorage.getItem('kin_active_user');
+        if (active) {
+          const parsed = JSON.parse(active);
+          parsed.language = newLang;
+          localStorage.setItem('kin_active_user', JSON.stringify(parsed));
+        }
+      } catch (_) {}
+    }
     if (userId) {
       fetch('/api/account/data', {
         method: 'POST',

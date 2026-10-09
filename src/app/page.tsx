@@ -316,7 +316,7 @@ export default function MobileApp() {
   const [biometricsEnabled, setBiometricsEnabled] = useState(true);
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
   const [currencyPref, setCurrencyPref] = useState<'USD' | 'MXN'>('USD');
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [language, setLanguage] = useState<'es' | 'en'>('en');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [copiedClientId, setCopiedClientId] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
@@ -364,13 +364,18 @@ export default function MobileApp() {
       if (typeof user.balanceUSD === 'number') setBaseBalanceUSD(user.balanceUSD);
     }
     if (user.memberSince) setUserMemberSince(user.memberSince);
-    if (user.language === 'es' || user.language === 'en') {
-      setLanguage(user.language);
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('kin_language', user.language);
-        } catch (_) {}
-      }
+
+    // Prioridad inviolable: La preferencia explícita del dispositivo en 'kin_language' manda
+    const savedLocalLang = typeof window !== 'undefined' ? (localStorage.getItem('kin_language') as 'es' | 'en' | null) : null;
+    const finalLanguage = (savedLocalLang === 'es' || savedLocalLang === 'en')
+      ? savedLocalLang
+      : (user.language === 'es' || user.language === 'en') ? user.language : 'en';
+
+    setLanguage(finalLanguage);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_language', finalLanguage);
+      } catch (_) {}
     }
     if (user.currencyPref === 'USD' || user.currencyPref === 'MXN') {
       setCurrencyPref(user.currencyPref);
@@ -629,6 +634,12 @@ export default function MobileApp() {
             state: clientSaved.state !== undefined ? clientSaved.state : (data.user.state || ''),
             zip: clientSaved.zip !== undefined ? clientSaved.zip : (data.user.zip || ''),
           };
+
+          const activeDeviceLang = typeof window !== 'undefined' ? (localStorage.getItem('kin_language') as 'es' | 'en' | null) : null;
+          if (activeDeviceLang === 'es' || activeDeviceLang === 'en') {
+            effectiveUser.language = activeDeviceLang;
+          }
+
           loadUserData(effectiveUser);
           if (Array.isArray(data.transactions)) {
             setTransactions(data.transactions);
@@ -2331,6 +2342,12 @@ export default function MobileApp() {
           if (typeof window !== 'undefined') {
             try {
               localStorage.setItem('kin_language', newLang);
+              const active = localStorage.getItem('kin_active_user');
+              if (active) {
+                const parsed = JSON.parse(active);
+                parsed.language = newLang;
+                localStorage.setItem('kin_active_user', JSON.stringify(parsed));
+              }
             } catch (_) {}
           }
           if (userId) {

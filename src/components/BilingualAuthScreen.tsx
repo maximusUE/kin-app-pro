@@ -14,7 +14,7 @@ export function BilingualAuthScreen({
   initialMode = 'login',
 }: BilingualAuthScreenProps) {
   const [authMode, setAuthMode] = useState<'login' | 'register'>(initialMode);
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [language, setLanguage] = useState<'es' | 'en'>('en');
 
   // Load saved language on mount & inject Google Identity Services script
   useEffect(() => {
@@ -39,7 +39,15 @@ export function BilingualAuthScreen({
   const handleLanguageChange = (lang: 'es' | 'en') => {
     setLanguage(lang);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('kin_language', lang);
+      try {
+        localStorage.setItem('kin_language', lang);
+        const active = localStorage.getItem('kin_active_user');
+        if (active) {
+          const parsed = JSON.parse(active);
+          parsed.language = lang;
+          localStorage.setItem('kin_active_user', JSON.stringify(parsed));
+        }
+      } catch (_) {}
     }
   };
 

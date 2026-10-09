@@ -73,7 +73,7 @@ export function EnterpriseAuthScreen({
 }: EnterpriseAuthScreenProps) {
   // Mode & Language
   const [authMode, setAuthMode] = useState<'login' | 'register'>(initialMode);
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [language, setLanguage] = useState<'es' | 'en'>('en');
   // Theme state for adaptive Apple Light / Catppuccin Dark styling
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
@@ -137,7 +137,15 @@ export function EnterpriseAuthScreen({
   const handleLanguageToggle = (newLang: 'es' | 'en') => {
     setLanguage(newLang);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('kin_language', newLang);
+      try {
+        localStorage.setItem('kin_language', newLang);
+        const active = localStorage.getItem('kin_active_user');
+        if (active) {
+          const parsed = JSON.parse(active);
+          parsed.language = newLang;
+          localStorage.setItem('kin_active_user', JSON.stringify(parsed));
+        }
+      } catch (_) {}
     }
   };
 

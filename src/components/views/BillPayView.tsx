@@ -13,17 +13,24 @@ import { MexicanBillReceiptModal, MexicanBillReceiptData } from '../modals/Mexic
 export interface ServiceDefinition {
   id: string;
   nombre: string;
+  nombreEn?: string;
   subtitulo: string;
+  subtituloEn?: string;
   icono: string;
   badge?: string;
+  badgeEn?: string;
   badgeClass?: string;
   empresa: string;
+  empresaEn?: string;
   placeholder: string;
+  placeholderEn?: string;
   sampleTitular: string;
+  sampleTitularEn?: string;
   sampleLocation: string;
   sampleContrato: string;
   sampleMXN: number;
   sampleDueDate: string;
+  sampleDueDateEn?: string;
   dueDaysNotice?: number;
   isUrgent?: boolean;
   reconnectionFeeMXN?: number;
@@ -37,17 +44,24 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
   {
     id: 'electricidad',
     nombre: 'Electricidad (CFE)',
+    nombreEn: 'Electricity (CFE)',
     subtitulo: 'CFE Suministrador Básico',
+    subtituloEn: 'CFE Basic Utility Supplier',
     icono: 'bolt',
     badge: 'Popular',
+    badgeEn: 'POPULAR',
     badgeClass: 'bg-emerald-500/20 text-emerald-300 font-label-caps text-[9px] uppercase font-bold border border-emerald-500/30',
     empresa: 'CFE Suministrador Básico',
+    empresaEn: 'CFE Basic Utility',
     placeholder: 'Número de servicio (30 dígitos)',
+    placeholderEn: 'Service number (30 digits)',
     sampleTitular: 'Casa Mamá',
+    sampleTitularEn: "Mom's House (Casa Mamá)",
     sampleLocation: 'Jalisco',
     sampleContrato: '0182 9384 7162',
     sampleMXN: 842.00,
     sampleDueDate: 'Vence en 3 días',
+    sampleDueDateEn: 'Due in 3 days',
     dueDaysNotice: 3,
     isUrgent: true,
     reconnectionFeeMXN: 180,
@@ -59,17 +73,24 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
   {
     id: 'telefono',
     nombre: 'Telefonía',
+    nombreEn: 'Phone & Mobile',
     subtitulo: 'Telmex • Telcel • AT&T',
+    subtituloEn: 'Telmex • Telcel • AT&T',
     icono: 'phone_iphone',
     badge: 'SPEI 10s',
+    badgeEn: 'SPEI 10S',
     badgeClass: 'bg-blue-500/20 text-blue-300 font-label-caps text-[9px] uppercase font-bold border border-blue-500/30',
     empresa: 'Telmex Telecomunicaciones',
+    empresaEn: 'Telmex Telecom',
     placeholder: 'Teléfono a 10 dígitos o Referencia',
+    placeholderEn: '10-digit phone or reference',
     sampleTitular: 'Rosa Elena Morales',
+    sampleTitularEn: 'Rosa Elena Morales',
     sampleLocation: 'Guadalajara',
     sampleContrato: '33 1948 2019',
     sampleMXN: 389.00,
     sampleDueDate: 'Vence en 8 días',
+    sampleDueDateEn: 'Due in 8 days',
     dueDaysNotice: 8,
     isUrgent: false,
     logoBg: 'bg-blue-600',
@@ -80,17 +101,24 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
   {
     id: 'internet',
     nombre: 'Internet',
+    nombreEn: 'Internet & Fiber',
     subtitulo: 'Totalplay • Izzi • Megacable',
+    subtituloEn: 'Totalplay • Izzi • Megacable',
     icono: 'wifi',
     badge: 'Fibra',
+    badgeEn: 'FIBER',
     badgeClass: 'bg-purple-500/20 text-purple-300 font-label-caps text-[9px] uppercase font-bold border border-purple-500/30',
     empresa: 'Totalplay Telecomunicaciones',
+    empresaEn: 'Totalplay Telecom',
     placeholder: 'Número de cuenta Totalplay',
+    placeholderEn: 'Totalplay account number',
     sampleTitular: 'Familia Ugalde',
+    sampleTitularEn: 'Ugalde Family',
     sampleLocation: 'Zapopan',
     sampleContrato: 'TP-8841920',
     sampleMXN: 629.00,
     sampleDueDate: 'Vence en 12 días',
+    sampleDueDateEn: 'Due in 12 days',
     dueDaysNotice: 12,
     isUrgent: false,
     logoBg: 'bg-purple-600',
@@ -101,15 +129,21 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
   {
     id: 'television',
     nombre: 'TV de Paga',
+    nombreEn: 'Pay TV & Cable',
     subtitulo: 'Sky México • Dish',
+    subtituloEn: 'Sky Mexico • Dish',
     icono: 'tv',
     empresa: 'Sky México Satelital',
+    empresaEn: 'Sky Mexico Satellite',
     placeholder: 'Número de contrato Sky / Dish',
+    placeholderEn: 'Sky / Dish contract number',
     sampleTitular: 'Rosa Elena Morales',
+    sampleTitularEn: 'Rosa Elena Morales',
     sampleLocation: 'Jalisco',
     sampleContrato: 'SKY-40912-MX',
     sampleMXN: 450.00,
     sampleDueDate: 'Vence en 14 días',
+    sampleDueDateEn: 'Due in 14 days',
     dueDaysNotice: 14,
     isUrgent: false,
     logoBg: 'bg-indigo-600',
@@ -120,15 +154,21 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
   {
     id: 'agua',
     nombre: 'Agua Potable',
+    nombreEn: 'City Water',
     subtitulo: 'SIAPA • SACMEX • AyD',
+    subtituloEn: 'SIAPA • SACMEX • AyD',
     icono: 'water_drop',
     empresa: 'SIAPA Agua Potable Jalisco',
+    empresaEn: 'SIAPA Water Board',
     placeholder: 'Número de cuenta o medidor',
+    placeholderEn: 'Account or meter number',
     sampleTitular: 'Casa Mamá',
+    sampleTitularEn: "Mom's House (Casa Mamá)",
     sampleLocation: 'Guadalajara',
     sampleContrato: 'SIAPA-993201',
     sampleMXN: 285.00,
     sampleDueDate: 'Vence en 20 días',
+    sampleDueDateEn: 'Due in 20 days',
     dueDaysNotice: 20,
     isUrgent: false,
     logoBg: 'bg-cyan-600',
@@ -139,15 +179,21 @@ export const SERVICIOS_MEXICO: ServiceDefinition[] = [
   {
     id: 'gas',
     nombre: 'Gas Natural',
+    nombreEn: 'Natural Gas',
     subtitulo: 'Naturgy • Gas del Norte',
+    subtituloEn: 'Naturgy • Gas del Norte',
     icono: 'local_fire_department',
     empresa: 'Naturgy México Gas Natural',
+    empresaEn: 'Naturgy Mexico Natural Gas',
     placeholder: 'Número de cliente o cuenta',
+    placeholderEn: 'Customer account number',
     sampleTitular: 'Casa Mamá',
+    sampleTitularEn: "Mom's House (Casa Mamá)",
     sampleLocation: 'Jalisco',
     sampleContrato: 'NAT-552019-JAL',
     sampleMXN: 520.00,
     sampleDueDate: 'Vence en 15 días',
+    sampleDueDateEn: 'Due in 15 days',
     dueDaysNotice: 15,
     isUrgent: false,
     logoBg: 'bg-amber-600',
@@ -239,10 +285,10 @@ export function BillPayView({
 
   const handleOpenDemoReceipt = () => {
     const data: MexicanBillReceiptData = {
-      serviceName: activeService.nombre,
+      serviceName: isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre,
       serviceCategory: activeService.id,
-      companyName: activeService.empresa,
-      accountHolder: activeService.sampleTitular,
+      companyName: isEn ? (activeService.empresaEn || activeService.empresa) : activeService.empresa,
+      accountHolder: isEn ? (activeService.sampleTitularEn || activeService.sampleTitular) : activeService.sampleTitular,
       location: activeService.sampleLocation,
       contractNumber: activeService.sampleContrato,
       billingCycle: activeService.billingCycle,
@@ -268,8 +314,8 @@ export function BillPayView({
         <CardCheckoutView
           onBack={() => setIsCardCheckoutOpen(false)}
           title={isEn ? 'Bill Pay Card Checkout' : 'Pago de Factura con Tarjeta'}
-          conceptTitle={activeService.nombre}
-          conceptSubtitle={`${activeService.sampleTitular} • ${activeService.sampleLocation} (${activeService.sampleContrato})`}
+          conceptTitle={isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre}
+          conceptSubtitle={`${isEn ? (activeService.sampleTitularEn || activeService.sampleTitular) : activeService.sampleTitular} • ${activeService.sampleLocation} (${activeService.sampleContrato})`}
           amountBaseUSD={currentUSD}
           amountMXN={currentMXN}
           feeUSD={KIN_SERVICE_FEE}
@@ -277,19 +323,19 @@ export function BillPayView({
           language={language}
           metadata={{
             serviceId: activeService.id,
-            empresa: activeService.empresa,
+            empresa: isEn ? (activeService.empresaEn || activeService.empresa) : activeService.empresa,
             contrato: activeService.sampleContrato,
-            titular: activeService.sampleTitular,
+            titular: isEn ? (activeService.sampleTitularEn || activeService.sampleTitular) : activeService.sampleTitular,
           }}
           onPaymentSuccess={(result) => {
             setIsCardCheckoutOpen(false);
             const satUuid = result?.satUuid || `8F9B${Math.floor(1000 + Math.random() * 9000)}-3D4E-4A1B-${Math.floor(1000 + Math.random() * 9000)}-CFDI2026`;
             const banxicoTracking = result?.banxicoTracking || `20261006${Math.floor(1000000000000000 + Math.random() * 9000000000000000)}`;
             const receiptData: MexicanBillReceiptData = {
-              serviceName: activeService.nombre,
+              serviceName: isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre,
               serviceCategory: activeService.id,
-              companyName: activeService.empresa,
-              accountHolder: activeService.sampleTitular,
+              companyName: isEn ? (activeService.empresaEn || activeService.empresa) : activeService.empresa,
+              accountHolder: isEn ? (activeService.sampleTitularEn || activeService.sampleTitular) : activeService.sampleTitular,
               location: activeService.sampleLocation,
               contractNumber: activeService.sampleContrato,
               billingCycle: activeService.billingCycle,
@@ -308,7 +354,7 @@ export function BillPayView({
             setIsReceiptModalOpen(true);
             setIsSuccess(true);
             if (onPaymentSuccess) {
-              onPaymentSuccess(activeService.nombre, currentMXN);
+              onPaymentSuccess(isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre, currentMXN);
             }
           }}
         />
@@ -317,18 +363,26 @@ export function BillPayView({
   }
 
   // Filtrado de servicios
-  const filteredServices = SERVICIOS_MEXICO.filter((s) =>
-    s.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.subtitulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.empresa.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredServices = SERVICIOS_MEXICO.filter((s) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      s.nombre.toLowerCase().includes(q) ||
+      (s.nombreEn && s.nombreEn.toLowerCase().includes(q)) ||
+      s.subtitulo.toLowerCase().includes(q) ||
+      (s.subtituloEn && s.subtituloEn.toLowerCase().includes(q)) ||
+      s.empresa.toLowerCase().includes(q) ||
+      (s.empresaEn && s.empresaEn.toLowerCase().includes(q))
+    );
+  });
 
   const handleScanSuccess = (scanned: ScannedBillResult) => {
     const found = SERVICIOS_MEXICO.find(
       (s) =>
         s.id === scanned.serviceId ||
         s.nombre.toLowerCase().includes((scanned.serviceName || '').toLowerCase()) ||
-        s.subtitulo.toLowerCase().includes((scanned.serviceName || '').toLowerCase())
+        (s.nombreEn && s.nombreEn.toLowerCase().includes((scanned.serviceName || '').toLowerCase())) ||
+        s.subtitulo.toLowerCase().includes((scanned.serviceName || '').toLowerCase()) ||
+        (s.subtituloEn && s.subtituloEn.toLowerCase().includes((scanned.serviceName || '').toLowerCase()))
     );
 
     if (found) {
@@ -347,9 +401,13 @@ export function BillPayView({
       }));
     }
 
+    const resolvedName = found
+      ? (isEn ? (found.nombreEn || found.nombre) : found.nombre)
+      : (scanned.serviceName || (isEn ? (servicioSeleccionado.nombreEn || servicioSeleccionado.nombre) : servicioSeleccionado.nombre));
+
     showToast(
       isEn ? 'Receipt Scanned Successfully! ⚡' : '¡Recibo Escaneado con Éxito! ⚡',
-      `${scanned.serviceName || servicioSeleccionado.nombre} ${isEn ? 'linked:' : 'vinculado:'} ${scanned.contractNumber}`
+      `${resolvedName} ${isEn ? 'linked:' : 'vinculado:'} ${scanned.contractNumber}`
     );
   };
 
@@ -407,7 +465,7 @@ export function BillPayView({
                       {isEn ? 'Imminent Disconnection Warning!' : '¡Aviso de Corte Inminente CFE!'}
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-300 text-[9px] font-bold uppercase tracking-wider border border-amber-500/30">
-                      {isEn ? 'Due in 3 days' : 'Vence en 3 días'}
+                      {isEn ? (activeService.sampleDueDateEn || 'Due in 3 days') : activeService.sampleDueDate}
                     </span>
                   </div>
                   <p className="text-[11px] text-amber-200/90 leading-tight mt-1">
@@ -540,22 +598,22 @@ export function BillPayView({
                   <div className="flex flex-col items-end gap-1">
                     {serv.badge && (
                       <span className={`px-2 py-0.5 rounded-full font-label-caps text-[9px] uppercase font-bold tracking-tight shrink-0 whitespace-nowrap ${serv.badgeClass || 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#2ED5A4]'}`}>
-                        {serv.badge}
+                        {isEn ? (serv.badgeEn || serv.badge) : serv.badge}
                       </span>
                     )}
                     {serv.isUrgent && (
                       <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-500 dark:text-amber-300 font-label-caps text-[8px] font-bold uppercase tracking-tight flex items-center gap-1 border border-amber-500/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-ping" />
-                        {serv.sampleDueDate}
+                        {isEn ? (serv.sampleDueDateEn || serv.sampleDueDate) : serv.sampleDueDate}
                       </span>
                     )}
                   </div>
                 </div>
                 <span className={`text-sm font-bold transition-colors truncate w-full ${isSelected ? 'text-emerald-800 dark:text-[#2ED5A4]' : 'text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-[#2ED5A4]'}`}>
-                  {serv.nombre}
+                  {isEn ? (serv.nombreEn || serv.nombre) : serv.nombre}
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8] truncate w-full mt-0.5">
-                  {serv.subtitulo}
+                  {isEn ? (serv.subtituloEn || serv.subtitulo) : serv.subtitulo}
                 </span>
               </button>
             );
@@ -585,14 +643,14 @@ export function BillPayView({
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="font-headline-md text-sm font-bold text-slate-900 dark:text-white truncate">
-                    {activeService.sampleTitular}
+                    {isEn ? (activeService.sampleTitularEn || activeService.sampleTitular) : activeService.sampleTitular}
                   </span>
                   <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-[#A6ADC8] text-[9px] font-medium shrink-0">
                     {activeService.sampleLocation}
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-500 dark:text-[#A6ADC8] truncate">
-                  {activeService.nombre} • {activeService.empresa}
+                  {(isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre)} • {(isEn ? (activeService.empresaEn || activeService.empresa) : activeService.empresa)}
                 </span>
               </div>
             </div>
@@ -644,7 +702,7 @@ export function BillPayView({
               <span>{isEn ? 'Preview SAT Receipt & WhatsApp' : 'Comprobante SAT & WhatsApp'}</span>
             </button>
             <span className="text-[10px] text-slate-400 dark:text-[#9399B2] font-mono">
-              Contrato: {activeService.sampleContrato}
+              {isEn ? 'Contract / Ref:' : 'Contrato:'} {activeService.sampleContrato}
             </span>
           </div>
         </div>
@@ -753,7 +811,7 @@ export function BillPayView({
 
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 dark:text-neutral-400">{isEn ? 'Provider & Contract' : 'Proveedor y Contrato'}</span>
-                <span className="font-mono text-slate-800 dark:text-white">{activeService.empresa} • {activeService.sampleContrato}</span>
+                <span className="font-mono text-slate-800 dark:text-white">{isEn ? (activeService.empresaEn || activeService.empresa) : activeService.empresa} • {activeService.sampleContrato}</span>
               </div>
 
               <div className="pt-3 flex items-center justify-between border-t border-slate-200/80 dark:border-white/10">
@@ -794,14 +852,14 @@ export function BillPayView({
             </h3>
             <p className="text-xs text-[#A6ADC8]">
               {isEn
-                ? `Payment sent via SPEI Banxico to ${activeService.empresa}.`
+                ? `Payment sent via SPEI Banxico to ${isEn ? (activeService.empresaEn || activeService.empresa) : activeService.empresa}.`
                 : `Pago enviado vía SPEI Banxico a ${activeService.empresa}.`}
             </p>
 
             <div className="p-3.5 rounded-2xl bg-[#14141F] border border-white/10 text-left space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-[#A6ADC8]">{isEn ? 'Service:' : 'Servicio:'}</span>
-                <span className="font-bold text-white">{activeService.nombre}</span>
+                <span className="font-bold text-white">{isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#A6ADC8]">{isEn ? 'Reference:' : 'Referencia:'}</span>
@@ -854,7 +912,7 @@ export function BillPayView({
         isOpen={showCameraScanner}
         onClose={() => setShowCameraScanner(false)}
         onScanSuccess={handleScanSuccess}
-        targetServiceName={activeService.nombre}
+        targetServiceName={isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre}
       />
 
       {/* Modal de Comprobante Fiscal SAT Oficial con WhatsApp 1-Tap */}
