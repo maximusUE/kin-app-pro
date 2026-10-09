@@ -1186,11 +1186,11 @@ export function SendView({
               +$200
             </button>
             <button
-              className="px-3.5 py-1.5 rounded-full bg-primary/15 hover:bg-primary/25 text-primary font-financial-mono text-xs active:scale-95 transition-all font-bold cursor-pointer border border-primary/30 shadow-xs flex-shrink-0"
-              onClick={() => setAmountValue('500')}
+              className="px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright text-on-surface font-financial-mono text-xs active:scale-95 transition-all font-bold cursor-pointer border border-white/10 shadow-xs flex-shrink-0"
+              onClick={() => setAmountValue((prev) => ((parseFloat(prev) || 0) + 500).toFixed(0))}
               type="button"
             >
-              {isEn ? '$500 Max' : '$500 Máx'}
+              +$500
             </button>
           </div>
         </div>

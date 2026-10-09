@@ -679,16 +679,19 @@ export function KinCashP2PModal({
           </span>
         </div>
 
-        {/* Transfer Concept Note Chip (Editable) */}
+        {/* Transfer Concept Note Chip (Editable & Explicitly Optional) */}
         <div className="mt-3 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-all cursor-pointer shadow-sm border border-white/5">
           <span className="text-[14px]">🛒</span>
           <input
-            className="bg-transparent border-none text-white font-caption-sm text-caption-sm focus:outline-none w-56 text-center truncate"
-            placeholder={isEn ? 'Payment note...' : 'Concepto de pago...'}
+            className="bg-transparent border-none text-white font-caption-sm text-caption-sm focus:outline-none w-52 text-center truncate placeholder:text-white/40"
+            placeholder={isEn ? 'Payment note (Optional)...' : 'Concepto de pago (Opcional)...'}
             type="text"
             value={conceptNote}
             onChange={(e) => setConceptNote(e.target.value)}
           />
+          <span className="px-2 py-0.5 rounded-full bg-white/10 text-[9px] font-bold text-on-surface-variant uppercase tracking-wider shrink-0 select-none">
+            {isEn ? 'Optional' : 'Opcional'}
+          </span>
           <span className="material-symbols-outlined text-on-surface-variant text-[14px]">edit</span>
         </div>
 

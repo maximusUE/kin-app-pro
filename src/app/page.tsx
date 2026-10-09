@@ -347,7 +347,9 @@ export default function MobileApp() {
     setUserZip(user.zip ?? '');
     if (user.country) setUserCountry(capitalizeWords(user.country));
     // Asignar el avatar explícito (si está vacío o es foto de stock ficticia, deja recuadro vacío sin foto)
-    setUserAvatar(user.avatar && !user.avatar.includes('images.unsplash.com') ? user.avatar : '');
+    const localAvatar = typeof window !== 'undefined' ? localStorage.getItem('kin_avatar') : null;
+    const resolvedAvatar = (localAvatar && localAvatar.trim()) || (user.avatar && !user.avatar.includes('images.unsplash.com') ? user.avatar : '');
+    setUserAvatar(resolvedAvatar);
     if (user.email === 'airygc7@gmail.com' || user.role === 'MASTER_ADMIN' || user.isMasterAdmin) {
       setUserClientId(user.clientId || 'KIN-MASTER-001');
       setUserDocType('Credencial Maestro de Operador KIN');
@@ -625,9 +627,11 @@ export default function MobileApp() {
             }
           } catch (_) {}
 
+          const localAvatar = typeof window !== 'undefined' ? localStorage.getItem('kin_avatar') : null;
           const effectiveUser = {
             ...data.user,
             ...clientSaved,
+            avatar: (localAvatar && localAvatar.trim()) || clientSaved.avatar || (data.user.avatar && !data.user.avatar.includes('images.unsplash.com') ? data.user.avatar : '') || '',
             address1: clientSaved.address1 !== undefined ? clientSaved.address1 : (data.user.address1 || ''),
             address2: clientSaved.address2 !== undefined ? clientSaved.address2 : (data.user.address2 || ''),
             city: clientSaved.city !== undefined ? clientSaved.city : (data.user.city || ''),
@@ -797,6 +801,7 @@ export default function MobileApp() {
     state?: string;
     zip?: string;
     email?: string;
+    avatar?: string;
   }) => {
     if (updates.firstName !== undefined) {
       const clean = capitalizeWords(updates.firstName);
@@ -815,6 +820,14 @@ export default function MobileApp() {
     if (updates.state !== undefined) setUserState(capitalizeWords(updates.state));
     if (updates.zip !== undefined) setUserZip(updates.zip);
     if (updates.email !== undefined) setUserEmail(updates.email);
+    if (updates.avatar !== undefined) {
+      setUserAvatar(updates.avatar);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('kin_avatar', updates.avatar);
+        } catch (_) {}
+      }
+    }
 
     try {
       const currentSaved = localStorage.getItem('kin_active_user');
@@ -2257,7 +2270,20 @@ export default function MobileApp() {
               if (typeof window !== 'undefined') {
                 try {
                   localStorage.setItem('kin_avatar', newAvatar);
+                  const active = localStorage.getItem('kin_active_user');
+                  if (active) {
+                    const parsed = JSON.parse(active);
+                    parsed.avatar = newAvatar;
+                    localStorage.setItem('kin_active_user', JSON.stringify(parsed));
+                  }
                 } catch (_) {}
+              }
+              if (userId) {
+                fetch('/api/account/data', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId, updates: { avatar: newAvatar } }),
+                }).catch(() => {});
               }
             }}
             exchangeRate={exchangeRate}
