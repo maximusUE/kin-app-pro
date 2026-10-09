@@ -65,7 +65,11 @@ export function MobileBottomDock({
     <nav
       className="stitch-bottom-dock"
       style={{
-        backgroundColor: isLight ? '#FFFFFF' : '#181825',
+        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(24, 24, 37, 0.95)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: isLight ? '1px solid rgba(226, 232, 240, 0.8)' : '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: isLight ? '0 -4px 20px rgba(15, 23, 42, 0.06)' : '0 -4px 20px rgba(0, 0, 0, 0.35)',
         opacity: 1,
       }}
       data-active-classes="text-primary font-bold scale-105"
@@ -79,12 +83,14 @@ export function MobileBottomDock({
               key={item.id}
               type="button"
               onClick={() => handleTabClick(item.id)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-14 h-14 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer select-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-14 h-14 rounded-2xl transition-all duration-200 active:scale-90 cursor-pointer select-none ${
                 isActive
-                  ? 'text-primary font-bold scale-105 drop-shadow-[0_0_8px_rgba(46,213,164,0.35)]'
+                  ? isLight
+                    ? 'bg-emerald-50 text-primary font-bold scale-105 shadow-xs'
+                    : 'bg-emerald-500/15 text-primary font-bold scale-105 shadow-[0_0_12px_rgba(46,213,164,0.25)]'
                   : isLight
-                  ? 'text-slate-500 hover:text-slate-800'
-                  : 'text-on-surface-variant hover:text-white'
+                  ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/50'
+                  : 'text-on-surface-variant hover:text-white hover:bg-white/5'
               }`}
               title={isEn ? item.label.en : item.label.es}
               aria-current={isActive ? 'page' : undefined}

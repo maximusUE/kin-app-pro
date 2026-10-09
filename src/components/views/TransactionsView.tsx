@@ -59,19 +59,19 @@ export function TransactionsView({
             className="btn-circle"
             title={isEn ? "Back to Home" : "Volver al Home"}
           >
-            <ChevronLeftIcon className="w-5 h-5 text-white" />
+            <ChevronLeftIcon className="w-5 h-5 text-slate-800 dark:text-white" />
           </button>
           <KinLogo size={34} />
         </div>
         <div className="text-center">
-          <h1 className="text-base font-bold text-white tracking-wide">{isEn ? 'Transactions' : 'Movimientos'}</h1>
-          <p className="text-[10px] text-[#2ED5A4] font-medium flex items-center justify-center gap-1 mt-0.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
+          <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-wide">{isEn ? 'Transactions' : 'Movimientos'}</h1>
+          <p className="text-[10px] text-emerald-600 dark:text-[#2ED5A4] font-medium flex items-center justify-center gap-1 mt-0.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#2ED5A4] animate-pulse" />
             {isEn ? 'Real-time movements' : 'Movimientos en tiempo real'}
           </p>
         </div>
         <div
-          className="w-10 h-10 rounded-full bg-[#181928] border border-white/10 flex items-center justify-center text-xs font-bold text-[#8E91A5] shadow-sm"
+          className="w-10 h-10 rounded-full bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-[#8E91A5] shadow-xs"
           title={isEn ? `${transactions.length} recorded transactions` : `${transactions.length} transacciones registradas`}
         >
           {transactions.length}
@@ -85,8 +85,8 @@ export function TransactionsView({
           onClick={() => setFilterCategory('all')}
           className={`h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
             filterCategory === 'all'
-              ? 'bg-[#2ED5A4] text-neutral-950 shadow-sm'
-              : 'bg-[#181928] hover:bg-[#202236] text-[#8E91A5] border border-white/10'
+              ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
+              : 'bg-white dark:bg-[#181928] hover:bg-slate-50 dark:hover:bg-[#202236] text-slate-700 dark:text-[#8E91A5] border border-slate-200/80 dark:border-white/10 shadow-xs'
           }`}
         >
           {isEn ? 'All' : 'Todos'} ({transactions.length})
@@ -96,8 +96,8 @@ export function TransactionsView({
           onClick={() => setFilterCategory('transfers')}
           className={`h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1.5 ${
             filterCategory === 'transfers'
-              ? 'bg-[#2ED5A4] text-neutral-950 shadow-sm'
-              : 'bg-[#181928] hover:bg-[#202236] text-[#8E91A5] border border-white/10'
+              ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
+              : 'bg-white dark:bg-[#181928] hover:bg-slate-50 dark:hover:bg-[#202236] text-slate-700 dark:text-[#8E91A5] border border-slate-200/80 dark:border-white/10 shadow-xs'
           }`}
         >
           <span className="material-symbols-outlined text-[15px]">send</span>
@@ -108,8 +108,8 @@ export function TransactionsView({
           onClick={() => setFilterCategory('bills')}
           className={`h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1.5 ${
             filterCategory === 'bills'
-              ? 'bg-[#2ED5A4] text-neutral-950 shadow-sm'
-              : 'bg-[#181928] hover:bg-[#202236] text-[#8E91A5] border border-white/10'
+              ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
+              : 'bg-white dark:bg-[#181928] hover:bg-slate-50 dark:hover:bg-[#202236] text-slate-700 dark:text-[#8E91A5] border border-slate-200/80 dark:border-white/10 shadow-xs'
           }`}
         >
           <span className="material-symbols-outlined text-[15px]">receipt_long</span>
@@ -164,10 +164,10 @@ export function TransactionsView({
               <div key={groupKey} className="space-y-2">
                 {/* Cabecera de grupo temporal */}
                 <div className="flex items-center justify-between px-1">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-[#8E91A5]">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-[#8E91A5]">
                     {GROUP_LABELS[groupKey]?.[language] || groupKey}
                   </span>
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-[#8E91A5] border border-white/5">
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-[#8E91A5] border border-slate-200/80 dark:border-white/5">
                     {itemsInGroup.length} {isEn ? (itemsInGroup.length === 1 ? 'transaction' : 'transactions') : (itemsInGroup.length === 1 ? 'movimiento' : 'movimientos')}
                   </span>
                 </div>
@@ -182,17 +182,17 @@ export function TransactionsView({
                         key={tx.id}
                         type="button"
                         onClick={() => onSelectTransaction(tx)}
-                        className="w-full p-3.5 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between hover:border-primary/40 hover:bg-[#1E2033] transition-all cursor-pointer text-left group active:scale-[0.99]"
+                        className="w-full p-3.5 rounded-2xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 flex items-center justify-between hover:border-emerald-500/40 hover:bg-slate-50/80 dark:hover:bg-[#1E2033] shadow-xs transition-all cursor-pointer text-left group active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3">
                           {/* Icono del movimiento con micro-badge de flujo */}
                           <div className="relative flex-shrink-0">
-                            <div className="w-11 h-11 rounded-2xl bg-[#202236] border border-white/10 flex items-center justify-center text-white shadow-sm">
+                            <div className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-[#202236] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-800 dark:text-white shadow-xs">
                               {renderTransactionIcon(tx)}
                             </div>
                             <div
-                              className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center border border-[#181928] text-[8px] font-black ${
-                                isIncome ? 'bg-[#2ED5A4] text-[#06070B]' : 'bg-[#7047EB] text-white'
+                              className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white dark:border-[#181928] text-[8px] font-black ${
+                                isIncome ? 'bg-emerald-500 text-slate-950' : 'bg-purple-600 text-white'
                               }`}
                             >
                               {isIncome ? '↓' : '↑'}
@@ -200,17 +200,17 @@ export function TransactionsView({
                           </div>
 
                           <div>
-                            <p className="text-xs font-bold text-white leading-tight group-hover:text-primary transition-colors">
+                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight group-hover:text-primary transition-colors">
                               {tx.title}
                             </p>
-                            <p className="text-[10px] text-[#8E91A5] mt-0.5 flex items-center gap-1.5 flex-wrap">
+                            <p className="text-[10px] text-slate-500 dark:text-[#8E91A5] mt-0.5 flex items-center gap-1.5 flex-wrap">
                               <span>{tx.category}</span>
                               <span>•</span>
                               <span>{tx.time}</span>
                               <span className={`px-1.5 py-0.2 rounded font-mono text-[8px] font-bold ${
                                 isBill
-                                  ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
-                                  : 'bg-emerald-500/15 text-[#2ED5A4] border border-emerald-500/30'
+                                  ? 'bg-blue-500/15 text-blue-500 dark:text-blue-400 border border-blue-500/30'
+                                  : 'bg-emerald-500/15 text-emerald-600 dark:text-[#2ED5A4] border border-emerald-500/30'
                               }`}>
                                 {isBill ? 'SAT CFDI ✓' : 'CEP Banxico ✓'}
                               </span>
@@ -225,19 +225,19 @@ export function TransactionsView({
                               <>
                                 <p
                                   className={`text-xs font-black tracking-tight ${
-                                    isIncome ? 'text-[#2ED5A4]' : 'text-white'
+                                    isIncome ? 'text-emerald-600 dark:text-[#2ED5A4]' : 'text-slate-900 dark:text-white'
                                   }`}
                                 >
                                   {isIncome ? `+$${tx.amount.toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
-                                  <span className="text-[10px] text-[#8E91A5] font-semibold ml-0.5">USD</span>
+                                  <span className="text-[10px] text-slate-500 dark:text-[#8E91A5] font-semibold ml-0.5">USD</span>
                                 </p>
-                                <p className="text-[10px] text-[#8E91A5] mt-0.5 font-medium">
+                                <p className="text-[10px] text-slate-500 dark:text-[#8E91A5] mt-0.5 font-medium">
                                   {tx.amountMXN ? (
                                     <span>
                                       ≈ ${tx.amountMXN.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
                                     </span>
                                   ) : (
-                                    <span className="text-[#2ED5A4] font-semibold">
+                                    <span className="text-emerald-600 dark:text-[#2ED5A4] font-semibold">
                                       {language === 'en' ? 'Completed ✓' : 'Completado ✓'}
                                     </span>
                                   )}
@@ -247,15 +247,15 @@ export function TransactionsView({
                               <>
                                 <p
                                   className={`text-xs font-black tracking-tight ${
-                                    isIncome ? 'text-[#2ED5A4]' : 'text-white'
+                                    isIncome ? 'text-emerald-600 dark:text-[#2ED5A4]' : 'text-slate-900 dark:text-white'
                                   }`}
                                 >
                                   {isIncome
                                     ? `+$${(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                     : `-$${Math.abs(tx.amountMXN || (tx.amount * USD_TO_MXN_RATE)).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                  <span className="text-[10px] text-[#8E91A5] font-semibold ml-0.5">MXN</span>
+                                  <span className="text-[10px] text-slate-500 dark:text-[#8E91A5] font-semibold ml-0.5">MXN</span>
                                 </p>
-                                <p className="text-[10px] text-[#8E91A5] mt-0.5 font-medium">
+                                <p className="text-[10px] text-slate-500 dark:text-[#8E91A5] mt-0.5 font-medium">
                                   <span>
                                     ≈ ${Math.abs(tx.amount).toFixed(2)} USD
                                   </span>
@@ -263,7 +263,7 @@ export function TransactionsView({
                               </>
                             )}
                           </div>
-                          <span className="material-symbols-outlined text-[16px] text-[#8E91A5] group-hover:text-primary transition-colors">
+                          <span className="material-symbols-outlined text-[16px] text-slate-400 dark:text-[#8E91A5] group-hover:text-primary transition-colors">
                             chevron_right
                           </span>
                         </div>

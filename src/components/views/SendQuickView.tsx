@@ -286,20 +286,20 @@ export function SendQuickView({
             className="btn-circle"
             title={isEn ? 'Back to home' : 'Volver a Home'}
           >
-            <ChevronLeftIcon className="w-5 h-5 text-white" />
+            <ChevronLeftIcon className="w-5 h-5 text-slate-800 dark:text-white" />
           </button>
           <KinLogo size={34} />
         </div>
         <div className="text-center">
           <div className="flex items-center justify-center gap-1.5">
-            <span className="text-sm font-bold text-white tracking-wide">
+            <span className="text-sm font-bold text-slate-900 dark:text-white tracking-wide">
               {isEn ? 'Send Quick' : 'Envío Rápido'}
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] text-[10px] font-black tracking-wider">
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-[#2ED5A4] text-[10px] font-black tracking-wider">
               ⚡ 1-TAP
             </span>
           </div>
-          <span className="text-[10px] text-[#8E91A5] block">
+          <span className="text-[10px] text-slate-500 dark:text-[#8E91A5] block">
             {isEn ? 'Ultra-fast SPEI transfer with zero unnecessary steps' : 'Envío SPEI ultrarrápido sin pasos innecesarios'}
           </span>
         </div>
@@ -315,37 +315,37 @@ export function SendQuickView({
           className="btn-circle"
           title={isEn ? 'Information' : 'Información'}
         >
-          <span className="text-xs font-bold text-white">ℹ️</span>
+          <span className="text-xs font-bold text-slate-800 dark:text-white">ℹ️</span>
         </button>
       </header>
 
       {/* 1. SECCIÓN DE REMITENTES / DESTINATARIOS FRECUENTES Y RECIENTES */}
-      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3.5 shadow-lg">
+      <div className="p-4 rounded-3xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 space-y-3.5 shadow-sm dark:shadow-lg">
         {/* Cabecera con selector de Filtros: Frecuentes | Recientes | Todos */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-[#8E91A5] uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-[#8E91A5] uppercase tracking-wider">
               {isEn ? 'Frequent & Recent Recipients' : 'Destinatarios y Remitentes'}
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/10 text-[#2ED5A4] text-[9px] font-extrabold border border-[#2ED5A4]/25">
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-[#2ED5A4] text-[9px] font-extrabold border border-emerald-500/25">
               {displayedRecipients.length}
             </span>
           </div>
-          <span className="text-[10px] text-[#2ED5A4] font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
+          <span className="text-[10px] text-emerald-600 dark:text-[#2ED5A4] font-semibold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#2ED5A4] animate-pulse" />
             {isEn ? 'SPEI Active' : 'SPEI Activo'}
           </span>
         </div>
 
         {/* Pestañas ergonómicas de acceso rápido */}
-        <div className="flex items-center gap-2 p-1 rounded-2xl bg-[#0E0F1A] border border-white/5">
+        <div className="flex items-center gap-2 p-1 rounded-2xl bg-slate-100 dark:bg-[#0E0F1A] border border-slate-200/80 dark:border-white/5">
           <button
             type="button"
             onClick={() => setFilterTab('frequent')}
             className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
               filterTab === 'frequent'
-                ? 'bg-[#2ED5A4] text-slate-950 shadow-sm font-black'
-                : 'text-[#8E91A5] hover:text-white'
+                ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
+                : 'text-slate-600 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span>⭐</span>
@@ -356,8 +356,8 @@ export function SendQuickView({
             onClick={() => setFilterTab('recent')}
             className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
               filterTab === 'recent'
-                ? 'bg-[#2ED5A4] text-slate-950 shadow-sm font-black'
-                : 'text-[#8E91A5] hover:text-white'
+                ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
+                : 'text-slate-600 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span>🕒</span>
@@ -368,8 +368,8 @@ export function SendQuickView({
             onClick={() => setFilterTab('all')}
             className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
               filterTab === 'all'
-                ? 'bg-[#2ED5A4] text-slate-950 shadow-sm font-black'
-                : 'text-[#8E91A5] hover:text-white'
+                ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
+                : 'text-slate-600 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span>👥</span>
@@ -389,8 +389,8 @@ export function SendQuickView({
                 onClick={() => handleSelectIndex(idx)}
                 className={`relative flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border transition-all flex-shrink-0 cursor-pointer ${
                   isSelected
-                    ? 'bg-[#2ED5A4]/15 border-[#2ED5A4] text-white shadow-md shadow-[#2ED5A4]/15 scale-[1.02]'
-                    : 'bg-[#202236] border-white/5 text-[#8E91A5] hover:text-white hover:border-white/15'
+                    ? 'bg-emerald-50 dark:bg-[#2ED5A4]/15 border-emerald-500 dark:border-[#2ED5A4] text-slate-900 dark:text-white shadow-sm scale-[1.02]'
+                    : 'bg-slate-50 dark:bg-[#202236] border-slate-200/80 dark:border-white/5 text-slate-700 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/15'
                 }`}
                 style={{ minWidth: '82px' }}
               >
@@ -400,7 +400,7 @@ export function SendQuickView({
                     photoUrl={c.photoUrl}
                     name={c.name}
                     className={`w-12 h-12 rounded-full border-2 transition-all ${
-                      isSelected ? 'border-[#2ED5A4]' : 'border-white/10'
+                      isSelected ? 'border-emerald-500 dark:border-[#2ED5A4]' : 'border-slate-200 dark:border-white/10'
                     }`}
                     iconSize="text-[26px]"
                   />
@@ -412,7 +412,7 @@ export function SendQuickView({
                   )}
                   {/* Checkmark verde si está seleccionado */}
                   {isSelected && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2ED5A4] flex items-center justify-center text-slate-950 text-[10px] font-black shadow-sm">
+                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 dark:bg-[#2ED5A4] flex items-center justify-center text-slate-950 text-[10px] font-black shadow-sm">
                       ✓
                     </div>
                   )}
@@ -424,7 +424,7 @@ export function SendQuickView({
                 </span>
 
                 {/* Frecuencia o Badge sutil */}
-                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-white/5 text-[#8E91A5] font-semibold truncate max-w-[76px]">
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-slate-200/60 dark:bg-white/5 text-slate-600 dark:text-[#8E91A5] font-semibold truncate max-w-[76px]">
                   {c.transferCount ? `${c.transferCount} ${isEn ? 'sends' : 'envíos'}` : c.lastSentDate || (isEn ? 'Verified' : 'Verificado')}
                 </span>
               </button>
@@ -435,10 +435,10 @@ export function SendQuickView({
           <button
             type="button"
             onClick={onAddContact}
-            className="flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl border border-dashed border-white/15 text-[#8E91A5] hover:text-white hover:border-[#2ED5A4]/40 transition-all flex-shrink-0 cursor-pointer"
+            className="flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl border border-dashed border-slate-300 dark:border-white/15 text-slate-600 dark:text-[#8E91A5] hover:text-slate-900 dark:hover:text-white hover:border-emerald-500/40 dark:hover:border-[#2ED5A4]/40 transition-all flex-shrink-0 cursor-pointer"
             style={{ minWidth: '82px', height: '94px' }}
           >
-            <div className="w-10 h-10 rounded-full bg-[#202236] flex items-center justify-center text-[#2ED5A4] border border-white/5">
+            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-[#202236] flex items-center justify-center text-emerald-600 dark:text-[#2ED5A4] border border-slate-200 dark:border-white/5">
               <span className="material-symbols-outlined text-[20px]">person_add</span>
             </div>
             <span className="text-[10px] font-bold">{isEn ? '+ New' : '+ Nuevo'}</span>
@@ -447,18 +447,18 @@ export function SendQuickView({
 
         {/* Tarjeta de Detalle del Destinatario Seleccionado (Stitch Obsidian 2026) */}
         {currentRecipient && (
-          <div className="p-3.5 rounded-2xl bg-[#0E0F1A] border border-white/10 flex items-center justify-between gap-3 shadow-inner">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#0E0F1A] border border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 shadow-inner">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#2ED5A4]/20 to-[#202236] border border-[#2ED5A4]/30 flex items-center justify-center font-black text-sm text-[#2ED5A4] flex-shrink-0 shadow-sm">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-gradient-to-br dark:from-[#2ED5A4]/20 dark:to-[#202236] border border-emerald-300 dark:border-[#2ED5A4]/30 flex items-center justify-center font-black text-sm text-emerald-800 dark:text-[#2ED5A4] flex-shrink-0 shadow-xs">
                 {currentRecipient.name.charAt(0)}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-xs font-bold text-white truncate">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                     {currentRecipient.fullName || currentRecipient.name}
                   </p>
                   {currentRecipient.relation && (
-                    <span className="px-1.5 py-0.2 rounded-md bg-[#2ED5A4]/15 text-[#2ED5A4] text-[9px] font-extrabold shrink-0">
+                    <span className="px-1.5 py-0.2 rounded-md bg-emerald-50 dark:bg-[#2ED5A4]/15 text-emerald-700 dark:text-[#2ED5A4] text-[9px] font-extrabold shrink-0 border border-emerald-200/50 dark:border-transparent">
                       {currentRecipient.relation}
                     </span>
                   )}
@@ -473,12 +473,12 @@ export function SendQuickView({
                       />
                     </div>
                   )}
-                  <p className="text-[10px] text-white/80 truncate">
+                  <p className="text-[10px] text-slate-600 dark:text-white/80 truncate">
                     {currentRecipient.bank || 'SPEI Banxico'} • {currentRecipient.clabe ? `CLABE •••• ${currentRecipient.clabe.slice(-4)}` : (isEn ? 'Verified Account' : 'Cuenta Verificada')}
                   </p>
                 </div>
                 {currentRecipient.phone && (
-                  <p className="text-[9px] text-[#8E91A5] truncate mt-0.5">
+                  <p className="text-[9px] text-slate-500 dark:text-[#8E91A5] truncate mt-0.5">
                     📱 {currentRecipient.phone} • {currentRecipient.state ? `${currentRecipient.state}, MX` : 'México'}
                   </p>
                 )}
@@ -487,7 +487,7 @@ export function SendQuickView({
             <button
               type="button"
               onClick={onAddContact}
-              className="px-2.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white text-[10px] font-bold border border-white/10 flex-shrink-0 active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-full bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white text-[10px] font-bold border border-slate-300/80 dark:border-white/10 flex-shrink-0 active:scale-95 transition-all cursor-pointer"
             >
               {isEn ? 'Directory' : 'Agenda'}
             </button>
@@ -496,15 +496,15 @@ export function SendQuickView({
       </div>
 
       {/* 2. Hero Amount Card (Gran Tipografía Móvil & Chips) */}
-      <div className="p-5 rounded-3xl bg-[#181928] border border-white/5 space-y-4 shadow-lg text-center">
-        <span className="text-[11px] font-bold text-[#8E91A5] uppercase tracking-wider block">
+      <div className="p-5 rounded-3xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 space-y-4 shadow-sm dark:shadow-lg text-center">
+        <span className="text-[11px] font-bold text-slate-500 dark:text-[#8E91A5] uppercase tracking-wider block">
           {isEn ? 'Quick Send Amount' : 'Monto del Envío Rápido'}
         </span>
 
         {/* Display Gigante del Monto (Acceso directo al teclado numérico nativo del celular) */}
         <div className="flex flex-col items-center justify-center">
           <div className="flex items-center justify-center gap-1.5 relative">
-            <span className="text-3xl sm:text-4xl font-black text-[#2ED5A4] select-none">$</span>
+            <span className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-[#2ED5A4] select-none">$</span>
             <input
               type="text"
               inputMode="decimal"
@@ -517,40 +517,40 @@ export function SendQuickView({
                 if (parts[1] && parts[1].length > 2) return;
                 setSendQuickAmount(val === '' ? '0' : val);
               }}
-              className="text-4xl sm:text-5xl font-black text-white bg-transparent text-center focus:outline-none min-w-[120px] max-w-[220px] tracking-tight border-b-2 border-[#2ED5A4]/40 focus:border-[#2ED5A4] transition-all py-1 font-financial-mono cursor-text"
+              className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white bg-transparent text-center focus:outline-none min-w-[120px] max-w-[220px] tracking-tight border-b-2 border-emerald-500/40 focus:border-emerald-500 dark:border-[#2ED5A4]/40 dark:focus:border-[#2ED5A4] transition-all py-1 font-financial-mono cursor-text"
               placeholder="0"
             />
-            <span className="text-sm font-bold text-[#2ED5A4] tracking-wide shrink-0">USD</span>
+            <span className="text-sm font-bold text-emerald-600 dark:text-[#2ED5A4] tracking-wide shrink-0">USD</span>
             {sendQuickAmount !== '0' && sendQuickAmount !== '' && (
               <button
                 type="button"
                 onClick={() => setSendQuickAmount('0')}
-                className="ml-1 text-on-surface-variant hover:text-white text-xs px-2.5 py-1.5 rounded-full bg-surface-container-high border border-white/10 shrink-0 cursor-pointer active:scale-95 transition-all"
+                className="ml-1 text-slate-500 hover:text-slate-900 dark:text-on-surface-variant dark:hover:text-white text-xs px-2.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-surface-container-high border border-slate-200 dark:border-white/10 shrink-0 cursor-pointer active:scale-95 transition-all"
                 title={isEn ? 'Clear to zero' : 'Borrar a cero'}
               >
                 ✕
               </button>
             )}
           </div>
-          <p className="text-[11px] text-[#8E91A5] font-medium text-center mt-1">
+          <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium text-center mt-1">
             {isEn ? 'Tap the amount to type with your phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
         </div>
 
         {/* Conversión en Vivo con Tasa SPEI */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#202236] border border-white/5 text-center">
-          <span className="text-xs font-bold text-white">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-[#202236] border border-slate-200/80 dark:border-white/5 text-center">
+          <span className="text-xs font-bold text-slate-900 dark:text-white">
             ≈ ${((parseFloat(sendQuickAmount) || 0) * USD_TO_MXN_RATE).toLocaleString('es-MX', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}{' '}
             MXN
           </span>
-          <span className="text-[10px] text-white/60">|</span>
-          <span className="text-[10px] text-[#2ED5A4] font-semibold">1 USD = ${USD_TO_MXN_RATE.toFixed(2)} MXN</span>
+          <span className="text-[10px] text-slate-400 dark:text-white/60">|</span>
+          <span className="text-[10px] text-emerald-600 dark:text-[#2ED5A4] font-semibold">1 USD = ${USD_TO_MXN_RATE.toFixed(2)} MXN</span>
         </div>
 
-        {/* 4 Chips de Monto Ergonómicos - Regla Don César: Estilo Píldora Bandera USA */}
+        {/* 4 Chips de Monto Ergonómicos */}
         <div className="grid grid-cols-4 gap-2 pt-1">
           {['25', '50', '100', '200'].map((val) => (
             <button
@@ -559,8 +559,8 @@ export function SendQuickView({
               onClick={() => setSendQuickAmount(val)}
               className={`h-11 rounded-full text-xs font-bold font-financial-mono transition-all cursor-pointer flex items-center justify-center active:scale-95 border ${
                 sendQuickAmount === val
-                  ? 'bg-primary text-slate-950 font-black border-primary shadow-sm scale-105'
-                  : 'bg-surface-container border-white/10 text-white hover:bg-surface-bright shadow-xs'
+                  ? 'bg-emerald-500 text-slate-950 font-black border-emerald-500 shadow-sm scale-105'
+                  : 'bg-slate-100 hover:bg-slate-200/80 dark:bg-surface-container dark:hover:bg-surface-bright border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-white shadow-xs'
               }`}
             >
               ${val}
@@ -570,33 +570,33 @@ export function SendQuickView({
       </div>
 
       {/* 3. Desglose Financiero, Fórmula de Tarifa y Fuente de Fondos */}
-      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 text-xs shadow-lg">
+      <div className="p-4 rounded-3xl bg-white dark:bg-[#181928] border border-slate-200/80 dark:border-white/5 space-y-3 text-xs shadow-sm dark:shadow-lg">
         {/* Origen de fondos */}
-        <div className="flex items-center justify-between text-[#8E91A5]">
+        <div className="flex items-center justify-between text-slate-500 dark:text-[#8E91A5]">
           <span>{isEn ? 'Funding source:' : 'Origen de fondos:'}</span>
-          <span className="font-bold text-white flex items-center gap-1">
+          <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
             <span>🟢</span> KIN Digital Wallet (${netBalance.toFixed(2)} USD)
           </span>
         </div>
 
         {/* Comisión de transferencia con la Fórmula Oficial KIN */}
-        <div className="flex items-center justify-between text-[#8E91A5]">
+        <div className="flex items-center justify-between text-slate-500 dark:text-[#8E91A5]">
           <div className="flex items-center gap-1.5">
             <span>{isEn ? 'Transfer fee:' : 'Comisión de transferencia:'}</span>
             <button
               type="button"
               onClick={() => setShowFeeFormulaDetails(!showFeeFormulaDetails)}
-              className="text-[#8E91A5] hover:text-[#2ED5A4] transition-colors cursor-pointer"
+              className="text-slate-400 hover:text-emerald-600 dark:text-[#8E91A5] dark:hover:text-[#2ED5A4] transition-colors cursor-pointer"
               title={isEn ? 'View transparent fee formula' : 'Ver fórmula de tarifa transparente'}
             >
               <span className="material-symbols-outlined text-[15px]">info</span>
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] text-[#8E91A5] font-financial-mono">
+            <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[9px] text-slate-600 dark:text-[#8E91A5] font-financial-mono">
               {baseAmount <= 250 ? '≤$250 → $1.99' : '>$250 → $2.99'}
             </span>
-            <span className="font-bold font-financial-mono text-[#2ED5A4]">
+            <span className="font-bold font-financial-mono text-emerald-600 dark:text-[#2ED5A4]">
               +${transferFee.toFixed(2)} USD
             </span>
           </div>
@@ -604,50 +604,50 @@ export function SendQuickView({
 
         {/* Desglose desplegable de la fórmula si el usuario toca el botón de info */}
         {showFeeFormulaDetails && (
-          <div className="p-2.5 rounded-2xl bg-[#0E0F1A] border border-[#2ED5A4]/20 space-y-1.5 text-[11px] animate-fade-in">
-            <div className="flex items-center justify-between text-white font-bold">
+          <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-[#0E0F1A] border border-emerald-500/25 space-y-1.5 text-[11px] animate-fade-in">
+            <div className="flex items-center justify-between text-slate-900 dark:text-white font-bold">
               <span>{isEn ? 'Transparent KIN Fee Formula:' : 'Fórmula de Tarifa KIN Transparente:'}</span>
-              <span className="text-[10px] text-[#2ED5A4]">Banxico SPEI</span>
+              <span className="text-[10px] text-emerald-600 dark:text-[#2ED5A4]">Banxico SPEI</span>
             </div>
-            <div className="flex items-center justify-between text-[#8E91A5]">
+            <div className="flex items-center justify-between text-slate-500 dark:text-[#8E91A5]">
               <span>• {isEn ? 'Tier 1 (Up to $250.00 USD):' : 'Nivel 1 (Hasta $250.00 USD):'}</span>
-              <span className="font-financial-mono text-white">$1.99 USD</span>
+              <span className="font-financial-mono text-slate-900 dark:text-white">$1.99 USD</span>
             </div>
-            <div className="flex items-center justify-between text-[#8E91A5]">
+            <div className="flex items-center justify-between text-slate-500 dark:text-[#8E91A5]">
               <span>• {isEn ? 'Tier 2 (Over $250.00 USD):' : 'Nivel 2 (Más de $250.00 USD):'}</span>
-              <span className="font-financial-mono text-white">$2.99 USD</span>
+              <span className="font-financial-mono text-slate-900 dark:text-white">$2.99 USD</span>
             </div>
-            <p className="text-[10px] text-[#2ED5A4]/90 pt-0.5">
+            <p className="text-[10px] text-emerald-700 dark:text-[#2ED5A4]/90 pt-0.5">
               ✓ {isEn ? 'Zero hidden fees. Recipient receives 100% of converted funds.' : 'Sin comisiones ocultas. Tu destinatario recibe el 100% íntegro.'}
             </p>
           </div>
         )}
 
         {/* Total a debitar con la fórmula aplicada */}
-        <div className="flex items-center justify-between text-xs pt-2 border-t border-white/5">
-          <span className="text-white font-bold">{isEn ? 'Total you pay:' : 'Total a debitar:'}</span>
+        <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-white/5">
+          <span className="text-slate-900 dark:text-white font-bold">{isEn ? 'Total you pay:' : 'Total a debitar:'}</span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[10px] text-[#8E91A5] font-financial-mono">
+            <span className="text-[10px] text-slate-500 dark:text-[#8E91A5] font-financial-mono">
               (${baseAmount.toFixed(2)} + ${transferFee.toFixed(2)})
             </span>
-            <span className="font-black font-financial-mono text-[#2ED5A4] text-sm">
+            <span className="font-black font-financial-mono text-emerald-600 dark:text-[#2ED5A4] text-sm">
               ${totalYouPay.toFixed(2)} USD
             </span>
           </div>
         </div>
 
         {/* Monto que recibe el destinatario en México */}
-        <div className="flex items-center justify-between text-[11px] text-[#8E91A5]">
+        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-[#8E91A5]">
           <span>{isEn ? 'Recipient receives in Mexico:' : 'Recibe en México (SPEI):'}</span>
-          <span className="font-bold font-financial-mono text-white">
+          <span className="font-bold font-financial-mono text-slate-900 dark:text-white">
             ≈ ${recipientReceivesMXN.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
           </span>
         </div>
 
         {/* Tiempo de acreditación */}
-        <div className="flex items-center justify-between text-[#8E91A5] text-[11px]">
+        <div className="flex items-center justify-between text-slate-500 dark:text-[#8E91A5] text-[11px]">
           <span>{isEn ? 'Estimated delivery time:' : 'Tiempo de acreditación:'}</span>
-          <span className="font-bold text-white">{isEn ? '⚡ Less than 30 seconds' : '⚡ Menos de 30 segundos'}</span>
+          <span className="font-bold text-slate-900 dark:text-white">{isEn ? '⚡ Less than 30 seconds' : '⚡ Menos de 30 segundos'}</span>
         </div>
       </div>
 
