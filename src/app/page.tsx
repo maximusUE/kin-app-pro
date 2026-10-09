@@ -1673,6 +1673,8 @@ export default function MobileApp() {
     const clabe = recipient.clabe || '012180004567891234';
 
     const amt = parseFloat(sendQuickAmount) || 50;
+    const fee = amt <= 250 ? 1.99 : 2.99; // Fórmula oficial KIN: $1.99 para <= $250, $2.99 para > $250
+    const totalPaid = +(amt + fee).toFixed(2);
     const txId = 'KIN-QK-' + Math.floor(100000 + Math.random() * 900000);
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1681,9 +1683,9 @@ export default function MobileApp() {
     const newTx: TransactionItem = {
       id: Date.now().toString(),
       title: `Envío Rápido a ${recipient.name}`,
-      category: 'SPEI Exprés (0 comisiones)',
+      category: 'SPEI Exprés (Acreditación Inmediata)',
       time: `Hoy, ${timeStr}`,
-      amount: -amt,
+      amount: -totalPaid,
       type: 'expense',
       iconType: 'send',
       dateGroup: 'Hoy',
@@ -1694,13 +1696,13 @@ export default function MobileApp() {
       recipientPhone: phone,
       bancoDestino: bank,
       cuentaBeneficiario: clabe,
-      paymentMethod: 'KIN Balance ($0.00 fee)',
-      feeUSD: 0,
+      paymentMethod: `Saldo KIN (+$${fee.toFixed(2)} tarifa)`,
+      feeUSD: fee,
       createdAt: now.toISOString(),
     };
 
     setTransactions((prev) => [newTx, ...prev]);
-    setBaseBalanceUSD((prev) => +(prev - amt).toFixed(2));
+    setBaseBalanceUSD((prev) => +(prev - totalPaid).toFixed(2));
 
     // Incrementar frecuencia y persistir en la lista de contactos y recientes
     setContactsList((prev) => {
@@ -1743,6 +1745,8 @@ export default function MobileApp() {
         recipientId: recipient.id,
         recipientPhone: phone,
         amountUSD: amt,
+        feeUSD: fee,
+        totalPaidUSD: totalPaid,
         deliveryMethod: 'bank',
       }),
     }).catch((e) => console.warn('[SPEI Quick API error]', e));
@@ -1750,9 +1754,9 @@ export default function MobileApp() {
     setSendSuccessData({
       id: txId,
       amount: amt,
-      amountMXN: amt * USD_TO_MXN_RATE,
-      fee: 0,
-      totalPaid: amt,
+      amountMXN: +(amt * USD_TO_MXN_RATE).toFixed(2),
+      fee: fee,
+      totalPaid: totalPaid,
       recipientName: recipient.name,
       recipientAvatar: recipient.avatar,
       recipientPhotoUrl: recipient.photoUrl,
@@ -1760,7 +1764,7 @@ export default function MobileApp() {
       time: `${dateStr} a las ${timeStr}`,
       deliveryTitle: 'SPEI Exprés Inmediato (Banxico)',
       deliveryMethod: 'bank',
-      paymentTitle: 'KIN Balance ($0.00 fee)',
+      paymentTitle: `KIN Digital Wallet ($${fee.toFixed(2)} tarifa)`,
     });
     setActiveTab('send');
   };

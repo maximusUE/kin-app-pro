@@ -266,6 +266,15 @@ export function SendQuickView({
     }
   };
 
+  // Fórmula oficial de Tarifa de Envío KIN (Transaction / Transfer Fee Formula)
+  // • Envíos de $1 a $250 USD   -> Tarifa plana de $1.99 USD
+  // • Envíos mayores a $250 USD -> Tarifa plana de $2.99 USD
+  const baseAmount = parseFloat(sendQuickAmount) || 0;
+  const transferFee = baseAmount <= 0 ? 0 : baseAmount <= 250 ? 1.99 : 2.99;
+  const totalYouPay = +(baseAmount + transferFee).toFixed(2);
+  const recipientReceivesMXN = +(baseAmount * USD_TO_MXN_RATE).toFixed(2);
+  const [showFeeFormulaDetails, setShowFeeFormulaDetails] = useState(false);
+
   return (
     <div className="animate-fade-in space-y-4 pb-28">
       {/* Native Mobile Header: < | KinLogo | Send Quick | Info */}
@@ -560,19 +569,83 @@ export function SendQuickView({
         </div>
       </div>
 
-      {/* 3. Beneficios SPEI / Fuente de Fondos */}
-      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-2.5 text-xs">
+      {/* 3. Desglose Financiero, Fórmula de Tarifa y Fuente de Fondos */}
+      <div className="p-4 rounded-3xl bg-[#181928] border border-white/5 space-y-3 text-xs shadow-lg">
+        {/* Origen de fondos */}
         <div className="flex items-center justify-between text-[#8E91A5]">
           <span>{isEn ? 'Funding source:' : 'Origen de fondos:'}</span>
           <span className="font-bold text-white flex items-center gap-1">
             <span>🟢</span> KIN Digital Wallet (${netBalance.toFixed(2)} USD)
           </span>
         </div>
+
+        {/* Comisión de transferencia con la Fórmula Oficial KIN */}
         <div className="flex items-center justify-between text-[#8E91A5]">
-          <span>{isEn ? 'Transfer fee:' : 'Comisión de transferencia:'}</span>
-          <span className="font-bold text-[#2ED5A4]">{isEn ? 'FREE ($0.00 USD)' : 'GRATIS ($0.00 USD)'}</span>
+          <div className="flex items-center gap-1.5">
+            <span>{isEn ? 'Transfer fee:' : 'Comisión de transferencia:'}</span>
+            <button
+              type="button"
+              onClick={() => setShowFeeFormulaDetails(!showFeeFormulaDetails)}
+              className="text-[#8E91A5] hover:text-[#2ED5A4] transition-colors cursor-pointer"
+              title={isEn ? 'View transparent fee formula' : 'Ver fórmula de tarifa transparente'}
+            >
+              <span className="material-symbols-outlined text-[15px]">info</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] text-[#8E91A5] font-financial-mono">
+              {baseAmount <= 250 ? '≤$250 → $1.99' : '>$250 → $2.99'}
+            </span>
+            <span className="font-bold font-financial-mono text-[#2ED5A4]">
+              +${transferFee.toFixed(2)} USD
+            </span>
+          </div>
         </div>
-        <div className="flex items-center justify-between text-[#8E91A5]">
+
+        {/* Desglose desplegable de la fórmula si el usuario toca el botón de info */}
+        {showFeeFormulaDetails && (
+          <div className="p-2.5 rounded-2xl bg-[#0E0F1A] border border-[#2ED5A4]/20 space-y-1.5 text-[11px] animate-fade-in">
+            <div className="flex items-center justify-between text-white font-bold">
+              <span>{isEn ? 'Transparent KIN Fee Formula:' : 'Fórmula de Tarifa KIN Transparente:'}</span>
+              <span className="text-[10px] text-[#2ED5A4]">Banxico SPEI</span>
+            </div>
+            <div className="flex items-center justify-between text-[#8E91A5]">
+              <span>• {isEn ? 'Tier 1 (Up to $250.00 USD):' : 'Nivel 1 (Hasta $250.00 USD):'}</span>
+              <span className="font-financial-mono text-white">$1.99 USD</span>
+            </div>
+            <div className="flex items-center justify-between text-[#8E91A5]">
+              <span>• {isEn ? 'Tier 2 (Over $250.00 USD):' : 'Nivel 2 (Más de $250.00 USD):'}</span>
+              <span className="font-financial-mono text-white">$2.99 USD</span>
+            </div>
+            <p className="text-[10px] text-[#2ED5A4]/90 pt-0.5">
+              ✓ {isEn ? 'Zero hidden fees. Recipient receives 100% of converted funds.' : 'Sin comisiones ocultas. Tu destinatario recibe el 100% íntegro.'}
+            </p>
+          </div>
+        )}
+
+        {/* Total a debitar con la fórmula aplicada */}
+        <div className="flex items-center justify-between text-xs pt-2 border-t border-white/5">
+          <span className="text-white font-bold">{isEn ? 'Total you pay:' : 'Total a debitar:'}</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-[10px] text-[#8E91A5] font-financial-mono">
+              (${baseAmount.toFixed(2)} + ${transferFee.toFixed(2)})
+            </span>
+            <span className="font-black font-financial-mono text-[#2ED5A4] text-sm">
+              ${totalYouPay.toFixed(2)} USD
+            </span>
+          </div>
+        </div>
+
+        {/* Monto que recibe el destinatario en México */}
+        <div className="flex items-center justify-between text-[11px] text-[#8E91A5]">
+          <span>{isEn ? 'Recipient receives in Mexico:' : 'Recibe en México (SPEI):'}</span>
+          <span className="font-bold font-financial-mono text-white">
+            ≈ ${recipientReceivesMXN.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+          </span>
+        </div>
+
+        {/* Tiempo de acreditación */}
+        <div className="flex items-center justify-between text-[#8E91A5] text-[11px]">
           <span>{isEn ? 'Estimated delivery time:' : 'Tiempo de acreditación:'}</span>
           <span className="font-bold text-white">{isEn ? '⚡ Less than 30 seconds' : '⚡ Menos de 30 segundos'}</span>
         </div>
@@ -599,8 +672,8 @@ export function SendQuickView({
             <span className="h-9 px-3.5 rounded-full bg-[#003828] text-primary text-xs font-financial-mono font-bold flex items-center justify-center gap-1.5 shadow-sm">
               <span>
                 {currencyPref === 'USD'
-                  ? `$${(parseFloat(sendQuickAmount) || 50).toFixed(2)} USD`
-                  : `$${((parseFloat(sendQuickAmount) || 50) * USD_TO_MXN_RATE).toLocaleString('es-MX', {
+                  ? `$${totalYouPay.toFixed(2)} USD`
+                  : `$${recipientReceivesMXN.toLocaleString('es-MX', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })} MXN`}
