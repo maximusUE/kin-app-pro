@@ -146,38 +146,46 @@ export function FxControlModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
-      <div className="relative w-full max-w-[440px] max-h-[92vh] overflow-y-auto scrollbar-none rounded-3xl bg-[#0E131F] border border-white/10 p-5 sm:p-6 shadow-[0_24px_50px_rgba(0,0,0,0.95)] text-white space-y-4 my-auto">
-        {/* Universal Don César Header: < | KinLogo | Badge */}
-        <header className="flex items-center justify-between pb-1">
+    <div className="fixed inset-0 z-[200] bg-black/60 dark:bg-black/85 backdrop-blur-xl flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 overflow-y-auto animate-fade-in">
+      <div className="relative w-full max-w-[440px] max-h-[92vh] flex flex-col bg-white dark:bg-gradient-to-b dark:from-[#111625] dark:via-[#0D111D] dark:to-[#080B11] border-t sm:border border-slate-200/80 dark:border-white/10 rounded-t-[32px] sm:rounded-[28px] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.95),_0_0_40px_rgba(46,213,164,0.08)] overflow-hidden text-slate-900 dark:text-white my-0 sm:my-auto">
+        {/* iOS Drag Handle on Mobile */}
+        <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-white/20 mx-auto mt-2.5 mb-1 shrink-0 select-none sm:hidden" />
+
+        {/* Universal Top Header */}
+        <header className="flex items-center justify-between px-5 pt-3 pb-3 border-b border-slate-100 dark:border-white/5 shrink-0">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="btn-circle"
+              className="btn-circle bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all cursor-pointer"
               title={isEn ? "Back" : "Volver"}
             >
-              <ChevronLeftIcon className="w-5 h-5 text-white" />
+              <ChevronLeftIcon className="w-5 h-5" />
             </button>
-            <KinLogo size={34} />
+            <KinLogo size={32} />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
-            <span className="material-symbols-outlined text-[13px]">account_balance</span>
-            <span className="font-label-caps text-[9px] uppercase tracking-wider font-bold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[14px]">account_balance</span>
+            <span className="font-label-caps text-[9px] uppercase tracking-wider font-extrabold">
               {isEn ? 'Institutional Treasury' : 'Tesorería KIN'}
             </span>
           </div>
         </header>
 
-        {/* Hero Title & Subtitle */}
-        <div className="text-left pt-1">
-          <h2 className="text-lg font-bold text-white tracking-tight">
-            {isEn ? 'FX Market & Margin Control' : 'Tesorería & Tipo de Cambio'}
-          </h2>
-          <p className="text-xs text-[#A6ADC8] mt-0.5">
-            {isEn
-              ? 'Configure real-time profit spread, Banxico spot rate & promo tiers'
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-4 scrollbar-none">
+          {/* Hero Title & Subtitle */}
+          <div className="text-left">
+            <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              {isEn ? 'FX Market & Margin Control' : 'Tesorería & Tipo de Cambio'}
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+              {isEn
+                ? 'Configure real-time profit spread, Banxico spot rate & promo tiers'
+                : 'Configura tu margen de ganancia en vivo, tasa spot y promociones'}
+            </p>
+          </div>
               : 'Configura tu margen de ganancia en vivo, tasa spot y promociones'}
           </p>
         </div>
@@ -400,12 +408,12 @@ export function FxControlModal({
         </div>
 
         {/* Botón Principal de Guardar y Aplicar */}
-        <div className="pt-2">
+        <div className="pt-2 pb-4">
           <button
             type="button"
             disabled={isSaving}
             onClick={handleSaveAndApply}
-            className="w-full h-13 rounded-full bg-gradient-to-r from-primary to-[#18A57E] text-[#002116] font-headline-md text-sm font-black shadow-[0_10px_25px_rgba(46,213,164,0.4)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+            className="w-full h-12 rounded-full bg-gradient-to-r from-primary to-[#18A57E] text-[#002116] font-headline-md text-sm font-black shadow-[0_10px_25px_rgba(46,213,164,0.4)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
           >
             {isSaving ? (
               <span className="w-5 h-5 border-2 border-[#002116] border-t-transparent rounded-full animate-spin" />
@@ -418,6 +426,7 @@ export function FxControlModal({
               </>
             )}
           </button>
+        </div>
         </div>
       </div>
     </div>,

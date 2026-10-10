@@ -148,9 +148,12 @@ export function KinCashP2PModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [showQrModal, setShowQrModal] = useState(false);
   const [showAirDropModal, setShowAirDropModal] = useState(false);
+  const [destinationCorridor, setDestinationCorridor] = useState<'us' | 'mx'>('us');
   const [pendingSuccessData, setPendingSuccessData] = useState<{
     recipient: string;
     amountMXN: number;
+    amountUSD?: number;
+    corridor?: 'us' | 'mx';
     contact?: ContactItem | null;
   } | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -158,6 +161,20 @@ export function KinCashP2PModal({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Detección inteligente del corredor según el contacto seleccionado
+  useEffect(() => {
+    if (selectedContact) {
+      const phone = selectedContact.phone || '';
+      const country = (selectedContact.country || '').toLowerCase();
+      const isMex =
+        phone.startsWith('+52') ||
+        phone.startsWith('52') ||
+        country.includes('mex') ||
+        (selectedContact.clabe && selectedContact.clabe.length === 18);
+      setDestinationCorridor(isMex ? 'mx' : 'us');
+    }
+  }, [selectedContact]);
 
   // Sincronizar hacia abajo si el padre actualiza props controladas
   useEffect(() => {
@@ -373,7 +390,11 @@ export function KinCashP2PModal({
       // Éxito: Snap al final y disparo KIN Cash P2P con Onda Ultrasónica AirDrop
       setSlideX(maxDist);
       setIsDispatched(true);
-      setStatusMessage(isEn ? 'Ultrasonic Transfer in progress... 🚀' : '¡Transferencia Ultrasónica en curso! 🚀');
+      setStatusMessage(
+        destinationCorridor === 'us'
+          ? (isEn ? `Sending $${numAmount.toFixed(2)} USD via KIN Cash USA... 🚀` : `Enviando $${numAmount.toFixed(2)} USD vía KIN Cash USA... 🚀`)
+          : (isEn ? 'Ultrasonic Transfer via SPEI Banxico... 🚀' : '¡Transferencia a México vía SPEI Banxico! 🚀')
+      );
 
       const recipientLabel = selectedContact
         ? (selectedContact.fullName || selectedContact.name)
@@ -381,7 +402,9 @@ export function KinCashP2PModal({
 
       setPendingSuccessData({
         recipient: recipientLabel,
-        amountMXN: numAmount * exchangeRate,
+        amountMXN: destinationCorridor === 'mx' ? numAmount * exchangeRate : numAmount,
+        amountUSD: numAmount,
+        corridor: destinationCorridor,
         contact: selectedContact,
       });
 
@@ -672,17 +695,58 @@ export function KinCashP2PModal({
           </p>
         </div>
 
-        {/* Live FX & Fee Guarantee */}
-        <div className="flex items-center gap-2 mt-1 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-surface-container-high/80 backdrop-blur-sm border border-slate-200/80 dark:border-white/5">
-          <span className="material-symbols-outlined text-emerald-600 dark:text-primary text-[15px] animate-pulse">bolt</span>
-          <span className="font-financial-mono text-caption-sm text-emerald-600 dark:text-primary font-bold">
-            ≈ ${Number(mxnEquivalent).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
-          </span>
-          <span className="text-slate-300 dark:text-outline text-[12px]">•</span>
-          <span className="font-caption-sm text-caption-sm text-slate-700 dark:text-white font-medium">
-            {isEn ? 'Zero Fees' : 'Sin Comisión'}
-          </span>
+        {/* Selector de Destino de Entrega: USA a USA (USD) vs USA a México (Pesos) */}
+        <div className="flex items-center justify-center p-1 rounded-full bg-slate-100 dark:bg-surface-container border border-slate-200/80 dark:border-white/10 my-1.5 max-w-[340px] w-full shadow-xs">
+          <button
+            type="button"
+            onClick={() => setDestinationCorridor('us')}
+            className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              destinationCorridor === 'us'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <span>🇺🇸</span>
+            <span>{isEn ? 'USA to USA (USD)' : 'USA a USA (Dólares)'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDestinationCorridor('mx')}
+            className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              destinationCorridor === 'mx'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <span>🇲🇽</span>
+            <span>{isEn ? 'USA to MX (Pesos)' : 'USA a México (Pesos)'}</span>
+          </button>
         </div>
+
+        {/* Dynamic Delivery Breakdown Guarantee */}
+        {destinationCorridor === 'us' ? (
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 backdrop-blur-sm border border-emerald-500/30 text-emerald-800 dark:text-[#2ED5A4]">
+            <span className="material-symbols-outlined text-[15px] animate-pulse">bolt</span>
+            <span className="font-financial-mono text-caption-sm font-bold">
+              {isEn ? 'Recipient gets:' : 'Destinatario recibe:'} ${numAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+            </span>
+            <span className="opacity-40 text-[12px]">•</span>
+            <span className="font-caption-sm text-[11px] font-semibold">
+              {isEn ? 'Direct USD • Zero Fees' : 'Dólares Directos • Sin Comisión'}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-surface-container-high/80 backdrop-blur-sm border border-slate-200/80 dark:border-white/5">
+            <span className="material-symbols-outlined text-emerald-600 dark:text-primary text-[15px] animate-pulse">currency_exchange</span>
+            <span className="font-financial-mono text-caption-sm text-emerald-600 dark:text-primary font-bold">
+              ≈ ${Number(mxnEquivalent).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+            </span>
+            <span className="text-slate-300 dark:text-outline text-[12px]">•</span>
+            <span className="font-caption-sm text-caption-sm text-slate-700 dark:text-white font-medium">
+              {isEn ? 'SPEI Banxico • Zero Fees' : 'SPEI Banxico • Sin Comisión'}
+            </span>
+          </div>
+        )}
 
         {/* Transfer Concept Note Chip (Editable & Explicitly Optional) */}
         <div className="mt-3 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-surface-container text-slate-800 dark:text-on-surface hover:bg-slate-50 dark:hover:bg-surface-container-high transition-all cursor-pointer shadow-xs border border-slate-200/80 dark:border-white/5">
