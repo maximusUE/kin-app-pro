@@ -101,3 +101,16 @@ Para cumplir con los requerimientos de la **Consumer Financial Protection Bureau
 4. **Advertencia de Comisiones de Terceros:** Aviso sobre cargos por disposición de efectivo en tarjetas de crédito por parte de bancos emisores.
 5. **Protección de Datos y Privacidad Zero-Knowledge:** Cifrado en dispositivo AES-GCM-256 (ClientVault); los datos de medios de pago no se comparten ni se comercializan.
 6. **Resolución de Errores y Autoridades Reguladoras:** Canales directos de aclaración (180 días) y datos de contacto de la CFPB en EE.UU. y CONDUSEF en México.
+
+---
+
+## 6. 🏛️ Matriz de Divulgaciones Regulatorias por Producto
+
+El componente [`LegalDisclaimersCard.tsx`](file:///Users/cesarue/Desktop/Proyecto%20YouTube/src/components/LegalDisclaimersCard.tsx) conmuta automáticamente según el producto financiero:
+
+| Producto KIN | Variante | Normativas Clave | Cláusulas Críticas |
+| :--- | :--- | :--- | :--- |
+| **Envío de Dinero (Send / SendQuick)** | `variant="remittance"` | CFPB 12 CFR Part 1005 (Regulación E), Banxico SPEI | • 30 minutos de cancelación obligatoria<br>• Transparencia de margen FX<br>• Liquidación SPEI 24/7/365 en &lt; 30s |
+| **Pago de Servicios (Bill Pay)** | `variant="billpay"` | Regulación de Compensación de Servicios, SAT CFDI 4.0, PROFECO | • SLA de 24-48 horas hábiles ante CFE/Telmex<br>• **Irreversibilidad absoluta** tras liquidación<br>• Validez del recibo vs Factura SAT deducible |
+| **Billetera Digital (KIN Cash / Wallet)** | `variant="wallet"` | EFTA (Electronic Fund Transfer Act), FDIC Pass-Through, FIDO2 | • Custodia de fondos en banco patrocinador asegurado por la FDIC ($250k USD)<br>• Límite de responsabilidad por fraude ($50 USD en 2 días)<br>• Vigencia de 7 días naturales en códigos PIN de retiro en efectivo |
+

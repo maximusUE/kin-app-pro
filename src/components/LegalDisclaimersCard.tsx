@@ -2,28 +2,31 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeftIcon, CloseIcon, ShieldCheckIcon } from '@/components/Icons';
+import { ChevronLeftIcon, ShieldCheckIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
+
+export type LegalDisclaimersVariant = 'remittance' | 'billpay' | 'wallet';
 
 export interface LegalDisclaimersCardProps {
   language?: 'es' | 'en';
   className?: string;
   defaultExpanded?: boolean;
+  variant?: LegalDisclaimersVariant;
 }
 
 /**
  * 🏛️ LegalDisclaimersCard — Componente Oficial de Cumplimiento Regulatorio KIN
  * 
- * Diseñado con estándares de alta ingeniería y artesanía visual Apple/Vercel:
- * 1. Cumplimiento estricto de la Regla de Remesas de la CFPB (12 CFR Part 1005 / Regulation E).
- * 2. Normativa de transferencias en tiempo real de Banco de México (SPEI 24/7/365).
- * 3. Bóveda criptográfica ClientVault (AES-GCM-256) y privacidad bajo la ley GLBA.
- * 4. Presentación ergonómica nativa con createPortal z-[200], eliminando popups genéricos.
+ * Soporta 3 variantes especializadas:
+ * 1. 'remittance' -> Envío Transfronterizo (CFPB 12 CFR Part 1005, Banxico SPEI, 30 min cancelación, margen FX).
+ * 2. 'billpay'    -> Pago de Facturas (CFE/Telmex SLA 24-48h, Irreversibilidad, Comprobante SAT CFDI 4.0).
+ * 3. 'wallet'     -> KIN Cash y Billetera Digital (Seguro FDIC en banco custodio, EFTA Reg E, vigencia PIN retiro 7 días).
  */
 export function LegalDisclaimersCard({
   language = 'es',
   className = '',
   defaultExpanded = false,
+  variant = 'remittance',
 }: LegalDisclaimersCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -35,13 +38,176 @@ export function LegalDisclaimersCard({
 
   const isEn = language === 'en';
 
+  // Contenido dinámico según la variante
+  const config = {
+    remittance: {
+      title: isEn ? 'Legal disclaimers and important info' : 'Avisos legales e información regulatoria',
+      subtitle: isEn ? 'CFPB 12 CFR Part 1005 • Banxico SPEI • GLBA Privacy' : 'CFPB Regulación E • SPEI Banxico • Privacidad GLBA',
+      summary: isEn
+        ? 'When you send money outside of the U.S. or its territories, the term "receiver" means your Final Receiver and the terms "transaction" or "transfer" mean the payment transfer transactions governed by KIN Remittance Disclosures and CFPB 12 CFR Part 1005.'
+        : 'Al enviar dinero fuera de los EE. UU. o sus territorios, el término "destinatario" significa su Destinatario Final y los términos "transacción" o "envío" se rigen por la Ley de Transferencias de Remesas de la CFPB (12 CFR Parte 1005) y las normativas de Banco de México.',
+      pills: [
+        { label: isEn ? 'SPEI Instant Rail' : 'Riel SPEI en Segundos', icon: '⚡' },
+        { label: isEn ? '30-Min Cancellation' : 'Cancelación en 30 Min', icon: '🛡️' },
+        { label: isEn ? 'AES-256 Vault' : 'Bóveda Cifrada', icon: '🔒' },
+      ],
+      tag: 'REG-E-1005 • BANXICO-SPEI-2026',
+      clauses: [
+        {
+          num: '01',
+          title: isEn ? 'Real-time transfers & bank network' : 'Transferencias en tiempo real y red bancaria',
+          desc: isEn
+            ? 'Real-time transfers are available via Banxico SPEI to BBVA Bancomer, Banamex, Santander, Banco Azteca, BanCoppel, HSBC, Scotiabank and other registered Mexican institutions (24/7/365). Cash pickups at participating locations (OXXO, Bodega Aurrera, Walmart) are subject to store hours. Certain transfers may experience delays due to regulatory compliance or anti-fraud verification.'
+            : 'Las transferencias se acreditan en tiempo real vía SPEI Banco de México a BBVA, Citibanamex, Santander, Banco Azteca, BanCoppel, HSBC, Scotiabank y demás entidades bancarias mexicanas (24/7/365). Los retiros en efectivo en comercios afiliados (OXXO, Bodega Aurrera, Walmart) se rigen por horarios de sucursal. Los fondos pueden experimentar demoras en caso de revisiones de prevención de fraude o validación de identidad.',
+        },
+        {
+          num: '02',
+          title: isEn ? 'Currency exchange transparency & fees' : 'Transparencia cambiaria y comisiones',
+          desc: isEn
+            ? 'KIN generates revenue from transfer service fees and currency exchange spread (FX markup). When choosing a money transmitter, compare both transfer fees and exchange rates. Exchange rates and fees are locked and guaranteed at the moment of authorization with zero unexpected deductions upon arrival.'
+            : 'KIN obtiene ingresos de las tarifas por servicio y del diferencial de tipo de cambio (spread FX). Al elegir un transmisor de dinero, compare tanto las comisiones como el tipo de cambio. La tasa y tarifas quedan congeladas y garantizadas al momento de autorizar, garantizando que el receptor reciba el 100% íntegro.',
+        },
+        {
+          num: '03',
+          title: isEn ? 'Card issuer & banking fees' : 'Cargos de bancos emisores de tarjeta',
+          desc: isEn
+            ? 'If funding via credit card, your financial institution may assess cash advance charges and interest. You can avoid cash advance fees by using a debit card or your KIN Digital Wallet balance.'
+            : 'Si financia la transferencia con tarjeta de crédito, su institución bancaria en EE. UU. podría aplicar comisiones por disposición de efectivo e intereses. Puede evitar estos cargos adicionales utilizando tarjeta de débito o su saldo KIN Digital Wallet.',
+        },
+        {
+          num: '04',
+          title: isEn ? '30-Minute cancellation guarantee (CFPB 12 CFR § 1005.34)' : 'Garantía de cancelación en 30 minutos (CFPB 12 CFR § 1005.34)',
+          desc: isEn
+            ? 'Under federal law, you have the right to cancel your remittance transfer for a 100% full refund of all funds and fees paid within 30 minutes of authorization, provided the funds have not already been picked up or deposited into the recipient’s bank account.'
+            : 'Por mandato de la ley federal de EE. UU., usted tiene derecho a cancelar su remesa para recibir un reembolso íntegro del 100% de fondos y tarifas pagadas dentro de los 30 minutos posteriores a la autorización, siempre y cuando el dinero no haya sido ya cobrado en efectivo o depositado en la cuenta del destinatario.',
+        },
+        {
+          num: '05',
+          title: isEn ? 'ClientVault privacy & Zero-Knowledge encryption' : 'Privacidad ClientVault y cifrado Zero-Knowledge',
+          desc: isEn
+            ? 'Your financial information is protected under the Gramm-Leach-Bliley Act (GLBA) and FinCEN BSA regulations. Sensitive payment card numbers are encrypted locally with AES-GCM-256; card credentials are never sold or stored unencrypted.'
+            : 'Su información financiera y personal está blindada bajo la ley GLBA y las normativas de confidencialidad de FinCEN. Los datos de pago están cifrados en su dispositivo con AES-GCM-256; sus números de tarjeta jamás son comercializados ni almacenados en texto plano.',
+        },
+        {
+          num: '06',
+          title: isEn ? 'Error resolution & regulatory inquiries' : 'Resolución de errores y contacto con autoridades',
+          desc: isEn
+            ? 'For transfer inquiries or claims, contact KIN Support within 180 days. You may also contact the Consumer Financial Protection Bureau (CFPB) at (855) 411-2372 (consumerfinance.gov) or in Mexico, CONDUSEF at 55 5340 0999 (condusef.gob.mx).'
+            : 'Para cualquier aclaración o reclamo, contacte a soporte KIN dentro de los 180 días posteriores al envío. También puede comunicarse con la Oficina para la Protección Financiera del Consumidor (CFPB) de EE. UU. al (855) 411-2372 (consumerfinance.gov) o en México ante la CONDUSEF al 55 5340 0999 (condusef.gob.mx).',
+        },
+      ],
+    },
+    billpay: {
+      title: isEn ? 'Utility & bill pay regulatory disclosures' : 'Avisos legales de pago de facturas y servicios',
+      subtitle: isEn ? 'SLA Reconciliation • Irreversibility • Official SAT CFDI' : 'SLA de Conciliación • Irreversibilidad • Comprobante Fiscal SAT',
+      summary: isEn
+        ? 'Cross-border utility bill payments (CFE, Telmex, Water, Gas) are processed through automated interbank settlement rails in Mexico. Review processing timelines, cancellation limits, and official SAT invoice guidelines.'
+        : 'Los pagos transfronterizos de servicios públicos en México (CFE, Telmex, agua, gas) se procesan a través de rieles interbancarios automatizados. Conozca los tiempos de conciliación, límites de cancelación y validez del comprobante fiscal.',
+      pills: [
+        { label: isEn ? '24-48h Utility SLA' : 'SLA 24-48h CFE/Telmex', icon: '⏱️' },
+        { label: isEn ? 'Irreversible Once Paid' : 'Pago Final Irreversible', icon: '🔒' },
+        { label: isEn ? 'SAT CFDI Stamped' : 'Comprobante SAT 4.0', icon: '🧾' },
+      ],
+      tag: 'BILLPAY-CFE-SAT-2026',
+      clauses: [
+        {
+          num: '01',
+          title: isEn ? 'Provider reconciliation timeframe (24-48 Business Hours)' : 'Tiempo de conciliación ante la empresa proveedora (24-48 Horas Hábiles)',
+          desc: isEn
+            ? 'KIN executes payment settlement immediately upon authorization. However, utility providers in Mexico (such as CFE, SACMEX, or Telmex) typically take between 24 and 48 business hours to reflect the payment in their administrative systems. Payments should be scheduled at least 48 hours prior to service cut-off dates.'
+            : 'KIN ejecuta la dispersión del pago de forma inmediata tras su autorización. Sin embargo, las empresas suministradoras en México (como CFE, SACMEX o Telmex) demoran de 24 a 48 horas hábiles en reflejar el abono en sus sistemas comerciales. Se recomienda pagar al menos 48 horas antes de la fecha límite para evitar cortes del suministro.',
+        },
+        {
+          num: '02',
+          title: isEn ? 'Strict non-cancellation & irreversibility policy' : 'Política de no cancelación e irreversibilidad',
+          desc: isEn
+            ? 'Unlike person-to-person remittance transfers, utility bill payments cannot be cancelled or reversed once submitted and acknowledged by the billing clearinghouse. Please verify the service contract number and amount carefully before confirming.'
+            : 'A diferencia de las remesas familiares P2P, los pagos de servicios públicos no admiten cancelación ni reversión una vez enviados y confirmados por la cámara de compensación. Verifique detenidamente el número de servicio/contrato y el monto antes de autorizar.',
+        },
+        {
+          num: '03',
+          title: isEn ? 'Legal receipt vs. Official SAT CFDI 4.0 invoice' : 'Comprobante legal KIN vs. Factura Fiscal SAT (CFDI 4.0)',
+          desc: isEn
+            ? 'The electronic receipt generated by KIN certifies cross-border fund disbursement and interbank tracking. The official tax-deductible invoice (CFDI 4.0) is issued directly by the utility company (e.g. CFE) under the account holder’s Mexican RFC tax ID.'
+            : 'El comprobante electrónico generado por KIN acredita la dispersión financiera transfronteriza y la clave de rastreo bancario. La factura fiscal oficial deducible (CFDI 4.0) es emitida directamente por la entidad prestadora del servicio conforme al RFC del titular del contrato.',
+        },
+        {
+          num: '04',
+          title: isEn ? 'Locked FX conversion rate (USD to MXN)' : 'Tasa de conversión garantizada (USD a MXN)',
+          desc: isEn
+            ? 'Bills denominated in Mexican Pesos (MXN) are converted into USD using the transparent guaranteed rate shown at checkout. Zero unexpected foreign collection surcharges will be assessed upon delivery.'
+            : 'Los recibos denominados en pesos mexicanos (MXN) se convierten a dólares aplicando la tasa de cambio congelada en pantalla al momento del pago. Cero comisiones imprevistas serán cobradas al beneficiario en destino.',
+        },
+        {
+          num: '05',
+          title: isEn ? 'Inquiries, claim rights & regulatory escalation' : 'Aclaraciones, reclamos y escalamiento oficial',
+          desc: isEn
+            ? 'Keep your KIN transaction reference ID and tracking number for any billing dispute. Inquiries can be submitted within 90 days to KIN Support, or escalated to PROFECO / CONDUSEF in Mexico.'
+            : 'Conserve su folio de transacción KIN y clave de rastreo para cualquier aclaración de saldo. Puede presentar reclamos dentro de los 90 días naturales ante soporte KIN o acudir ante PROFECO / CONDUSEF en México.',
+        },
+      ],
+    },
+    wallet: {
+      title: isEn ? 'Digital wallet & KIN Cash legal disclosures' : 'Avisos legales de billetera digital y KIN Cash',
+      subtitle: isEn ? 'FDIC Custody • EFTA Regulation E • WebAuthn Security' : 'Custodia FDIC • EFTA Regulación E • Seguridad WebAuthn',
+      summary: isEn
+        ? 'Digital wallet balances and KIN Cash peer-to-peer transfers are safeguarded under the Electronic Fund Transfer Act (EFTA / Regulation E) and federal deposit custody requirements.'
+        : 'Los saldos en billetera digital y envíos P2P KIN Cash están protegidos conforme a la Ley de Transferencias Electrónicas de Fondos (EFTA / Regulación E) y las normativas federales de custodia.',
+      pills: [
+        { label: isEn ? 'FDIC Custodial Partner' : 'Custodia Asegurada FDIC', icon: '🏛️' },
+        { label: isEn ? 'EFTA Reg E Liability' : 'Protección EFTA Reg E', icon: '🛡️' },
+        { label: isEn ? '7-Day PIN Validity' : 'PIN 7 Días de Vigencia', icon: '⏱️' },
+      ],
+      tag: 'WALLET-FDIC-EFTA-2026',
+      clauses: [
+        {
+          num: '01',
+          title: isEn ? 'FDIC Pass-Through Deposit Insurance disclosure' : 'Aviso mandatorio de seguro de depósito FDIC (Pass-Through)',
+          desc: isEn
+            ? 'Funds held in your KIN Digital Wallet are held in pooled custodial accounts at our FDIC-insured partner banking institution in the United States. Your deposits are eligible for FDIC insurance coverage up to $250,000 USD per depositor against bank failure.'
+            : 'Los fondos en dólares mantenidos en su KIN Digital Wallet están custodiados en cuentas bancarias de depósito en nuestro banco patrocinador regulado en EE. UU. Dichos fondos son elegibles para la cobertura del seguro de depósito de la FDIC hasta por $250,000 USD por usuario contra insolvencia bancaria.',
+        },
+        {
+          num: '02',
+          title: isEn ? 'Protection against unauthorized transfers (CFPB Reg E § 1005.11)' : 'Protección ante transferencias no autorizadas (CFPB Reg E § 1005.11)',
+          desc: isEn
+            ? 'If you suspect unauthorized access or lost credentials, notify KIN immediately. Under federal Regulation E, if reported within 2 business days of discovery, your maximum statutory liability is limited to $50 USD.'
+            : 'Si sospecha un acceso no reconocido a su cuenta o pérdida de credenciales, notifique a KIN de inmediato. Por mandato de la Regulación E federal, si reporta dentro de los 2 días hábiles posteriores a enterarse, su responsabilidad máxima por ley se limita a $50 USD.',
+        },
+        {
+          num: '03',
+          title: isEn ? 'Instant P2P transfers & recipient verification' : 'Envíos P2P inmediatos y verificación de destinatario',
+          desc: isEn
+            ? 'Peer-to-peer balance transfers between KIN users settle instantaneously with zero transaction fees. Verify phone numbers or $kinhandles carefully; confirmed P2P wallet transfers cannot be cancelled once accepted by the recipient.'
+            : 'Las transferencias de saldo P2P entre usuarios KIN se liquidan de forma instantánea y sin comisiones. Verifique cuidadosamente el teléfono o usuario ($handle); los envíos confirmados no pueden revertirse unilateralmente una vez acreditados.',
+        },
+        {
+          num: '04',
+          title: isEn ? '7-Day validity for cash pickup PINs' : 'Vigencia de 7 días naturales para códigos de retiro en efectivo',
+          desc: isEn
+            ? 'PIN codes generated for cash withdrawals at merchant partners (OXXO, Bodega Aurrera) expire after 7 calendar days. If uncollected by the recipient, 100% of the funds are automatically refunded back to your KIN Digital Wallet.'
+            : 'Los códigos PIN generados para retiro en efectivo en tiendas afiliadas (OXXO, Bodega Aurrera) tienen una vigencia de 7 días naturales. Si el beneficiario no acude a ventanilla en ese plazo, el 100% del dinero se reembolsa automáticamente a su billetera KIN.',
+        },
+        {
+          num: '05',
+          title: isEn ? 'Biometric security & ClientVault hardware isolation' : 'Seguridad biométrica FIDO2 y aislamiento en dispositivo',
+          desc: isEn
+            ? 'Card reveal, wallet freeze actions, and high-value transfers require WebAuthn hardware biometric confirmation (Face ID / Touch ID / Device PIN) and are encrypted locally via AES-GCM-256.'
+            : 'El desbloqueo de datos de tarjeta, descongelamiento y envíos de alto monto requieren autenticación biométrica WebAuthn (Face ID / Huella / PIN del dispositivo) y se procesan con cifrado local AES-GCM-256.',
+        },
+      ],
+    },
+  };
+
+  const current = config[variant] || config.remittance;
+
   return (
     <>
       {/* ========================================================================= */}
       {/* 1. SECCIÓN INLINE EN EL FEED (DISEÑO FINTECH PULIDO Y NO INVASIVO) */}
       {/* ========================================================================= */}
       <section
-        aria-label={isEn ? 'Legal & Regulatory Information' : 'Información Legal y Regulatoria'}
+        aria-label={current.title}
         className={`w-full rounded-3xl bg-slate-50/80 dark:bg-[#121623]/80 border border-slate-200/80 dark:border-white/10 p-4 transition-all shadow-xs ${className}`}
       >
         {/* Cabecera Interactiva */}
@@ -53,14 +219,16 @@ export function LegalDisclaimersCard({
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-[#2ED5A4] flex items-center justify-center shrink-0 border border-emerald-500/20">
-              <span className="material-symbols-outlined text-[17px]">gavel</span>
+              <span className="material-symbols-outlined text-[17px]">
+                {variant === 'billpay' ? 'receipt_long' : variant === 'wallet' ? 'account_balance_wallet' : 'gavel'}
+              </span>
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-bold text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-[#2ED5A4] transition-colors truncate">
-                {isEn ? 'Legal disclaimers and important info' : 'Avisos legales e información regulatoria'}
+                {current.title}
               </span>
               <span className="text-[10px] text-slate-500 dark:text-[#8E91A5] truncate font-medium">
-                {isEn ? 'CFPB 12 CFR Part 1005 • Banxico SPEI • GLBA Privacy' : 'CFPB Regulación E • SPEI Banxico • Privacidad GLBA'}
+                {current.subtitle}
               </span>
             </div>
           </div>
@@ -79,112 +247,46 @@ export function LegalDisclaimersCard({
 
         {/* Resumen Inmediato en Tipografía Gris Fina Regulada */}
         <p className="text-[11px] leading-relaxed text-slate-500 dark:text-[#8E91A5] mt-2.5 font-normal">
-          {isEn
-            ? 'When you send money outside of the U.S. or its territories, the term "receiver" means your Final Receiver and the terms "transaction" or "transfer" mean the payment transfer transactions governed by KIN Remittance Disclosures and CFPB 12 CFR Part 1005.'
-            : 'Al enviar dinero fuera de los EE. UU. o sus territorios, el término "destinatario" significa su Destinatario Final y los términos "transacción" o "envío" se rigen por la Ley de Transferencias de Remesas de la CFPB (12 CFR Parte 1005) y las normativas de Banco de México.'}
+          {current.summary}
         </p>
 
         {/* Pills de Certificación Rápida */}
         <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/5">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-medium text-slate-600 dark:text-slate-300 shadow-2xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            {isEn ? 'SPEI Instant Rail' : 'Riel SPEI en Segundos'}
-          </span>
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-medium text-slate-600 dark:text-slate-300 shadow-2xs">
-            <span>🛡️</span>
-            {isEn ? '30-Min Cancellation' : 'Cancelación en 30 Min'}
-          </span>
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-medium text-slate-600 dark:text-slate-300 shadow-2xs">
-            <span>🔒</span>
-            {isEn ? 'AES-256 Vault' : 'Bóveda Cifrada'}
-          </span>
+          {current.pills.map((pill, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-medium text-slate-600 dark:text-slate-300 shadow-2xs"
+            >
+              <span>{pill.icon}</span>
+              {pill.label}
+            </span>
+          ))}
         </div>
 
-        {/* Acordeón Plegable con las 6 Cláusulas Regulatorias */}
+        {/* Acordeón Plegable con las Cláusulas Regulatorias */}
         {isExpanded && (
           <div className="mt-3.5 pt-3 border-t border-slate-200/60 dark:border-white/10 space-y-3 animate-fade-in">
-            {/* Cláusula 1: SPEI & Bancos */}
-            <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-600 dark:text-[#8E91A5]">
-              <span className="font-financial-mono font-bold text-emerald-600 dark:text-[#2ED5A4] shrink-0">01</span>
-              <div>
-                <strong className="font-bold text-slate-900 dark:text-white block mb-0.5">
-                  {isEn ? 'Real-time transfers & bank network' : 'Transferencias en tiempo real y red bancaria'}
-                </strong>
-                {isEn
-                  ? 'Real-time transfers are available via Banxico SPEI to BBVA Bancomer, Banamex, Santander, Banco Azteca, BanCoppel, HSBC, Scotiabank and other registered Mexican institutions (24/7/365). Cash pickups at participating locations (OXXO, Bodega Aurrera, Walmart) are subject to store hours. Certain transfers may experience delays due to regulatory compliance or anti-fraud verification.'
-                  : 'Las transferencias se acreditan en tiempo real vía SPEI Banco de México a BBVA, Citibanamex, Santander, Banco Azteca, BanCoppel, HSBC, Scotiabank y demás entidades bancarias mexicanas (24/7/365). Los retiros en efectivo en comercios afiliados (OXXO, Bodega Aurrera, Walmart) se rigen por horarios de sucursal. Los fondos pueden experimentar demoras en caso de revisiones de prevención de fraude o validación de identidad.'}
+            {current.clauses.map((clause, idx) => (
+              <div
+                key={idx}
+                className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-600 dark:text-[#8E91A5]"
+              >
+                <span className="font-financial-mono font-bold text-emerald-600 dark:text-[#2ED5A4] shrink-0">
+                  {clause.num}
+                </span>
+                <div>
+                  <strong className="font-bold text-slate-900 dark:text-white block mb-0.5">
+                    {clause.title}
+                  </strong>
+                  {clause.desc}
+                </div>
               </div>
-            </div>
-
-            {/* Cláusula 2: Transparencia Cambiaria CFPB */}
-            <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-600 dark:text-[#8E91A5]">
-              <span className="font-financial-mono font-bold text-emerald-600 dark:text-[#2ED5A4] shrink-0">02</span>
-              <div>
-                <strong className="font-bold text-slate-900 dark:text-white block mb-0.5">
-                  {isEn ? 'Currency exchange transparency & fees' : 'Transparencia cambiaria y comisiones'}
-                </strong>
-                {isEn
-                  ? 'KIN generates revenue from transfer service fees and currency exchange spread (FX markup). When choosing a money transmitter, compare both transfer fees and exchange rates. Exchange rates and fees are locked and guaranteed at the moment of authorization with zero unexpected deductions upon arrival.'
-                  : 'KIN obtiene ingresos de las tarifas por servicio y del diferencial de tipo de cambio (spread FX). Al elegir un transmisor de dinero, compare tanto las comisiones como el tipo de cambio. La tasa y tarifas quedan congeladas y garantizadas al momento de autorizar, garantizando que el receptor reciba el 100% íntegro.'}
-              </div>
-            </div>
-
-            {/* Cláusula 3: Cargos Bancarios de Emisor de Tarjeta */}
-            <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-600 dark:text-[#8E91A5]">
-              <span className="font-financial-mono font-bold text-emerald-600 dark:text-[#2ED5A4] shrink-0">03</span>
-              <div>
-                <strong className="font-bold text-slate-900 dark:text-white block mb-0.5">
-                  {isEn ? 'Card issuer & banking fees' : 'Cargos de bancos emisores de tarjeta'}
-                </strong>
-                {isEn
-                  ? 'If funding via credit card, your financial institution may assess cash advance charges and interest. You can avoid cash advance fees by using a debit card or your KIN Digital Wallet balance.'
-                  : 'Si financia la transferencia con tarjeta de crédito, su institución bancaria en EE. UU. podría aplicar comisiones por disposición de efectivo e intereses. Puede evitar estos cargos adicionales utilizando tarjeta de débito o su saldo KIN Digital Wallet.'}
-              </div>
-            </div>
-
-            {/* Cláusula 4: Derecho de Cancelación en 30 Minutos */}
-            <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-600 dark:text-[#8E91A5]">
-              <span className="font-financial-mono font-bold text-emerald-600 dark:text-[#2ED5A4] shrink-0">04</span>
-              <div>
-                <strong className="font-bold text-slate-900 dark:text-white block mb-0.5">
-                  {isEn ? '30-Minute cancellation guarantee (CFPB 12 CFR § 1005.34)' : 'Garantía de cancelación en 30 minutos (CFPB 12 CFR § 1005.34)'}
-                </strong>
-                {isEn
-                  ? 'Under federal law, you have the right to cancel your remittance transfer for a 100% full refund of all funds and fees paid within 30 minutes of authorization, provided the funds have not already been picked up or deposited into the recipient’s bank account.'
-                  : 'Por mandato de la ley federal de EE. UU., usted tiene derecho a cancelar su remesa para recibir un reembolso íntegro del 100% de fondos y tarifas pagadas dentro de los 30 minutos posteriores a la autorización, siempre y cuando el dinero no haya sido ya cobrado en efectivo o depositado en la cuenta del destinatario.'}
-              </div>
-            </div>
-
-            {/* Cláusula 5: Privacidad GLBA y Bóveda Zero-Knowledge */}
-            <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-600 dark:text-[#8E91A5]">
-              <span className="font-financial-mono font-bold text-emerald-600 dark:text-[#2ED5A4] shrink-0">05</span>
-              <div>
-                <strong className="font-bold text-slate-900 dark:text-white block mb-0.5">
-                  {isEn ? 'ClientVault privacy & Zero-Knowledge encryption' : 'Privacidad ClientVault y cifrado Zero-Knowledge'}
-                </strong>
-                {isEn
-                  ? 'Your financial information is protected under the Gramm-Leach-Bliley Act (GLBA) and FinCEN BSA regulations. Sensitive payment card numbers are encrypted locally with AES-GCM-256; card credentials are never sold or stored unencrypted.'
-                  : 'Su información financiera y personal está blindada bajo la ley GLBA y las normativas de confidencialidad de FinCEN. Los datos de pago están cifrados en su dispositivo con AES-GCM-256; sus números de tarjeta jamás son comercializados ni almacenados en texto plano.'}
-              </div>
-            </div>
-
-            {/* Cláusula 6: Aclaraciones y Organismos Reguladores */}
-            <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-600 dark:text-[#8E91A5]">
-              <span className="font-financial-mono font-bold text-emerald-600 dark:text-[#2ED5A4] shrink-0">06</span>
-              <div>
-                <strong className="font-bold text-slate-900 dark:text-white block mb-0.5">
-                  {isEn ? 'Error resolution & regulatory inquiries' : 'Resolución de errores y contacto con autoridades'}
-                </strong>
-                {isEn
-                  ? 'For transfer inquiries or claims, contact KIN Support within 180 days. You may also contact the Consumer Financial Protection Bureau (CFPB) at (855) 411-2372 (consumerfinance.gov) or in Mexico, CONDUSEF at 55 5340 0999 (condusef.gob.mx).'
-                  : 'Para cualquier aclaración o reclamo, contacte a soporte KIN dentro de los 180 días posteriores al envío. También puede comunicarse con la Oficina para la Protección Financiera del Consumidor (CFPB) de EE. UU. al (855) 411-2372 (consumerfinance.gov) o en México ante la CONDUSEF al 55 5340 0999 (condusef.gob.mx).'}
-              </div>
-            </div>
+            ))}
 
             {/* Botón de Apertura de la Hoja Oficial Detallada */}
             <div className="pt-2 flex items-center justify-between">
               <span className="text-[10px] text-slate-400 dark:text-white/40 font-mono">
-                REG-E-1005 • BANXICO-SPEI-2026
+                {current.tag}
               </span>
               <button
                 type="button"
@@ -234,12 +336,10 @@ export function LegalDisclaimersCard({
 
               <div className="text-center">
                 <h2 id="compliance-dossier-title" className="text-xs font-black uppercase tracking-wider text-white">
-                  {isEn ? 'Remittance Legal Disclosures' : 'Dossier Legal y Regulatorio'}
+                  {current.title}
                 </h2>
                 <span className="text-[9px] font-mono text-[#2ED5A4] flex items-center justify-center gap-1">
-                  <span>CFPB 12 CFR 1005</span>
-                  <span>•</span>
-                  <span>Banxico SPEI</span>
+                  <span>{current.tag}</span>
                 </span>
               </div>
 
@@ -257,118 +357,37 @@ export function LegalDisclaimersCard({
                 <div className="flex items-center gap-2">
                   <ShieldCheckIcon className="w-5 h-5 text-[#2ED5A4] shrink-0" />
                   <span className="text-xs font-black text-white">
-                    {isEn ? 'Federal Consumer Protection Seal' : 'Sello Federal de Protección al Remitente'}
+                    {isEn ? 'Official Regulatory Certification' : 'Certificación Regulatoria Oficial'}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#A6ADC8] leading-relaxed">
-                  {isEn
-                    ? 'Transfers originating in the United States and routed to Mexico are protected by federal statutes. You are entitled to transparent pre-payment cost disclosures, clear FX margins, and 30 minutes of guaranteed cancellation.'
-                    : 'Las transferencias con origen en los Estados Unidos y destino en México están tuteladas por leyes federales. El remitente tiene derecho inalienable a desglose previo de costos, transparencia en el tipo de cambio y 30 minutos de cancelación sin costo.'}
+                  {current.summary}
                 </p>
               </div>
 
-              {/* Bento 1: SPEI en Tiempo Real y Red Bancaria */}
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">account_balance</span>
-                    <span className="text-xs font-bold text-white">
-                      {isEn ? '1. Banxico SPEI Settlement' : '1. Liquidación SPEI Banco de México'}
+              {/* Bento Cards con los puntos clave */}
+              {current.clauses.map((clause, idx) => (
+                <div key={idx} className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-2">
+                      <span className="font-mono text-[#2ED5A4]">{clause.num}.</span>
+                      {clause.title}
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[#2ED5A4] text-[9px] font-mono font-bold">
-                    &lt; 30s SLA
-                  </span>
+                  <p className="text-[11px] text-[#8E91A5]">
+                    {clause.desc}
+                  </p>
                 </div>
-                <p className="text-[11px] text-[#8E91A5]">
-                  {isEn
-                    ? 'Electronic bank transfers are routed directly through the Sistema de Pagos Electrónicos Interbancarios (SPEI) operated by Banco de México. Real-time availability applies to BBVA, Banamex, Azteca, Santander, BanCoppel, HSBC, and all registered banks 24 hours a day, 365 days a year.'
-                    : 'Las transferencias interbancarias se dispersan por el Sistema de Pagos Electrónicos Interbancarios (SPEI) de Banco de México en tiempo real las 24 horas del día hacia BBVA, Citibanamex, Azteca, Santander, BanCoppel, HSBC y demás bancos regulados.'}
-                </p>
-                <div className="flex items-center gap-2 pt-1">
-                  <span className="text-[10px] text-slate-400 font-semibold">{isEn ? 'Participating banks:' : 'Bancos participantes:'}</span>
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-bold">BBVA</span>
-                    <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-bold">Citibanamex</span>
-                    <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-bold">Azteca</span>
-                    <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-bold">BanCoppel</span>
-                  </div>
-                </div>
-              </div>
+              ))}
 
-              {/* Bento 2: Transparencia Cambiaria CFPB */}
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">currency_exchange</span>
-                    <span className="text-xs font-bold text-white">
-                      {isEn ? '2. FX Margin & Transparent Pricing' : '2. Margen FX y Tasa de Cambio Transparente'}
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-white text-[9px] font-mono">
-                    Zero Hidden Fees
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#8E91A5]">
-                  {isEn
-                    ? 'KIN publishes guaranteed exchange rates before authorization. KIN derives income through service fees and the foreign exchange spread. Your beneficiary in Mexico will receive the exact displayed amount without destination bank deductions.'
-                    : 'KIN muestra la tasa garantizada antes de pagar. KIN obtiene ingresos a través de la comisión de servicio y el spread cambiario. Su familiar en México recibe el monto íntegro en pesos sin comisiones imprevistas en ventanilla o sucursal.'}
-                </p>
-              </div>
-
-              {/* Bento 3: Garantía de Cancelación de 30 Minutos */}
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">schedule</span>
-                    <span className="text-xs font-bold text-white">
-                      {isEn ? '3. 30-Minute Federal Cancellation' : '3. Derecho de Cancelación en 30 Minutos'}
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[#2ED5A4] text-[9px] font-mono font-bold">
-                    100% Refund
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#8E91A5]">
-                  {isEn
-                    ? 'Pursuant to 12 CFR § 1005.34, you have 30 minutes from payment authorization to cancel for a full refund of principal and fees, provided the funds have not been picked up or credited to the receiver.'
-                    : 'Conforme a la sección 12 CFR § 1005.34 de la ley de EE. UU., usted cuenta con 30 minutos tras autorizar el pago para solicitar la cancelación y reembolso total (capital y tarifas), salvo que los fondos ya hayan sido entregados o abonados en cuenta.'}
-                </p>
-              </div>
-
-              {/* Bento 4: Cifrado Zero-Knowledge y Privacidad GLBA */}
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">lock</span>
-                    <span className="text-xs font-bold text-white">
-                      {isEn ? '4. ClientVault Encryption & Privacy' : '4. Privacidad GLBA y Bóveda Criptográfica'}
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-white text-[9px] font-mono">
-                    AES-GCM-256
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#8E91A5]">
-                  {isEn
-                    ? 'Payment instruments are isolated on-device via AES-GCM-256 ClientVault. Personal financial data is governed under the Gramm-Leach-Bliley Act (GLBA) and FinCEN anti-money laundering regulations.'
-                    : 'Sus instrumentos de pago se resguardan de forma local mediante la Bóveda ClientVault con cifrado militar AES-GCM-256. Sus datos personales no se comercializan bajo ninguna circunstancia, cumpliendo la ley GLBA.'}
-                </p>
-              </div>
-
-              {/* Bento 5: Contacto con Autoridades Reguladoras */}
+              {/* Footer regulatorio de contactos */}
               <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2.5">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[18px] text-[#2ED5A4]">help_center</span>
                   <span className="text-xs font-bold text-white">
-                    {isEn ? '5. Regulatory Contact & Error Resolution' : '5. Autoridades Reguladoras y Aclaraciones'}
+                    {isEn ? 'Supervisory Contacts & Redress' : 'Organismos de Supervisión y Quejas'}
                   </span>
                 </div>
-                <p className="text-[11px] text-[#8E91A5]">
-                  {isEn
-                    ? 'For inquiries or claims, contact KIN Support within 180 days. You may also contact federal supervisory agencies directly:'
-                    : 'Para cualquier aclaración, contacte a KIN dentro de los primeros 180 días. También puede contactar a las entidades supervisoras oficiales:'}
-                </p>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <a
                     href="https://www.consumerfinance.gov"

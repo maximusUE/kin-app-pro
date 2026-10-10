@@ -6,6 +6,7 @@ import { KinLogo } from '@/components/KinLogo';
 import { AppleWalletPassModal } from '@/components/modals/AppleWalletPassModal';
 import { KinPinRevealModal } from '@/components/modals/KinPinRevealModal';
 import { KinCardLimitsModal } from '@/components/modals/KinCardLimitsModal';
+import { LegalDisclaimersCard } from '@/components/LegalDisclaimersCard';
 
 interface WalletViewProps {
   onBack: () => void;
@@ -297,6 +298,11 @@ export function WalletView({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* CUMPLIMIENTO REGULATORIO Y AVISOS LEGALES BILLETERA KIN / FDIC / EFTA REGLA E */}
+      <div className="pt-1">
+        <LegalDisclaimersCard language={language} variant="wallet" defaultExpanded={false} />
       </div>
 
       {/* Modales Interactivos de Step 6 */}

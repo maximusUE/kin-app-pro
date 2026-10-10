@@ -17,6 +17,7 @@ import { ContactAvatar } from './ContactAvatar';
 import { WhatsAppContactsModal } from './WhatsAppContactsModal';
 import { KinAirDropWaveModal } from './animations/KinAirDropWaveModal';
 import { KinQrModal } from './modals/KinQrModal';
+import { LegalDisclaimersCard } from './LegalDisclaimersCard';
 
 export interface ContactItem {
   id: string;
@@ -805,6 +806,11 @@ export function KinCashP2PModal({
             ? 'Secured by Banxico SPEI • Direct Settlement • FDIC-insured partner bank'
             : 'Protegido por Banxico SPEI • Liquidación Directa • Banco asegurado por FDIC'}
         </p>
+      </div>
+
+      {/* CUMPLIMIENTO REGULATORIO Y AVISOS LEGALES KIN CASH P2P / FDIC / REGLA E */}
+      <div className="pt-1">
+        <LegalDisclaimersCard language={language} variant="wallet" defaultExpanded={false} />
       </div>
 
       {/* Agenda Telefónica y Búsqueda de Contactos estilo WhatsApp iOS */}

@@ -123,6 +123,7 @@ export function CardCheckoutView({
   onPaymentSuccess,
 }: CardCheckoutViewProps) {
   const isEn = language === 'en';
+  const isBillPay = Boolean(metadata?.serviceId || metadata?.empresa || (conceptTitle && (conceptTitle.toLowerCase().includes('cfe') || conceptTitle.toLowerCase().includes('telmex') || conceptTitle.toLowerCase().includes('servicio') || conceptTitle.toLowerCase().includes('factura'))));
 
   // Cards state - Pre-inicializado con INITIAL_SAVED_CARDS para evitar null pointers
   const [cards, setCards] = useState<SavedCardItem[]>(INITIAL_SAVED_CARDS);
@@ -905,8 +906,8 @@ export function CardCheckoutView({
             </div>
           )}
 
-          {/* CUMPLIMIENTO REGULATORIO Y AVISOS LEGALES CFPB / SPEI */}
-          <LegalDisclaimersCard language={language} defaultExpanded={false} className="mt-2" />
+          {/* CUMPLIMIENTO REGULATORIO Y AVISOS LEGALES SEGÚN PRODUCTO (BILL PAY O REMESA) */}
+          <LegalDisclaimersCard language={language} variant={isBillPay ? 'billpay' : 'remittance'} defaultExpanded={false} className="mt-2" />
 
           {/* BOTÓN PRIMARIO DE AUTORIZACIÓN STRIPE EN MODO APP */}
           <div className="pt-2 pb-6">

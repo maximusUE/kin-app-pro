@@ -9,6 +9,7 @@ import { CardCheckoutView } from './CardCheckoutView';
 import { BillCameraScannerModal, ScannedBillResult } from '../BillCameraScannerModal';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { MexicanBillReceiptModal, MexicanBillReceiptData } from '../modals/MexicanBillReceiptModal';
+import { LegalDisclaimersCard } from '@/components/LegalDisclaimersCard';
 
 export interface ServiceDefinition {
   id: string;
@@ -706,6 +707,11 @@ export function BillPayView({
             </span>
           </div>
         </div>
+      </div>
+
+      {/* CUMPLIMIENTO REGULATORIO Y AVISOS LEGALES BILL PAY (CFE / PROFECO / SAT) */}
+      <div className="pt-1">
+        <LegalDisclaimersCard language={language} variant="billpay" defaultExpanded={false} />
       </div>
 
       {/* Spacer para holgura de scroll con la barra flotante */}
