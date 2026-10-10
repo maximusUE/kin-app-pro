@@ -186,9 +186,6 @@ export function FxControlModal({
                 : 'Configura tu margen de ganancia en vivo, tasa spot y promociones'}
             </p>
           </div>
-              : 'Configura tu margen de ganancia en vivo, tasa spot y promociones'}
-          </p>
-        </div>
 
         {/* 1. Mercado en Vivo (Interbank Spot Rate) */}
         <div className="p-4 rounded-2xl bg-[#161828] border border-white/10 flex flex-col gap-2 relative overflow-hidden shadow-inner">
