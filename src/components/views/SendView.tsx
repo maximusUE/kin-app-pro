@@ -23,6 +23,7 @@ import {
 } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { ContactAvatar } from '@/components/ContactAvatar';
+import { LegalDisclaimersCard } from '@/components/LegalDisclaimersCard';
 import { MEXICO_STATES, MexicoState } from '@/data/mexicoLocations';
 import type { SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
 import {
@@ -2510,6 +2511,11 @@ export function SendView({
         </div>
       )}
 
+      {/* CUMPLIMIENTO REGULATORIO Y AVISOS LEGALES CFPB / BANXICO SPEI (ESTILO WESTERN UNION) */}
+      <div className="pt-2">
+        <LegalDisclaimersCard language={language} defaultExpanded={false} />
+      </div>
+
       {/* WESTERN UNION-STYLE COMPACT FLOATING BOTTOM ACTION BAR & OPTIONAL DISCLOSURE */}
       {(() => {
         const currentBaseUSD = parseFloat(amountValue) || 50;
@@ -2628,6 +2634,16 @@ export function SendView({
                         <span className="text-[10px] text-slate-500 dark:text-neutral-400">{isEn ? 'Includes transparent KIN fee' : 'Incluye cargo de envío KIN'}</span>
                       </div>
                       <span className="font-financial-mono text-base font-bold text-emerald-600 dark:text-primary">${currentTotalUSD.toFixed(2)} USD</span>
+                    </div>
+
+                    {/* Nota regulatoria CFPB / SPEI */}
+                    <div className="pt-1.5 pb-1 text-[10px] text-slate-500 dark:text-[#8E91A5] flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[13px] text-emerald-600 dark:text-primary shrink-0">verified_user</span>
+                      <span>
+                        {isEn
+                          ? 'CFPB Remittance Rule compliant. 30-min full refund cancellation guarantee.'
+                          : 'Cumple Regla de Remesas CFPB. Garantía de cancelación y reembolso en 30 min.'}
+                      </span>
                     </div>
                   </div>
 

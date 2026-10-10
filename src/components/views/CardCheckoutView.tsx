@@ -6,6 +6,7 @@ import { ChevronLeftIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { getStoredCards, saveStoredCards, SavedCardItem, INITIAL_SAVED_CARDS } from '@/lib/cards';
 import { MexicanBillReceiptModal, MexicanBillReceiptData } from '../modals/MexicanBillReceiptModal';
+import { LegalDisclaimersCard } from '@/components/LegalDisclaimersCard';
 
 export interface CardCheckoutViewProps {
   onBack: () => void;
@@ -903,6 +904,9 @@ export function CardCheckoutView({
               </label>
             </div>
           )}
+
+          {/* CUMPLIMIENTO REGULATORIO Y AVISOS LEGALES CFPB / SPEI */}
+          <LegalDisclaimersCard language={language} defaultExpanded={false} className="mt-2" />
 
           {/* BOTÓN PRIMARIO DE AUTORIZACIÓN STRIPE EN MODO APP */}
           <div className="pt-2 pb-6">

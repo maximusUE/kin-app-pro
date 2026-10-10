@@ -88,3 +88,16 @@ KIN cuenta con reglas de monitoreo automatizado de transacciones:
 1. **Estructuración (*Smurfing*):** Múltiples envíos de \$990 USD en un mismo día para evadir el límite de \$1,000 USD de Tier 1 activan una congelación preventiva del usuario hasta completar la verificación Tier 2.
 2. **Dispersión a Múltiples Beneficiarios Desconocidos:** Envío a más de 5 cuentas CLABE distintas en menos de 2 horas activa revisión de seguridad.
 3. **Control de Duplicidad:** El mismo número de CURP o Clave de Elector no puede asociarse a dos cuentas de KIN distintas.
+
+---
+
+## 5. 📜 Divulgaciones Obligatorias CFPB (Regulation E) y Privacidad GLBA
+
+Para cumplir con los requerimientos de la **Consumer Financial Protection Bureau (CFPB 12 CFR Part 1005, Subpart B)** y la **Gramm-Leach-Bliley Act (GLBA)** antes del despliegue en producción y aprobación de las tiendas (Apple/Google), KIN integra el componente [`LegalDisclaimersCard.tsx`](file:///Users/cesarue/Desktop/Proyecto%20YouTube/src/components/LegalDisclaimersCard.tsx):
+
+1. **Pre-Payment Disclosure Obligatorio:** Desglose del tipo de cambio exacto, comisiones, total a debitar en USD y monto garantizado a recibir en MXN antes de autorizar.
+2. **Transparencia en Ganancia Cambiaria (FX Spread):** Cláusula legal explícita declarando los ingresos obtenidos por el diferencial de tipo de cambio.
+3. **Derecho Federal de Cancelación en 30 Minutos:** Garantía de reembolso del 100% de fondos y tarifas si la cancelación se solicita dentro de los 30 minutos posteriores a la orden (siempre que los fondos no hayan sido liquidados o cobrados).
+4. **Advertencia de Comisiones de Terceros:** Aviso sobre cargos por disposición de efectivo en tarjetas de crédito por parte de bancos emisores.
+5. **Protección de Datos y Privacidad Zero-Knowledge:** Cifrado en dispositivo AES-GCM-256 (ClientVault); los datos de medios de pago no se comparten ni se comercializan.
+6. **Resolución de Errores y Autoridades Reguladoras:** Canales directos de aclaración (180 días) y datos de contacto de la CFPB en EE.UU. y CONDUSEF en México.

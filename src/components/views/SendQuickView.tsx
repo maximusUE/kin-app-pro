@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { ChevronLeftIcon, getBankLogoUrl } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { ContactAvatar } from '@/components/ContactAvatar';
+import { LegalDisclaimersCard } from '@/components/LegalDisclaimersCard';
 
 export interface SendQuickContactItem {
   id: string;
@@ -653,6 +654,9 @@ export function SendQuickView({
           <span className="font-bold text-slate-900 dark:text-white">{isEn ? '⚡ Less than 30 seconds' : '⚡ Menos de 30 segundos'}</span>
         </div>
       </div>
+
+      {/* 4. Divulgaciones Legales y Cumplimiento Regulatorio CFPB / SPEI (Estilo Western Union) */}
+      <LegalDisclaimersCard language={language} defaultExpanded={false} />
 
       {/* FLOATING ACTION CTA: SEND QUICK (STITCH MINT GRADIENT CTA) */}
       <div className="send-floating-cta-container">
