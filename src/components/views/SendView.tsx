@@ -271,7 +271,7 @@ export function SendView({
   // Nombre formateado para mostrar en pantalla (reconociendo CDMX y Distrito Federal)
   const getStateDisplayName = (state: MexicoState) => {
     if (state.id === 'cdmx') {
-      return 'Ciudad de México (Distrito Federal)';
+      return 'Distrito Federal (CDMX y Área Metropolitana)';
     }
     return state.name;
   };
@@ -2963,27 +2963,59 @@ export function SendView({
                           })}
                         </div>
 
-                        {/* Ciudades representativas del estado actual */}
-                        <div className="pt-1 border-t border-white/5">
-                          <span className="text-[10px] font-bold text-slate-400 block mb-1">
-                            {isEn ? `Major cities in ${currentStateObj.name}:` : `Ciudades de entrega en ${currentStateObj.name}:`}
-                          </span>
-                          <div className="flex flex-wrap gap-1">
-                            {currentStateObj.cities.slice(0, 6).map((city) => (
-                              <span
-                                key={city}
-                                className="px-2 py-0.5 rounded-md bg-white/5 text-slate-300 text-[10px] font-medium border border-white/5"
-                              >
-                                {city}
+                        {/* Ciudades representativas o Cobertura Universal para Distrito Federal */}
+                        {currentStateObj.id === 'cdmx' ? (
+                          <div className="pt-2 border-t border-white/5 space-y-2">
+                            <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-[11px]">
+                              <span className="material-symbols-outlined text-[16px]">verified</span>
+                              <span>
+                                {isEn
+                                  ? 'Englobes All 16 Delegations & Metropolitan Area'
+                                  : 'Opción Única: Engloba todas las Delegaciones y Área Metropolitana'}
                               </span>
-                            ))}
-                            {currentStateObj.cities.length > 6 && (
-                              <span className="px-2 py-0.5 rounded-md bg-white/5 text-primary text-[10px] font-bold">
-                                +{currentStateObj.cities.length - 6} más
+                            </div>
+                            <p className="text-[11px] text-slate-300 leading-normal">
+                              {isEn
+                                ? 'Selecting Distrito Federal covers all 16 boroughs (delegaciones) and the surrounding Estado de México. Your recipient can pick up at ANY authorized store across the entire metropolitan area with their KIN code.'
+                                : 'Al seleccionar Distrito Federal englobas automáticamente todas las 16 delegaciones (alcaldías) y municipios del Estado de México. Tu familiar puede cobrar en cualquiera de los 8,300+ comercios con su clave KIN.'}
+                            </p>
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-[10px] font-bold border border-emerald-500/25 flex items-center gap-1">
+                                <span>✓</span>
+                                <span>Todas las 16 Delegaciones / Alcaldías</span>
                               </span>
-                            )}
+                              <span className="px-2.5 py-1 rounded-lg bg-white/5 text-slate-200 text-[10px] font-medium border border-white/10 flex items-center gap-1">
+                                <span>✓</span>
+                                <span>Estado de México Conurbado</span>
+                              </span>
+                              <span className="px-2.5 py-1 rounded-lg bg-white/5 text-slate-200 text-[10px] font-medium border border-white/10 flex items-center gap-1">
+                                <span>✓</span>
+                                <span>8,300+ Puntos de Cobro</span>
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="pt-1 border-t border-white/5">
+                            <span className="text-[10px] font-bold text-slate-400 block mb-1">
+                              {isEn ? `Major cities in ${currentStateObj.name}:` : `Ciudades de entrega en ${currentStateObj.name}:`}
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {currentStateObj.cities.slice(0, 6).map((city) => (
+                                <span
+                                  key={city}
+                                  className="px-2 py-0.5 rounded-md bg-white/5 text-slate-300 text-[10px] font-medium border border-white/5"
+                                >
+                                  {city}
+                                </span>
+                              ))}
+                              {currentStateObj.cities.length > 6 && (
+                                <span className="px-2 py-0.5 rounded-md bg-white/5 text-primary text-[10px] font-bold">
+                                  +{currentStateObj.cities.length - 6} más
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
