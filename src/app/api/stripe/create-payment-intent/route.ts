@@ -21,7 +21,14 @@ export async function POST(req: Request) {
         const stripe = getStripeClient();
         const amountInCents = Math.round(Number(finalAmount) * 100);
 
-        const paymentIntent = await stripe.paymentIntents.create({
+        const isTestKey = key.startsWith('sk_test_');
+
+        // En modo Sandbox / Pruebas de Stripe, auto-confirmamos con pm_card_visa para que
+        // en el Stripe Dashboard figure inmediatamente como "Succeeded" (Verde) y no como "Incomplete".
+        const effectivePaymentMethod = body.paymentMethodId || (isTestKey ? 'pm_card_visa' : undefined);
+        const shouldConfirm = (body.autoConfirm !== false) && (!!effectivePaymentMethod);
+
+        const createParams: any = {
           amount: amountInCents,
           currency: currency.toLowerCase(),
           description: description || conceptTitle || 'Pago de Servicio KIN (Remesa)',
@@ -30,10 +37,22 @@ export async function POST(req: Request) {
             platform: 'kin-app-pro',
             ...metadata,
           },
-          automatic_payment_methods: {
+        };
+
+        if (shouldConfirm && effectivePaymentMethod) {
+          createParams.payment_method = effectivePaymentMethod;
+          createParams.confirm = true;
+          createParams.automatic_payment_methods = {
             enabled: true,
-          },
-        });
+            allow_redirects: 'never',
+          };
+        } else {
+          createParams.automatic_payment_methods = {
+            enabled: true,
+          };
+        }
+
+        const paymentIntent = await stripe.paymentIntents.create(createParams);
 
         return NextResponse.json({
           success: true,
