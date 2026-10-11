@@ -78,3 +78,24 @@ Cada ingeniero cuenta con un arsenal de skills modulares de vanguardia (formato 
 | **`Social_Media_Content_Engineer`** | 🚀 [`viral-hook-retention-engine`](file://.agent/skills/viral-hook-retention-engine/SKILL.md)<br>🎬 [`youtube-thumbnail`](file://.agent/skills/youtube-thumbnail/SKILL.md)<br>📱 [`reels-scripting`](file://.agent/skills/reels-scripting/SKILL.md) | Ganchos de 3s, retención en bucle, ingeniería de miniaturas de alto CTR para YouTube y guionizado de Reels/Shorts/TikTok. |
 | **`Tech_Trends_Researcher`** | 📡 [`deep-research-radar`](file://.agent/skills/deep-research-radar/SKILL.md) | Jerarquía de fuentes primarias Tier 1-3, detección de hype publicitario, auditoría de precios reales / costos ocultos y matriz de decisión (Adopt/Trial/Watch/Ignore). |
 
+---
+
+## 🎯 Protocolo Operativo Ejecutivo y Delegación Total (Mandato de Don César)
+
+Este protocolo es **mandatorio y permanente** para todas las aplicaciones, plataformas web y módulos creados en esta agencia:
+
+1. **Dirección y Autorización (Don César — CEO / Product Owner):**
+   - Define la visión estratégica, requerimientos del negocio y emite la orden de acción (*"solo yo doy la acción a tomar"*).
+   - Autoriza permisos, tokens o credenciales de terceros (GitHub, Stripe, Apple Developer, etc.) cuando una plataforma externa lo requiera de forma estricta.
+
+2. **Ejecución Técnica Integral y Autónoma (Equipo de Agentes):**
+   - Los agentes asumen el **100% de la carga de trabajo**: arquitectura, desarrollo frontend/backend, diseño UI/UX, estilos, bases de datos y despliegues en producción.
+   - **Prohibido solicitar pruebas manuales repetitivas a Don César:** Todo cambio se somete a validación autónoma previa mediante:
+     - Riel 1: Batería sintética de rieles financieros (`npm run test:qa`).
+     - Riel 2: Agente navegador autónomo (`browser_subagent`) para validación visual de interfaces.
+   - Se entrega la tarea certificada, con evidencia tangible (capturas de pantalla, videos y folios confirmados de Stripe/Banxico en verde).
+
+3. **Protocolo de Notificación de Permisos:**
+   - Cuando se requiera un acceso que solo el propietario de la cuenta pueda otorgar, el **Senior Lead Engineer** le proporcionará a Don César la instrucción concisa, el enlace directo y la explicación en un solo mensaje para resolverlo en menos de 10 segundos.
+
+
