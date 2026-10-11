@@ -1124,15 +1124,16 @@ export function SendView({
               <span className="material-symbols-outlined text-[13px]">check_circle</span> {isEn ? 'No markup rate' : 'Sin sobreprecio'}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 min-w-0 flex-1 h-14 px-4.5 rounded-full bg-slate-50 dark:bg-surface-container border border-slate-200/90 dark:border-white/10 shadow-xs focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
-              <span className="font-financial-mono text-2xl sm:text-3xl text-emerald-600 dark:text-primary font-black select-none shrink-0">$</span>
+          {/* Modo Líneas Profesional: Monto a Enviar USD */}
+          <div className="relative flex items-center justify-between pt-1 pb-3 border-b-2 border-slate-200 dark:border-white/10 focus-within:border-emerald-500 dark:focus-within:border-primary transition-all">
+            <div className="flex items-baseline gap-2 min-w-0 flex-1">
+              <span className="font-financial-mono text-3xl sm:text-4xl text-emerald-600 dark:text-primary font-black select-none shrink-0">$</span>
               <input
                 aria-label="Send amount in USD"
                 type="text"
                 inputMode="decimal"
                 pattern="[0-9]*[.,]?[0-9]*"
-                className="w-full bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 font-financial-mono text-2xl sm:text-3xl text-slate-900 dark:text-white font-black placeholder:text-slate-400 dark:placeholder:text-white/20 py-0 cursor-text shadow-none"
+                className="w-full bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 font-financial-mono text-3xl sm:text-4xl text-slate-900 dark:text-white font-black placeholder:text-slate-400 dark:placeholder:text-white/20 py-0 cursor-text shadow-none tracking-tight"
                 id="send-amount-input"
                 placeholder="0"
                 value={amountValue === '0' || !amountValue ? '' : amountValue}
@@ -1148,16 +1149,16 @@ export function SendView({
                 <button
                   type="button"
                   onClick={() => setAmountValue('0')}
-                  className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white text-xs shrink-0 cursor-pointer active:scale-90 transition-all ml-1"
+                  className="w-6 h-6 rounded-full flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white text-xs shrink-0 cursor-pointer active:scale-90 transition-all mr-1.5"
                   title={isEn ? 'Clear to zero' : 'Borrar a cero'}
                 >
                   ✕
                 </button>
               )}
             </div>
-            <div className="h-14 px-4.5 rounded-full bg-white dark:bg-surface-container border border-slate-200/90 dark:border-white/10 shadow-sm flex items-center gap-2 shrink-0 select-none">
+            <div className="flex items-center gap-2 pl-3 py-1 shrink-0 select-none border-l border-slate-200/70 dark:border-white/10">
               <span className="text-xl">🇺🇸</span>
-              <span className="font-title-base text-xs sm:text-sm text-slate-900 dark:text-white font-black tracking-wide">USD</span>
+              <span className="font-financial-mono text-sm sm:text-base text-slate-900 dark:text-white font-black tracking-wide">USD</span>
             </div>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium pt-0.5">
@@ -1220,19 +1221,20 @@ export function SendView({
               {isEn ? 'Instant pickup' : 'Disponibilidad inmediata'}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 min-w-0 flex-1 h-14 px-4.5 rounded-full bg-slate-50 dark:bg-surface-container-high border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
-              <span className="font-financial-mono text-2xl sm:text-3xl text-emerald-600 dark:text-primary font-black select-none shrink-0">$</span>
-              <span className="font-financial-mono text-2xl sm:text-3xl text-slate-900 dark:text-white font-black tracking-tight truncate">
+          {/* Modo Líneas Profesional: Monto Garantizado MXN */}
+          <div className="relative flex items-center justify-between pt-1 pb-3 border-b-2 border-slate-200 dark:border-white/10 transition-all">
+            <div className="flex items-baseline gap-2 min-w-0 flex-1 overflow-hidden">
+              <span className="font-financial-mono text-3xl sm:text-4xl text-emerald-600 dark:text-primary font-black select-none shrink-0">$</span>
+              <span className="font-financial-mono text-3xl sm:text-4xl text-slate-900 dark:text-white font-black tracking-tight truncate">
                 {((parseFloat(amountValue) || 0) * USD_TO_MXN_RATE).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </span>
             </div>
-            <div className="h-14 px-4.5 rounded-full bg-white dark:bg-surface-container border border-slate-200/90 dark:border-white/10 shadow-sm flex items-center gap-2 shrink-0 select-none">
+            <div className="flex items-center gap-2 pl-3 py-1 shrink-0 select-none border-l border-slate-200/70 dark:border-white/10">
               <span className="text-xl">🇲🇽</span>
-              <span className="font-title-base text-xs sm:text-sm text-slate-900 dark:text-white font-black tracking-wide">MXN</span>
+              <span className="font-financial-mono text-sm sm:text-base text-slate-900 dark:text-white font-black tracking-wide">MXN</span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 pt-0.5">

@@ -656,41 +656,43 @@ export function KinCashP2PModal({
           </span>
         </div>
 
-        {/* Amount Hero Input - Regla Don César: Cápsula Fija en Forma de Óvalo con Estilo Bandera USA */}
-        <div className="flex flex-col items-center justify-center my-2 w-full px-2">
-          <div className="w-full max-w-[340px] h-14 rounded-full bg-white dark:bg-surface-container-high border border-slate-200/90 dark:border-white/10 shadow-sm px-4 flex items-center justify-between focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
-            <span className="font-financial-mono text-2xl sm:text-3xl text-emerald-600 dark:text-primary font-black select-none shrink-0 mr-1.5">$</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*[.,]?[0-9]*"
-              value={currentAmount === '0' ? '' : currentAmount}
-              placeholder="0"
-              onChange={(e) => {
-                const val = e.target.value.replace(/[^0-9.]/g, '');
-                const parts = val.split('.');
-                if (parts.length > 2) return;
-                if (parts[1] && parts[1].length > 2) return;
-                setCurrentAmount(val === '' ? '0' : val);
-              }}
-              className="w-full bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 text-center font-financial-mono text-2xl sm:text-3xl text-slate-900 dark:text-white font-black placeholder:text-slate-400 dark:placeholder:text-white/20 py-0 cursor-text shadow-none"
-            />
-            {currentAmount !== '0' && (
-              <button
-                type="button"
-                onClick={clearAmount}
-                className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white text-xs shrink-0 cursor-pointer active:scale-90 transition-all mr-1.5"
-                title={isEn ? 'Clear amount to zero' : 'Borrar monto a cero'}
-              >
-                ✕
-              </button>
-            )}
-            <div className="h-10 px-3.5 rounded-full bg-slate-100 dark:bg-surface-container border border-slate-200/80 dark:border-white/10 flex items-center gap-1.5 shrink-0 select-none shadow-xs">
-              <span className="text-base">🇺🇸</span>
-              <span className="font-title-base text-xs font-black text-slate-900 dark:text-white">USD</span>
+        {/* Amount Hero Input - Modo Líneas Profesional */}
+        <div className="flex flex-col items-center justify-center my-3 w-full px-4">
+          <div className="w-full max-w-[340px] pb-3 border-b-2 border-slate-200 dark:border-white/10 focus-within:border-emerald-500 dark:focus-within:border-primary transition-all flex items-center justify-between">
+            <div className="flex items-baseline gap-2 min-w-0 flex-1">
+              <span className="font-financial-mono text-3xl sm:text-4xl text-emerald-600 dark:text-primary font-black select-none shrink-0">$</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
+                value={currentAmount === '0' ? '' : currentAmount}
+                placeholder="0"
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9.]/g, '');
+                  const parts = val.split('.');
+                  if (parts.length > 2) return;
+                  if (parts[1] && parts[1].length > 2) return;
+                  setCurrentAmount(val === '' ? '0' : val);
+                }}
+                className="w-full bg-transparent border-none border-0 outline-none focus:outline-none focus:ring-0 font-financial-mono text-3xl sm:text-4xl text-slate-900 dark:text-white font-black placeholder:text-slate-400 dark:placeholder:text-white/20 py-0 cursor-text shadow-none tracking-tight"
+              />
+              {currentAmount !== '0' && (
+                <button
+                  type="button"
+                  onClick={clearAmount}
+                  className="w-6 h-6 rounded-full flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white text-xs shrink-0 cursor-pointer active:scale-90 transition-all mr-1.5"
+                  title={isEn ? 'Clear amount to zero' : 'Borrar monto a cero'}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 pl-3 py-1 shrink-0 select-none border-l border-slate-200/70 dark:border-white/10">
+              <span className="text-xl">🇺🇸</span>
+              <span className="font-financial-mono text-sm font-black text-slate-900 dark:text-white">USD</span>
             </div>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium text-center mt-2">
+          <p className="text-[11px] text-slate-500 dark:text-[#8E91A5] font-medium text-center mt-2.5">
             {isEn ? 'Tap amount to type with phone keyboard' : 'Toca la cantidad para escribir con el teclado de tu teléfono'}
           </p>
         </div>
