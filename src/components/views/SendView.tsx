@@ -226,6 +226,7 @@ export function SendView({
   const [isCashPickupSheetOpen, setIsCashPickupSheetOpen] = React.useState(false);
   const [showFeeBreakdownSheet, setShowFeeBreakdownSheet] = React.useState(false);
   const [stateSearchQuery, setStateSearchQuery] = React.useState('');
+  const [showAllStatesList, setShowAllStatesList] = React.useState(false);
 
   // Estado de México seleccionado para cobro en efectivo
   const [selectedStateId, setSelectedStateId] = React.useState<string>(() => {
@@ -1339,34 +1340,27 @@ export function SendView({
         </div>
       </div>
 
-      {/* TARJETA RESUMEN DE RETIRO EN EFECTIVO CON DISPARADOR A LA HOJA EMERGENTE */}
+      {/* CENTRO OFICIAL DE RETIRO EN EFECTIVO: MÓDULO DESTACADO Y PROFESIONAL */}
       {deliveryMethod === 'cash' && (
-        <div className="flex flex-col space-y-3 pt-1 animate-fade-in">
+        <div className="flex flex-col space-y-2 pt-1 animate-fade-in">
           <div
             onClick={() => setIsCashPickupSheetOpen(true)}
-            className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/30 hover:border-primary/40 transition-all cursor-pointer shadow-md active:scale-[0.98]"
+            className="group relative p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 cursor-pointer shadow-md active:scale-[0.99] overflow-hidden"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow-sm border border-slate-200">
-                  {(() => {
-                    const LogoComp = selectedStoreObj.Logo;
-                    return <LogoComp className="w-full h-full object-contain" />;
-                  })()}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-title-base text-xs font-bold text-on-surface truncate">
-                      {selectedStoreObj.name} • {currentStateObj.name}
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[9px] font-bold shrink-0">
-                      ✓ Seleccionado
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-on-surface-variant truncate mt-0.5">
-                    {currentStateObj.totalLocations} de cobro en {currentStateObj.name}
-                  </p>
-                </div>
+            {/* Resplandor sutil de fondo */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/20 transition-all" />
+
+            {/* Cabecera superior: Bandera, Título oficial y botón de cambio */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/5">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-base select-none">🇲🇽</span>
+                <span className="text-[11px] font-black uppercase tracking-wider text-primary truncate">
+                  {isEn ? 'Official Cash Pickup Hub' : 'Centro Oficial de Retiro en Efectivo'}
+                </span>
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
               </div>
               <button
                 type="button"
@@ -1374,11 +1368,65 @@ export function SendView({
                   e.stopPropagation();
                   setIsCashPickupSheetOpen(true);
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-xs font-bold shrink-0 ml-2 cursor-pointer transition-colors border border-primary/30 flex items-center gap-1 active:scale-95"
+                className="px-2.5 py-1 rounded-full bg-primary/15 hover:bg-primary/25 text-primary text-[11px] font-bold transition-all flex items-center gap-1 border border-primary/30 group-hover:border-primary/60 shrink-0 ml-2 cursor-pointer active:scale-95"
               >
-                <span>{isEn ? 'Change' : 'Cambiar'}</span>
-                <span className="material-symbols-outlined text-[14px]">expand_less</span>
+                <span>{isEn ? 'Change Location' : 'Cambiar Tienda / Estado'}</span>
+                <span className="material-symbols-outlined text-[14px]">tune</span>
               </button>
+            </div>
+
+            {/* Fila principal: Logotipo hero, nombre de cadena, estado y cobertura */}
+            <div className="flex items-center justify-between pt-3 gap-3">
+              <div className="flex items-center gap-3.5 min-w-0">
+                {/* Contenedor del logotipo de la tienda */}
+                <div className="w-13 h-13 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0 shadow-md border border-slate-200/90">
+                  {(() => {
+                    const LogoComp = selectedStoreObj.Logo;
+                    return <LogoComp className="w-full h-full object-contain" />;
+                  })()}
+                </div>
+
+                {/* Detalles de la tienda y localidad */}
+                <div className="min-w-0 flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-headline-md text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                      {selectedStoreObj.name}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#2ED5A4] text-[10px] font-bold border border-emerald-500/25 shrink-0">
+                      {selectedStoreObj.badge}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-on-surface-variant font-medium mt-1 truncate">
+                    <span className="material-symbols-outlined text-[15px] text-primary shrink-0">location_on</span>
+                    <span className="truncate font-bold text-slate-800 dark:text-white/90">
+                      {currentStateObj.name}
+                    </span>
+                    <span className="opacity-40">•</span>
+                    <span className="text-[11px] text-slate-500 dark:text-white/60 shrink-0">
+                      {currentStateObj.totalLocations}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Indicador de chevron */}
+              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:border-primary/40 transition-colors shrink-0">
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+              </div>
+            </div>
+
+            {/* Fila inferior de seguridad y garantía */}
+            <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500 dark:text-white/60">
+              <span className="flex items-center gap-1.5 truncate">
+                <span className="material-symbols-outlined text-[14px] text-primary shrink-0">verified_user</span>
+                <span className="truncate">
+                  {isEn ? 'Instant pickup with official ID (INE) • Zero Fees' : 'Retiro inmediato con INE • Sin cuenta bancaria • Sin comisión'}
+                </span>
+              </span>
+              <span className="text-primary font-bold text-[10px] shrink-0 ml-2 flex items-center gap-0.5">
+                <span>40,000+ comercios</span>
+                <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+              </span>
             </div>
           </div>
         </div>
@@ -2677,36 +2725,39 @@ export function SendView({
       {/* ========================================================================= */}
       {isMounted && isCashPickupSheetOpen && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[200] flex justify-center bg-black/90 sm:backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-[200] flex justify-center bg-black/90 backdrop-blur-md animate-fade-in"
           onClick={() => setIsCashPickupSheetOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="cash-pickup-mexico-title"
         >
           <div
-            className="w-full max-w-[412px] h-[100dvh] bg-[#06070B] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
+            className="w-full max-w-[420px] h-[100dvh] bg-[#07090E] border-x border-white/10 flex flex-col justify-between overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Cabecera nativa de pantalla móvil */}
-            <div className="px-4 pt-3 pb-2.5 border-b border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0 flex items-center justify-between">
+            {/* Cabecera nativa estilo Apple HIG */}
+            <div className="px-4 pt-3.5 pb-3 border-b border-white/10 bg-[#07090E]/95 backdrop-blur-xl shrink-0 flex items-center justify-between z-20">
               <div className="flex items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsCashPickupSheetOpen(false)}
-                  className="btn-circle"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer"
                   title={isEn ? 'Back' : 'Regresar'}
                 >
                   <ChevronLeftIcon className="w-5 h-5 text-white" />
                 </button>
                 <div>
-                  <h3
-                    id="cash-pickup-mexico-title"
-                    className="font-title-base text-sm font-bold text-white leading-tight"
-                  >
-                    {isEn ? 'Cash Pickup in Mexico' : 'Retiro en Efectivo en México'}
-                  </h3>
-                  <p className="font-caption-sm text-[11px] text-on-surface-variant leading-tight">
-                    {isEn ? 'Choose city and pickup partner' : 'Selecciona tu ciudad y tienda de cobro'}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm select-none">🇲🇽</span>
+                    <h3
+                      id="cash-pickup-mexico-title"
+                      className="font-headline-md text-sm font-bold text-white leading-tight"
+                    >
+                      {isEn ? 'Cash Pickup Network' : 'Red de Retiro en México'}
+                    </h3>
+                  </div>
+                  <p className="font-caption-sm text-[11px] text-slate-400 leading-tight">
+                    {isEn ? 'Choose state, city and authorized store' : 'Elige estado, ciudad y tienda autorizada'}
                   </p>
                 </div>
               </div>
@@ -2714,15 +2765,33 @@ export function SendView({
               <button
                 type="button"
                 onClick={() => setIsCashPickupSheetOpen(false)}
-                className="btn-circle"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer"
                 title={isEn ? 'Close' : 'Cerrar'}
               >
-                <ChevronLeftIcon className="w-5 h-5 text-white" />
+                <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            {/* 3. BARRA DE BÚSQUEDA EN LA CABECERA: "Busca tu Ciudad" */}
-            <div className="px-4 py-2 shrink-0 bg-[#06070B]">
+            {/* Banner Oficial de Red Autorizada 40,000+ Puntos */}
+            <div className="px-4 pt-2.5 pb-1 shrink-0 bg-[#07090E]">
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-primary/10 to-transparent border border-emerald-500/25 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/20 text-primary flex items-center justify-center shrink-0 border border-primary/30">
+                  <span className="material-symbols-outlined text-[20px]">storefront</span>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-white">40,000+ Puntos en Todo México</span>
+                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-primary/20 text-primary">Oficial</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-tight mt-0.5 truncate">
+                    {isEn ? 'No bank account required • Instant pickup with official ID' : 'Sin cuenta bancaria • Tu familiar retira con su INE y clave KIN'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Barra de Búsqueda Reactiva Inteligente */}
+            <div className="px-4 py-2 shrink-0 bg-[#07090E]">
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[19px]">
                   search
@@ -2731,7 +2800,7 @@ export function SendView({
                   type="text"
                   value={stateSearchQuery}
                   onChange={(e) => setStateSearchQuery(e.target.value)}
-                  placeholder={isEn ? 'Search your City...' : 'Busca tu Ciudad'}
+                  placeholder={isEn ? 'Search city, municipality or state (e.g. Morelia, León)...' : 'Busca tu ciudad, municipio o estado (ej. Morelia, Guadalajara)...'}
                   className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-high border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
                 />
                 {stateSearchQuery && (
@@ -2749,13 +2818,13 @@ export function SendView({
             {/* CONTENIDO PRINCIPAL SCROLLABLE */}
             <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 custom-scrollbar">
               {stateSearchQuery.trim().length >= 1 ? (
-                /* RESULTADOS DE BÚSQUEDA (CIUDADES Y ESTADOS) */
+                /* RESULTADOS DE BÚSQUEDA REACTIVOS */
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between py-1 sticky top-0 bg-[#06070B] z-10">
+                  <div className="flex items-center justify-between py-1 sticky top-0 bg-[#07090E] z-10">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      {matchingStates.length} {isEn ? 'locations found with' : 'lugares encontrados con'} "{stateSearchQuery}":
+                      {matchingStates.length} {isEn ? 'locations matching' : 'lugares encontrados con'} "{stateSearchQuery}":
                     </span>
-                    <span className="text-[10px] text-primary">Toca uno para seleccionarlo</span>
+                    <span className="text-[10px] text-primary font-bold">Toca para seleccionar</span>
                   </div>
                   {matchingStates.length > 0 ? (
                     matchingStates.map((st) => (
@@ -2763,98 +2832,223 @@ export function SendView({
                         key={st.id}
                         type="button"
                         onClick={() => handleSelectState(st)}
-                        className={`w-full p-3 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
+                        className={`w-full p-3.5 rounded-2xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
                           st.id === selectedStateId
-                            ? 'bg-primary/15 border-primary text-white shadow-sm'
-                            : 'bg-surface-container border-white/5 hover:border-primary/40 text-slate-200'
+                            ? 'bg-primary/20 border-primary text-white shadow-md shadow-primary/10'
+                            : 'bg-surface-container border-white/10 hover:border-primary/40 text-slate-200'
                         }`}
                       >
-                        <div className="flex flex-col">
+                        <div className="flex flex-col min-w-0 pr-2">
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-white">
                               {getStateDisplayName(st)}
                             </span>
-                            <span className="px-1.5 py-0.2 rounded-md bg-white/10 text-primary text-[10px] font-bold font-financial-mono">
+                            <span className="px-1.5 py-0.2 rounded bg-white/10 text-primary text-[10px] font-bold font-financial-mono">
                               {st.code}
                             </span>
                             {st.isPopularRemittance && (
-                              <span className="text-[10px] text-amber-400 font-bold">★ Popular</span>
+                              <span className="text-[10px] text-amber-400 font-bold">★ Corredor Principal</span>
                             )}
                           </div>
-                          <span className="text-[10px] text-slate-400 mt-0.5">
-                            {st.totalLocations} • {st.cities.slice(0, 4).join(', ')}...
+                          <span className="text-[10px] text-slate-400 mt-1 truncate">
+                            {st.totalLocations} • {st.cities.slice(0, 5).join(', ')}...
                           </span>
                         </div>
-                        <span className="material-symbols-outlined text-primary text-[18px]">
+                        <span className="material-symbols-outlined text-primary text-[20px] shrink-0">
                           chevron_right
                         </span>
                       </button>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-slate-400 space-y-1">
-                      <p className="text-xs font-semibold">
+                    <div className="text-center py-8 text-slate-400 space-y-2">
+                      <span className="material-symbols-outlined text-4xl text-slate-500">location_off</span>
+                      <p className="text-xs font-semibold text-white">
                         {isEn ? 'No locations match' : 'No se encontraron lugares con'} "{stateSearchQuery}"
                       </p>
-                      <p className="text-[11px]">Prueba buscando por tu ciudad (ej. Morelia, Guadalajara, León) o estado</p>
+                      <p className="text-[11px] text-slate-400">
+                        Prueba buscando por tu municipio (ej. Morelia, Guadalajara, León, Toluca, Puebla) o estado
+                      </p>
                     </div>
                   )}
                 </div>
               ) : (
-                /* VISTA NORMAL: RECUADRO 2 ELIMINADO! */
+                /* VISTA COMPLETA: LOCALIDAD + CADENAS COMERCIALES */
                 <div className="space-y-4">
-                  {/* Chips horizontales de estados (Recuadro 2 eliminado) */}
-                  <div className="flex flex-col space-y-2">
+                  {/* SECCIÓN 1: LOCALIDAD DE RETIRO (ESTADO Y CIUDADES) */}
+                  <div className="p-3.5 rounded-2xl bg-surface-container border border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                        {isEn ? 'States with Cash Pickup' : 'Estados con Retiro en Efectivo'}
-                      </span>
-                      <span className="text-[10px] text-primary font-medium">
-                        {currentStateObj.name} activo
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary text-[18px]">place</span>
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-extrabold text-white uppercase tracking-wider">
+                            {isEn ? 'Pickup Location in Mexico' : 'Localidad de Retiro en México'}
+                          </span>
+                          <span className="text-[10px] text-primary font-bold">
+                            {currentStateObj.name} • {currentStateObj.totalLocations}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowAllStatesList((prev) => !prev)}
+                        className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/15 text-white text-[10px] font-bold transition-all flex items-center gap-1 border border-white/10 cursor-pointer active:scale-95"
+                      >
+                        <span>{showAllStatesList ? (isEn ? 'Show Top States' : 'Ver Top Estados') : (isEn ? 'Browse 32 States' : 'Ver los 32 Estados')}</span>
+                        <span className="material-symbols-outlined text-[13px]">
+                          {showAllStatesList ? 'expand_less' : 'expand_more'}
+                        </span>
+                      </button>
                     </div>
 
-                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
-                      {pinnedStates.map((stId) => {
-                        const st = MEXICO_STATES.find((s) => s.id === stId);
-                        if (!st) return null;
-                        const isSelected = st.id === selectedStateId;
-                        return (
-                          <button
-                            key={st.id}
-                            type="button"
-                            onClick={() => handleSelectState(st)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer border ${
-                              isSelected
-                                ? 'bg-primary/20 text-primary border-primary ring-1 ring-primary/40 shadow-xs'
-                                : 'bg-surface-container text-slate-300 border-white/5 hover:border-white/20'
-                            }`}
-                          >
-                            {isSelected && <span className="text-primary mr-1">✓</span>}
-                            {st.name}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {/* VISTA A: LISTA COMPLETA DE LOS 32 ESTADOS */}
+                    {showAllStatesList ? (
+                      <div className="space-y-1.5 max-h-[220px] overflow-y-auto custom-scrollbar pr-1 pt-1">
+                        <span className="text-[10px] text-slate-400 font-semibold block pb-1">
+                          {isEn ? 'Select any of the 32 Mexican states:' : 'Selecciona cualquiera de los 32 estados de México:'}
+                        </span>
+                        {MEXICO_STATES.map((st) => {
+                          const isSelected = st.id === selectedStateId;
+                          return (
+                            <button
+                              key={st.id}
+                              type="button"
+                              onClick={() => {
+                                handleSelectState(st);
+                                setShowAllStatesList(false);
+                              }}
+                              className={`w-full px-3 py-2 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer border ${
+                                isSelected
+                                  ? 'bg-primary/20 text-primary border-primary ring-1 ring-primary/40'
+                                  : 'bg-surface-container-high/60 text-slate-200 border-white/5 hover:border-white/20'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{st.name}</span>
+                                <span className="text-[9px] font-financial-mono text-slate-400 px-1 py-0.2 rounded bg-white/5">
+                                  {st.code}
+                                </span>
+                                {st.isPopularRemittance && (
+                                  <span className="text-[9px] text-amber-400 font-semibold">★ Popular</span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-slate-400">{st.totalLocations}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      /* VISTA B: CHIPS DE CORREDORES TOP + CIUDADES PRINCIPALES */
+                      <div className="space-y-2.5">
+                        {/* Chips horizontales de estados populares */}
+                        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
+                          {pinnedStates.map((stId) => {
+                            const st = MEXICO_STATES.find((s) => s.id === stId);
+                            if (!st) return null;
+                            const isSelected = st.id === selectedStateId;
+                            return (
+                              <button
+                                key={st.id}
+                                type="button"
+                                onClick={() => handleSelectState(st)}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer border flex items-center gap-1 active:scale-95 ${
+                                  isSelected
+                                    ? 'bg-primary/25 text-primary border-primary ring-1 ring-primary/40 shadow-xs'
+                                    : 'bg-surface-container-high text-slate-300 border-white/10 hover:border-white/20'
+                                }`}
+                              >
+                                {isSelected && <span>✓</span>}
+                                <span>{st.name}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Ciudades representativas del estado actual */}
+                        <div className="pt-1 border-t border-white/5">
+                          <span className="text-[10px] font-bold text-slate-400 block mb-1">
+                            {isEn ? `Major cities in ${currentStateObj.name}:` : `Ciudades de entrega en ${currentStateObj.name}:`}
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {currentStateObj.cities.slice(0, 6).map((city) => (
+                              <span
+                                key={city}
+                                className="px-2 py-0.5 rounded-md bg-white/5 text-slate-300 text-[10px] font-medium border border-white/5"
+                              >
+                                {city}
+                              </span>
+                            ))}
+                            {currentStateObj.cities.length > 6 && (
+                              <span className="px-2 py-0.5 rounded-md bg-white/5 text-primary text-[10px] font-bold">
+                                +{currentStateObj.cities.length - 6} más
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Red de tiendas y sucursales en ese estado */}
-                  <div className="flex flex-col space-y-2 pt-1">
+                  {/* SECCIÓN 2: CADENAS COMERCIALES AUTORIZADAS */}
+                  <div className="space-y-2 pt-1">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="font-title-base text-xs text-on-surface font-bold">
-                          Red de Tiendas en {currentStateObj.name}
+                        <span className="font-headline-md text-xs text-white font-extrabold uppercase tracking-wider">
+                          {isEn ? 'Authorized Pickup Partner' : `Tiendas Autorizadas en ${currentStateObj.name}`}
                         </span>
-                        <span className="font-caption-sm text-[10px] text-on-surface-variant">
-                          Sucursales autorizadas para entrega de efectivo
+                        <span className="text-[10px] text-slate-400">
+                          {isEn ? 'Select specific store or entire retail network' : 'Elige una cadena específica o toda la red abierta'}
                         </span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-bold text-primary border border-white/10">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-black border border-emerald-500/25">
                         9 Cadenas + Red
                       </span>
                     </div>
 
-                    {/* Cuadrícula de 9 Cadenas Comerciales (3x3) */}
-                    <div className="grid grid-cols-3 gap-2">
+                    {/* OPCIÓN VIP DESTACADA: RED COMPLETA COMERCIAL (40,000+ TIENDAS) */}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectStore('any')}
+                      className={`w-full p-3.5 rounded-2xl transition-all cursor-pointer active:scale-[0.98] border text-left flex items-center justify-between ${
+                        selectedStore === 'any'
+                          ? 'bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-2 border-primary ring-2 ring-primary/40 shadow-lg shadow-primary/15'
+                          : 'bg-surface-container hover:bg-surface-container-high border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-[#18A57E] flex items-center justify-center text-slate-950 shrink-0 shadow-md">
+                          <span className="material-symbols-outlined text-[24px]">hub</span>
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-headline-md text-xs font-black text-white truncate">
+                              {isEn ? 'Any Authorized Partner' : 'Cualquier Comercio de la Red'}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-primary/20 text-primary text-[9px] font-black uppercase tracking-wider shrink-0">
+                              40,000+ Puntos
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 font-medium leading-tight mt-0.5">
+                            {isEn
+                              ? 'Receiver can collect at OXXO, Walmart, Coppel or any partner with their KIN code'
+                              : 'Tu familiar cobra en OXXO, Walmart, Coppel o cualquier tienda con su clave KIN'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="shrink-0 ml-2">
+                        {selectedStore === 'any' ? (
+                          <span className="w-6 h-6 rounded-full bg-primary text-slate-950 flex items-center justify-center text-xs font-black shadow-sm">
+                            ✓
+                          </span>
+                        ) : (
+                          <span className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-slate-400 text-xs">
+                            ○
+                          </span>
+                        )}
+                      </div>
+                    </button>
+
+                    {/* CUADRÍCULA DE 9 CADENAS COMERCIALES (3x3 BESPOKE TILES) */}
+                    <div className="grid grid-cols-3 gap-2 pt-1">
                       {CASH_PICKUP_STORES.filter((s) => s.id !== 'any').map((store) => {
                         const isSelected = selectedStore === store.id;
                         const StoreLogo = store.Logo;
@@ -2863,71 +3057,83 @@ export function SendView({
                             key={store.id}
                             type="button"
                             onClick={() => handleSelectStore(store.id)}
-                            className={`network-btn relative h-14 rounded-xl bg-white text-slate-900 shadow-md p-1.5 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-[0.97] ${
+                            className={`relative min-h-[84px] rounded-2xl p-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-[0.96] border ${
                               isSelected
-                                ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)] scale-[1.02]'
-                                : 'border border-transparent hover:bg-slate-50'
+                                ? 'bg-primary/15 border-2 border-primary ring-2 ring-primary/40 shadow-md shadow-primary/20'
+                                : 'bg-surface-container hover:bg-surface-container-high border-white/10 hover:border-white/20'
                             }`}
                           >
-                            <div className="w-full h-7 flex items-center justify-center">
+                            {/* Medallón de logo sobre fondo blanco nítido */}
+                            <div className="w-13 h-8.5 rounded-lg bg-white p-1 flex items-center justify-center shadow-xs shrink-0 border border-slate-200">
                               <StoreLogo className="w-full h-full object-contain" />
                             </div>
-                            <span className="text-[9px] font-bold text-slate-700 leading-tight truncate w-full">
+
+                            {/* Nombre de la tienda */}
+                            <span className="text-[11px] font-extrabold text-white leading-tight truncate w-full mt-1">
+                              {store.name}
+                            </span>
+
+                            {/* Insignia / Beneficio */}
+                            <span className="text-[9px] font-bold text-primary leading-tight truncate w-full">
                               {store.badge}
                             </span>
+
+                            {/* Indicador de seleccionado */}
                             {isSelected && (
-                              <span className="absolute top-1 right-1.5 text-primary text-[17px] font-black leading-none select-none drop-shadow-xs">
+                              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary text-slate-950 flex items-center justify-center text-[10px] font-black leading-none shadow-xs">
                                 ✓
                               </span>
                             )}
                           </button>
                         );
                       })}
+                    </div>
+                  </div>
 
-                      {/* Tarjeta de Red Completa Comercial (40,000+ Puntos) */}
-                      <button
-                        type="button"
-                        onClick={() => handleSelectStore('any')}
-                        className={`network-btn col-span-3 h-13 rounded-xl bg-white text-slate-900 shadow-sm px-3.5 flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.98] ${
-                          selectedStore === 'any'
-                            ? 'border-2 border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(46,213,164,0.55)]'
-                            : 'border border-transparent hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className="material-symbols-outlined text-primary-container text-[22px]">hub</span>
-                          <div className="flex flex-col leading-tight">
-                            <span className="font-title-base text-xs font-bold text-slate-900">
-                              {isEn ? 'Any Authorized Retail Partner' : 'Cualquier Tienda Comercial de la Red'}
-                            </span>
-                            <span className="text-[10px] text-slate-500 font-medium">
-                              {isEn ? 'Receiver picks up at 40,000+ retail locations in Mexico' : 'El familiar cobra en cualquiera de los 40,000+ comercios con su clave'}
-                            </span>
-                          </div>
-                        </div>
-                        {selectedStore === 'any' && (
-                          <span className="text-primary text-[24px] font-black leading-none select-none drop-shadow-xs">
-                            ✓
-                          </span>
-                        )}
-                      </button>
+                  {/* REQUISITOS OFICIALES DE RETIRO */}
+                  <div className="p-3.5 rounded-2xl bg-surface-container-low border border-white/5 space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      {isEn ? 'Pickup Requirements in Mexico:' : 'Requisitos para Cobrar en Mostrador:'}
+                    </span>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="p-2 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center">
+                        <span className="material-symbols-outlined text-primary text-[18px]">badge</span>
+                        <span className="text-[10px] font-bold text-white mt-1 leading-tight">INE Oficial</span>
+                        <span className="text-[9px] text-slate-400">O pasaporte vigente</span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center">
+                        <span className="material-symbols-outlined text-primary text-[18px]">pin</span>
+                        <span className="text-[10px] font-bold text-white mt-1 leading-tight">Clave 8 Dígitos</span>
+                        <span className="text-[9px] text-slate-400">Enviada al celular</span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center">
+                        <span className="material-symbols-outlined text-primary text-[18px]">payments</span>
+                        <span className="text-[10px] font-bold text-white mt-1 leading-tight">Sin Comisión</span>
+                        <span className="text-[9px] text-slate-400">Recibe 100% neto</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* BOTÓN INFERIOR DE CONFIRMACIÓN */}
-            <div className="p-4 border-t border-white/10 bg-[#06070B]/95 backdrop-blur-md shrink-0">
+            {/* BARRA FLOTANTE INFERIOR DE CONFIRMACIÓN */}
+            <div className="p-4 border-t border-white/10 bg-[#07090E]/95 backdrop-blur-xl shrink-0">
               <button
                 type="button"
                 onClick={() => setIsCashPickupSheetOpen(false)}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary-container to-[#18A57E] text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer font-headline-md tracking-wide"
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-primary to-[#18A57E] text-slate-950 font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-between shadow-lg shadow-primary/25 cursor-pointer font-headline-md tracking-wide"
               >
-                <span>
-                  Confirmar Retiro en {selectedStoreObj.name} ({currentStateObj.name})
-                </span>
-                <span className="material-symbols-outlined text-[17px]">check_circle</span>
+                <div className="flex items-center gap-2 truncate">
+                  <span className="text-base">🇲🇽</span>
+                  <span className="truncate">
+                    Confirmar: {selectedStoreObj.name} ({currentStateObj.name})
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  <span className="text-[11px] font-black uppercase">Listo</span>
+                  <span className="material-symbols-outlined text-[17px]">check_circle</span>
+                </div>
               </button>
             </div>
           </div>
