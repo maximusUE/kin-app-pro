@@ -39,4 +39,5 @@ leads/
 lead-magnet/
 backups/
 *.tar.gz
+.temp_research/
 

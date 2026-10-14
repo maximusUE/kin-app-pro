@@ -6,7 +6,7 @@
  */
 
 import Stripe from 'stripe';
-import { MEXICO_STATES, getBranchesForCity } from '../data/mexicoLocations.ts';
+import { MEXICO_STATES, getBranchesForCity } from '../data/mexicoLocations';
 import 'dotenv/config';
 
 interface TestResult {

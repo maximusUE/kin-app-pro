@@ -22,12 +22,12 @@ import { LegalDisclaimersCard } from './LegalDisclaimersCard';
 export interface ContactItem {
   id: string;
   name: string;
-  fullName: string;
-  avatar: string;
-  role: string;
-  country: string;
-  bank: string;
-  photoUrl: string;
+  fullName?: string;
+  avatar?: string;
+  role?: string;
+  country?: string;
+  bank?: string;
+  photoUrl?: string;
   phone?: string;
   street?: string;
   clabe?: string;

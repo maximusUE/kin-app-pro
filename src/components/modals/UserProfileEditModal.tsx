@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { CameraIcon, ChevronLeftIcon, CheckCircleIcon, LanguageIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { compressProfileImage } from '@/lib/utils/imageCompressor';
 
 export const DEFAULT_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
@@ -358,16 +359,19 @@ export function UserProfileEditModal({
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => {
+              onChange={async (e) => {
                 if (e.target.files && e.target.files[0]) {
                   const file = e.target.files[0];
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    if (event.target?.result) {
-                      setDraftAvatar(event.target.result as string);
+                  try {
+                    const compressed = await compressProfileImage(file);
+                    if (compressed) {
+                      setDraftAvatar(compressed);
                     }
-                  };
-                  reader.readAsDataURL(file);
+                  } catch (err) {
+                    console.error('[UserProfileEditModal] Error compressing photo:', err);
+                  } finally {
+                    e.target.value = '';
+                  }
                 }
               }}
             />

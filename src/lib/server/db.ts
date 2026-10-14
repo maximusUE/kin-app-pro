@@ -396,7 +396,8 @@ export function registerNewUser(params: {
 
 export function updateUserProfile(userId: string, updates: Partial<UserProfile>): UserProfile | null {
   const db = loadDatabase();
-  const idx = db.users.findIndex((u) => u.id === userId);
+  const effectiveId = LEGACY_ID_MAP[userId] || userId;
+  const idx = db.users.findIndex((u) => u.id === effectiveId || u.id === userId);
   if (idx === -1) return null;
 
   const sanitizedUpdates: Partial<UserProfile> = { ...updates };

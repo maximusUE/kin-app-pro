@@ -348,7 +348,7 @@ export default function MobileApp() {
     if (user.country) setUserCountry(capitalizeWords(user.country));
     // Asignar el avatar explícito (si está vacío o es foto de stock ficticia, deja recuadro vacío sin foto)
     const localAvatar = typeof window !== 'undefined' ? localStorage.getItem('kin_avatar') : null;
-    const resolvedAvatar = (localAvatar && localAvatar.trim()) || (user.avatar && !user.avatar.includes('images.unsplash.com') ? user.avatar : '');
+    const resolvedAvatar = (localAvatar && localAvatar.trim()) || user.avatar || '';
     setUserAvatar(resolvedAvatar);
     if (user.email === 'airygc7@gmail.com' || user.role === 'MASTER_ADMIN' || user.isMasterAdmin) {
       setUserClientId(user.clientId || 'KIN-MASTER-001');
@@ -631,7 +631,7 @@ export default function MobileApp() {
           const effectiveUser = {
             ...data.user,
             ...clientSaved,
-            avatar: (localAvatar && localAvatar.trim()) || clientSaved.avatar || (data.user.avatar && !data.user.avatar.includes('images.unsplash.com') ? data.user.avatar : '') || '',
+            avatar: (localAvatar && localAvatar.trim()) || clientSaved.avatar || data.user?.avatar || '',
             address1: clientSaved.address1 !== undefined ? clientSaved.address1 : (data.user.address1 || ''),
             address2: clientSaved.address2 !== undefined ? clientSaved.address2 : (data.user.address2 || ''),
             city: clientSaved.city !== undefined ? clientSaved.city : (data.user.city || ''),
@@ -901,6 +901,9 @@ export default function MobileApp() {
       try {
         localStorage.setItem('kin_language', draftUserLanguage);
         localStorage.setItem('kin_currency_pref', draftUserCurrencyPref);
+        if (draftUserAvatar) {
+          localStorage.setItem('kin_avatar', draftUserAvatar);
+        }
       } catch (_) {}
     }
 

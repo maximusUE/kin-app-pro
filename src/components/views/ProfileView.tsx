@@ -12,6 +12,7 @@ import { PersonalInformationModal } from '@/components/modals/PersonalInformatio
 import { LanguageSelectionModal } from '@/components/modals/LanguageSelectionModal';
 import { PrivacySecurityModal } from '@/components/modals/PrivacySecurityModal';
 import { KinSupportModal } from '@/components/modals/KinSupportModal';
+import { compressProfileImage } from '@/lib/utils/imageCompressor';
 
 export interface ProfileViewProps {
   onBack: () => void;
@@ -60,6 +61,7 @@ export interface ProfileViewProps {
     state?: string;
     zip?: string;
     email?: string;
+    avatar?: string;
   }) => void;
   onUpdateAvatar?: (newAvatar: string) => void;
   handleLogout: () => void;
@@ -104,34 +106,38 @@ export function ProfileView({
   // Acceso nativo a fotos y cámara del dispositivo
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [currentAvatar, setCurrentAvatar] = useState<string | null>(() => {
+    if (userAvatar && userAvatar.trim()) return userAvatar;
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kin_avatar');
-      if (saved) return saved;
+      if (saved && saved.trim()) return saved;
     }
-    return userAvatar;
+    return null;
   });
   const [avatarError, setAvatarError] = useState<boolean>(false);
 
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('kin_avatar') : null;
-    if (saved) {
-      setCurrentAvatar(saved);
-      setAvatarError(false);
-    } else if (userAvatar) {
+    if (userAvatar && userAvatar.trim()) {
       setCurrentAvatar(userAvatar);
       setAvatarError(false);
+    } else if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kin_avatar');
+      if (saved && saved.trim()) {
+        setCurrentAvatar(saved);
+        setAvatarError(false);
+      }
     }
   }, [userAvatar]);
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
+
+    try {
+      const dataUrl = await compressProfileImage(file);
       if (dataUrl) {
         setCurrentAvatar(dataUrl);
         setAvatarError(false);
+
         if (typeof window !== 'undefined') {
           try {
             localStorage.setItem('kin_avatar', dataUrl);
@@ -143,6 +149,7 @@ export function ProfileView({
             }
           } catch (_) {}
         }
+
         if (onUpdateAvatar) {
           onUpdateAvatar(dataUrl);
         }
@@ -156,13 +163,26 @@ export function ProfileView({
             body: JSON.stringify({ userId, updates: { avatar: dataUrl } }),
           }).catch(() => {});
         }
+
         notifyToast(
-          isEn ? 'Profile photo updated permanently!' : '¡Foto de perfil actualizada con éxito!',
+          isEn ? 'Profile photo updated successfully!' : '¡Foto de perfil actualizada con éxito!',
           'photo_camera'
         );
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('[ProfileView] Error processing photo:', err);
+      notifyToast(
+        isEn ? 'Could not process photo. Please choose another image.' : 'No se pudo procesar la foto. Intenta con otra imagen.',
+        'error'
+      );
+    } finally {
+      if (e.target) {
+        e.target.value = '';
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   // 5 Core Modals State (Exact mapping to stitch_kin_mobile_CLIENTE)
@@ -371,14 +391,12 @@ export function ProfileView({
     }, 1200);
   };
 
+  const effectiveAvatar = (currentAvatar || userAvatar || '').trim();
   const hasCustomAvatar = Boolean(
-    (currentAvatar || userAvatar) &&
-    (currentAvatar || userAvatar)!.trim().length > 0 &&
-    !(currentAvatar || userAvatar)!.includes('images.unsplash.com') &&
-    !(currentAvatar || userAvatar)!.includes('lh3.googleusercontent.com') &&
+    effectiveAvatar.length > 0 &&
     !avatarError
   );
-  const displayAvatar = hasCustomAvatar ? (currentAvatar || userAvatar)! : '';
+  const displayAvatar = hasCustomAvatar ? effectiveAvatar : '';
   const displayName = `${draftFirstName} ${draftLastName}`.trim() || userName || 'Usuario KIN';
   const displayEmail = userEmail || '';
   const displayPhone = draftPhone || userPhone || '';
