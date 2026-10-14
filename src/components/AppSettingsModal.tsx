@@ -16,6 +16,7 @@ import {
   MailIcon,
   PhoneIcon,
   CheckCircleIcon as CheckIcon,
+  WhatsAppIcon,
 } from './Icons';
 import { KinLogo } from './KinLogo';
 
@@ -121,6 +122,12 @@ export function AppSettingsModal({
   };
 
   const isEn = language === 'en';
+  const whatsappHelpMessage = encodeURIComponent(
+    isEn
+      ? 'Hello KIN VIP Support team, I need assistance with my account.'
+      : 'Hola equipo de Soporte VIP KIN, necesito asistencia con mi cuenta.'
+  );
+  const whatsappVipUrl = `https://wa.me/18005462776?text=${whatsappHelpMessage}`;
 
   return createPortal(
     <div
@@ -169,7 +176,7 @@ export function AppSettingsModal({
             { id: 'general', label: isEn ? 'General' : 'General' },
             { id: 'seguridad', label: isEn ? 'Security' : 'Seguridad' },
             { id: 'notificaciones', label: isEn ? 'Alerts' : 'Alertas' },
-            { id: 'legal', label: isEn ? 'Legal' : 'Legal' },
+            { id: 'legal', label: isEn ? 'Support' : 'Soporte' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -503,6 +510,52 @@ export function AppSettingsModal({
           {/* ========================================================================= */}
           {activeSubTab === 'legal' && (
             <div className="space-y-3 animate-fade-in">
+              {/* Soporte VIP por WhatsApp (Concierge Prioritario 24/7) */}
+              <a
+                href={whatsappVipUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative p-4 rounded-2xl bg-gradient-to-br from-[#0c261e] via-[#101b26] to-[#0c131f] border border-emerald-500/35 hover:border-emerald-400/60 shadow-[0_4px_22px_rgba(37,211,102,0.12)] hover:shadow-[0_6px_28px_rgba(37,211,102,0.22)] transition-all duration-200 active:scale-[0.98] flex items-center justify-between gap-3 text-left overflow-hidden cursor-pointer"
+              >
+                {/* Glow ambiental verde WhatsApp */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#25D366]/10 rounded-full blur-2xl pointer-events-none group-hover:bg-[#25D366]/20 transition-all duration-300" />
+
+                <div className="flex items-center gap-3 min-w-0 z-10">
+                  {/* Icono WhatsApp con Indicador En Vivo */}
+                  <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#25D366]/25 to-emerald-400/15 border border-[#25D366]/40 flex items-center justify-center text-[#25D366] shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-200">
+                    <WhatsAppIcon className="w-6 h-6 text-[#25D366]" />
+                    <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#25D366]"></span>
+                    </span>
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-black text-white tracking-tight">
+                        {isEn ? 'VIP WhatsApp Support' : 'Soporte VIP por WhatsApp'}
+                      </span>
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-[#2ED5A4] border border-emerald-500/30 text-[9px] font-black uppercase tracking-wider">
+                        VIP 24/7
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-slate-300 block truncate mt-0.5">
+                      {isEn ? 'Direct priority concierge • Response < 2 min' : 'Atención directa prioritaria • Respuesta < 2 min'}
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400/90 block mt-0.5 font-semibold">
+                      +1 (800) 546-2776
+                    </span>
+                  </div>
+                </div>
+
+                <div className="z-10 shrink-0">
+                  <div className="px-3.5 py-2 rounded-xl bg-[#25D366] group-hover:bg-[#22c35e] text-[#05160e] text-xs font-black flex items-center gap-1.5 shadow-md shadow-[#25D366]/25 transition-all group-hover:translate-x-0.5">
+                    <span>{isEn ? 'Chat' : 'Escribir'}</span>
+                    <span className="material-symbols-outlined text-[15px] font-bold">arrow_forward</span>
+                  </div>
+                </div>
+              </a>
+
               {/* Soporte 24/7 */}
               <div className="p-3.5 rounded-2xl bg-[#181928] border border-white/5 flex items-center justify-between">
                 <div>
