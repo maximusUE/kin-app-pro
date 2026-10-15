@@ -20,7 +20,6 @@ import {
 } from './Icons';
 import { KinLogo } from './KinLogo';
 import { KinWordmark } from './KinWordmark';
-import { useKinApp } from '@/context/KinAppContext';
 
 interface AppSettingsModalProps {
   isOpen: boolean;
@@ -85,7 +84,21 @@ export function AppSettingsModal({
   onLanguageChange,
 }: AppSettingsModalProps) {
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'seguridad' | 'notificaciones' | 'legal'>('general');
-  const { wordmarkStyle, setWordmarkStyle } = useKinApp();
+  const [wordmarkStyle, setWordmarkStyle] = useState<'deconstructed' | 'radical'>('deconstructed');
+
+  const handleSetWordmarkStyle = (style: 'deconstructed' | 'radical') => {
+    setWordmarkStyle(style);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_wordmark_style', style);
+      } catch (_) {}
+    }
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(8);
+      } catch (_) {}
+    }
+  };
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [sms2FA, setSms2FA] = useState(true);
   const [fxAlerts, setFxAlerts] = useState(true);
@@ -100,6 +113,12 @@ export function AppSettingsModal({
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kin_wordmark_style') as 'deconstructed' | 'radical' | null;
+      if (saved === 'deconstructed' || saved === 'radical') {
+        setWordmarkStyle(saved);
+      }
+    }
   }, []);
 
   if (!isOpen || !mounted) return null;
@@ -295,12 +314,7 @@ export function AppSettingsModal({
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     type="button"
-                    onClick={() => {
-                      setWordmarkStyle('deconstructed');
-                      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                        try { navigator.vibrate(8); } catch (_) {}
-                      }
-                    }}
+                    onClick={() => handleSetWordmarkStyle('deconstructed')}
                     className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
                       wordmarkStyle === 'deconstructed'
                         ? 'bg-[#2ED5A4]/20 border-[#2ED5A4] text-white shadow-sm'
@@ -317,12 +331,7 @@ export function AppSettingsModal({
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setWordmarkStyle('radical');
-                      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                        try { navigator.vibrate(8); } catch (_) {}
-                      }
-                    }}
+                    onClick={() => handleSetWordmarkStyle('radical')}
                     className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
                       wordmarkStyle === 'radical'
                         ? 'bg-[#2ED5A4]/20 border-[#2ED5A4] text-white shadow-sm'

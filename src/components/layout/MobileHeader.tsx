@@ -5,7 +5,6 @@ import { ChevronLeftIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { KinWordmark } from '@/components/KinWordmark';
 import { KinAppTab } from '@/components/layout/MobileBottomDock';
-import { useKinApp } from '@/context/KinAppContext';
 
 export interface MobileHeaderProps {
   theme: 'dark' | 'light';
@@ -30,7 +29,31 @@ export function MobileHeader({
 }: MobileHeaderProps) {
   const isLight = theme === 'light';
   const isEn = language === 'en';
-  const { wordmarkStyle, setWordmarkStyle } = useKinApp();
+  const [wordmarkStyle, setWordmarkStyle] = React.useState<'deconstructed' | 'radical'>('deconstructed');
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kin_wordmark_style') as 'deconstructed' | 'radical' | null;
+      if (saved === 'deconstructed' || saved === 'radical') {
+        setWordmarkStyle(saved);
+      }
+    }
+  }, []);
+
+  const handleToggleWordmark = () => {
+    const next = wordmarkStyle === 'deconstructed' ? 'radical' : 'deconstructed';
+    setWordmarkStyle(next);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_wordmark_style', next);
+      } catch (_) {}
+    }
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(8);
+      } catch (_) {}
+    }
+  };
 
   return (
     <div
@@ -107,15 +130,7 @@ export function MobileHeader({
             <KinLogo size={34} />
             <button
               type="button"
-              onClick={() => {
-                const next = wordmarkStyle === 'deconstructed' ? 'radical' : 'deconstructed';
-                setWordmarkStyle(next);
-                if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                  try {
-                    navigator.vibrate(8);
-                  } catch (_) {}
-                }
-              }}
+              onClick={handleToggleWordmark}
               className="flex flex-col justify-center ml-0.5 text-left group cursor-pointer transition-transform active:scale-95"
               title={isEn ? 'Tap to switch KIN typography style' : 'Toca para alternar estilo de tipografía KIN'}
             >
