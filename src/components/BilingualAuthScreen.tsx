@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { capitalizeWords } from '@/lib/utils/capitalize';
+import { KinWordmark } from '@/components/KinWordmark';
 
 export interface BilingualAuthScreenProps {
   onLoginSuccess?: (userData?: any) => void;
@@ -389,9 +390,9 @@ export function BilingualAuthScreen({
                   />
                 </div>
               </div>
-              <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">
-                KIN <span className="text-primary">Mobile</span>
-              </h1>
+              <div className="mt-2 mb-1 flex flex-col items-center">
+                <KinWordmark height={32} variant="emerald" badge="MOBILE FINTECH" showGlow />
+              </div>
               <p className="font-body-medium text-body-medium text-on-surface-variant mt-1 max-w-[340px] transition-all duration-300">
                 {authMode === 'login'
                   ? (language === 'es'

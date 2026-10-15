@@ -134,6 +134,11 @@ export default {
           "Menlo",
           "monospace",
         ],
+        "syncopate": [
+          "Syncopate",
+          "Space Grotesk",
+          "sans-serif",
+        ],
         "body-base": [
           "-apple-system",
           "BlinkMacSystemFont",

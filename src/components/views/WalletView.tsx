@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronLeftIcon, SettingsGearIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
+import { KinWordmark } from '@/components/KinWordmark';
 import { AppleWalletPassModal } from '@/components/modals/AppleWalletPassModal';
 import { KinPinRevealModal } from '@/components/modals/KinPinRevealModal';
 import { KinCardLimitsModal } from '@/components/modals/KinCardLimitsModal';
@@ -91,9 +92,8 @@ export function WalletView({
             <div className="w-8 h-8 rounded-full bg-[#2ED5A4] text-[#06070B] font-black flex items-center justify-center text-sm shadow-md">
               K
             </div>
-            <div>
-              <span className="text-xs font-extrabold text-white tracking-wider block">KIN CARD</span>
-              <span className="text-[9px] text-[#8E91A5] font-semibold">VISA PLATINUM</span>
+            <div className="flex flex-col">
+              <KinWordmark height={14} variant="white" badge="VISA PLATINUM" />
             </div>
           </div>
 

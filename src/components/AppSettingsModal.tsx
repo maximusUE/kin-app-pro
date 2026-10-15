@@ -19,6 +19,8 @@ import {
   WhatsAppIcon,
 } from './Icons';
 import { KinLogo } from './KinLogo';
+import { KinWordmark } from './KinWordmark';
+import { useKinApp } from '@/context/KinAppContext';
 
 interface AppSettingsModalProps {
   isOpen: boolean;
@@ -83,6 +85,7 @@ export function AppSettingsModal({
   onLanguageChange,
 }: AppSettingsModalProps) {
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'seguridad' | 'notificaciones' | 'legal'>('general');
+  const { wordmarkStyle, setWordmarkStyle } = useKinApp();
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [sms2FA, setSms2FA] = useState(true);
   const [fxAlerts, setFxAlerts] = useState(true);
@@ -150,6 +153,7 @@ export function AppSettingsModal({
               <ChevronLeftIcon className="w-5 h-5 text-white" />
             </button>
             <KinLogo size={34} />
+            <KinWordmark height={16} variant="emerald" badge="SETTINGS" />
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#2ED5A4]">
@@ -254,6 +258,85 @@ export function AppSettingsModal({
                   onToggle={() => setFxAlerts(!fxAlerts)}
                   title={isEn ? 'Smart FX Alert' : 'Alerta Inteligente de Tasa FX'}
                 />
+              </div>
+
+              {/* Tipografía KIN Arquitectónica (Inspirada en Nokia 2023) */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#121324] to-[#18192E] border border-[#2ED5A4]/30 shadow-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🏛️</span>
+                    <div>
+                      <span className="text-xs font-bold text-white block">
+                        {isEn ? 'KIN Architectural Typography' : 'Tipografía KIN Arquitectónica'}
+                      </span>
+                      <span className="text-[10px] text-[#2ED5A4] font-medium">
+                        {isEn ? 'Keynote Google Cloud • Nokia 2023 Geometry' : 'Keynote Google Cloud • Geometría Nokia 2023'}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[#2ED5A4] text-[9px] font-black uppercase tracking-wider font-syncopate">
+                    VECTOR SVG
+                  </span>
+                </div>
+
+                {/* Preview Box */}
+                <div className="py-4 px-3 rounded-xl bg-[#06070B] border border-white/10 flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-teal-500/10 to-transparent pointer-events-none" />
+                  <KinWordmark
+                    height={36}
+                    variant="emerald"
+                    kStyle={wordmarkStyle}
+                    badge={isEn ? 'USA ➔ MEXICO FINTECH' : 'REMESAS USA ➔ MÉXICO'}
+                    showGlow
+                  />
+                </div>
+
+                {/* Switcher: Deconstruido vs Radical */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWordmarkStyle('deconstructed');
+                      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                        try { navigator.vibrate(8); } catch (_) {}
+                      }
+                    }}
+                    className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
+                      wordmarkStyle === 'deconstructed'
+                        ? 'bg-[#2ED5A4]/20 border-[#2ED5A4] text-white shadow-sm'
+                        : 'bg-[#202236] border-white/5 text-[#8E91A5] hover:text-white'
+                    }`}
+                  >
+                    <span className="text-[11px] font-black block text-white">
+                      {isEn ? '1. Deconstructed' : '1. Deconstruido'}
+                    </span>
+                    <span className="text-[9px] text-[#2ED5A4] block font-semibold">
+                      {isEn ? 'K with stem (recommended)' : 'K con tronco (recomendado)'}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWordmarkStyle('radical');
+                      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                        try { navigator.vibrate(8); } catch (_) {}
+                      }
+                    }}
+                    className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
+                      wordmarkStyle === 'radical'
+                        ? 'bg-[#2ED5A4]/20 border-[#2ED5A4] text-white shadow-sm'
+                        : 'bg-[#202236] border-white/5 text-[#8E91A5] hover:text-white'
+                    }`}
+                  >
+                    <span className="text-[11px] font-black block text-white">
+                      {isEn ? '2. Radical Minimal' : '2. Radical Minimal'}
+                    </span>
+                    <span className="text-[9px] text-[#8E91A5] block">
+                      {isEn ? 'Chevron-only (Pure Nokia)' : 'Solo chevron (Puro Nokia)'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               {/* Idioma de la Aplicación */}

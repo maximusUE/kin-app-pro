@@ -3,7 +3,9 @@
 import React from 'react';
 import { ChevronLeftIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
+import { KinWordmark } from '@/components/KinWordmark';
 import { KinAppTab } from '@/components/layout/MobileBottomDock';
+import { useKinApp } from '@/context/KinAppContext';
 
 export interface MobileHeaderProps {
   theme: 'dark' | 'light';
@@ -28,6 +30,7 @@ export function MobileHeader({
 }: MobileHeaderProps) {
   const isLight = theme === 'light';
   const isEn = language === 'en';
+  const { wordmarkStyle, setWordmarkStyle } = useKinApp();
 
   return (
     <div
@@ -102,18 +105,27 @@ export function MobileHeader({
               </button>
             )}
             <KinLogo size={34} />
-            <div className="flex flex-col leading-none">
-              <span
-                className={`font-headline-md text-[17px] font-bold tracking-tight ${
-                  isLight ? 'text-slate-900' : 'text-white'
-                }`}
-              >
-                KIN
-              </span>
-              <span className="font-label-caps text-[9px] uppercase tracking-widest text-[#2ED5A4]">
-                Global
-              </span>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const next = wordmarkStyle === 'deconstructed' ? 'radical' : 'deconstructed';
+                setWordmarkStyle(next);
+                if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                  try {
+                    navigator.vibrate(8);
+                  } catch (_) {}
+                }
+              }}
+              className="flex flex-col justify-center ml-0.5 text-left group cursor-pointer transition-transform active:scale-95"
+              title={isEn ? 'Tap to switch KIN typography style' : 'Toca para alternar estilo de tipografía KIN'}
+            >
+              <KinWordmark
+                height={16}
+                variant={isLight ? 'current' : 'emerald'}
+                kStyle={wordmarkStyle}
+                badge="GLOBAL"
+              />
+            </button>
           </div>
 
           {/* Quick Direct Access: Login / Enterprise Auth Screen */}

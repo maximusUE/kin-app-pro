@@ -99,6 +99,8 @@ export interface KinAppContextType {
   setLanguage: (lang: 'es' | 'en') => void;
   theme: 'dark' | 'light';
   handleToggleTheme: (newTheme?: 'dark' | 'light') => void;
+  wordmarkStyle: 'deconstructed' | 'radical';
+  setWordmarkStyle: (style: 'deconstructed' | 'radical') => void;
 
   // Contacts
   contactsList: ContactItem[];
@@ -161,6 +163,16 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
   // Language & Theme
   const [language, setLanguageState] = useState<'es' | 'en'>('en');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [wordmarkStyle, setWordmarkStyleState] = useState<'deconstructed' | 'radical'>('deconstructed');
+
+  const setWordmarkStyle = (style: 'deconstructed' | 'radical') => {
+    setWordmarkStyleState(style);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kin_wordmark_style', style);
+      } catch (_) {}
+    }
+  };
 
   const setLanguage = (lang: 'es' | 'en') => {
     setLanguageState(lang);
@@ -332,6 +344,10 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
       if (savedLang === 'es' || savedLang === 'en') {
         setLanguage(savedLang);
       }
+      const savedWordmark = localStorage.getItem('kin_wordmark_style') as 'deconstructed' | 'radical' | null;
+      if (savedWordmark === 'deconstructed' || savedWordmark === 'radical') {
+        setWordmarkStyleState(savedWordmark);
+      }
     }
   }, []);
 
@@ -356,6 +372,8 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
     setLanguage,
     theme,
     handleToggleTheme,
+    wordmarkStyle,
+    setWordmarkStyle,
     contactsList,
     setContactsList,
     handleDeleteContact,
