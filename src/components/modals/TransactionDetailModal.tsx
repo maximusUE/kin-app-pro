@@ -13,6 +13,7 @@ import {
 } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { BanxicoCepModal, BanxicoCepData } from './BanxicoCepModal';
+import { SpeiLiveTracker } from '@/components/SpeiLiveTracker';
 
 export interface TransactionDetailModalProps {
   transaction: {
@@ -175,6 +176,14 @@ export function TransactionDetailModal({
               <span className="material-symbols-outlined text-[16px]">chevron_right</span>
             </div>
           </button>
+
+          {/* Rastreador SPEI en Vivo SSE */}
+          <SpeiLiveTracker
+            txId={transaction.id}
+            claveRastreo={transaction.claveRastreoBanxico || transaction.refNumber}
+            initialSettled={true}
+            language={language}
+          />
           {/* Tarjeta Hero Principal: Monto, Estatus y Conversión */}
           <div className="p-4 rounded-2xl bg-gradient-to-br from-[#1c242c] via-[#12161b] to-[#0d1014] border border-[#2ED5A4]/30 shadow-[0_4px_20px_rgba(46,213,164,0.12)] space-y-2 text-center">
             {/* Badge de Estatus */}

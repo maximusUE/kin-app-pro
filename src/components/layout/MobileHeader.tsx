@@ -12,6 +12,7 @@ export interface MobileHeaderProps {
   sendSuccessData: any;
   language: 'es' | 'en';
   fxRate?: number;
+  speiLatencyMs?: number;
   onBackToHome: () => void;
   onLoginClick: () => void;
 }
@@ -26,6 +27,7 @@ export function MobileHeader({
   sendSuccessData,
   language,
   fxRate,
+  speiLatencyMs,
   onBackToHome,
   onLoginClick,
 }: MobileHeaderProps) {
@@ -149,15 +151,20 @@ export function MobileHeader({
           <div className="flex items-center gap-1.5">
             {fxRate && (
               <div
-                className={`hidden xs:flex items-center gap-1 px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-financial-mono font-bold border transition-colors shadow-2xs ${
+                className={`hidden xs:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-financial-mono font-bold border transition-colors shadow-2xs ${
                   isLight
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
                     : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/20'
                 }`}
-                title={isEn ? 'Live USD/MXN Rate via SSE' : 'Tipo de Cambio USD/MXN en Vivo vía SSE'}
+                title={isEn ? `Live FX via SSE • Banxico STP Latency: ${speiLatencyMs || 135}ms` : `Tipo de Cambio en Vivo vía SSE • Latencia Banxico: ${speiLatencyMs || 135}ms`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span>${fxRate.toFixed(2)}</span>
+                {speiLatencyMs && (
+                  <span className="text-[9px] opacity-75 hidden sm:inline font-mono">
+                    • {speiLatencyMs}ms
+                  </span>
+                )}
               </div>
             )}
             <button

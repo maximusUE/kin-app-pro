@@ -13,6 +13,7 @@ import {
 } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
 import { BanxicoCepModal, BanxicoCepData } from '../modals/BanxicoCepModal';
+import { SpeiLiveTracker } from '@/components/SpeiLiveTracker';
 
 export interface SendSuccessData {
   id: string;
@@ -216,7 +217,14 @@ export function ReceiptView({ data, exchangeRate, onDone, language = 'es' }: Rec
           </div>
         </div>
       ) : data.claveRastreoBanxico ? (
-        <div className="bg-[#181928] border border-[#2ED5A4]/30 rounded-2xl p-3.5 space-y-2">
+        <div className="space-y-3">
+          <SpeiLiveTracker
+            txId={data.id}
+            claveRastreo={data.claveRastreoBanxico}
+            language={language}
+          />
+
+          <div className="bg-[#181928] border border-[#2ED5A4]/30 rounded-2xl p-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[#8E91A5] font-medium flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[15px] text-[#2ED5A4]">verified_user</span>
@@ -263,6 +271,7 @@ export function ReceiptView({ data, exchangeRate, onDone, language = 'es' }: Rec
             </div>
           </button>
         </div>
+      </div>
       ) : null}
 
       {/* Method details pill */}

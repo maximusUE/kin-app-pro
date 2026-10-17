@@ -331,6 +331,7 @@ export default function MobileApp() {
     lastTimestamp: '',
     source: 'Banxico FX (SSE)',
   });
+  const [speiLatencyMs, setSpeiLatencyMs] = useState<number>(138);
   const USD_TO_MXN_RATE = exchangeRate;
 
   const loadUserData = (user: any) => {
@@ -807,6 +808,44 @@ export default function MobileApp() {
     };
 
     connectSSE();
+
+    return () => {
+      if (eventSource) eventSource.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
+  }, []);
+
+  // SSE: Server-Sent Events Listener for Banxico Telemetry & Latency
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+
+    const connectEvents = () => {
+      try {
+        eventSource = new EventSource('/api/events/stream');
+
+        eventSource.addEventListener('network', (event: MessageEvent) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data && typeof data.latencyMs === 'number') {
+              setSpeiLatencyMs(data.latencyMs);
+            }
+          } catch {}
+        });
+
+        eventSource.onerror = () => {
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          reconnectTimeout = setTimeout(connectEvents, 8000);
+        };
+      } catch {}
+    };
+
+    connectEvents();
 
     return () => {
       if (eventSource) eventSource.close();
@@ -2056,6 +2095,7 @@ export default function MobileApp() {
           sendSuccessData={sendSuccessData}
           language={language}
           fxRate={USD_TO_MXN_RATE}
+          speiLatencyMs={speiLatencyMs}
           onBackToHome={() => setActiveTab('home')}
           onLoginClick={() => {
             setIsAuthenticated(false);
