@@ -198,12 +198,91 @@ export function BilingualAuthScreen({
   };
 
   // ────────────────────────────────────────────────────────────────────────────
+  // Password Strength Evaluator (0 to 4 bars: length, numbers, uppercase)
+  // ────────────────────────────────────────────────────────────────────────────
+  const passwordStrength = React.useMemo(() => {
+    const pwd = password.trim();
+    if (!pwd) {
+      return {
+        score: 0,
+        labelEs: 'Mín. 8 caracteres',
+        labelEn: 'Min. 8 characters',
+        textColor: 'text-slate-400 dark:text-outline',
+        barColor: 'bg-slate-200 dark:bg-surface-container-highest',
+      };
+    }
+
+    let score = 0;
+    if (pwd.length >= 6) score += 1;
+    if (pwd.length >= 8) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/\d/.test(pwd)) score += 1;
+
+    // Cap at 1 bar if shorter than 6 characters regardless of uppercase/digits
+    if (pwd.length < 6) {
+      score = 1;
+    }
+
+    if (score === 1) {
+      return {
+        score: 1,
+        labelEs: 'Rojo / Débil',
+        labelEn: 'Weak / Vulnerable',
+        textColor: 'text-rose-500 dark:text-rose-400',
+        barColor: 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]',
+      };
+    }
+    if (score === 2) {
+      return {
+        score: 2,
+        labelEs: 'Ámbar / Débil',
+        labelEn: 'Weak / Fair',
+        textColor: 'text-amber-500 dark:text-amber-400',
+        barColor: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]',
+      };
+    }
+    if (score === 3) {
+      return {
+        score: 3,
+        labelEs: 'Media / Segura',
+        labelEn: 'Medium / Good',
+        textColor: 'text-amber-400 dark:text-amber-300',
+        barColor: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]',
+      };
+    }
+    return {
+      score: 4,
+      labelEs: 'Verde / Fuerte',
+      labelEn: 'Strong / Protected',
+      textColor: 'text-primary-fixed',
+      barColor: 'bg-primary-container shadow-[0_0_8px_rgba(46,213,164,0.6)]',
+    };
+  }, [password]);
+
+  // ────────────────────────────────────────────────────────────────────────────
   // Submit Register (Email / Password)
   // ────────────────────────────────────────────────────────────────────────────
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName.trim() || !email.trim()) {
-      showToast(language === 'es' ? 'Por favor completa tu nombre y correo' : 'Please enter your name and email');
+    const cleanPassword = password.trim();
+
+    if (!firstName.trim() || !email.trim() || !cleanPassword) {
+      showToast(
+        language === 'es'
+          ? 'Por favor completa tu nombre, correo y contraseña obligatoria'
+          : 'Please enter your name, email, and required password',
+        'error'
+      );
+      return;
+    }
+
+    if (cleanPassword.length < 6) {
+      showToast(
+        language === 'es'
+          ? 'La contraseña es muy débil (mínimo 6 caracteres)'
+          : 'Password is too weak (minimum 6 characters)',
+        'error'
+      );
       return;
     }
 
@@ -219,7 +298,7 @@ export function BilingualAuthScreen({
           lastName: capitalizeWords(lastName.trim()),
           phone: `${phonePrefix} ${phone}`.trim(),
           email: email.trim(),
-          password: password.trim() || 'KinVault2025$Secure',
+          password: cleanPassword,
         }),
       });
 
@@ -699,8 +778,10 @@ export function BilingualAuthScreen({
                       <label className="font-caption-sm text-caption-sm text-slate-600 dark:text-on-surface-variant">
                         {language === 'es' ? 'Contraseña Segura' : 'Secure Password'}
                       </label>
-                      <span className="font-label-caps text-label-caps text-primary-fixed uppercase tracking-wider font-bold">
-                        {language === 'es' ? 'Verde / Fuerte' : 'Strong / Protected'}
+                      <span
+                        className={`font-label-caps text-label-caps uppercase tracking-wider font-bold transition-colors duration-200 ${passwordStrength.textColor}`}
+                      >
+                        {language === 'es' ? passwordStrength.labelEs : passwordStrength.labelEn}
                       </span>
                     </div>
                     <div className="relative rounded-2xl bg-white dark:bg-surface-container px-3.5 py-3 flex items-center gap-2 shadow-inner focus-within:bg-slate-50 dark:focus-within:bg-surface-container-high border border-slate-200/90 dark:border-white/10 transition-colors">
@@ -711,6 +792,7 @@ export function BilingualAuthScreen({
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        minLength={6}
                         required
                       />
                       <button
@@ -724,10 +806,16 @@ export function BilingualAuthScreen({
                       </button>
                     </div>
                     <div className="flex items-center gap-1.5 mt-1 px-1">
-                      <div className="h-1.5 flex-1 rounded-full bg-primary-container shadow-[0_0_8px_rgba(46,213,164,0.6)]" />
-                      <div className="h-1.5 flex-1 rounded-full bg-primary-container shadow-[0_0_8px_rgba(46,213,164,0.6)]" />
-                      <div className="h-1.5 flex-1 rounded-full bg-primary-container shadow-[0_0_8px_rgba(46,213,164,0.6)]" />
-                      <div className="h-1.5 flex-1 rounded-full bg-primary-container shadow-[0_0_8px_rgba(46,213,164,0.6)]" />
+                      {[1, 2, 3, 4].map((barIndex) => (
+                        <div
+                          key={barIndex}
+                          className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                            passwordStrength.score >= barIndex
+                              ? passwordStrength.barColor
+                              : 'bg-slate-200 dark:bg-surface-container-highest'
+                          }`}
+                        />
+                      ))}
                     </div>
                   </div>
 
@@ -873,19 +961,21 @@ export function BilingualAuthScreen({
                   : 'By continuing you agree to KIN Terms of Service and Biometric Privacy Policy.'}
               </p>
 
-              {/* Direct Dashboard Access Link */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (onLoginSuccess) onLoginSuccess();
-                  }}
-                  className="px-4 py-2 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-bold hover:bg-primary/20 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
-                >
-                  <span className="material-symbols-outlined text-[16px]">dashboard</span>
-                  <span>{language === 'es' ? 'Entrar directo al Dashboard KIN →' : 'Direct to KIN Dashboard →'}</span>
-                </button>
-              </div>
+              {/* Direct Dashboard Access Link (Development Only) */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onLoginSuccess) onLoginSuccess();
+                    }}
+                    className="px-4 py-2 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-bold hover:bg-primary/20 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">dashboard</span>
+                    <span>{language === 'es' ? 'Entrar directo al Dashboard KIN →' : 'Direct to KIN Dashboard →'}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </main>
