@@ -71,6 +71,14 @@ export interface UserProfileState {
   pushNotificationsEnabled: boolean;
 }
 
+export interface FxLiveState {
+  isLive: boolean;
+  change: number;
+  direction: 'up' | 'down' | 'neutral';
+  lastTimestamp: string;
+  source: string;
+}
+
 export interface KinAppContextType {
   // Navigation
   activeTab: KinAppTab;
@@ -87,6 +95,7 @@ export interface KinAppContextType {
   // Balances & Currency
   exchangeRate: number;
   setExchangeRate: (rate: number) => void;
+  fxLiveState: FxLiveState;
   currencyPref: 'USD' | 'MXN';
   handleToggleCurrency: (newCurr?: 'USD' | 'MXN') => void;
   hideBalance: boolean;
@@ -157,6 +166,13 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
 
   // FX & Financial preferences
   const [exchangeRate, setExchangeRate] = useState<number>(DEFAULT_USD_TO_MXN_RATE);
+  const [fxLiveState, setFxLiveState] = useState<FxLiveState>({
+    isLive: false,
+    change: 0,
+    direction: 'neutral',
+    lastTimestamp: '',
+    source: 'Banxico FX (SSE)',
+  });
   const [currencyPref, setCurrencyPref] = useState<'USD' | 'MXN'>('USD');
   const [hideBalance, setHideBalance] = useState<boolean>(false);
 
@@ -351,6 +367,61 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Server-Sent Events (SSE) Real-Time FX Stream Listener
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+
+    const connectSSE = () => {
+      try {
+        eventSource = new EventSource('/api/fx/stream');
+
+        eventSource.onopen = () => {
+          setFxLiveState((prev) => ({ ...prev, isLive: true }));
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data && typeof data.rate === 'number') {
+              setExchangeRate(data.rate);
+              setFxLiveState({
+                isLive: true,
+                change: data.change || 0,
+                direction: data.direction || 'neutral',
+                lastTimestamp: data.timestamp || new Date().toLocaleTimeString('es-MX', { hour12: false }),
+                source: data.source || 'Banxico FX Interbancario (En Vivo)',
+              });
+            }
+          } catch {
+            // Heartbeat or comment chunk, safe to ignore
+          }
+        };
+
+        eventSource.onerror = () => {
+          setFxLiveState((prev) => ({ ...prev, isLive: false }));
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          // Exponential backoff / retry after 5s
+          reconnectTimeout = setTimeout(connectSSE, 5000);
+        };
+      } catch {
+        setFxLiveState((prev) => ({ ...prev, isLive: false }));
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) eventSource.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
+  }, []);
+
   const value = {
     activeTab,
     setActiveTab,
@@ -362,6 +433,7 @@ export function KinAppProvider({ children }: { children: ReactNode }) {
     updateUserProfile,
     exchangeRate,
     setExchangeRate,
+    fxLiveState,
     currencyPref,
     handleToggleCurrency,
     hideBalance,
@@ -406,6 +478,7 @@ export function useKinApp() {
       updateUserProfile: () => {},
       exchangeRate: 20.15,
       setExchangeRate: () => {},
+      fxLiveState: { isLive: false, change: 0, direction: 'neutral', lastTimestamp: '', source: 'Banxico FX (SSE)' },
       currencyPref: 'USD',
       handleToggleCurrency: () => {},
       hideBalance: false,

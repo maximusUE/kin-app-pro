@@ -11,6 +11,7 @@ export interface MobileHeaderProps {
   activeTab: KinAppTab;
   sendSuccessData: any;
   language: 'es' | 'en';
+  fxRate?: number;
   onBackToHome: () => void;
   onLoginClick: () => void;
 }
@@ -24,6 +25,7 @@ export function MobileHeader({
   activeTab,
   sendSuccessData,
   language,
+  fxRate,
   onBackToHome,
   onLoginClick,
 }: MobileHeaderProps) {
@@ -143,8 +145,21 @@ export function MobileHeader({
             </button>
           </div>
 
-          {/* Quick Direct Access: Login / Enterprise Auth Screen */}
+          {/* Quick Direct Access: Live FX SSE & Login Screen */}
           <div className="flex items-center gap-1.5">
+            {fxRate && (
+              <div
+                className={`hidden xs:flex items-center gap-1 px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-financial-mono font-bold border transition-colors shadow-2xs ${
+                  isLight
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
+                    : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/20'
+                }`}
+                title={isEn ? 'Live USD/MXN Rate via SSE' : 'Tipo de Cambio USD/MXN en Vivo vía SSE'}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>${fxRate.toFixed(2)}</span>
+              </div>
+            )}
             <button
               type="button"
               onClick={() => {

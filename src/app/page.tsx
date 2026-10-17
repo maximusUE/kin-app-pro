@@ -107,6 +107,7 @@ import { UserProfileEditModal } from '@/components/modals/UserProfileEditModal';
 import { SendReviewModal } from '@/components/modals/SendReviewModal';
 import { TransactionDetailModal } from '@/components/modals/TransactionDetailModal';
 import { CashPickupLocationModal, SelectedPickupLocation } from '@/components/modals/CashPickupLocationModal';
+import { FxLiveState } from '@/context/KinAppContext';
 
 // Tasa de cambio base por defecto USD/MXN
 const DEFAULT_USD_TO_MXN_RATE = 20.45;
@@ -321,8 +322,15 @@ export default function MobileApp() {
   const [copiedClientId, setCopiedClientId] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
-  // Dynamic FX Exchange Rate (Treasury Control)
+  // Dynamic FX Exchange Rate (Treasury Control & SSE Stream)
   const [exchangeRate, setExchangeRate] = useState<number>(DEFAULT_USD_TO_MXN_RATE);
+  const [fxLiveState, setFxLiveState] = useState<FxLiveState>({
+    isLive: false,
+    change: 0,
+    direction: 'neutral',
+    lastTimestamp: '',
+    source: 'Banxico FX (SSE)',
+  });
   const USD_TO_MXN_RATE = exchangeRate;
 
   const loadUserData = (user: any) => {
@@ -751,6 +759,60 @@ export default function MobileApp() {
       router.push('/auth');
     }
   };
+
+  // SSE: Server-Sent Events Listener for Live FX Rate (USD/MXN)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+
+    const connectSSE = () => {
+      try {
+        eventSource = new EventSource('/api/fx/stream');
+
+        eventSource.onopen = () => {
+          setFxLiveState((prev) => ({ ...prev, isLive: true }));
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data && typeof data.rate === 'number') {
+              setExchangeRate(data.rate);
+              setFxLiveState({
+                isLive: true,
+                change: data.change || 0,
+                direction: data.direction || 'neutral',
+                lastTimestamp: data.timestamp || new Date().toLocaleTimeString('es-MX', { hour12: false }),
+                source: data.source || 'Banxico FX Interbancario (En Vivo)',
+              });
+            }
+          } catch {
+            // Heartbeat chunk
+          }
+        };
+
+        eventSource.onerror = () => {
+          setFxLiveState((prev) => ({ ...prev, isLive: false }));
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          reconnectTimeout = setTimeout(connectSSE, 5000);
+        };
+      } catch {
+        setFxLiveState((prev) => ({ ...prev, isLive: false }));
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) eventSource.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
+  }, []);
 
   // Abrir modal cargando valores actuales
   const handleOpenAvatarPicker = () => {
@@ -1993,6 +2055,7 @@ export default function MobileApp() {
           activeTab={activeTab}
           sendSuccessData={sendSuccessData}
           language={language}
+          fxRate={USD_TO_MXN_RATE}
           onBackToHome={() => setActiveTab('home')}
           onLoginClick={() => {
             setIsAuthenticated(false);
@@ -2029,6 +2092,7 @@ export default function MobileApp() {
             setHideBalance={setHideBalance}
             executiveBalance={executiveBalance}
             USD_TO_MXN_RATE={USD_TO_MXN_RATE}
+            fxLiveState={fxLiveState}
             language={language}
             onNavigateTab={(tab) => setActiveTab(tab)}
             contactsList={contactsList}

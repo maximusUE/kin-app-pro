@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getBankLogoUrl } from '@/components/Icons';
 import { ContactAvatar } from '@/components/ContactAvatar';
+import { FxLiveState } from '@/context/KinAppContext';
 
 export interface HomeContact {
   id?: string;
@@ -37,6 +38,7 @@ export interface HomeViewProps {
   setHideBalance?: (hide: boolean) => void;
   executiveBalance?: number;
   USD_TO_MXN_RATE: number;
+  fxLiveState?: FxLiveState;
   language: 'es' | 'en';
   onNavigateTab: (tab: 'send' | 'kin-cash' | 'send-quick' | 'bill-pay') => void;
   contactsList: HomeContact[];
@@ -96,6 +98,7 @@ export function HomeView({
   currencyPref = 'USD',
   handleToggleCurrency,
   USD_TO_MXN_RATE,
+  fxLiveState,
   language,
   onNavigateTab,
   contactsList,
@@ -315,25 +318,48 @@ export function HomeView({
 
         <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/5">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span
+              className={`w-2 h-2 rounded-full ${
+                fxLiveState?.isLive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+              }`}
+            />
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-[#A6ADC8]">
               {isEn ? 'Live Exchange Rate' : 'Tipo de Cambio en Vivo'}
             </span>
+            {fxLiveState?.isLive && (
+              <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                SSE
+              </span>
+            )}
           </div>
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-[#2ED5A4] text-[10px] font-mono font-bold">
-            Banxico SPEI • 24/7
-          </span>
+          <div className="flex items-center gap-1.5">
+            {fxLiveState?.isLive && fxLiveState.change !== 0 && (
+              <span
+                className={`text-[10px] font-mono font-bold flex items-center gap-0.5 px-1.5 py-0.5 rounded ${
+                  fxLiveState.direction === 'up'
+                    ? 'text-emerald-600 dark:text-[#2ED5A4] bg-emerald-500/10'
+                    : 'text-rose-500 bg-rose-500/10'
+                }`}
+              >
+                {fxLiveState.direction === 'up' ? '▲ +' : '▼ '}
+                {Math.abs(fxLiveState.change).toFixed(3)}
+              </span>
+            )}
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-[#2ED5A4] text-[10px] font-mono font-bold">
+              Banxico SPEI • 24/7
+            </span>
+          </div>
         </div>
 
         <div className="pt-2.5 flex items-baseline justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="font-financial-mono text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <span className="font-financial-mono text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight transition-all duration-300">
               1 USD = ${USD_TO_MXN_RATE.toFixed(2)}
             </span>
             <span className="text-xs font-bold text-emerald-700 dark:text-[#2ED5A4]">MXN</span>
           </div>
           <span className="text-[10px] font-semibold text-emerald-700 dark:text-[#2ED5A4] bg-emerald-500/10 px-2 py-0.5 rounded-full">
-            {isEn ? 'Audited Rate' : 'Tasa Oficial'}
+            {fxLiveState?.lastTimestamp ? `${fxLiveState.lastTimestamp} MX` : isEn ? 'Audited Rate' : 'Tasa Oficial'}
           </span>
         </div>
 
