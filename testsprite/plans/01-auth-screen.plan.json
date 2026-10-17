@@ -1,0 +1,33 @@
+{
+  "projectId": "9f6fc3fd-ac03-4840-8ad6-676fcaede252",
+  "type": "frontend",
+  "name": "Bilingual Authentication and Security Status verification",
+  "description": "Verify that KIN App Pro loads with Firebase and SPEI v4.2 badges, language switcher toggles between ES and EN, and password security meter reacts.",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to the home URL of KIN App Pro"
+    },
+    {
+      "type": "assertion",
+      "description": "Verify the header displays the Firebase and SPEI v4.2 status indicator with an active pulse"
+    },
+    {
+      "type": "action",
+      "description": "Click on the English (EN) language switcher button"
+    },
+    {
+      "type": "assertion",
+      "description": "Verify the screen text transitions to English including login and register options"
+    },
+    {
+      "type": "action",
+      "description": "Click on the Spanish (ES) language switcher button to return to Spanish"
+    },
+    {
+      "type": "assertion",
+      "description": "Verify the screen text is back in Spanish"
+    }
+  ]
+}

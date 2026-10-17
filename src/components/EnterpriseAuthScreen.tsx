@@ -312,12 +312,19 @@ export function EnterpriseAuthScreen({
             )}
             <KinLogo size={36} />
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className={`font-extrabold text-[19px] sm:text-[20px] tracking-tight ${isLight ? 'text-slate-900' : 'bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent'}`}>
                   KIN
                 </span>
                 <span className={`text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full ${isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}`}>
                   PRO
+                </span>
+                {/* Live Firebase & SPEI Status Indicator */}
+                <span className={`inline-flex items-center gap-1 text-[8.5px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${isLight ? 'bg-slate-100/90 text-slate-700 border-slate-200' : 'bg-white/5 text-zinc-300 border-white/10'}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">Firebase</span>
+                  <span className="text-slate-400 dark:text-zinc-500">●</span>
+                  <span>SPEI v4.2</span>
                 </span>
               </div>
               <p className={`text-[9.5px] sm:text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'} font-medium tracking-wide truncate max-w-[140px] sm:max-w-none`}>

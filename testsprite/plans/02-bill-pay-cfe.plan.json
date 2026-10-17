@@ -1,0 +1,25 @@
+{
+  "projectId": "9f6fc3fd-ac03-4840-8ad6-676fcaede252",
+  "type": "frontend",
+  "name": "Bill Payment Utility CFE flow verification",
+  "description": "Verify that user can view utility bills, inspect CFE service details with Jalisco location and reconnection fee indicators in KIN App Pro.",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to KIN App Pro application"
+    },
+    {
+      "type": "assertion",
+      "description": "Verify the interface loads properly without unhandled runtime exceptions"
+    },
+    {
+      "type": "action",
+      "description": "Locate the bill pay or utility services section"
+    },
+    {
+      "type": "assertion",
+      "description": "Verify that CFE Suministrador Básico is listed as an available service provider"
+    }
+  ]
+}

@@ -17,7 +17,9 @@
     "compile": "node_modules/.bin/tsc --outDir dist --module commonjs --target es2020 --esModuleInterop true --resolveJsonModule true --skipLibCheck true src/scripts/testRunner.ts",
     "factory:compiled": "npm run compile && node dist/testRunner.js",
     "test:qa": "node --experimental-strip-types src/scripts/qaSyntheticTests.ts",
-    "rates": "node --experimental-strip-types src/scripts/compareRates.ts"
+    "rates": "node --experimental-strip-types src/scripts/compareRates.ts",
+    "test:e2e": "npx @testsprite/testsprite-cli test list --project 9f6fc3fd-ac03-4840-8ad6-676fcaede252",
+    "test:credits": "npx @testsprite/testsprite-cli usage"
   },
   "dependencies": {
     "@google/generative-ai": "^0.11.1",
