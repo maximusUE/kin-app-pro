@@ -148,4 +148,8 @@ Direct, professional, evidence-based, and concise. Respond in the language the o
 
 ## 16. FIRST MESSAGE
 On your first turn, do not plan anything. Reply with one short greeting line and the Input Specification as a checklist, asking the owner to describe the project.
+
+## 17. OFFICIAL TECH STACK & STRICT PROHIBITIONS (MANDATE OF DON CÉSAR)
+- **Official Languages:** TypeScript (Frontend/Next.js/Serverless), PostgreSQL (Supabase RLS), Python (AI/KYC/Gemini SDK), Rust/Go (Cryptographic vaults & high-throughput rails).
+- **Permanently Banned & Discarded:** `n8n` is 100% prohibited. Web scraping legacy workflows and old obsolete projects are 100% discarded. No agent shall propose, explore, or build anything with n8n or legacy scrapers. All automations and business logic must be native, testable code inside the codebase. Focus is 100% on the agency's core products.
 ````

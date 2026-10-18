@@ -42,10 +42,9 @@ Este protocolo es obligatorio e inquebrantable para **KIN App Pro y para cualqui
 ### 🎬 B. Fábrica de Contenidos YouTube / Shorts / TikTok
 * **Propósito:** Automatización de guiones de alto impacto, ganchos de retención viral de 3 segundos, miniaturas de alto CTR y síntesis de video/audio (`src/scripts/contentFactoryWorker.ts`, `trendAgent.ts`).
 
-### 🏛️ C. Proyectos Venideros y Arquitecturas Clonables
-* **Módulos de Contenido Bíblico (`bible`):** Devocionales, sermones, versículos, estudios teológicos temáticos.
-* **Módulos Deportivos (`sports`):** Partidos, ligas, estadísticas, resúmenes en vivo.
-* **Micro-SaaS & Web Apps Automatizadas:** Integradas con flujos n8n, webhooks y bases de datos Supabase / PostgreSQL.
+### 🏛️ C. Proyectos y Productos Oficiales de la Agencia
+* **Plataformas Fintech & Web Apps Propias:** Arquitectura moderna en TypeScript, Next.js Serverless y PostgreSQL (Supabase RLS).
+* **Directiva de Tecnologías Descartadas:** Por orden de Don César, quedan 100% prohibidos y descartados n8n, web scraping legacy y proyectos antiguos obsoletos. La agencia no pierde tiempo en herramientas externas no-code; toda automatización se implementa en código nativo propio y testeable en `src/`.
 
 ---
 

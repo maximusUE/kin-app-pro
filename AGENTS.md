@@ -99,4 +99,37 @@ Este protocolo es **mandatorio y permanente** para todas las aplicaciones, plata
 3. **Protocolo de Notificación de Permisos:**
    - Cuando se requiera un acceso que solo el propietario de la cuenta pueda otorgar, el **Senior Lead Engineer** le proporcionará a Don César la instrucción concisa, el enlace directo y la explicación en un solo mensaje para resolverlo en menos de 10 segundos.
 
+---
+
+## ⚡ Tridente de Oro de Lenguajes y Stack Oficial (2026)
+
+Para maximizar la velocidad de entrega, evitar pérdida de tiempo buscando herramientas y asegurar que los agentes de IA operen con máxima precisión sin alucinaciones, la agencia adopta exclusivamente el siguiente stack tecnológico unificado:
+
+| Capa del Sistema | Lenguaje Oficial | Tecnologías y Librerías Estándar | Justificación Técnica |
+| :--- | :--- | :--- | :--- |
+| **Frontend & Web Apps** | **`TypeScript`** | Next.js 15+, React 19, Tailwind CSS, shadcn/ui, Zod | Máxima precisión de modelos de IA, tipado estricto como escudo anti-alucinaciones (`tsc --noEmit`). |
+| **Backend & APIs** | **`TypeScript`** | Next.js Serverless Routes, Node.js, Web Standards (`fetch`, `ReadableStream`, SSE) | Unificación de contratos de datos entre cliente y servidor con cero duplicación de código. |
+| **Base de Datos & Seguridad** | **`PostgreSQL`** | Supabase Postgres, Row Level Security (RLS), ACID `FOR UPDATE` | Integridad transaccional bancaria, prevención de doble gasto y aislamiento de datos por usuario. |
+| **Inteligencia Artificial & KYC** | **`Python`** / **`TypeScript`** | Google GenAI SDK (Gemini 2.0/Flash), Pydantic, Zod Schemas | Procesamiento multimodal forense (INE/Pasaporte), OCR de facturas y prompting blindado. |
+| **Rieles Críticos & Criptografía** | **`Rust`** / **`Go`** | WebAssembly, AES-GCM-256 Zero-Knowledge, Goroutines | Rendimiento extremo a nivel de hardware, microsegundos de latencia y seguridad militar de memoria. |
+
+---
+
+## 🚫 Directiva de Tecnologías y Proyectos Descartados (Mandato Permanente de Don César)
+
+Por orden directa y definitiva de Don César (CEO de la Agencia), **quedan terminantemente descartados y prohibidos para esta agencia ahora y en el futuro**:
+
+1. **`n8n` queda 100% DESCARTADO y PROHIBIDO:**
+   - Ningún ingeniero de la agencia propondrá, configurará ni consumirá tiempo en n8n ni herramientas no-code similares.
+   - Toda la lógica de negocio, colas, webhooks bancarios, cron jobs y automatizaciones se construyen directamente en **código fuente nativo propio, testeable y mantenible dentro del repositorio (`src/`)**.
+
+2. **Web Scraping Legacy y Proyectos Antiguos quedan 100% DESCARTADOS:**
+   - Quedan descartados de forma definitiva todos los proyectos viejos con los que Don César inició en el pasado y los flujos de web scraping masivo obsoletos.
+   - Ningún agente debe sugerir reactivarlos ni considerarlos en planes futuros.
+
+3. **Cero Procrastinación en Búsqueda de Herramientas:**
+   - Los 7 ingenieros actúan de inmediato y con foco absoluto utilizando el **Tridente de Oro Oficial**. Prohibido gastar tiempo explorando librerías secundarias, frameworks experimentales o herramientas ajenas a esta matriz.
+   - La concentración de todo el equipo de agentes está **al 100% en esta agencia, sus productos fintech y sus plataformas activas**.
+
+
 

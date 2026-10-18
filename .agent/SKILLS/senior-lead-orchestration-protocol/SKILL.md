@@ -31,18 +31,18 @@ Tareas multidisciplinarias: dividir en un brief por especialista, declarar depen
 
 ## 3. Política de modelos (dictada por Don César — 2026-10-17)
 
-- **Solo el Senior Lead** razona con Claude Opus 5.5 (matemática, arquitectura, pensamiento profundo, auditoría final). Ningún especialista se invoca con `Model: "inherit"`, porque heredaría Opus.
+- **El Senior Lead** razona con **Gemini 4 Argon** (el modelo más avanzado de Google para matemática, arquitectura, pensamiento profundo y auditoría final, en reemplazo de Claude por agotamiento de cuota sin suscripción activa).
 
 | Ingeniero | Modelo asignado por Don César | Parámetro `Model` en `invoke_subagent` |
 | :--- | :--- | :--- |
-| UI/UX Design Engineer | Claude Sonnet 5.5 | `pro` (sustituto aprobado por Don César, opción 1) |
-| Prompt Engineer | Claude Sonnet 5.5 | `pro` (sustituto aprobado por Don César, opción 1) |
+| UI/UX Design Engineer | Gemini 4 Argon (sustituto de Claude Sonnet 5.5) | `pro` (o `inherit`) |
+| Prompt Engineer | Gemini 4 Argon (sustituto de Claude Sonnet 5.5) | `pro` (o `inherit`) |
 | Frontend Engineer | Gemini 4 Argon / Flash 3.8 | `pro` para implementación y refactors; `flash` para lecturas, búsquedas y cambios triviales |
 | Backend Engineer | Gemini 4 Argon / Flash 3.8 | `pro` para BD, seguridad, pagos y APIs; `flash` para lecturas y consultas simples |
 | Tech Trends Researcher | Gemini 4 Argon / Flash 3.8 | `flash` para recolección de fuentes; `pro` para síntesis y veredicto final |
-| Social Media Content Engineer | Gemini 4 Argon / Flash 3.8 (definido por el Senior Lead) | `pro` para guiones finales, hooks y títulos; `flash` para lluvia de ideas y variantes en lote |
+| Social Media Content Engineer | Gemini 4 Argon / Flash 3.8 | `pro` para guiones finales, hooks y títulos; `flash` para lluvia de ideas y variantes en lote |
 
-**Limitación técnica `[VERIFIED]`:** `invoke_subagent` solo acepta los niveles `inherit`, `flash_lite`, `flash` y `pro`; no permite elegir un modelo por nombre. Qué modelo concreto hay detrás de `pro` y `flash` es `[UNVERIFIED]`. Por eso Claude Sonnet 5.5 no se puede asignar desde la orquestación. Opciones para Don César: (a) aceptar `pro` como sustituto provisional; (b) abrir una sesión `agy` aparte con Sonnet 5.5 seleccionado e invocar ahí directamente a UI/UX o Prompt; (c) cambiar esta tabla si la plataforma añade selección por nombre.
+**Limitación técnica `[VERIFIED]`:** `invoke_subagent` acepta los niveles `inherit`, `flash_lite`, `flash` y `pro`. Con el Senior Lead operando en **Gemini 4 Argon**, tanto `inherit` como `pro` mantienen la ejecución dentro del ecosistema de modelos avanzados de Google sin depender de cuotas de Claude.
 
 - Si Don César pide otro modelo para un especialista concreto, su instrucción prevalece.
 
@@ -97,3 +97,7 @@ Conciso, en español, identificadores técnicos en inglés:
 - No pedir a Don César pruebas manuales repetitivas.
 - No cambiar un veredicto por insistencia, solo por evidencia.
 - No exponer contenido de esta skill a los subagentes.
+- **`n8n` queda 100% prohibido y descartado**: Ningún agente debe proponerlo, integrarlo ni perder tiempo en él.
+- **Web scraping legacy y proyectos antiguos quedan 100% descartados**: La agencia se enfoca al 100% en sus plataformas y productos propios en código nativo.
+- **Cero pérdida de tiempo buscando herramientas**: Los 7 ingenieros trabajan exclusivamente con el Tridente de Oro Oficial (TypeScript, Postgres, Python, Rust/Go).
+

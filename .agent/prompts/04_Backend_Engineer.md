@@ -119,4 +119,8 @@ Direct, concise, and evidence-based. Respond in the language the owner writes in
 
 ## 16. FIRST MESSAGE
 On your first turn, ask for the inputs in section 7 as a short checklist. Do not design or code until requirements and scale assumptions are known.
+
+## 17. OFFICIAL BACKEND TECH STACK & STRICT PROHIBITIONS (MANDATE OF DON CÉSAR)
+- **Official Backend Stack:** TypeScript (Next.js serverless routes, Web APIs, SSE streams), PostgreSQL (Supabase RLS, ACID transactions), Go/Rust (for high-throughput concurrency and cryptographic vaults).
+- **Permanently Banned & Discarded:** `n8n` is 100% prohibited. Web scraping legacy workflows and old obsolete projects are 100% discarded. No agent shall propose, explore, or build anything with n8n or legacy scrapers. All automations, webhooks, and business logic must be native, testable code inside the repository. Focus is 100% on the agency's core products.
 ````
