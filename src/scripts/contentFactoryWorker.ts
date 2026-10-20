@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import * as https from 'https';
 import * as http from 'http';
+import { execSync } from 'child_process';
 import { google } from 'googleapis';
 import { Telegraf, Markup } from 'telegraf';
 import * as cheerio from 'cheerio';
@@ -116,11 +117,12 @@ export async function geminiGenerate(prompt: string): Promise<string> {
 
 export const SPREADSHEET_ID       = process.env.SPREADSHEET_ID!;
 const TELEGRAM_CHAT_ID     = process.env.TELEGRAM_CHAT_ID!;
-const DRIVE_ROOT_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID!;
-const ELEVENLABS_API_KEY   = process.env.ELEVENLABS_API_KEY!;
-const ELEVENLABS_VOICE_ID  = process.env.ELEVENLABS_VOICE_ID!;
-const PEXELS_API_KEY       = process.env.PEXELS_API_KEY!;
-const PIXABAY_API_KEY      = process.env.PIXABAY_API_KEY!;
+const DRIVE_ROOT_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || '';
+export const DEFAULT_TTS_VOICE    = process.env.TTS_VOICE || 'es-MX-JorgeNeural';
+const ELEVENLABS_API_KEY   = process.env.ELEVENLABS_API_KEY || '';
+const ELEVENLABS_VOICE_ID  = process.env.ELEVENLABS_VOICE_ID || '';
+const PEXELS_API_KEY       = process.env.PEXELS_API_KEY || '';
+const PIXABAY_API_KEY      = process.env.PIXABAY_API_KEY || '';
 
 // Parámetros de voz ajustables para mejorar la entonación dramática, brillo y fidelidad de la narración de YouTube
 const ELEVENLABS_STABILITY  = parseFloat(process.env.ELEVENLABS_STABILITY || '0.40');
@@ -265,6 +267,126 @@ async function readGoogleDoc(docId: string): Promise<string> {
     console.error(`❌ Error leyendo Google Doc (${docId}):`, error);
     throw error;
   }
+}
+
+/**
+ * 🎙️ Genera locución neuronal en alta fidelidad y 100% GRATIS usando Microsoft Edge TTS.
+ * Cero suscripciones, duración ilimitada y sin consumo de créditos de tokens.
+ */
+export async function generateNeuralSpeech(
+  text: string,
+  outputPath: string,
+  voice: string = DEFAULT_TTS_VOICE,
+  subtitlesPath?: string
+): Promise<string> {
+  const tempScriptPath = outputPath.replace(/\.mp3$/, '_temp_script.txt');
+  fs.writeFileSync(tempScriptPath, text, 'utf-8');
+
+  try {
+    console.log(`🎙️ [Edge-TTS] Generando locución neuronal gratuita (Voz: ${voice})...`);
+    const subOption = subtitlesPath ? `--write-subtitles "${subtitlesPath}"` : '';
+    // Usamos python3 -m edge_tts con --file para evitar limitaciones de longitud de línea en la shell
+    const cmd = `python3 -m edge_tts --voice "${voice}" --file "${tempScriptPath}" --write-media "${outputPath}" ${subOption}`;
+    execSync(cmd, { stdio: 'inherit' });
+
+    if (fs.existsSync(outputPath)) {
+      console.log(`✅ [Edge-TTS] Locución generada con éxito: ${outputPath}`);
+      return outputPath;
+    } else {
+      throw new Error(`El archivo de audio no fue generado en: ${outputPath}`);
+    }
+  } finally {
+    if (fs.existsSync(tempScriptPath)) {
+      try { fs.unlinkSync(tempScriptPath); } catch {}
+    }
+  }
+}
+
+/**
+ * 🎬 [FFmpeg Engine] Ensambla automáticamente los clips de video descargados con la locución en un archivo MP4 final.
+ * - Normaliza cada clip a 1080p (1920x1080, 16:9, 30fps, formato yuv420p compatible con YouTube).
+ * - Enlaza y genera un bucle de los clips para cubrir la duración exacta del audio.
+ * - Mezcla la pista de audio con el video ensamblado sin desfases.
+ */
+export async function assembleFinalVideo(
+  audioFilePath: string,
+  videoClipsDir: string,
+  outputVideoPath: string
+): Promise<string> {
+  console.log(`🎬 [FFmpeg Engine] Iniciando ensamblado automático de video...`);
+
+  if (!fs.existsSync(audioFilePath)) {
+    throw new Error(`Archivo de audio no encontrado: ${audioFilePath}`);
+  }
+
+  // 1. Obtener duración del audio con ffprobe
+  const probeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioFilePath}"`;
+  const rawDuration = execSync(probeCmd, { encoding: 'utf-8' }).trim();
+  const audioDurationSec = parseFloat(rawDuration);
+  console.log(`⏱️ Duración de locución: ${audioDurationSec.toFixed(2)}s (~${(audioDurationSec / 60).toFixed(1)} min).`);
+
+  // 2. Obtener lista de clips descargados
+  const clips = fs.existsSync(videoClipsDir)
+    ? fs.readdirSync(videoClipsDir).filter(f => f.endsWith('.mp4')).sort()
+    : [];
+
+  if (clips.length === 0) {
+    throw new Error(`No se encontraron clips MP4 en la carpeta: ${videoClipsDir}`);
+  }
+
+  console.log(`📹 Encontrados ${clips.length} clips descargados para el ensamblado.`);
+
+  // 3. Normalizar clips a una carpeta temporal para asegurar 1920x1080, 30fps y yuv420p uniforme
+  const tempNormalizedDir = path.join(videoClipsDir, 'normalized');
+  fs.mkdirSync(tempNormalizedDir, { recursive: true });
+
+  const normalizedClips: string[] = [];
+  for (let i = 0; i < clips.length; i++) {
+    const rawClip = path.join(videoClipsDir, clips[i]);
+    const normClip = path.join(tempNormalizedDir, `norm_${String(i).padStart(2, '0')}.mp4`);
+
+    if (!fs.existsSync(normClip)) {
+      console.log(`  🔧 Normalizando clip ${i + 1}/${clips.length} a 1080p 30fps...`);
+      const normCmd = `ffmpeg -y -i "${rawClip}" -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30" -c:v libx264 -preset ultrafast -crf 23 -an "${normClip}"`;
+      try {
+        execSync(normCmd, { stdio: 'pipe' });
+      } catch (normErr) {
+        console.warn(`  ⚠️ Clip ${clips[i]} falló al normalizar, omitiendo:`, normErr);
+        continue;
+      }
+    }
+    normalizedClips.push(normClip);
+  }
+
+  if (normalizedClips.length === 0) {
+    throw new Error('No se pudo normalizar ningún clip de video.');
+  }
+
+  // 4. Crear concat_list.txt repitiendo clips para cubrir la duración total del audio
+  const avgClipDuration = 5;
+  const clipsNeeded = Math.ceil((audioDurationSec + 10) / avgClipDuration);
+  const concatListPath = path.join(tempNormalizedDir, 'concat_list.txt');
+
+  let concatLines = '';
+  for (let c = 0; c < clipsNeeded; c++) {
+    const clipToUse = normalizedClips[c % normalizedClips.length];
+    concatLines += `file '${clipToUse}'\n`;
+  }
+  fs.writeFileSync(concatListPath, concatLines, 'utf-8');
+
+  // 5. Ensamblar video final
+  console.log(`🚀 Renderizando video final en: ${outputVideoPath}...`);
+  const finalCmd = `ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -i "${audioFilePath}" -map 0:v -map 1:a -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outputVideoPath}"`;
+
+  execSync(finalCmd, { stdio: 'inherit' });
+
+  // 6. Limpieza de temporales
+  try {
+    fs.rmSync(tempNormalizedDir, { recursive: true, force: true });
+  } catch {}
+
+  console.log(`🎉 ¡Video final ensamblado con éxito! -> ${outputVideoPath}`);
+  return outputVideoPath;
 }
 
 // ─── UTILIDADES PARA EL DASHBOARD NEXT.JS ─────────────────────────────
@@ -490,16 +612,16 @@ La tranquilidad no se compra. Se entrena... La salida no es un hack. Es un siste
   }
 }
 
-// ─── PASO 2: Producir assets (audio + videos) tras aprobación ──────────────
-
-export type ProductionMode = 'full' | 'videos_only' | 'preview' | 'user_voice';
+// ─── PASO 2: Producir assets (audio + videos + render) tras aprobación ───────
+export type ProductionMode = 'full' | 'videos_only' | 'preview' | 'user_voice' | 'elevenlabs';
 
 /**
- * Produce los assets del video según el modo elegido en Telegram.
+ * Produce los assets y ensambla el video según el modo elegido.
  * @param rowIndex  Fila del Sheets (1-indexed)
- * @param mode      'full' = audio completo + videos
- *                  'videos_only' = solo videos de Pexels (sin gastar créditos)
- *                  'preview' = solo primeros ~400 chars de audio (test de voz)
+ * @param mode      'full' = locución neuronal gratuita ($0) + videos Pexels + auto-ensamblado FFmpeg
+ *                  'videos_only' = solo videos de Pexels/Pixabay
+ *                  'preview' = primeros ~400 chars con voz neuronal ($0)
+ *                  'elevenlabs' = locución con ElevenLabs (opcional legacy)
  */
 export async function processApprovedRow(rowIndex: number, mode: ProductionMode = 'full') {
   console.log(`🎬 Produciendo assets para fila ${rowIndex}...`);
@@ -589,6 +711,7 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
 
     // ── A) Audio — según el modo elegido ─────────────────────────────
     let audioPath: string | null = null;
+    let subtitlesPath: string | null = null;
 
     // Limpiar el guion: eliminar timestamps tipo [0:00] o (0:00)
     const cleanScript = guionFinal
@@ -597,23 +720,15 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
       .trim();
 
     if (mode === 'videos_only' || mode === 'user_voice') {
-      console.log('⏭️  Modo sin ElevenLabs — audio de IA omitido.');
+      console.log('⏭️  Modo sin locución automática de IA.');
 
-    } else {
-      // 'full' → guion completo | 'preview' → primeros 400 chars (≈30 seg)
-      const textToSend = mode === 'preview'
-        ? cleanScript.slice(0, 400)
-        : cleanScript;
-
-      const chunks = chunkText(textToSend, 2500);
-      console.log(`🔊 Guion dividido en ${chunks.length} bloques para ElevenLabs.`);
+    } else if (mode === 'elevenlabs') {
+      // Modo ElevenLabs (opcional legacy)
+      const chunks = chunkText(cleanScript, 2500);
+      console.log(`🔊 [ElevenLabs] Guion dividido en ${chunks.length} bloques.`);
 
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
-        const charCount = chunk.length;
-        const estimatedCost = ((charCount / 1000) * 0.18).toFixed(4); // ~$0.18/1k chars
-        console.log(`   -> Enviando bloque ${i+1}/${chunks.length} (${charCount} chars, ~$${estimatedCost})...`);
-
         const elevenRes = await fetch(
           `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
           {
@@ -640,14 +755,26 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
         }
 
         const prefix = (i + 1).toString().padStart(2, '0');
-        const filename = mode === 'preview' ? 'preview_hook.mp3' : `${prefix}_narration.mp3`;
-        const audioPath = path.join(audioDir, filename);
+        const filename = `${prefix}_narration.mp3`;
+        audioPath = path.join(audioDir, filename);
         const audioBuffer = await elevenRes.arrayBuffer();
         fs.writeFileSync(audioPath, Buffer.from(audioBuffer));
-        console.log(`✅ Audio guardado: ${audioPath}`);
-        
-        if (mode === 'preview') break; // Solo generar un bloque si es preview
+        console.log(`✅ [ElevenLabs] Audio guardado: ${audioPath}`);
       }
+
+    } else {
+      // Modo por defecto 'full' o 'preview' con voz neuronal gratuita ($0)
+      const textToSend = mode === 'preview'
+        ? cleanScript.slice(0, 400)
+        : cleanScript;
+
+      const audioFileName = mode === 'preview' ? 'preview_hook.mp3' : 'full_narration.mp3';
+      const subFileName = mode === 'preview' ? 'preview_subtitles.vtt' : 'subtitles.vtt';
+      audioPath = path.join(audioDir, audioFileName);
+      subtitlesPath = path.join(audioDir, subFileName);
+
+      console.log(`🎙️ Generando locución neuronal gratuita ($0) para ${textToSend.length} caracteres...`);
+      await generateNeuralSpeech(textToSend, audioPath, DEFAULT_TTS_VOICE, subtitlesPath);
     }
 
     // ── B) Descargar videos de B-Roll (Pixabay -> Fallback Pexels) ──
@@ -747,16 +874,29 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
       }
     }
 
-    // ── D) Subir a Google Drive ───────────────────────────────────────
+    // ── D) Auto-Ensamblaje con FFmpeg (Cero edición manual) ───────────
+    let finalVideoPath: string | null = null;
+    let finalVideoLink = '';
+
+    const clipFiles = fs.existsSync(videoDir)
+      ? fs.readdirSync(videoDir).filter(f => f.endsWith('.mp4')).sort()
+      : [];
+
+    if (audioPath && fs.existsSync(audioPath) && clipFiles.length > 0 && mode !== 'preview') {
+      try {
+        const targetMp4 = path.join(baseDir, 'video_final.mp4');
+        finalVideoPath = await assembleFinalVideo(audioPath, videoDir, targetMp4);
+      } catch (assembleErr: any) {
+        console.error('⚠️ Error en ensamblado automático FFmpeg (los clips y audio siguen disponibles):', assembleErr.message || assembleErr);
+      }
+    }
+
+    // ── E) Subir a Google Drive ───────────────────────────────────────
     console.log('☁️  Subiendo a Google Drive...');
     let audioLink = '';
     let rootFolderLink = '';
     let driveUploadFailed = false;
     let driveErrorMsg = '';
-
-    const clipFiles = fs.existsSync(videoDir)
-      ? fs.readdirSync(videoDir).filter(f => f.endsWith('.mp4')).sort()
-      : [];
 
     try {
       const videoFolderDrive = await createDriveFolder(`${fecha}_${slug}`, DRIVE_ROOT_FOLDER_ID);
@@ -769,10 +909,16 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
         console.log(`  ✅ Audio subido: ${audioLink}`);
       }
 
-      // Subir cada clip de video
+      // Subir cada clip de video original
       for (const clipFile of clipFiles) {
         await uploadToDrive(path.join(videoDir, clipFile), clipFile, videoDriveFolderId);
         console.log(`  ✅ ${clipFile} subido.`);
+      }
+
+      // Subir video final ensamblado (si existe)
+      if (finalVideoPath && fs.existsSync(finalVideoPath)) {
+        finalVideoLink = await uploadToDrive(finalVideoPath, 'video_final.mp4', videoFolderDrive);
+        console.log(`  🎬 Video final ensamblado subido a Drive: ${finalVideoLink}`);
       }
 
       rootFolderLink = `https://drive.google.com/drive/folders/${videoFolderDrive}`;
@@ -782,12 +928,14 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
       console.warn('⚠️ Falló la subida a Google Drive, pero los archivos locales están listos:', driveErrorMsg);
     }
 
-    // ── D) Actualizar Sheets ──────────────────────────────────────────
+    // ── F) Actualizar Sheets ──────────────────────────────────────────
     const nuevoEstado = mode === 'preview'
       ? 'Preview escuchado 🟡'
       : mode === 'videos_only'
         ? 'Videos listos (sin audio) 🟡'
-        : 'Listo para editar 🟢';
+        : finalVideoPath
+          ? '🎬 Video Final Listo 🟢'
+          : 'Listo para editar 🟢';
 
     try {
       await sheets.spreadsheets.values.batchUpdate({
@@ -796,7 +944,7 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
           data: [
             { range: `Matriz!A${rowIndex}`, values: [[nuevoEstado]] },
             ...(audioLink ? [{ range: `Matriz!I${rowIndex}`, values: [[audioLink]] }] : []),
-            ...(rootFolderLink ? [{ range: `Matriz!J${rowIndex}`, values: [[rootFolderLink]] }] : []),
+            ...(finalVideoLink ? [{ range: `Matriz!J${rowIndex}`, values: [[finalVideoLink]] }] : (rootFolderLink ? [{ range: `Matriz!J${rowIndex}`, values: [[rootFolderLink]] }] : [])),
           ],
           valueInputOption: 'USER_ENTERED',
         },
@@ -805,13 +953,21 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
       console.warn('⚠️ No se pudo actualizar el estado en Google Sheets:', sheetErr.message);
     }
 
-    // ── E) Notificar por Telegram ─────────────────────────────────────
-    const modeLabel = mode === 'full' ? '🔊 Audio completo' : mode === 'preview' ? '🔊 Preview (30 seg)' : mode === 'user_voice' ? '🎙️ Voz de César (B-Roll listo)' : '🎥 Solo videos';
+    // ── G) Notificar por Telegram ─────────────────────────────────────
+    const modeLabel = mode === 'full' 
+      ? '🚀 Video Completo ($0 - Voz Neuronal + FFmpeg)' 
+      : mode === 'preview' 
+        ? '🔊 Preview (30 seg - $0)' 
+        : mode === 'user_voice' 
+          ? '🎙️ Voz de César (B-Roll listo)' 
+          : mode === 'elevenlabs'
+            ? '🔊 ElevenLabs'
+            : '🎥 Solo videos';
 
     // Si fue preview, ofrecer botones para continuar
     const extraButtons = mode === 'preview'
       ? Markup.inlineKeyboard([
-          [Markup.button.callback('🔊 Audio completo (confirmar)', `PRODUCE_FULL_${rowIndex}`)],
+          [Markup.button.callback('🚀 Renderizar Video Completo ($0)', `PRODUCE_FULL_${rowIndex}`)],
           [Markup.button.callback('🎥 Solo descargar videos', `PRODUCE_VIDEOS_${rowIndex}`)],
         ])
       : {};
@@ -820,11 +976,13 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
     if (driveUploadFailed) {
       driveText = `⚠️ *Subida a Drive omitida* (API no activa en tu cuenta de Google).\n` +
                   `📍 *Archivos locales guardados en tu Mac:* \n` +
-                  `\`output/${fecha}_${slug}/\` \n\n` +
+                  `\`output/${fecha}_${slug}/\` \n` +
+                  (finalVideoPath ? `🎬 *Video listo:* \`output/${fecha}_${slug}/video_final.mp4\`\n\n` : '\n') +
                   `💡 _Para activar la subida automática a Drive en el futuro, haz clic aquí:_ \n` +
                   `[Activar Google Drive API](https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=438038869850) (¡y presiona Habilitar!)`;
     } else {
-      driveText = `📁 *Drive:* [Abrir Carpeta](${rootFolderLink})`;
+      driveText = `📁 *Drive:* [Abrir Carpeta](${rootFolderLink})\n` +
+                  (finalVideoLink ? `🎬 *Video Final en Drive:* [Ver Video MP4](${finalVideoLink})\n` : '');
     }
 
     await bot.telegram.sendMessage(
@@ -833,15 +991,16 @@ export async function processApprovedRow(rowIndex: number, mode: ProductionMode 
       `*Video:* ${tema}\n` +
       `*Modo:* ${modeLabel}\n` +
       `🎥 Clips descargados: ${clipFiles.length}\n` +
-      (audioLink ? `🔊 Audio: [abrir](${audioLink})\n` : '') +
+      (audioPath ? `🎙️ Locución Neuronal: \`${path.basename(audioPath)}\` ($0)\n` : '') +
+      (finalVideoPath ? `🎬 *Video Final Ensamblado:* \`video_final.mp4\`\n` : '') +
       `\n${driveText}\n` +
-      (mode === 'preview' ? `\n_¿La voz suena bien? Elige cómo continuar:_` : `\n_¡Producción exitosa!_`),
+      (mode === 'preview' ? `\n_¿La voz suena bien? Elige cómo continuar:_` : `\n_¡Producción exitosa! Cero edición manual requerida._`),
       { parse_mode: 'Markdown', ...extraButtons }
     );
 
     console.log(`🎉 Producción completa para: ${tema} [modo: ${mode}]`);
 
-    return { success: true };
+    return { success: true, finalVideoPath };
 
   } catch (error: any) {
     console.error(`❌ Error en processApprovedRow(${rowIndex}):`, error);

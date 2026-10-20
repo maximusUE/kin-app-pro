@@ -45,18 +45,18 @@ bot.action(/APPROVE_(.+)/, async (ctx) => {
       requestBody: { values: [['Aprobado — esperando producción']] },
     }).catch((e: any) => console.warn('⚠️ No se pudo actualizar Sheets:', e.message));
 
-    // Mostrar los 3 botones de producción
+    // Mostrar los botones de producción
     await ctx.reply(
       `✅ *Guion aprobado.* ¿Cómo quieres producirlo?\n\n` +
-      `🔊 *Audio completo* — genera la locución entera (gasta créditos)\n` +
-      `👂 *Preview 30 seg* — escucha solo el hook (poco crédito)\n` +
-      `🎥 *Solo videos* — clips de B-Roll (Pexels/Pixabay) sin tocar ElevenLabs ($0)`,
+      `🚀 *Video completo ($0)* — Locución neuronal gratis + B-Roll + auto-render FFmpeg (.mp4)\n` +
+      `👂 *Preview 30 seg ($0)* — escucha solo el hook con voz neuronal\n` +
+      `🎥 *Solo videos ($0)* — descarga clips de Pexels/Pixabay sin audio`,
       {
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
-          [Markup.button.callback('🔊 Audio completo', `PRODUCE_FULL_${rowIndex}`)],
-          [Markup.button.callback('👂 Preview 30 seg (barato)', `PRODUCE_PREVIEW_${rowIndex}`)],
-          [Markup.button.callback('🎥 Solo videos (gratis)', `PRODUCE_VIDEOS_${rowIndex}`)],
+          [Markup.button.callback('🚀 Renderizar Video Completo ($0)', `PRODUCE_FULL_${rowIndex}`)],
+          [Markup.button.callback('👂 Preview 30 seg ($0)', `PRODUCE_PREVIEW_${rowIndex}`)],
+          [Markup.button.callback('🎥 Solo clips de video', `PRODUCE_VIDEOS_${rowIndex}`)],
         ]),
       }
     );
@@ -70,10 +70,11 @@ bot.action(/APPROVE_(.+)/, async (ctx) => {
 // Helper: delega al worker y avisa si falla
 async function startProduction(ctx: any, rowIndex: number, mode: ProductionMode) {
   const labels: Record<ProductionMode, string> = {
-    full:        '🔊 Audio completo + videos',
-    preview:     '🔊 Preview de 30 seg + videos',
-    videos_only: '🎥 Solo videos',
+    full:        '🚀 Video completo ($0 - Voz Neuronal + FFmpeg)',
+    preview:     '🔊 Preview de 30 seg ($0)',
+    videos_only: '🎥 Solo clips de video',
     user_voice:  '🎙️ Voz de César + videos',
+    elevenlabs:  '🔊 Locución con ElevenLabs',
   };
 
   await ctx.answerCbQuery(`Iniciando: ${labels[mode]}`);
