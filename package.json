@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "dashboard": "next dev --turbo",
+    "pilot": "tsx src/scripts/runPilotTest.ts",
     "trends": "node --experimental-strip-types src/scripts/trendAgent.ts",
     "factory": "node --experimental-strip-types src/scripts/testRunner.ts",
     "bot": "node --experimental-strip-types src/scripts/telegramBot.ts",
@@ -44,6 +45,7 @@
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.28",
     "tailwindcss": "^3.4.19",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
