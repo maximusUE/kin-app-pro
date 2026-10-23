@@ -104,14 +104,14 @@ export async function assembleFinalVideo(
 
   let concatLines = '';
   for (let c = 0; c < clipsNeeded; c++) {
-    const clipToUse = normalizedClips[c % normalizedClips.length];
+    const clipToUse = path.resolve(normalizedClips[c % normalizedClips.length]);
     concatLines += `file '${clipToUse}'\n`;
   }
   fs.writeFileSync(concatListPath, concatLines, 'utf-8');
 
   // 5. Ensamblar video final
   console.log(`🚀 Renderizando video final en: ${outputVideoPath}...`);
-  const finalCmd = `ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -i "${audioFilePath}" -map 0:v -map 1:a -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outputVideoPath}"`;
+  const finalCmd = `ffmpeg -y -f concat -safe 0 -i "${path.resolve(concatListPath)}" -i "${path.resolve(audioFilePath)}" -map 0:v -map 1:a -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${path.resolve(outputVideoPath)}"`;
 
   execSync(finalCmd, { stdio: 'inherit' });
 
