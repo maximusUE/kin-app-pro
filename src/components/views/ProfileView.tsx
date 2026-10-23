@@ -13,6 +13,7 @@ import { LanguageSelectionModal } from '@/components/modals/LanguageSelectionMod
 import { PrivacySecurityModal } from '@/components/modals/PrivacySecurityModal';
 import { KinSupportModal } from '@/components/modals/KinSupportModal';
 import { compressProfileImage } from '@/lib/utils/imageCompressor';
+import { getStoredCards, saveStoredCards, syncCardsWithApi, addCardToVault } from '@/lib/cards';
 
 export interface ProfileViewProps {
   onBack: () => void;
@@ -228,40 +229,22 @@ export function ProfileView({
     setDraftState(userState || '');
   }, [userFirstName, userLastName, userPhone, userAddress1, userAddress2, userZip, userCity, userState]);
 
-  // Saved Payment Cards (Enterprise Stripe Sheet format)
-  const [savedCards, setSavedCards] = useState<SavedCardItem[]>([
-    {
-      id: 'card-1',
-      name: 'Obsidian Metal Debit',
-      type: 'Visa',
-      brand: 'visa',
-      last4: '8942',
-      exp: '09/28',
-      isDefault: true,
-      icon: 'contactless',
-    },
-    {
-      id: 'card-2',
-      name: 'Chase Premier Sapphire',
-      type: 'Mastercard',
-      brand: 'mastercard',
-      last4: '4102',
-      exp: '11/26',
-      isDefault: false,
-      icon: 'account_balance',
-    },
-  ]);
+  // Saved Payment Cards (Unified Enterprise Vault synced with LocalStorage & API)
+  const [savedCards, setSavedCards] = useState<SavedCardItem[]>(() => getStoredCards());
 
-  // Load saved payment methods from API
+  // Load saved payment methods from API and sync unified vault
   useEffect(() => {
-    fetch(`/api/payment-methods?userId=${userId || 'user-001'}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.cards && Array.isArray(data.cards) && data.cards.length > 0) {
-          setSavedCards(data.cards);
+    let isMounted = true;
+    syncCardsWithApi(userId || 'user-001')
+      .then((cards) => {
+        if (isMounted && cards && cards.length > 0) {
+          setSavedCards(cards);
         }
       })
       .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
   // Handlers
@@ -286,7 +269,7 @@ export function ProfileView({
     );
   };
 
-  const handleAddNewCardFromSheet = (cardData: {
+  const handleAddNewCardFromSheet = async (cardData: {
     cardNumber: string;
     exp: string;
     cvv: string;
@@ -295,25 +278,8 @@ export function ProfileView({
     country: string;
     savePermanently: boolean;
   }) => {
-    const last4 = cardData.cardNumber.slice(-4) || '8831';
-    let brand: 'visa' | 'mastercard' | 'amex' | 'discover' = 'visa';
-    if (cardData.cardNumber.startsWith('34') || cardData.cardNumber.startsWith('37')) brand = 'amex';
-    else if (cardData.cardNumber.startsWith('5') || cardData.cardNumber.startsWith('2')) brand = 'mastercard';
-    else if (cardData.cardNumber.startsWith('6')) brand = 'discover';
-
-    const newCard: SavedCardItem = {
-      id: `pm_${Date.now()}`,
-      name: cardData.cardHolder || 'Tarjeta Débito KIN',
-      type: brand.toUpperCase(),
-      brand: brand,
-      last4: last4,
-      exp: cardData.exp || '12/28',
-      isDefault: savedCards.length === 0,
-      icon: 'credit_card',
-      zip: cardData.zip,
-      country: cardData.country,
-    };
-    setSavedCards((prev) => [newCard, ...prev]);
+    const newCard = await addCardToVault(cardData, userId || 'user-001');
+    setSavedCards((prev) => [newCard, ...prev.filter((c) => c.id !== newCard.id && c.last4 !== newCard.last4)]);
     notifyToast(
       isEn ? 'New card linked & tokenized (PCI-DSS Level 1)' : 'Nueva tarjeta vinculada y tokenizada (PCI-DSS Nivel 1)',
       'verified_user'
@@ -321,17 +287,17 @@ export function ProfileView({
   };
 
   const handleSelectDefaultCard = async (cardId: string) => {
-    setSavedCards((prev) =>
-      prev.map((c) => ({
-        ...c,
-        isDefault: c.id === cardId,
-      }))
-    );
+    const updated = savedCards.map((c) => ({
+      ...c,
+      isDefault: c.id === cardId,
+    }));
+    setSavedCards(updated);
+    saveStoredCards(updated);
     try {
       await fetch('/api/payment-methods', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userId || 'user-001', cardId }),
+        body: JSON.stringify({ userId: userId || 'user-001', cardId, action: 'setDefault' }),
       });
     } catch (_) {}
     notifyToast(
@@ -341,7 +307,12 @@ export function ProfileView({
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    setSavedCards((prev) => prev.filter((c) => c.id !== cardId));
+    const updated = savedCards.filter((c) => c.id !== cardId);
+    if (updated.length > 0 && !updated.some((c) => c.isDefault)) {
+      updated[0].isDefault = true;
+    }
+    setSavedCards(updated);
+    saveStoredCards(updated);
     try {
       await fetch(`/api/payment-methods?userId=${userId || 'user-001'}&cardId=${cardId}`, {
         method: 'DELETE',

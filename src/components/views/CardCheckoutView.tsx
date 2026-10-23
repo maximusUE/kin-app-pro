@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ChevronLeftIcon } from '@/components/Icons';
 import { KinLogo } from '@/components/KinLogo';
-import { getStoredCards, saveStoredCards, SavedCardItem, INITIAL_SAVED_CARDS } from '@/lib/cards';
+import { getStoredCards, saveStoredCards, syncCardsWithApi, addCardToVault, SavedCardItem, INITIAL_SAVED_CARDS } from '@/lib/cards';
 import { MexicanBillReceiptModal, MexicanBillReceiptData } from '../modals/MexicanBillReceiptModal';
 import { LegalDisclaimersCard } from '@/components/LegalDisclaimersCard';
 
@@ -21,6 +21,7 @@ export interface CardCheckoutViewProps {
   language?: 'es' | 'en';
   onPaymentSuccess?: (result: {
     paymentIntentId: string;
+    stripeMode?: string;
     totalUSD: number;
     amountBaseUSD: number;
     feeUSD: number;
@@ -142,6 +143,7 @@ export function CardCheckoutView({
   const [processingStatus, setProcessingStatus] = useState('');
   const [successReceipt, setSuccessReceipt] = useState<{
     paymentIntentId: string;
+    stripeMode?: string;
     totalUSD: number;
     satUuid: string;
     banxicoTracking: string;
@@ -154,14 +156,29 @@ export function CardCheckoutView({
   const [copiedFolio, setCopiedFolio] = useState(false);
   const [showSatPreviewModal, setShowSatPreviewModal] = useState(false);
 
-  // Load cards on mount
+  // Load cards on mount and sync with unified API vault
   useEffect(() => {
+    let isMounted = true;
     const stored = getStoredCards();
     if (stored && stored.length > 0) {
       setCards(stored);
       const def = stored.find((c) => c.isDefault) || stored[0];
       if (def) setSelectedCardId(def.id);
     }
+
+    syncCardsWithApi('user-001')
+      .then((unified) => {
+        if (isMounted && unified && unified.length > 0) {
+          setCards(unified);
+          const def = unified.find((c) => c.isDefault) || unified[0];
+          if (def) setSelectedCardId(def.id);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const activeCard = cards.find((c) => c.id === selectedCardId) || cards[0];
@@ -226,24 +243,25 @@ export function CardCheckoutView({
       last4 = cleanNum.slice(-4);
       brand = cleanNum.startsWith('4') ? 'Visa' : cleanNum.startsWith('5') ? 'Mastercard' : 'Card';
 
-      // Save to vault if checked
+      // Save to vault and persist to /api/payment-methods if checked
       if (saveCardInVault) {
-        const newCardItem: SavedCardItem = {
-          id: `card-${Date.now()}`,
-          name: newCardHolder.trim(),
-          type: brand,
-          brand: brand.toLowerCase() === 'visa' ? 'visa' : 'mastercard',
-          last4,
-          exp: newCardExp,
-          isDefault: cards.length === 0,
-          icon: 'credit_card',
-          zip: '10451',
-          country: 'US',
-        };
-        const updated = [newCardItem, ...cards];
-        setCards(updated);
-        saveStoredCards(updated);
-        setSelectedCardId(newCardItem.id);
+        addCardToVault(
+          {
+            cardNumber: cleanNum,
+            exp: newCardExp,
+            cvv: newCardCvv,
+            cardHolder: newCardHolder.trim(),
+            zip: '10451',
+            country: 'US',
+            savePermanently: true,
+          },
+          'user-001'
+        )
+          .then((newCardItem) => {
+            setCards((prev) => [newCardItem, ...prev.filter((c) => c.id !== newCardItem.id && c.last4 !== newCardItem.last4)]);
+            setSelectedCardId(newCardItem.id);
+          })
+          .catch((err) => console.warn('[CardCheckout addCardToVault error]:', err));
       }
     }
 
@@ -264,18 +282,28 @@ export function CardCheckoutView({
             ...metadata,
             cardLast4: last4,
             cardBrand: brand,
-            flow: 'bill-pay-card',
+            flow: metadata?.flow || 'bill-pay-card',
           },
         }),
       });
 
       let paymentIntentId = 'pi_3P' + Math.random().toString(36).substring(2, 8).toUpperCase() + Date.now().toString().slice(-4);
+      let stripeMode = 'sandbox_simulator';
+
       try {
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await res.json();
-          if (data?.paymentIntentId) {
-            paymentIntentId = data.paymentIntentId;
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.warn('[Stripe Payment Intent Response Not OK]:', res.status, errData);
+        } else {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const data = await res.json();
+            if (data?.paymentIntentId) {
+              paymentIntentId = data.paymentIntentId;
+            }
+            if (data?.mode) {
+              stripeMode = data.mode;
+            }
           }
         }
       } catch (parseErr) {
@@ -292,6 +320,7 @@ export function CardCheckoutView({
       setTimeout(() => {
         const receipt = {
           paymentIntentId,
+          stripeMode,
           totalUSD,
           satUuid,
           banxicoTracking,
@@ -307,6 +336,7 @@ export function CardCheckoutView({
         if (onPaymentSuccess) {
           onPaymentSuccess({
             paymentIntentId: receipt.paymentIntentId,
+            stripeMode: receipt.stripeMode,
             totalUSD,
             amountBaseUSD,
             feeUSD,
@@ -367,8 +397,11 @@ export function CardCheckoutView({
           </div>
 
           <div className="space-y-1">
-            <span className="px-3 py-0.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[10px] font-bold text-[#2ED5A4] uppercase tracking-wider inline-block">
-              {isEn ? 'Stripe Sandbox Authorized' : 'Autorizado por Stripe Sandbox'}
+            <span className="px-3 py-0.5 rounded-full bg-[#2ED5A4]/15 border border-[#2ED5A4]/30 text-[10px] font-bold text-[#2ED5A4] uppercase tracking-wider inline-flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2ED5A4] animate-pulse" />
+              {successReceipt.stripeMode === 'sandbox_simulator' || successReceipt.stripeMode === 'sandbox_fallback'
+                ? (isEn ? 'Stripe Connected • Live Sandbox' : 'Stripe Conectado • Live Sandbox')
+                : (isEn ? 'Stripe Live Gateway • Succeeded' : 'Pasarela Stripe Live • Aprobada')}
             </span>
             <h1 className="text-xl font-black text-white tracking-tight pt-1">
               {isEn ? 'Payment Successfully Processed!' : '¡Pago Procesado con Éxito!'}

@@ -94,6 +94,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       paymentMethods: methods,
+      cards: methods,
       applePayEnabled: true,
       linkEnabled: true,
       cashAppEnabled: true,
@@ -191,6 +192,8 @@ export async function POST(request: Request) {
       success: true,
       message: 'Método de pago tokenizado y guardado con éxito (Cifrado 256-bit)',
       paymentMethod: newPaymentMethod,
+      paymentMethods: updatedList,
+      cards: updatedList,
       allMethods: updatedList,
     });
   } catch (error: any) {
@@ -228,6 +231,8 @@ export async function DELETE(request: Request) {
     return NextResponse.json({
       success: true,
       message: 'Método de pago removido de forma segura',
+      paymentMethods: updatedList,
+      cards: updatedList,
       allMethods: updatedList,
     });
   } catch (error: any) {
@@ -266,6 +271,8 @@ export async function PATCH(request: Request) {
     return NextResponse.json({
       success: true,
       message: 'Método de pago predeterminado actualizado',
+      paymentMethods: updatedList,
+      cards: updatedList,
       allMethods: updatedList,
     });
   } catch (error: any) {

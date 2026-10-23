@@ -226,9 +226,21 @@ export const getCategoryIconTheme = (id: string, isSelected: boolean) => {
   }
 };
 
+export interface BillPaymentDetails {
+  serviceName: string;
+  amountMXN: number;
+  serviceId?: string;
+  referenceNumber?: string;
+  paymentIntentId?: string;
+  cardBrand?: string;
+  cardLast4?: string;
+  totalUSD?: number;
+  feeUSD?: number;
+}
+
 export interface BillPayViewProps {
   onBack?: () => void;
-  onPaymentSuccess?: (service: string, amountMXN: number) => void;
+  onPaymentSuccess?: (service: string, amountMXN: number, details?: BillPaymentDetails) => void;
   selectedServiceId?: string;
   exchangeRate?: number;
   language?: 'es' | 'en';
@@ -355,7 +367,21 @@ export function BillPayView({
             setIsReceiptModalOpen(true);
             setIsSuccess(true);
             if (onPaymentSuccess) {
-              onPaymentSuccess(isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre, currentMXN);
+              onPaymentSuccess(
+                isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre,
+                currentMXN,
+                {
+                  serviceName: isEn ? (activeService.nombreEn || activeService.nombre) : activeService.nombre,
+                  serviceId: activeService.id,
+                  referenceNumber: activeService.sampleContrato,
+                  amountMXN: currentMXN,
+                  paymentIntentId: result?.paymentIntentId,
+                  cardBrand: result?.cardBrand || 'Visa',
+                  cardLast4: result?.cardLast4 || '4242',
+                  totalUSD: totalUSDToCharge,
+                  feeUSD: KIN_SERVICE_FEE,
+                }
+              );
             }
           }}
         />

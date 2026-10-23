@@ -1596,13 +1596,18 @@ export default function MobileApp() {
   };
 
   // Helper para ejecutar el pago desde el Dashboard de Desglose y redirigir a Success con la Clave de Retiro
-  const handleExecuteSendPayment = async () => {
+  const handleExecuteSendPayment = async (stripeResult?: {
+    paymentIntentId?: string;
+    cardBrand?: string;
+    cardLast4?: string;
+    totalUSD?: number;
+  }) => {
     if (!selectedAvatar) return;
     setIsExecutingPayment(true);
 
     const amt = parseFloat(amountValue) || 50;
     const fee = amt <= 250 ? 1.99 : 2.99; // Tarifa KIN Transparente ($1.99 <= $250, $2.99 > $250)
-    const totalPaid = +(amt + fee).toFixed(2);
+    const totalPaid = stripeResult?.totalUSD || +(amt + fee).toFixed(2);
     const txId = 'KIN-' + Math.floor(100000 + Math.random() * 900000);
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1613,7 +1618,9 @@ export default function MobileApp() {
       ? `Retiro en Efectivo (${storeObj?.name || 'OXXO'})`
       : 'Depósito a Cuenta Bancaria (SPEI)';
     
-    const paymentTitle = `Tarjeta Bancaria (Stripe Sandbox • $${fee.toFixed(2)} fee)`;
+    const paymentTitle = stripeResult?.cardBrand && stripeResult?.cardLast4
+      ? `${stripeResult.cardBrand} •••• ${stripeResult.cardLast4} (Stripe Sandbox • $${fee.toFixed(2)} fee)`
+      : `Tarjeta Bancaria (Stripe Sandbox • $${fee.toFixed(2)} fee)`;
 
     // Generar Clave de Retiro en Efectivo (PIN de 8 dígitos formato XXXX-XXXX para cobro en sucursal)
     const p1 = Math.floor(1000 + Math.random() * 9000);
@@ -1669,28 +1676,32 @@ export default function MobileApp() {
           deliveryMethod,
           pickupStore: selectedStore,
           clabe: selectedAvatar.clabe || '',
+          stripePaymentIntentId: stripeResult?.paymentIntentId,
         }),
       });
       const data = await res.json();
       const finalClaveRetiro = data.claveRetiroEfectivo || clientClaveRetiro;
       const finalClaveBanxico = data.claveRastreoBanxico || clientClaveBanxico;
 
-      // Registrar PaymentIntent en Stripe Sandbox
-      fetch('/api/stripe/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: totalPaid,
-          currency: 'usd',
-          description: `Envío a ${selectedAvatar.name} (${deliveryTitle})`,
-          metadata: {
-            recipient: selectedAvatar.name,
-            amountUSD: amt.toString(),
-            serviceFeeUSD: fee.toString(),
-            deliveryMethod,
-          },
-        }),
-      }).catch((sErr) => console.warn('[Stripe PaymentIntent background call]:', sErr));
+      // Registrar PaymentIntent en Stripe Sandbox SOLO si no fue pre-autorizado por CardCheckoutView
+      if (!stripeResult?.paymentIntentId) {
+        fetch('/api/stripe/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: totalPaid,
+            currency: 'usd',
+            description: `Envío a ${selectedAvatar.name} (${deliveryTitle})`,
+            metadata: {
+              recipient: selectedAvatar.name,
+              amountUSD: amt.toString(),
+              serviceFeeUSD: fee.toString(),
+              deliveryMethod,
+              flow: 'send-review-modal',
+            },
+          }),
+        }).catch((sErr) => console.warn('[Stripe PaymentIntent background call]:', sErr));
+      }
 
       setTransactions((prev) =>
         prev.map((t) =>
@@ -1855,6 +1866,24 @@ export default function MobileApp() {
       }),
     }).catch((e) => console.warn('[SPEI Quick API error]', e));
 
+    // Registrar PaymentIntent en Stripe Sandbox para 1-Tap Quick Send
+    fetch('/api/stripe/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: totalPaid,
+        currency: 'usd',
+        description: `Envío Rápido a ${recipient.name} (SPEI Exprés)`,
+        metadata: {
+          recipient: recipient.name,
+          amountUSD: amt.toString(),
+          serviceFeeUSD: fee.toString(),
+          deliveryMethod: 'bank',
+          flow: 'send-quick-tap',
+        },
+      }),
+    }).catch((sErr) => console.warn('[Stripe SendQuick PaymentIntent background call]:', sErr));
+
     setSendSuccessData({
       id: txId,
       amount: amt,
@@ -1874,13 +1903,30 @@ export default function MobileApp() {
   };
 
   // Callback de pago de facturas
-  const handleBillPaymentSuccess = (service: string, amountMXN: number) => {
-    const amountUSD = +(amountMXN / USD_TO_MXN_RATE).toFixed(2);
+  const handleBillPaymentSuccess = (
+    service: string,
+    amountMXN: number,
+    details?: {
+      serviceName?: string;
+      serviceId?: string;
+      referenceNumber?: string;
+      paymentIntentId?: string;
+      cardBrand?: string;
+      cardLast4?: string;
+      totalUSD?: number;
+      feeUSD?: number;
+    }
+  ) => {
+    const amountUSD = details?.totalUSD || +(amountMXN / USD_TO_MXN_RATE).toFixed(2);
     let iconType: 'luz' | 'internet' | 'phone' | 'bill' = 'bill';
     const lower = service.toLowerCase();
     if (lower.includes('luz') || lower.includes('cfe') || lower.includes('electric')) iconType = 'luz';
     else if (lower.includes('internet') || lower.includes('totalplay') || lower.includes('telmex')) iconType = 'internet';
     else if (lower.includes('celular') || lower.includes('recarga') || lower.includes('telcel') || lower.includes('at&t')) iconType = 'phone';
+
+    const paymentMethodTitle = details?.cardBrand && details?.cardLast4
+      ? `${details.cardBrand} •••• ${details.cardLast4} (Stripe Sandbox)`
+      : 'Tarjeta Bancaria (Stripe Sandbox)';
 
     const newTx: TransactionItem = {
       id: Date.now().toString(),
@@ -1896,8 +1942,8 @@ export default function MobileApp() {
       status: 'Completado',
       nombreBeneficiario: service,
       bancoDestino: 'Proveedor de Servicio',
-      paymentMethod: 'Saldo USD KIN Transit',
-      feeUSD: 0,
+      paymentMethod: paymentMethodTitle,
+      feeUSD: details?.feeUSD || 0,
       createdAt: new Date().toISOString(),
     };
     setTransactions((prev) => [newTx, ...prev]);
@@ -1908,8 +1954,12 @@ export default function MobileApp() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId,
-        serviceName: service,
+        serviceId: details?.serviceId || (lower.includes('cfe') ? 'luz-cfe' : 'servicio-general'),
+        serviceName: details?.serviceName || service,
+        referenceNumber: details?.referenceNumber || ('REF-' + Math.floor(1000000000 + Math.random() * 9000000000)),
         amountMXN,
+        paymentIntentId: details?.paymentIntentId,
+        paymentMethod: details?.cardBrand ? `${details.cardBrand} •••• ${details.cardLast4}` : 'card',
       }),
     }).catch((e) => console.warn('[BillPay API error]', e));
 
@@ -2223,9 +2273,9 @@ export default function MobileApp() {
                   titular: selectedAvatar?.name || 'Beneficiario en México',
                   flow: 'send-money-card',
                 }}
-                onPaymentSuccess={async () => {
+                onPaymentSuccess={async (result) => {
                   setIsSendCardCheckoutOpen(false);
-                  await handleExecuteSendPayment();
+                  await handleExecuteSendPayment(result);
                 }}
               />
             </ErrorBoundary>

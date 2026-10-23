@@ -2,6 +2,7 @@
 
 @import "tailwindcss";
 @config "../../tailwind.config.js";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* Official Material Symbols Outlined Font Definition */
 .material-symbols-outlined {
@@ -548,6 +549,7 @@ input:-webkit-autofill:focus {
 }
 
 /* Utility classes */
+@layer utilities {
 .w-full { width: 100%; }
 .h-full { height: 100%; }
 .min-h-\[100dvh\] { min-height: 100dvh; }
@@ -729,30 +731,25 @@ input:-webkit-autofill:focus {
 .bg-\[\#1C1D2D\] { background-color: #222338; }
 .bg-\[\#222338\] { background-color: #222338; }
 .bg-\[\#28354D\] { background-color: #2B2C42; }
-.bg-\[\#2B2C42\] { background-color: #2B2C42; }
-.bg-white { background-color: #FFFFFF; }
-.bg-transparent { background-color: transparent; }
-
 .bg-\[\#2ED5A4\]\/15 { background-color: rgba(46, 213, 164, 0.15); }
 .bg-\[\#7047EB\]\/15 { background-color: rgba(112, 71, 235, 0.15); }
 .bg-\[\#FF5555\]\/15 { background-color: rgba(255, 85, 85, 0.15); }
 .bg-\[\#E06C75\]\/10 { background-color: rgba(224, 108, 117, 0.1); }
-.bg-\[\#2ED5A4\] { background-color: #2ED5A4 !important; }
-.bg-\[\#7047EB\] { background-color: #7047EB !important; }
-.bg-\[\#FF5555\] { background-color: #FF5555 !important; }
-.bg-red-solid { background-color: #FF5555 !important; }
+.bg-\[\#2ED5A4\] { background-color: #2ED5A4; }
+.bg-\[\#7047EB\] { background-color: #7047EB; }
+.bg-\[\#FF5555\] { background-color: #FF5555; }
+.bg-red-solid { background-color: #FF5555; }
 
-.text-white { color: #FFFFFF; }
 .text-white\/60 { color: rgba(255, 255, 255, 0.6); }
 .text-white\/70 { color: rgba(255, 255, 255, 0.7); }
 .text-white\/80 { color: rgba(255, 255, 255, 0.8); }
 .text-white\/90 { color: rgba(255, 255, 255, 0.9); }
 .text-\[\#0E0F1A\] { color: #0E0F1A; }
 .text-\[\#121622\] { color: #0E0F1A; }
-.text-\[\#2ED5A4\] { color: #2ED5A4 !important; }
+.text-\[\#2ED5A4\] { color: #2ED5A4; }
 .text-\[\#2ED5A4\]\/80 { color: rgba(46, 213, 164, 0.8); }
-.text-\[\#FF5555\] { color: #FF5555 !important; }
-.text-red-negative { color: #FF5555 !important; }
+.text-\[\#FF5555\] { color: #FF5555; }
+.text-red-negative { color: #FF5555; }
 .text-\[\#FF5555\]\/80 { color: rgba(255, 85, 85, 0.8); }
 .text-\[\#E06C75\] { color: #E06C75; }
 .text-\[\#8E91A5\] { color: #8E91A5; }
@@ -761,7 +758,6 @@ input:-webkit-autofill:focus {
 .text-\[\#6B7280\] { color: #6B7280; }
 
 /* Borders */
-.border { border-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.08); }
 .border-2 { border-width: 2px; border-style: solid; }
 .border-b { border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 .border-r { border-right: 1px solid rgba(255, 255, 255, 0.08); }
@@ -858,32 +854,32 @@ a {
 /* ========================================================================= */
 /* STITCH DESIGN SYSTEM TOKENS & UTILITIES                                    */
 /* ========================================================================= */
-.bg-surface { background-color: #0f1322; }
-.bg-surface-dim { background-color: #0f1322; }
-.bg-surface-bright { background-color: #353849; }
-.bg-surface-variant { background-color: #303445; }
-.bg-surface-container-lowest { background-color: #0a0d1c; }
-.bg-surface-container-low { background-color: #171b2a; }
-.bg-surface-container { background-color: #1b1f2f; }
-.bg-surface-container-high { background-color: #262939; }
-.bg-surface-container-highest { background-color: #303445; }
-.bg-primary { background-color: #57f2bf; }
-.bg-primary-container { background-color: #2ed5a4; }
-.bg-secondary { background-color: #ccbdff; }
-.bg-secondary-container { background-color: #5018cb; }
-.bg-primary\/10 { background-color: rgba(87, 242, 191, 0.10); }
-.bg-primary\/15 { background-color: rgba(87, 242, 191, 0.15); }
-.bg-primary\/20 { background-color: rgba(87, 242, 191, 0.20); }
-.bg-secondary-container\/20 { background-color: rgba(80, 24, 203, 0.20); }
-.bg-secondary-container\/30 { background-color: rgba(80, 24, 203, 0.30); }
+.bg-surface { background-color: rgb(var(--color-surface)); }
+.bg-surface-dim { background-color: rgb(var(--color-surface-dim)); }
+.bg-surface-bright { background-color: rgb(var(--color-surface-bright)); }
+.bg-surface-variant { background-color: rgb(var(--color-surface-variant)); }
+.bg-surface-container-lowest { background-color: rgb(var(--color-surface-container-lowest)); }
+.bg-surface-container-low { background-color: rgb(var(--color-surface-container-low)); }
+.bg-surface-container { background-color: rgb(var(--color-surface-container)); }
+.bg-surface-container-high { background-color: rgb(var(--color-surface-container-high)); }
+.bg-surface-container-highest { background-color: rgb(var(--color-surface-container-highest)); }
+.bg-primary { background-color: rgb(var(--color-primary)); }
+.bg-primary-container { background-color: rgb(var(--color-primary-container)); }
+.bg-secondary { background-color: rgb(var(--color-secondary)); }
+.bg-secondary-container { background-color: rgb(var(--color-secondary-container)); }
+.bg-primary\/10 { background-color: rgb(var(--color-primary) / 0.10); }
+.bg-primary\/15 { background-color: rgb(var(--color-primary) / 0.15); }
+.bg-primary\/20 { background-color: rgb(var(--color-primary) / 0.20); }
+.bg-secondary-container\/20 { background-color: rgb(var(--color-secondary-container) / 0.20); }
+.bg-secondary-container\/30 { background-color: rgb(var(--color-secondary-container) / 0.30); }
 
-.text-primary { color: #57f2bf; }
-.text-primary-container { color: #2ed5a4; }
-.text-on-primary { color: #003828; }
-.text-on-primary-container { color: #005740; }
-.text-secondary { color: #ccbdff; }
-.text-on-surface { color: #dfe1f7; }
-.text-on-surface-variant { color: #bbcac1; }
+.text-primary { color: rgb(var(--color-primary)); }
+.text-primary-container { color: rgb(var(--color-primary-container)); }
+.text-on-primary { color: rgb(var(--color-on-primary)); }
+.text-on-primary-container { color: rgb(var(--color-on-primary-container)); }
+.text-secondary { color: rgb(var(--color-secondary)); }
+.text-on-surface { color: rgb(var(--color-on-surface)); }
+.text-on-surface-variant { color: rgb(var(--color-on-surface-variant)); }
 
 .font-financial-mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: 'tnum'; }
 .font-headline-md { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 24px; line-height: 30px; letter-spacing: -0.02em; font-weight: 700; }
@@ -930,17 +926,17 @@ a {
 .-mx-margin-mobile { margin-left: -1.25rem; margin-right: -1.25rem; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+.animate-jiggle {
+  animation: ios-jiggle 0.24s infinite ease-in-out;
+  transform-origin: center center;
+}
+} /* End of @layer utilities */
 
 /* iOS-style Icon Jiggle Animation (Modo Edición / Eliminar / Editar Avatar) */
 @keyframes ios-jiggle {
   0% { transform: rotate(-1.2deg); }
   50% { transform: rotate(1.4deg); }
   100% { transform: rotate(-1.2deg); }
-}
-
-.animate-jiggle {
-  animation: ios-jiggle 0.24s infinite ease-in-out;
-  transform-origin: center center;
 }
 
 /* ========================================================================= */

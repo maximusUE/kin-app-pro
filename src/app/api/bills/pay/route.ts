@@ -5,7 +5,12 @@ import { getIdempotentResponse, saveIdempotentResponse } from '@/lib/server/idem
 
 export async function POST(request: Request) {
   try {
-    const rawBody = await request.json();
+    let rawBody: any = {};
+    try {
+      rawBody = await request.json();
+    } catch {
+      rawBody = {};
+    }
 
     // 0. Idempotency Check (Prevents duplicate bill pay)
     const idempotencyKey =
@@ -28,7 +33,9 @@ export async function POST(request: Request) {
           success: false,
           errorCode: 'VALIDATION_ERROR',
           error: formatZodError(validationResult.error),
-          details: validationResult.error.format(),
+          details: typeof validationResult.error.format === 'function'
+            ? validationResult.error.format()
+            : validationResult.error.issues,
         },
         { status: 400 }
       );
