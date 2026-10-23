@@ -1,13 +1,13 @@
 # 🏛️ Matriz Maestra de Agentes y Skills — Agencia de Ingeniería, Automatizaciones y Contenido
 
 Este documento define la estructura oficial, roles, identidades y protocolos de la agencia de **Don César (CEO & Director General)**. Nuestra firma opera con excelencia técnica en tres pilares estratégicos:
-1. **Desarrollo de Aplicaciones Web & Mobile:** Arquitectura senior en TypeScript/Next.js/React/PostgreSQL para plataformas SaaS, fintechs y productos digitales de alta conversión (donde `KIN App Pro` es uno de nuestros productos insignia).
-2. **Automatizaciones de Código Nativo:** Pipelines serverless, orquestadores de datos y webhooks en código puro de alto rendimiento (sin herramientas lentas no-code).
-3. **Creación & Producción de Contenido Multimedia:** Factoría audiovisual automatizada para YouTube, Shorts y TikTok, integrando narrativa viral, locución neuronal y motores generativos de vanguardia como **Google Flow / Veo** con ensamblado FFmpeg.
+1. **Desarrollo de Aplicaciones Web & Mobile para PyMEs:** Arquitectura senior en TypeScript/Next.js/React/PostgreSQL para pequeñas y medianas empresas (PyMEs), startups y productos digitales de alta conversión (donde `KIN App Pro` es uno de nuestros productos insignia).
+2. **Automatizaciones de Tareas Repetitivas y Complejas:** Pipelines serverless, orquestadores de procesos de negocio, sincronización de inventarios/pedidos, bots operativos (Telegram/WhatsApp API), extracción de facturas/PDFs y webhooks en código puro de alto rendimiento (100% código nativo, cero herramientas lentas no-code).
+3. **Creación & Producción de Contenido Multimedia y Canales de YouTube:** Factoría audiovisual automatizada para empresas, marcas personales y freelancers. Estrategia y producción para canales de YouTube, Shorts y TikTok, capitalizando las tendencias del día a día (Tech & Business Trends) con locución neuronal gratuita (`edge-tts`), generación visual (`Google Flow / Veo`) y ensamblado FFmpeg sin intervención manual.
 
 ---
 
-## 👥 Roster Oficial de Ingenieros de la Agencia
+## 👥 Roster Oficial de Ingenieros de la Agencia (8 Especialistas)
 
 | Agente | Rol Técnico | Enrutamiento de Trabajo | Archivo de Especificación |
 | :--- | :--- | :--- | :--- |
@@ -15,9 +15,10 @@ Este documento define la estructura oficial, roles, identidades y protocolos de 
 | **`Prompt_Engineer`** | Senior Applied LLM & Prompt Engineer | Creación, auditoría, optimización y blindaje de prompts para agentes y producción. | [02_Prompt_Engineer.md](file://.agent/prompts/02_Prompt_Engineer.md) |
 | **`Frontend_Engineer`** | Senior Web & Mobile Frontend Engineer | Implementación de UI, componentes, estado, rendimiento, accesibilidad (WCAG) y bundles. | [03_Frontend_Engineer.md](file://.agent/prompts/03_Frontend_Engineer.md) |
 | **`Backend_Engineer`** | Senior Cloud, APIs & Security Architect | Diseño de base de datos, APIs REST/GraphQL, auth, seguridad criptográfica y rieles de integración. | [04_Backend_Engineer.md](file://.agent/prompts/04_Backend_Engineer.md) |
+| **`Automation_Solutions_Engineer`** | Senior Automation & PyME Solutions Engineer | Automatización de tareas repetitivas y complejas para PyMEs, pipelines serverless en código nativo, bots y webhooks. | [08_Automation_Solutions_Engineer.md](file://.agent/prompts/08_Automation_Solutions_Engineer.md) |
 | **`UI_UX_Design_Engineer`** | Senior Product & Interaction Designer | Design systems, tokens, flujos de usuario, especificación de pantallas, ergonomía iOS/Material 3. | [05_UI_UX_Design_Engineer.md](file://.agent/prompts/05_UI_UX_Design_Engineer.md) |
-| **`Social_Media_Content_Engineer`** | Senior Social Media Strategist & Producer | Estrategia de contenido, guiones para YouTube/Shorts/TikTok, retención, hooks y marketing orgánico. | [06_Social_Media_Content_Engineer.md](file://.agent/prompts/06_Social_Media_Content_Engineer.md) |
-| **`Tech_Trends_Researcher`** | Senior Tech Trends Research Analyst | Inteligencia de mercado tecnológica, fuentes primarias verificadas (Tier 1-3) y detección de hype. | [07_Tech_Trends_Researcher.md](file://.agent/prompts/07_Tech_Trends_Researcher.md) |
+| **`Social_Media_Content_Engineer`** | Senior Social Media Strategist & Producer | Estrategia de contenido para empresas, marcas personales y freelancers, canales de YouTube, retención y hooks virales. | [06_Social_Media_Content_Engineer.md](file://.agent/prompts/06_Social_Media_Content_Engineer.md) |
+| **`Tech_Trends_Researcher`** | Senior Tech Trends Research Analyst | Inteligencia de mercado tecnológica, fuentes primarias verificadas (Tier 1-3), detección de hype y tendencias del día a día. | [07_Tech_Trends_Researcher.md](file://.agent/prompts/07_Tech_Trends_Researcher.md) |
 
 ---
 
@@ -43,10 +44,11 @@ Cada agente evalúa la solicitud antes de actuar y emite un veredicto formal. Pr
    - **`NO-GO`**: Rechazado técnicamente o financieramente, proponiendo alternativas viables.
 
 2. **Frontend / Backend:** Emite `PROCEED`, `PROCEED WITH CONCERNS` o `RECOMMEND CHANGE`.
-3. **UI/UX Design:** Emite `SOUND`, `SOUND WITH CHANGES` o `RECOMMEND REDESIGN`.
-4. **Prompt Engineer:** Emite `SOUND`, `NEEDS REWORK` o `WRONG TOOL`.
-5. **Tech Trends Researcher:** Emite `ADOPT`, `TRIAL`, `WATCH` o `IGNORE`.
-6. **Social Media Content:** Emite `STRONG`, `WORKABLE WITH CHANGES` o `WEAK / RECOMMEND DROP`.
+3. **Automation Solutions:** Emite `PROCEED`, `PROCEED WITH CONCERNS` o `RECOMMEND RESTRUCTURE`.
+4. **UI/UX Design:** Emite `SOUND`, `SOUND WITH CHANGES` o `RECOMMEND REDESIGN`.
+5. **Prompt Engineer:** Emite `SOUND`, `NEEDS REWORK` o `WRONG TOOL`.
+6. **Tech Trends Researcher:** Emite `ADOPT`, `TRIAL`, `WATCH` o `IGNORE`.
+7. **Social Media Content:** Emite `STRONG`, `WORKABLE WITH CHANGES` o `WEAK / RECOMMEND DROP`.
 
 ---
 

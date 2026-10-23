@@ -35,25 +35,25 @@ Este protocolo es obligatorio e inquebrantable para **KIN App Pro y para cualqui
 
 Esta no es una empresa de un solo proyecto. **Somos una Agencia de Ingeniería, Automatizaciones y Creación de Contenido Multimedia**:
 
-### 📱 Pilar 1: Desarrollo de Aplicaciones Web & Mobile
-* **Alcance:** Creación, arquitectura y despliegue de plataformas SaaS, aplicaciones móviles nativas/híbridas, interfaces fintech y sistemas empresariales.
+### 📱 Pilar 1: Desarrollo de Aplicaciones Web & Mobile para PyMEs
+* **Alcance:** Creación, arquitectura y despliegue de plataformas SaaS, aplicaciones móviles nativas/híbridas, interfaces fintech y sistemas digitales para pequeñas y medianas empresas (PyMEs), startups y productos propios.
 * **Stack Oficial:** TypeScript, Next.js 15+, React 19, Tailwind CSS, Supabase PostgreSQL, Stripe y APIs de alto rendimiento.
 * **Casos & Productos de la Agencia:**
   - **`KIN App Pro` (`kin-app-pro`):** Uno de los productos desarrollados en la agencia para remesas transfronterizas USA-México y pago de servicios (CFE, Telmex).
-  - **Nuevas Plataformas y Apps Web/Mobile:** Diseñadas con disciplina de ingeniería senior, interfaces de grado Apple y verificación autónoma.
+  - **Soluciones Web & Mobile para PyMEs:** Diseñadas con disciplina de ingeniería senior, interfaces de grado Apple, alta conversión y verificación autónoma.
 
-### ⚙️ Pilar 2: Automatizaciones de Código Nativo de Alto Rendimiento
-* **Alcance:** Creación de pipelines asíncronos, bots de mensajería (Telegram), procesamiento por lotes, orquestadores financieros y rieles de eventos en tiempo real (SSE).
-* **Directiva Permanente:** Cero herramientas externas no-code (n8n descartado). Toda automatización se programa en código limpio, modular y mantenible dentro del repositorio (`src/`).
+### ⚙️ Pilar 2: Automatizaciones de Tareas Repetitivas y Complejas (Código Nativo)
+* **Alcance:** Eliminación total de fricción operativa manual en PyMEs y flujos internos de la agencia. Creación de pipelines asíncronos, sincronización de pedidos e inventarios, bots de mensajería operativa (Telegram / WhatsApp Business API), extracción inteligente de facturas/PDFs (CFDI/SAT), orquestadores financieros y rieles de eventos en tiempo real (SSE).
+* **Directiva Permanente:** Cero herramientas externas no-code (n8n, Zapier, Make 100% descartados). Toda automatización se programa en código limpio, modular, tipado y testeable dentro del repositorio (`src/`).
 
-### 🎬 Pilar 3: Creación & Producción de Contenido Multimedia Escalable
-* **Alcance:** Canal de YouTube monetizable, YouTube Shorts y TikTok. Producción automatizada sin edición manual para Don César.
+### 🎬 Pilar 3: Creación de Contenido Multimedia, Canales de YouTube & Tendencias del Día a Día
+* **Alcance:** Producción de contenido audiovisual de alto impacto para **empresas, marcas personales y freelancers**. Creación, crecimiento y monetización de canales de YouTube (formatos largos y Shorts) y TikTok, capitalizando las tendencias del día a día (Tech & Business Trends) con cero edición manual para Don César.
 * **Tecnología del Estudio:**
-  - **Narrativa & Guionismo:** Retención algorítmica y ganchos de 3 segundos (`viral-hook-retention-engine`).
+  - **Narrativa & Guionismo:** Retención algorítmica, storytelling y ganchos de 3 segundos (`viral-hook-retention-engine`).
   - **Voz Neuronal Gratuita ($0):** Locución de alta fidelidad continua (`edge-tts`).
   - **Generación Visual Cinemática:** Integración con **Google Flow (`flow.google`)** y Google Veo para escenas exclusivas + B-Roll en Full HD.
   - **Motor de Renderizado:** Auto-ensamblado en código vía **FFmpeg** (`videoEngine.ts`).
-  - **Miniaturas de Alto CTR:** Psicología de clics y diseño contrastado.
+  - **Miniaturas de Alto CTR:** Psicología visual de clics y diseño contrastado.
 
 ---
 

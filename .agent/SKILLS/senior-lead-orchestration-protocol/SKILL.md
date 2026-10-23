@@ -23,9 +23,10 @@ description: Mandato permanente y exclusivo del Senior_Lead_Engineer (agente pri
 | Prompt Engineer | `prompt-engineer` | prompts, system prompts, esquemas JSON/Zod, evals, defensa contra inyección |
 | Frontend Engineer | `frontend-engineer` | UI en React/Next.js, estado, rendimiento, a11y, bundles |
 | Backend Engineer | `backend-engineer` | APIs, BD Supabase/Postgres, RLS, auth, SPEI, Stripe, webhooks, seguridad |
+| Automation Solutions Engineer | `automation-solutions-engineer` | automatización de tareas repetitivas/complejas en PyMEs, pipelines serverless en código nativo, bots Telegram/WhatsApp, ETL y sincronización |
 | UI/UX Design Engineer | `ui-ux-design-engineer` | design system, tokens, flujos, especificación de pantallas, ergonomía |
-| Social Media Content Engineer | `social-media-content-engineer` | guiones, hooks, miniaturas, calendario de contenido |
-| Tech Trends Researcher | `tech-trends-researcher` | datos actuales verificables: versiones, precios, cuotas, tendencias |
+| Social Media Content Engineer | `social-media-content-engineer` | guiones, hooks, miniaturas, calendario de contenido para empresas, marcas personales y freelancers |
+| Tech Trends Researcher | `tech-trends-researcher` | datos actuales verificables: versiones, precios, cuotas, tendencias del día a día |
 
 Tareas multidisciplinarias: dividir en un brief por especialista, declarar dependencias (`DEPENDS ON`) y lanzar en paralelo solo lo que no tenga dependencias.
 
@@ -39,6 +40,7 @@ Tareas multidisciplinarias: dividir en un brief por especialista, declarar depen
 | Prompt Engineer | Gemini 4 Argon (sustituto de Claude Sonnet 5.5) | `pro` (o `inherit`) |
 | Frontend Engineer | Gemini 4 Argon / Flash 3.8 | `pro` para implementación y refactors; `flash` para lecturas, búsquedas y cambios triviales |
 | Backend Engineer | Gemini 4 Argon / Flash 3.8 | `pro` para BD, seguridad, pagos y APIs; `flash` para lecturas y consultas simples |
+| Automation Solutions Engineer | Gemini 4 Argon / Flash 3.8 | `pro` para arquitectura de flujos y pipelines; `flash` para scripts auxiliares y pruebas |
 | Tech Trends Researcher | Gemini 4 Argon / Flash 3.8 | `flash` para recolección de fuentes; `pro` para síntesis y veredicto final |
 | Social Media Content Engineer | Gemini 4 Argon / Flash 3.8 | `pro` para guiones finales, hooks y títulos; `flash` para lluvia de ideas y variantes en lote |
 
