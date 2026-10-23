@@ -31,20 +31,29 @@ Este protocolo es obligatorio e inquebrantable para **KIN App Pro y para cualqui
 
 ---
 
-## 📦 3. Ecosistema de Proyectos de la Agencia
+## 🏛️ 3. Los 3 Pilares de la Agencia de Don César
 
-### 🚀 A. Proyecto Insignia: KIN App Pro (`kin-app-pro`)
-* **Propósito:** Plataforma transfronteriza de remesas familiares USA-México y pago de servicios (CFE, Telmex, Izzi, etc.).
-* **Tecnología:** Next.js 14+ (App Router), TypeScript, Tailwind CSS, Stripe PaymentIntents (USD), Banxico SPEI (Módulo 10 ponderado y claves de rastreo), Red nacional de retiro en efectivo en México (Distrito Federal unificado con cobertura de 16 delegaciones y zona metro, OXXO, Elektra).
-* **Producción:** Desplegado en Vercel (`https://kin-app-pro.vercel.app`), repositorio `maximusUE/kin-app-pro`.
-* **Regla de Pasarela Stripe:** Toda transacción de prueba en sandbox debe auto-confirmarse (`confirm: true` con `pm_card_visa`) para que en el Stripe Dashboard figure siempre en verde como **`Succeeded`** y nunca como `Incomplete`.
+Esta no es una empresa de un solo proyecto. **Somos una Agencia de Ingeniería, Automatizaciones y Creación de Contenido Multimedia**:
 
-### 🎬 B. Fábrica de Contenidos YouTube / Shorts / TikTok
-* **Propósito:** Automatización de guiones de alto impacto, ganchos de retención viral de 3 segundos, miniaturas de alto CTR y síntesis de video/audio (`src/scripts/contentFactoryWorker.ts`, `trendAgent.ts`).
+### 📱 Pilar 1: Desarrollo de Aplicaciones Web & Mobile
+* **Alcance:** Creación, arquitectura y despliegue de plataformas SaaS, aplicaciones móviles nativas/híbridas, interfaces fintech y sistemas empresariales.
+* **Stack Oficial:** TypeScript, Next.js 15+, React 19, Tailwind CSS, Supabase PostgreSQL, Stripe y APIs de alto rendimiento.
+* **Casos & Productos de la Agencia:**
+  - **`KIN App Pro` (`kin-app-pro`):** Uno de los productos desarrollados en la agencia para remesas transfronterizas USA-México y pago de servicios (CFE, Telmex).
+  - **Nuevas Plataformas y Apps Web/Mobile:** Diseñadas con disciplina de ingeniería senior, interfaces de grado Apple y verificación autónoma.
 
-### 🏛️ C. Proyectos y Productos Oficiales de la Agencia
-* **Plataformas Fintech & Web Apps Propias:** Arquitectura moderna en TypeScript, Next.js Serverless y PostgreSQL (Supabase RLS).
-* **Directiva de Tecnologías Descartadas:** Por orden de Don César, quedan 100% prohibidos y descartados n8n, web scraping legacy y proyectos antiguos obsoletos. La agencia no pierde tiempo en herramientas externas no-code; toda automatización se implementa en código nativo propio y testeable en `src/`.
+### ⚙️ Pilar 2: Automatizaciones de Código Nativo de Alto Rendimiento
+* **Alcance:** Creación de pipelines asíncronos, bots de mensajería (Telegram), procesamiento por lotes, orquestadores financieros y rieles de eventos en tiempo real (SSE).
+* **Directiva Permanente:** Cero herramientas externas no-code (n8n descartado). Toda automatización se programa en código limpio, modular y mantenible dentro del repositorio (`src/`).
+
+### 🎬 Pilar 3: Creación & Producción de Contenido Multimedia Escalable
+* **Alcance:** Canal de YouTube monetizable, YouTube Shorts y TikTok. Producción automatizada sin edición manual para Don César.
+* **Tecnología del Estudio:**
+  - **Narrativa & Guionismo:** Retención algorítmica y ganchos de 3 segundos (`viral-hook-retention-engine`).
+  - **Voz Neuronal Gratuita ($0):** Locución de alta fidelidad continua (`edge-tts`).
+  - **Generación Visual Cinemática:** Integración con **Google Flow (`flow.google`)** y Google Veo para escenas exclusivas + B-Roll en Full HD.
+  - **Motor de Renderizado:** Auto-ensamblado en código vía **FFmpeg** (`videoEngine.ts`).
+  - **Miniaturas de Alto CTR:** Psicología de clics y diseño contrastado.
 
 ---
 

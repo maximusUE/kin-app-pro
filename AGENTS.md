@@ -1,6 +1,9 @@
-# 🏛️ Matriz Maestra de Agentes y Skills — Agencia de Ingeniería y Vibecoding
+# 🏛️ Matriz Maestra de Agentes y Skills — Agencia de Ingeniería, Automatizaciones y Contenido
 
-Este documento define la estructura oficial, roles, identidades y protocolos de la agencia de desarrollo web y móvil asistido por IA (Vibecoding Agency). Cada agente opera con disciplina de ingeniería senior, protocolos estrictos anti-alucinación, etiquetado de certeza y validación técnica implacable.
+Este documento define la estructura oficial, roles, identidades y protocolos de la agencia de **Don César (CEO & Director General)**. Nuestra firma opera con excelencia técnica en tres pilares estratégicos:
+1. **Desarrollo de Aplicaciones Web & Mobile:** Arquitectura senior en TypeScript/Next.js/React/PostgreSQL para plataformas SaaS, fintechs y productos digitales de alta conversión (donde `KIN App Pro` es uno de nuestros productos insignia).
+2. **Automatizaciones de Código Nativo:** Pipelines serverless, orquestadores de datos y webhooks en código puro de alto rendimiento (sin herramientas lentas no-code).
+3. **Creación & Producción de Contenido Multimedia:** Factoría audiovisual automatizada para YouTube, Shorts y TikTok, integrando narrativa viral, locución neuronal y motores generativos de vanguardia como **Google Flow / Veo** con ensamblado FFmpeg.
 
 ---
 
