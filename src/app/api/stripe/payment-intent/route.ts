@@ -1,1 +1,2 @@
-export { POST, dynamic } from '../create-payment-intent/route';
+export { POST } from '../create-payment-intent/route';
+export const dynamic = 'force-dynamic';

@@ -4,11 +4,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "dashboard": "next dev --turbo",
+    "dashboard": "next dev",
     "pilot": "tsx src/scripts/runPilotTest.ts",
     "trends": "node --experimental-strip-types src/scripts/trendAgent.ts",
     "factory": "node --experimental-strip-types src/scripts/testRunner.ts",
@@ -23,29 +23,30 @@
     "test:credits": "npx @testsprite/testsprite-cli usage"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.11.1",
-    "@supabase/supabase-js": "^2.117.2",
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.118.0",
     "cheerio": "^1.2.0",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.9",
     "ffmpeg-static": "^5.3.0",
-    "firebase-admin": "^14.4.0",
-    "googleapis": "^137.1.0",
-    "next": "14.2.3",
-    "react": "^18",
-    "react-dom": "^18",
+    "firebase-admin": "^14.5.0",
+    "googleapis": "^188.0.0",
+    "next": "^16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "sonner": "^2.0.8",
-    "stripe": "^23.0.0",
+    "stripe": "^23.0.1",
     "telegraf": "^4.16.3",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.6.1",
-    "postcss": "^8.5.28",
-    "tailwindcss": "^3.4.19",
+    "postcss": "^8.5.31",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }

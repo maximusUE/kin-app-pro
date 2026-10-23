@@ -18,7 +18,7 @@ function getServiceAccount() {
 
   // 2) Desarrollo local: leer desde archivo en disco
   const serviceAccountPath = path.resolve(
-    process.cwd(),
+    /*turbopackIgnore: true*/ process.cwd(),
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH || './config/firebase-service-account.json'
   );
 
